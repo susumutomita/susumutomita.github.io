@@ -1,0 +1,25 @@
+name: textlint
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  textlint:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Switch to pull request branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Setup node with cache
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: 'yarn'
+      - name: Install packages via packages.json
+        run: yarn
+      - name: Run textlint
+        run: |
+          npx textlint ./content/**/*.ja_jp.md ./content/*.ja_jp.md

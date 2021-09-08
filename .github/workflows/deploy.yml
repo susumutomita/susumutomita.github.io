@@ -1,38 +1,32 @@
-name: Deploy to GitHub Pages
+name: deploy
 
-# main ブランチ の push 時にこのワークフローを実行する
 on:
- push:
-   branches:
-     - main
+  push:
+    branches:
+      - main  # Set a branch to deploy
+  pull_request:
 
 jobs:
- build:
-   runs-on: ubuntu-20.04
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
-   steps:
-     # main ブランチを取得する
-     - name: Checkout
-       uses: actions/checkout@v2
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+          extended: true
 
-     # Node.js のセットアップをする
-     - name: Setup Node
-       uses: actions/setup-node@v2
-       with:
-         node-version: 14.x
-         cache: yarn
+      - name: Build
+        run: hugo --minify
 
-     # パッケージをインストールする
-     - name: Install dependencies
-       run: yarn --frozen-lockfile
-
-     # ビルドする
-     - name: Build
-       run: yarn build
-
-     # GitHub Pages にデプロイする
-     - name: Deploy
-       uses: peaceiris/actions-gh-pages@v3
-       with:
-         github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-         publish_dir: out
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public

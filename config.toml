@@ -1,0 +1,4 @@
+baseURL = 'https://susumutomita.github.io/'
+languageCode = 'en-us'
+title = 'Susumu Tomita'
+theme = "archie"
