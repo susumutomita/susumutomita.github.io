@@ -1,5 +1,0 @@
-// repository_name はそれぞれの値に置き換える
-module.exports = {
-  basePath: process.env.GITHUB_ACTIONS ? '/susumutomita.github.io' : '',
-  trailingSlash: true,
-};
