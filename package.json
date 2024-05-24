@@ -9,7 +9,9 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "lint": "npx textlint '**/*.md'"
+    "lint": "npx textlint '**/*.md'",
+    "lint:fix": "npx textlint --fix '**/*.md'",
+    "lint-staged": "lint-staged"
   },
   "repository": {
     "type": "git",
@@ -30,7 +32,9 @@
     "textlint-rule-preset-ja-spacing": "^2.2.0",
     "textlint-rule-preset-ja-technical-writing": "^7.0.0",
     "textlint-rule-spellcheck-tech-word": "^5.0.0",
-    "textlint-rule-prefer-tari-tari": "^1.0.3"
+    "textlint-rule-prefer-tari-tari": "^1.0.3",
+    "lint-staged": "^14.0.1",
+    "husky": "^8.0.3"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.0.1",
