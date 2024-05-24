@@ -40,5 +40,8 @@
     "astro": "^4.9.1",
     "@astrojs/check": "^0.7.0",
     "typescript": "^5.4.5"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.6.1"
   }
 }
