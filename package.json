@@ -2,7 +2,7 @@
   "name": "susumutomita.github.io",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",

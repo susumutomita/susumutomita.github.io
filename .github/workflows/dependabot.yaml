@@ -1,8 +1,0 @@
-version: 2
-updates:
-  - package-ecosystem: "npm" # npmを指定
-    directory: "/" # 依存関係ファイルのディレクトリ
-    schedule:
-      interval: "weekly" # 週に一度のチェック
-    target-branch: "main" # プルリクエストのターゲットブランチ
-    open-pull-requests-limit: 10 # 開いているプルリクエストの最大数
