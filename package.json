@@ -11,15 +11,14 @@
     "astro": "astro",
     "husky": "npx husky install",
     "lint": "npx textlint '**/*.md'",
-    "lint:fix": "npx textlint --fix '**/*.md'",
-    "lint-staged": "lint-staged"
+    "lint:fix": "npx textlint --fix '**/*.md'"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/susumutomita/susumutomita.github.io.git"
   },
   "author": "Susumu Tomita <oyster880@gmail.com> (https://github.com/susumutomita)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/susumutomita/susumutomita.github.io/issues"
   },
