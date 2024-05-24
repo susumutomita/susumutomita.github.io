@@ -3,10 +3,19 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+const user = Astro.locals.user;
+if (!user) {
+	return Astro.redirect("/login");
+}
 ---
 
-<!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Lucia example</title>
+	</head>
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
   </head>
@@ -22,6 +31,22 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
         <p>Feel free to explore my website and reach out if you have any questions or opportunities to collaborate!</p>
       </section>
     </main>
+				<p>Your user ID is {user.id}.</p>
+				<form method="post" action="/api/logout">
+			<button>Sign out</button>
+		</form>
     <Footer />
   </body>
 </html>
+
+<script>
+	document.forms[0].addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const formElement = e.target as HTMLFormElement;
+		await fetch(formElement.action, {
+			method: formElement.method,
+			body: new FormData(formElement)
+		});
+		window.location.href = "/login";
+	});
+</script>
