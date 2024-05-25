@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/susumutomita/susumutomita.github.io#readme",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.10",
     "husky": "^8.0.3",
     "textlint": "^12.2.2",
     "textlint-rule-ja-no-abusage": "^3.0.0",
