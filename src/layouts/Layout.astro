@@ -18,16 +18,32 @@ const { title, description, page, fullScreen } = Astro.props;
   >
   </div>
   <slot />
-  <!-- Google Analytics with Partytown -->
-  <script
-    type="text/partytown"
-    src="https://www.googletagmanager.com/gtag/js?id=G-G6S8W732Q9"></script>
-  <script type="text/partytown">
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-    gtag("config", "G-G6S8W732Q9");
-  </script>
 </BasicLayout>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta
+      name="keywords"
+      content="Susumu Tomita, portfolio, web development, projects"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Google Analytics with Partytown -->
+    <script
+      type="text/partytown"
+      src="https://www.googletagmanager.com/gtag/js?id=G-G6S8W732Q9"></script>
+    <script type="text/partytown">
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-G6S8W732Q9");
+    </script>
+    <!-- 追加のMetaタグやスクリプト -->
+  </head>
+  <body> </body>
+</html>
