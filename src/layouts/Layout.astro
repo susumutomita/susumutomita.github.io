@@ -18,4 +18,17 @@ const { title, description, page, fullScreen } = Astro.props;
   >
   </div>
   <slot />
+  <!-- head -->
+  <script
+    type="text/partytown"
+    src="https://www.googletagmanager.com/gtag/js?id=G-G6S8W732Q9"></script>
+  <script type="text/partytown">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-G6S8W732Q9");
+  </script>
+  <!-- more head -->
 </BasicLayout>
