@@ -18,7 +18,7 @@ const { title, description, page, fullScreen } = Astro.props;
   >
   </div>
   <slot />
-  <!-- head -->
+  <!-- Google Analytics with Partytown -->
   <script
     type="text/partytown"
     src="https://www.googletagmanager.com/gtag/js?id=G-G6S8W732Q9"></script>
@@ -30,5 +30,4 @@ const { title, description, page, fullScreen } = Astro.props;
     gtag("js", new Date());
     gtag("config", "G-G6S8W732Q9");
   </script>
-  <!-- more head -->
 </BasicLayout>
