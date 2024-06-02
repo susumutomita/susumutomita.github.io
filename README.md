@@ -1,3 +1,4 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/caefb044-929a-4195-a9a2-cf5d9ad5b245/deploy-status)](https://app.netlify.com/sites/susumutomita/deploys)
 # My Personal site
 
 This is my personal site built with Astro.
