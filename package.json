@@ -29,6 +29,7 @@
     "@unocss/preset-uno": "^0.60.3",
     "@unocss/reset": "^0.60.3",
     "autoprefixer": "^10.4.19",
+    "cypress": "^13.11.0",
     "husky": "^8.0.3",
     "markdown-it": "^14.1.0",
     "motion": "^10.17.0",
