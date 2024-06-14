@@ -33,6 +33,7 @@
     "husky": "^8.0.3",
     "markdown-it": "^14.1.0",
     "motion": "^10.17.0",
+    "netlify-plugin-cypress": "^2.2.1",
     "sanitize-html": "^2.13.0",
     "textlint": "^12.2.2",
     "textlint-rule-ja-no-abusage": "^3.0.0",
