@@ -18,7 +18,7 @@ if (slug === undefined) {
 const posts = (await getCollection("blog")).sort(
   (blogEntryA, blogEntryB) =>
     (blogEntryB.data.pubDate || new Date()).getTime() -
-    (blogEntryA.data.pubDate || new Date()).getTime()
+    (blogEntryA.data.pubDate || new Date()).getTime(),
 );
 
 const entry = posts.find((entry) => entry.slug === slug);
@@ -32,15 +32,18 @@ const { Content } = await entry.render();
 <Content />
 
 <style is:global>
+  body {
+    color: #ffffff;
+    background-color: #1a1a1a;
+  }
+
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    font-weight: bold;
+    color: #ffffff;
   }
 
   h1 {
@@ -72,7 +75,7 @@ const { Content } = await entry.render();
   }
 
   a {
-    color: #1a0dab;
+    color: #ff6347;
     text-decoration: none;
   }
 
@@ -95,7 +98,7 @@ const { Content } = await entry.render();
   pre,
   code {
     font-family: "Courier New", monospace;
-    background-color: #f4f4f4;
+    background-color: #2a2a2a;
     border-radius: 5px;
   }
 
@@ -107,7 +110,7 @@ const { Content } = await entry.render();
   code {
     padding: 2px 4px;
     font-size: 90%;
-    color: #d63384;
+    color: white;
   }
 
   img {
