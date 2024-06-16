@@ -25,7 +25,7 @@
     "@astrojs/partytown": "^2.1.0",
     "@types/d3": "^7.4.3",
     "@unocss/astro": "^0.61.0",
-    "@unocss/postcss": "^0.60.3",
+    "@unocss/postcss": "^0.61.0",
     "@unocss/preset-uno": "^0.61.0",
     "@unocss/reset": "^0.60.3",
     "autoprefixer": "^10.4.19",
