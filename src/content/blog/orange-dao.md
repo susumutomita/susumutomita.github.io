@@ -77,4 +77,11 @@ PS: We highly recommend checking out tips for YC interviews, such as this [one](
 
 ## インタビューの結果について
 
-まだ、来ていないので TBD。電話で来るのかなと思ったけど来ないしメールもまだ来ない。
+インタビューが行われてから 11 日後にメールで来た。結果は残念ながらお見送りでした。
+ただ、丁寧なフィードバックとともに連絡をもらえたこと、今回不明確だった点を解決したらまた応募してねということでした。[Dock](https://www.dock.io/)も同じようなユースケースをカバーしているので話を聞いてみてヒントを探してみようと考えています。
+
+```text
+A couple of thoughts/feedback from us:
+We appreciate your vision and the ZK technology behind Inro. However, we couldn't identify the specific initial use cases or how they will be implemented. It's unclear how you will 'officially' collaborate with institutions (e.g., bars/nightclubs as mentioned), and provide their customers with an opportunity to use your system to verify their IDs. We're uncertain about the willingness of these institutions to use Inro, as well as the interest (e.g., nice-to-have vs must-have) of their customers for ZK ID verification systems. We’d love to revisit your application as you develop solid insights addressing those issues and gain more traction.
+Even though this is not the outcome you hoped for, we are nevertheless grateful for the time and effort you put into the process. You should know you were in the top 5 percent of applications, and so this was a difficult decision for us. We’d love to keep in touch as you continue to build your company.
+```
