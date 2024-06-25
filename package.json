@@ -9,7 +9,8 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "lint": "npx textlint '**/*.md'"
+    "lint": "npx textlint '**/*.md'",
+    "lint:fix": "npx textlint --fix '**/*.md'"
   },
   "repository": {
     "type": "git",
