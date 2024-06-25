@@ -1,6 +1,6 @@
 ---
 import BasicLayout from "./BasicLayout.astro";
-
+import { GoogleAnalytics } from "astro-google-analytics";
 interface Props {
   title: string;
   description: string;
@@ -30,18 +30,8 @@ const { title, description, page, fullScreen } = Astro.props;
       name="keywords"
       content="Susumu Tomita, portfolio, web development, projects"
     />
-    <!-- Google Analytics with Partytown -->
-    <script
-      type="text/partytown"
-      src="https://www.googletagmanager.com/gtag/js?id=G-G6S8W732Q9"></script>
-    <script type="text/partytown">
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-G6S8W732Q9");
-    </script>
+    <!-- Google Analytics -->
+    <GoogleAnalytics id="GA_G6S8W732Q9" />
     <!-- 追加のMetaタグやスクリプト -->
   </head>
   <body> </body>
