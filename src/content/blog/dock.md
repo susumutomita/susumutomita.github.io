@@ -16,6 +16,8 @@ Dock.io は、デジタルアイデンティティの管理と認証を支援す
 
 Dock.io は、ブロックチェイン技術を活用して、個人や組織のデジタルアイデンティティを安全かつ信頼性の高い方法で管理・認証するためのプラットフォームです。従来の中央集権型システムとは異なり、Dock.io は分散型ネットワークを利用することで、データのセキュリティとプライバシーを強化しています。
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/h0JudHh0wOg?si=dHv_mvIghasSsWDE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 **主要な機能**
 
 1. **分散型アイデンティティ管理**：
