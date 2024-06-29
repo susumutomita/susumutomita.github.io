@@ -17,7 +17,8 @@ if not os.getenv("GITHUB_ACTIONS"):
 # 定数
 EMBEDDING_MODEL = "text-embedding-3-small"
 COLLECTION_NAME = "issue_collection"
-GPT_MODEL = "gpt-4o"
+# GPT_MODEL = "gpt-4o"
+GPT_MODEL = "gpt-3.5-turbo"
 MAX_RESULTS = 3
 
 
