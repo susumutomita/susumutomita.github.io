@@ -58,7 +58,7 @@
     "@iconify-json/ri": "^1.1.20",
     "@rive-app/canvas": "^2.18.0",
     "@studio-freight/lenis": "^1.0.42",
-    "arctic": "^1.9.0",
+    "arctic": "^1.9.1",
     "astro": "^4.11.5",
     "astro-google-analytics": "^1.0.3",
     "astro-icon": "^1.1.0",
