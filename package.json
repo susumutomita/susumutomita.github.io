@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.8.1",
-    "@astrojs/mdx": "^3.1.1",
+    "@astrojs/mdx": "^3.1.4",
     "@astrojs/netlify": "^5.4.0",
     "@astrojs/rss": "^4.0.6",
     "@astrojs/sitemap": "^3.1.5",
