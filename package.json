@@ -31,7 +31,7 @@
     "@unocss/reset": "^0.62.3",
     "autoprefixer": "^10.4.19",
     "cypress": "^13.13.1",
-    "husky": "^8.0.3",
+    "husky": "^9.1.5",
     "markdown-it": "^14.1.0",
     "motion": "^10.18.0",
     "netlify-plugin-cypress": "^2.2.1",
