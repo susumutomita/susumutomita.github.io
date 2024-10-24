@@ -36,7 +36,7 @@
     "motion": "^10.18.0",
     "netlify-plugin-cypress": "^2.2.1",
     "sanitize-html": "^2.13.0",
-    "textlint": "^12.2.2",
+    "textlint": "^14.3.0",
     "textlint-rule-ja-no-abusage": "^3.0.0",
     "textlint-rule-ja-no-inappropriate-words": "^2.0.0",
     "textlint-rule-no-double-negative-ja": "^2.0.1",
