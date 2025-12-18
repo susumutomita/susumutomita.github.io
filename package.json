@@ -25,7 +25,7 @@
   "devDependencies": {
     "@astrojs/partytown": "^2.1.2",
     "@types/d3": "^7.4.3",
-    "@unocss/astro": "^0.63.1",
+    "@unocss/astro": "^66.5.10",
     "@unocss/postcss": "^0.63.2",
     "@unocss/preset-uno": "^0.62.3",
     "@unocss/reset": "^0.62.3",
