@@ -61,7 +61,7 @@
     "arctic": "^1.9.0",
     "astro": "^4.11.5",
     "astro-google-analytics": "^1.0.3",
-    "astro-icon": "^1.1.0",
+    "astro-icon": "^1.1.5",
     "astro-robots-txt": "^1.0.0",
     "autoprefixer": "^10.4.19",
     "d3": "^7.9.0",
