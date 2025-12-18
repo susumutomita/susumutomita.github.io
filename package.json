@@ -43,7 +43,7 @@
     "textlint-rule-no-dropping-the-ra": "^3.0.0",
     "textlint-rule-prefer-tari-tari": "^1.0.3",
     "textlint-rule-preset-ja-spacing": "^2.2.0",
-    "textlint-rule-preset-ja-technical-writing": "^7.0.0",
+    "textlint-rule-preset-ja-technical-writing": "^12.0.2",
     "textlint-rule-spellcheck-tech-word": "^5.0.0",
     "unocss": "^0.63.1"
   },
