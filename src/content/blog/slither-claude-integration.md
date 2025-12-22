@@ -1,8 +1,8 @@
 ---
 layout: ../../layouts/LayoutBlogPost.astro
-title: "SlitherにClaude統合を実装した - Claude Code MAXでAPIコストゼロのスマートコントラクト脆弱性分析"
-description: "Slitherの--codexオプションがOpenAI APIを必要とする問題に対し、Claude Code MAXのOAuthトークンを活用してAPIコストなしでAI脆弱性分析を行える機能を実装した話"
-pubDate: 2024-12-21
+title: "SlitherにClaude統合を実装してPRを出した - Claude Code MAXでAPIコストゼロのスマートコントラクト脆弱性分析"
+description: "Slitherの--codexオプションがOpenAI APIを必要とする問題に対し、Claude Code MAXのOAuthトークンを活用してAPIコストなしでAI脆弱性分析を行える機能を実装し、実際にPull Requestを出した話"
+pubDate: 2024-12-22
 category: "blockchain"
 ---
 
@@ -78,28 +78,109 @@ Claude (https://www.anthropic.com/claude):
   --claude-use-code     Use Claude Code CLI instead of API (no API cost for MAX)
 ```
 
-## コントリビューションの可能性
+## 実際に動作確認
 
-この実装は[susumutomita/slither](https://github.com/susumutomita/slither/tree/feat/claude-integration)にある。
+テスト用のコントラクトで動作確認を行った。意図的に脆弱性を含むコントラクトを用意した。
 
-Trail of Bits（Slither の開発元）への PR として出せる可能性がある。
+```solidity
+contract ClaudeTest {
+    mapping(address => uint256) public balances;
+    address public owner;
 
-特に以下の点がアピールポイントになる。
+    // Reentrancy vulnerability
+    function withdraw(uint256 amount) external {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Transfer failed");
+        balances[msg.sender] -= amount;  // State change after external call
+    }
 
-1. **代替 LLM プロバイダー** - OpenAI 依存からの脱却
-2. **コスト効率** - MAX 契約者は追加コストなし
-3. **Claude の強み** - コード解析での Claude 評価が高い
+    // Missing access control
+    function setOwner(address newOwner) external {
+        owner = newOwner;
+    }
+}
+```
+
+実行結果は以下の通り。
+
+```bash
+$ slither tests/e2e/detectors/test_data/claude/0.8.0/claude_test.sol --detect claude --claude-use-code
+
+INFO:Slither:Claude: Using model 'sonnet'
+INFO:Slither:Claude: Analyzing 1 contract(s)...
+INFO:Slither:Claude: [1/1] Found potential vulnerability in ClaudeTest
+```
+
+Claude は以下の脆弱性を検出した。
+
+1. **Reentrancy Vulnerability (CRITICAL)** - 外部呼び出し後に状態変更
+2. **Missing Access Control (CRITICAL)** - `setOwner()`にアクセス制御なし
+3. その他、Missing Events、Zero Address Validation など
+
+## Pull Request を提出
+
+CONTRIBUTING.md のガイドラインに従って、実際に PR を出した。
+
+### 準備したもの
+
+| 項目 | 状態 |
+|------|------|
+| `dev`ブランチから分岐 | ✅ |
+| ユニットテスト (10件) | ✅ |
+| ドキュメント更新 | ✅ |
+| Lint (10.00/10) | ✅ |
+| 動作確認 | ✅ |
+
+### E2Eテストについて
+
+CONTRIBUTING.md では新しい detector には e2e テストが必要とされている。しかし、Claude detector は外部 API を呼び出すため、以下の理由で省略した。
+
+- **非決定的な出力** - 毎回結果が変わる可能性
+- **CI 環境での認証** - API キーが必要
+
+既存の Codex detector も同じ理由で e2e テストがない前例があったため、これに倣った。
+
+### 提出したPR
+
+**[PR #2842: feat: add Claude integration as alternative to OpenAI Codex](https://github.com/crytic/slither/pull/2842)**
+
+```
+## Summary
+
+Add a new detector that uses Claude (via Claude Code CLI or Anthropic API)
+to analyze Solidity smart contracts for vulnerabilities.
+
+- Claude Code CLI integration (free for MAX subscribers)
+- Anthropic API fallback for programmatic access
+- Configurable model selection (opus, sonnet, haiku)
+- Per-contract and all-contracts analysis modes
+- Optional logging of Claude's analysis
+
+## Test plan
+
+- [x] Unit tests pass (10 tests)
+- [x] Lint passes (10.00/10)
+- [x] Manual testing: detector finds reentrancy and access control issues
+
+Note: E2E tests are not included as this detector requires external API calls
+which are non-deterministic and need credentials. This is consistent with
+the existing Codex detector which also lacks e2e tests.
+```
 
 ## まとめ
 
 - Slither の`--codex`は OpenAI API が必要でコストがかかる
 - Shannon と同じ仕組みで`CLAUDE_CODE_OAUTH_TOKEN`を使えば、Claude Code MAX 契約者は API コストなしで AI 分析が可能
-- 実装は fork で完成、upstream PR の検討余地あり
+- **実際に PR #2842 として Trail of Bits に提出した**
 
 Claude Code MAX を契約している人にとっては、追加コストなしで AI セキュリティ分析ができるのは大きなメリットだ。
+
+PR がマージされるかはレビュー次第だが、OSS へのコントリビューションとして第一歩を踏み出せた。
 
 ## 関連リンク
 
 - [Slither (Trail of Bits)](https://github.com/crytic/slither)
 - [Shannon (Keygraph)](https://github.com/KeygraphHQ/shannon)
-- [実装ブランチ](https://github.com/susumutomita/slither/tree/feat/claude-integration)
+- [PR #2842](https://github.com/crytic/slither/pull/2842)
+- [実装ブランチ](https://github.com/susumutomita/slither/tree/feat/claude-detector)
