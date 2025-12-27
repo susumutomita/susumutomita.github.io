@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "Dock.ioについて"
 description: "Dock.ioの調査メモを残しておく"
 pubDate: 2024-06-25

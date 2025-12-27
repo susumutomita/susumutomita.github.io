@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "Gray Paper Tour: Tokyo with Dr. Gavin Wood"
 description: "Gray Paper Tour について講義を聞いてきたのでメモを残しておく"
 pubDate: 2024-06-10

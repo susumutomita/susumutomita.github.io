@@ -4,9 +4,9 @@ import BasicLayout from "../layouts/BasicLayout.astro";
 ---
 
 <script>
-  import { timeline, type TimelineDefinition } from "motion";
+  import { animate } from "motion";
 
-  const sequence = [
+  const sequence: [[string, Record<string, unknown>, Record<string, unknown>]] = [
     [
       ".loaderRef",
       { opacity: [1, 0], pointerEvents: "none" },
@@ -14,7 +14,8 @@ import BasicLayout from "../layouts/BasicLayout.astro";
     ],
   ];
 
-  timeline(sequence as TimelineDefinition);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  animate(sequence as any);
 </script>
 
 <BasicLayout

@@ -1,6 +1,4 @@
 ---
-
-layout: ../../layouts/LayoutBlogPost.astro
 title: "StarkHackでプライズをもらった"
 description: "嬉しかったのでログを残す"
 pubDate: 2024-06-27

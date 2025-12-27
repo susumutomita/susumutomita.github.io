@@ -1,5 +1,5 @@
 // uno.config.ts
-import { defineConfig, presetUno, presetWebFonts } from "unocss";
+import { defineConfig, presetWebFonts, presetWind } from "unocss";
 
 export default defineConfig({
   content: {
@@ -58,7 +58,7 @@ export default defineConfig({
     },
   },
   presets: [
-    presetUno(),
+    presetWind(),
     presetWebFonts({
       provider: "fontshare",
       fonts: {

@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "SlitherにClaude統合を実装してPRを出した - Claude Code MAXでAPIコストゼロのスマートコントラクト脆弱性分析"
 description: "Slitherの--codexオプションがOpenAI APIを必要とする問題に対し、Claude Code MAXのOAuthトークンを活用してAPIコストなしでAI脆弱性分析を行える機能を実装し、実際にPull Requestを出した話"
 pubDate: 2024-12-22

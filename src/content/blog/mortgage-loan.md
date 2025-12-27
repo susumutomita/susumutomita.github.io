@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "住宅ローンの抵当権を外す"
 description: "住宅ローンの抵当権の外し方"
 pubDate: 2024-06-17

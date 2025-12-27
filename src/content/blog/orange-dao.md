@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "Orange DAOのインタビューを受けた"
 description: "Orange DAOインタビュー"
 pubDate: 2024-06-13
