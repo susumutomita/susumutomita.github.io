@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "SQL Chainについて"
 description: "SQLをブロックチェーンで実行できないか調査メモを残しておく"
 pubDate: 2024-06-25

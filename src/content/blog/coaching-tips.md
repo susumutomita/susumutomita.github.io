@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "コーチングで一番大事なこと"
 description: "アジャイルコーチングにおいて最も重要な「コンテキストの把握」と「観察」について"
 pubDate: 2025-12-18

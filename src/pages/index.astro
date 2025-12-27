@@ -10,11 +10,14 @@ import Globe from "../components/Globe";
 ---
 
 <script>
-  import { stagger, spring, timeline, type TimelineDefinition } from "motion";
+  import { stagger, animate } from "motion";
   import { loaderAnimation } from "../lib/constants";
   const cards = document.querySelectorAll(".card");
 
-  const sequence = [
+  const sequence: [
+    [string, Record<string, unknown>, Record<string, unknown>],
+    [NodeListOf<Element>, Record<string, unknown>, Record<string, unknown>],
+  ] = [
     loaderAnimation,
     [
       cards,
@@ -23,12 +26,13 @@ import Globe from "../components/Globe";
         at: "-0.1",
         duration: 0.4,
         delay: stagger(0.3),
-        easing: spring({ velocity: 100, stiffness: 50, damping: 10 }),
+        easing: [0.25, 0.1, 0.25, 1],
       },
     ],
   ];
 
-  timeline(sequence as TimelineDefinition);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  animate(sequence as any);
 </script>
 
 <Layout

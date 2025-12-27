@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/LayoutBlogPost.astro
 title: "RailsChainについて"
 description: "Railsとスマートコントラクトをシームレスに結合できないか調査メモを残しておく"
 pubDate: 2024-06-27

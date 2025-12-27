@@ -5,7 +5,7 @@ export const LINKS = {
   findy: "https://findy-code.io/share_profiles/534Wg0z099ZcD",
 };
 
-export const loaderAnimation = [
+export const loaderAnimation: [string, Record<string, unknown>, Record<string, unknown>] = [
   ".loader",
   { opacity: [1, 0], pointerEvents: "none" },
   { easing: "ease-out" },
