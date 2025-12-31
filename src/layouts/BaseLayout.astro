@@ -75,8 +75,10 @@ const schema = {
     <!-- Google Analytics -->
     <GoogleAnalytics id="GA_G6S8W732Q9" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://cdn.fontshare.com" />
+    <!-- Fonts - AXIS Std + Noto Sans JP (fallback) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Schema.org -->
     <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
@@ -108,17 +110,9 @@ const schema = {
 
 <style is:global>
   @font-face {
-    font-family: "CabinetGrotesk";
-    src: url("/fonts/CabinetGrotesk-Variable.ttf") format("truetype-variations");
-    font-weight: 100 1000;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "Satoshi";
-    src: url("/fonts/Satoshi-Variable.ttf") format("truetype-variations");
-    font-weight: 100 1000;
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400;
     font-style: normal;
     font-display: swap;
   }
@@ -131,6 +125,7 @@ const schema = {
     margin: 0;
     display: flex;
     flex-direction: column;
+    font-family: "AXIS Std", "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
   }
 
   h1,
@@ -139,14 +134,15 @@ const schema = {
   h4,
   h5,
   h6 {
-    font-family: "CabinetGrotesk", sans-serif;
+    font-family: "AXIS Std", "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+    font-weight: 500;
   }
 
   p,
   span,
   li,
   a {
-    font-family: "Satoshi", sans-serif;
+    font-family: "AXIS Std", "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
   }
 
   /* Selection */

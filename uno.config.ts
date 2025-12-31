@@ -15,9 +15,9 @@ export default defineConfig({
       lg: "0 10px 15px rgba(0,0,0,0.1)",
     },
     fontFamily: {
-      sans: ["CabinetGrotesk", "Satoshi"],
-      display: ["CabinetGrotesk"],
-      body: ["Satoshi"],
+      sans: ["AXIS Std", "Helvetica Neue", "Helvetica", "Arial", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", "sans-serif"],
+      display: ["AXIS Std", "Helvetica Neue", "Helvetica", "Arial", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", "sans-serif"],
+      body: ["AXIS Std", "Helvetica Neue", "Helvetica", "Arial", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", "sans-serif"],
     },
     gridTemplateRows: {
       "auto-250": "repeat(auto-fill, 250px)",
