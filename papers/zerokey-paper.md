@@ -3,7 +3,7 @@ title: "ZeroKey: A Distributed Execution Model Separating Instruction, Execution
 author:
   - name: Susumu Tomita
     affiliation: Independent Researcher
-    email: susumutomita@example.com
+    email: oyster880@gmail.com
 abstract: |
   ブロックチェインシステムは、スマートコントラクトのデプロイおよび資産移動の認可に暗号署名を用いる。この設計において、指示・実行・責任は秘密鍵の保持に強く結び付けられ、人間のオペレータおよび自律エージェントは不可逆な結果に対して直接的な責任を負う。この結合は、長期的な鍵管理、安全な自動化、および実行クリティカルなワークフローへの AI エージェント統合において根本的な課題を生じさせる。
 
@@ -135,7 +135,7 @@ $$E = (I, policies, riskAssessment, approvals)$$
 
 **定義 3 (Accountability Record)**: 責任レコード $A$ は、実行結果とその監査情報を表す。
 
-$$A = (E, txHash, outcome, explanation, タイムスタンプ)$$
+$$A = (E, txHash, outcome, explanation, timestamp)$$
 
 **状態遷移**: ZeroKey モデルにおける状態遷移は以下の通りである。
 
@@ -305,13 +305,13 @@ AI ポリシーエンジンは、以下の観点からトランザクション�
 
 ## Lit Protocol PKP Integration
 
-Lit Protocol の Programmable Key Pairs（PKP）は、閾値暗号を用いた分散鍵システムである。
+Lit Protocol の Programmable Key Pairs（PKP）は、Shamir の秘密分散法 [1] に基づく閾値暗号を用いた分散鍵システムである。PKP は閾値 ECDSA [2] を実装し、t-of-n 署名スキームを提供する。
 
 PKP の特徴：
 
-- **分散閾値暗号**: 秘密鍵が完全な形で存在しない
+- **分散閾値暗号**: Distributed Key Generation (DKG) により、秘密鍵が完全な形で存在しない
 - **条件付き署名**: ポリシー条件を満たす場合のみ署名を生成
-- **プログラマブル**: 署名条件をコードで定義可能
+- **プログラマブル**: Lit Actions により署名条件をコードで定義可能
 
 # Evaluation
 
@@ -343,10 +343,14 @@ ZeroKey は以下の脅威に対して耐性を持つ：
 
 ### Deployment Time
 
+初期評価として、ERC-721 コントラクトのデプロイ時間を測定した。手動デプロイ（鍵の取り出し、署名、ブロードキャスト）と ZeroKeyCI を比較した結果を以下に示す。
+
 | 項目 | 手動デプロイ | ZeroKeyCI |
 |------|-------------|-----------|
-| 総所要時間 | 35 分 | 3-4 分 |
-| 高速化率 | - | 10x |
+| 総所要時間 | 約 35 分 | 3-4 分 |
+| 高速化率 | - | 約 10x |
+
+注: これは単一のデプロイシナリオにおける予備的評価であり、より厳密な評価は今後の課題である。
 
 ### Gas Optimization
 
@@ -399,9 +403,9 @@ ZeroKey Treasury は、自律金融のための基盤的な**実行ガバナン�
 
 今後の研究課題として以下を挙げる：
 
-1. **マルチチェイン対応の拡充**: クロスチェイントランザクションへの対応
-2. **AI モデルの改善**: より高精度なリスク判定
-3. **形式検証**: ガードコントラクトの形式的安全性証明
+1. **形式検証**: ガードコントラクトの形式的安全性証明。スマートコントラクトの形式検証手法 [3] を適用し、ZeroKeyGuard の安全性特性（例: 「ポリシー違反トランザクションは実行されない」）を証明する。
+2. **マルチチェイン対応の拡充**: クロスチェイントランザクションへの対応
+3. **AI モデルの改善**: より高精度なリスク判定と説明可能性の向上
 4. **プライバシー保護**: ゼロ知識証明を用いた監査情報の秘匿化
 
 # Conclusion
@@ -411,18 +415,22 @@ ZeroKey Treasury は、自律金融のための基盤的な**実行ガバナン�
 1. 秘密鍵を人間や AI が直接保持しない実行モデルの設計
 2. ZeroKeyCI による CI/CD パイプラインのキーレス化
 3. ZeroKey Treasury による AI 駆動の実行ガバナンス
-4. 従来手法と比較した 10 倍の効率化と攻撃表面の大幅削減
+4. 予備評価による効率化の確認と攻撃表面の削減
 
 ZeroKey は、自律金融の時代における安全な実行基盤として、ブロックチェイン技術の大衆化に貢献することが期待される。
 
 # References
 
-1. Buterin, V. et al. "ERC-4337: Account Abstraction Using Alt Mempool." Ethereum Improvement Proposals, 2021.
+1. Shamir, A. "How to Share a Secret." Communications of the ACM, 22(11):612-613, 1979.
 
-2. Gnosis. "Safe: Programmable Accounts." https://safe.global/
+2. Gennaro, R. and Goldfeder, S. "One Round Threshold ECDSA with Identifiable Abort." IACR Cryptology ePrint Archive, 2020/540, 2020.
 
-3. Lit Protocol. "Programmable Key Pairs." https://developer.litprotocol.com/
+3. Tolmach, P. et al. "A Survey of Smart Contract Formal Specification and Verification." ACM Computing Surveys, 54(7):1-38, 2021.
 
-4. Open Policy Agent. "Policy-based control for cloud native environments." https://www.openpolicyagent.org/
+4. Buterin, V. et al. "ERC-4337: Account Abstraction Using Alt Mempool." Ethereum Improvement Proposals, 2021.
 
-5. ETHGlobal. "Bangkok 2024 Hackathon." https://ethglobal.com/events/bangkok
+5. Gnosis. "Safe: Programmable Accounts." https://safe.global/
+
+6. Lit Protocol. "Programmable Key Pairs." https://developer.litprotocol.com/
+
+7. Open Policy Agent. "Policy-based control for cloud native environments." https://www.openpolicyagent.org/
