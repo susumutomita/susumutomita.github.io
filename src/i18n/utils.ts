@@ -1,4 +1,4 @@
-import { ui, defaultLang, showDefaultLang, routes } from "./ui";
+import { ui, defaultLang, showDefaultLang, routes, untranslatedPages } from "./ui";
 
 export function getLangFromUrl(url: URL): keyof typeof ui {
   const [, lang] = url.pathname.split("/");
@@ -14,23 +14,25 @@ export function useTranslations(lang: keyof typeof ui) {
 
 export function useTranslatedPath(lang: keyof typeof ui) {
   return function translatePath(path: string, l: string = lang): string {
-    const pathName = path.replaceAll("/", "");
-    const hasTranslation =
-      defaultLang !== l &&
-      routes[l as keyof typeof routes] !== undefined &&
-      routes[l as keyof typeof routes][
-        pathName as keyof (typeof routes)[keyof typeof routes]
-      ] !== undefined;
-    const translatedPath = hasTranslation
-      ? "/" +
-        routes[l as keyof typeof routes][
-          pathName as keyof (typeof routes)[keyof typeof routes]
-        ]
-      : path;
+    const pathName = path.replace(/^\//, "").split("/")[0] || "";
 
-    return !showDefaultLang && l === defaultLang
-      ? translatedPath
-      : `/${l}${translatedPath}`;
+    // Check if this page has a translation
+    const hasTranslation =
+      routes[l as keyof typeof routes] !== undefined &&
+      pathName in routes[l as keyof typeof routes];
+
+    // For pages without translations, always return English path
+    if (!hasTranslation && untranslatedPages.includes(pathName as typeof untranslatedPages[number])) {
+      return path; // Return original English path
+    }
+
+    // For default language, return path without prefix
+    if (!showDefaultLang && l === defaultLang) {
+      return path;
+    }
+
+    // For translated pages, add locale prefix
+    return `/${l}${path}`;
   };
 }
 

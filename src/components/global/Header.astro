@@ -8,6 +8,29 @@ const currentPath = Astro.url.pathname;
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const translatePath = useTranslatedPath(lang);
+
+// Map href to translation keys
+const navLabelKeys: Record<string, string> = {
+  "/": "nav.home",
+  "/about": "nav.about",
+  "/projects": "nav.projects",
+  "/papers": "nav.papers",
+  "/blog": "nav.blog",
+  "/resume": "nav.resume",
+  "/contact": "nav.contact",
+  "/travel": "nav.travel",
+  "/cover-letter": "nav.coverLetter",
+};
+
+// Helper to get translated label
+function getNavLabel(href: string): string {
+  const key = navLabelKeys[href];
+  if (key) {
+    // @ts-ignore - dynamic key access
+    return t(key) || href.slice(1) || "Home";
+  }
+  return href.slice(1) || "Home";
+}
 ---
 
 <header
@@ -17,7 +40,7 @@ const translatePath = useTranslatedPath(lang);
     <div class="flex items-center justify-between h-16">
       <!-- Logo -->
       <a
-        href="/"
+        href={translatePath("/")}
         class="font-display font-bold text-lg hover:text-accent-500 transition-colors"
       >
         {SITE.name}
@@ -27,12 +50,14 @@ const translatePath = useTranslatedPath(lang);
       <div class="hidden md:flex items-center gap-1">
         {
           NAV_LINKS.map((link) => {
+            const translatedHref = translatePath(link.href);
+            const translatedLabel = getNavLabel(link.href);
             const isActive =
-              currentPath === link.href ||
-              (link.href !== "/" && currentPath.startsWith(link.href));
+              currentPath === translatedHref ||
+              (link.href !== "/" && currentPath.startsWith(translatedHref));
             return (
               <a
-                href={link.href}
+                href={translatedHref}
                 class:list={[
                   "px-3 py-2 text-sm font-medium rounded-md transition-colors",
                   isActive
@@ -40,7 +65,7 @@ const translatePath = useTranslatedPath(lang);
                     : "text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text hover:bg-light-border/50 dark:hover:bg-dark-border/50",
                 ]}
               >
-                {link.label}
+                {translatedLabel}
               </a>
             );
           })
@@ -95,12 +120,14 @@ const translatePath = useTranslatedPath(lang);
       <div class="flex flex-col gap-1">
         {
           NAV_LINKS.map((link) => {
+            const translatedHref = translatePath(link.href);
+            const translatedLabel = getNavLabel(link.href);
             const isActive =
-              currentPath === link.href ||
-              (link.href !== "/" && currentPath.startsWith(link.href));
+              currentPath === translatedHref ||
+              (link.href !== "/" && currentPath.startsWith(translatedHref));
             return (
               <a
-                href={link.href}
+                href={translatedHref}
                 class:list={[
                   "px-3 py-2 text-sm font-medium rounded-md transition-colors",
                   isActive
@@ -108,7 +135,7 @@ const translatePath = useTranslatedPath(lang);
                     : "text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text hover:bg-light-border/50 dark:hover:bg-dark-border/50",
                 ]}
               >
-                {link.label}
+                {translatedLabel}
               </a>
             );
           })

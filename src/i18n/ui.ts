@@ -18,6 +18,7 @@ export const ui = {
     "nav.resume": "Resume",
     "nav.travel": "Travel",
     "nav.coverLetter": "Cover Letter",
+    "nav.contact": "Contact",
 
     // Home page
     "home.greeting": "Hi, I'm",
@@ -91,6 +92,7 @@ export const ui = {
     "nav.resume": "履歴書",
     "nav.travel": "旅行",
     "nav.coverLetter": "カバーレター",
+    "nav.contact": "お問い合わせ",
 
     // Home page
     "home.greeting": "こんにちは、",
@@ -164,6 +166,7 @@ export const ui = {
     "nav.resume": "Currículum",
     "nav.travel": "Viajes",
     "nav.coverLetter": "Carta de Presentación",
+    "nav.contact": "Contacto",
 
     // Home page
     "home.greeting": "Hola, soy",
@@ -229,17 +232,21 @@ export const ui = {
   },
 } as const;
 
+// Only include pages that have actual translations (ja/es pages exist)
 export const routes = {
   ja: {
+    "": "",  // home page
     about: "about",
     projects: "projects",
     resume: "resume",
-    blog: "blog",
   },
   es: {
+    "": "",  // home page
     about: "about",
     projects: "projects",
     resume: "resume",
-    blog: "blog",
   },
 } as const;
+
+// Pages without translations - these should link to English version
+export const untranslatedPages = ["papers", "blog", "contact", "travel", "cover-letter"] as const;
