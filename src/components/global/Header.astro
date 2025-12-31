@@ -1,8 +1,13 @@
 ---
 import { NAV_LINKS, SITE } from "../../lib/constants";
 import ThemeToggle from "./ThemeToggle";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import { getLangFromUrl, useTranslations, useTranslatedPath } from "../../i18n/utils";
 
 const currentPath = Astro.url.pathname;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
 ---
 
 <header
@@ -40,13 +45,15 @@ const currentPath = Astro.url.pathname;
             );
           })
         }
-        <div class="ml-2 pl-2 border-l border-light-border dark:border-dark-border">
+        <div class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center gap-2">
+          <LanguageSwitcher />
           <ThemeToggle client:load />
         </div>
       </div>
 
       <!-- Mobile Menu Button -->
       <div class="flex md:hidden items-center gap-2">
+        <LanguageSwitcher />
         <ThemeToggle client:load />
         <button
           id="mobile-menu-btn"

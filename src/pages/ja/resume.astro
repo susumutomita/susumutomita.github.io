@@ -1,0 +1,338 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { LINKS } from "../../lib/constants";
+
+const experiences = [
+  {
+    company: "株式会社デンソー",
+    role: "アジャイルコーチ（業務委託）",
+    period: "2026.1 - 現在",
+    location: "日本",
+    highlights: [
+      "開発チーム全体のアジャイル変革とエンジニアリング文化の改善をサポート",
+      "スクラム、カンバン、DevOpsのプラクティスをチームにコーチング",
+      "レトロスペクティブと継続的改善イニシアチブのファシリテーション",
+    ],
+    tech: ["Scrum", "Kanban", "DevOps", "アジャイルコーチング"],
+  },
+  {
+    company: "株式会社デンソー",
+    role: "ソフトウェアエンジニア",
+    period: "2018.10 - 2025.12",
+    location: "日本",
+    highlights: [
+      "デンソー「ソフトウェアソムリエ」制度で初のクラウド/ITソフトウェアアーキテクト認定",
+      "10万〜100万台のデバイスを管理する大規模IoTサービス（mobi-Crews、Drive Agent Personal）向けAWSインフラを設計・運用",
+      "Jamf Pro、Okta、Druva、Microsoft Defenderを使用したMacセキュリティ環境を構築",
+      "セキュリティとクラウド教育のための社内AWS GameDayトレーニングプラットフォームを開発",
+      "デンソーグループ全体で2,000人以上のエンジニアが参加するCloud Tech Friends（CCoE）コミュニティを創設",
+      "クラウドエンジニア、SRE、アーキテクト向けの採用プロセスと技術評価基準を確立",
+    ],
+    tech: ["AWS", "Terraform", "Ruby on Rails", "Python", "Go", "TypeScript", "Docker", "GitHub Actions"],
+  },
+  {
+    company: "Logomix Inc.",
+    role: "ソフトウェアエンジニア（ラボ自動化 / SRE）",
+    period: "2025.6 - 現在",
+    location: "リモート（フリーランス）",
+    highlights: [
+      "再生医療研究向けの完全自動化iPS細胞培養システムを構築",
+      "Hamilton STAR分注ロボットとインキュベーター、観察装置を統合",
+      "SREプラクティスの実装：監視、インシデント対応、ポストモーテム文化",
+    ],
+    tech: ["Python", "HSL", "AWS", "Terraform", "GitHub Actions"],
+  },
+  {
+    company: "MynaWallet Inc.",
+    role: "ソフトウェアエンジニア（Web3 / インフラ）",
+    period: "2025.8 - 現在",
+    location: "リモート（フリーランス）",
+    highlights: [
+      "日本のJPKI（公開鍵基盤）を使用したWeb3ウォレットのインフラ設計とセキュリティ監査をサポート",
+      "暗号署名、認証、CRL/OCSP検証のためのクラウドアーキテクチャを構築",
+      "AWS Step FunctionsとECSを使用した署名リクエスト処理のワークフロー自動化を実装",
+      "JPKI認証監査の準備とISMS/鍵管理コンプライアンスをリード",
+    ],
+    tech: ["TypeScript", "AWS CDK", "ECS", "Step Functions", "Lambda", "Aurora", "Docker"],
+  },
+  {
+    company: "WHILL Inc.",
+    role: "ソフトウェアエンジニア（モビリティプラットフォーム）",
+    period: "2021.9 - 2022.4",
+    location: "リモート（フリーランス）",
+    highlights: [
+      "車椅子シェアリングサービス向けクラウドアプリケーションを開発",
+      "SORACOM BeamとAWS Lambdaを使用した車椅子からクラウドへのリアルタイムデータパイプラインを構築",
+      "AWS AppSyncを使用したリアルタイム車椅子ステータス監視用GraphQL APIを作成",
+      "OTISシステムとの車椅子-エレベーター連携のプロトタイプを開発",
+    ],
+    tech: ["TypeScript", "Express", "AWS AppSync", "DynamoDB", "AWS CDK", "SORACOM"],
+  },
+  {
+    company: "Hitachi Vantara",
+    role: "スペシャリストソフトウェアQA / 自動化エンジニア",
+    period: "2017.2 - 2018.8",
+    location: "日本 / 米国（サンタクララ、シアトル、ボストン、デンバー）",
+    highlights: [
+      "Lumada IoTプラットフォームのQAとテスト自動化",
+      "データ可視化モジュールのテスト計画と自動化フレームワークを設計",
+      "LumadaとHitachi産業用プリンターを接続するPoCをリード",
+      "プロジェクト発足時から開発文化とソフトウェアプロセスの確立に貢献",
+    ],
+    tech: ["Java", "TestNG", "Selenium", "REST Assured", "Jenkins", "GitLab CI"],
+  },
+  {
+    company: "株式会社日立製作所",
+    role: "QAエンジニア / テクニカルリード",
+    period: "2006.4 - 2017.1",
+    location: "日本 / 米国",
+    highlights: [
+      "ミッションクリティカルシステム（銀行ATM、鉄道ICカード、株式取引）で使用されるJP1 Performance Management（サーバー監視ソフトウェア）のQA",
+      "Hitachi Data Systemsでストレージ管理ソフトウェアのプリンシパルQAエンジニア（80%以上のテスト自動化）",
+      "米国チームと連携したUCP Director（統合インフラ製品）の日本側開発・QAチームをリード",
+      "QAプロセスとテスト自動化フレームワークをゼロから確立",
+    ],
+    tech: ["Java", "JUnit", "Silk Test", "Jenkins", "Visual Studio", "Git", "SVN"],
+  },
+];
+
+const skills = {
+  "クラウド & インフラ": {
+    items: ["AWS", "GCP", "Azure", "Terraform", "AWS CDK", "Docker", "Kubernetes"],
+    years: "7年以上",
+  },
+  "プログラミング言語": {
+    items: ["Python", "TypeScript", "Go", "Ruby", "Solidity", "Cairo"],
+    years: "8年以上",
+  },
+  "CI/CD & DevOps": {
+    items: ["GitHub Actions", "GitLab CI", "CircleCI", "Jenkins", "Bitbucket Pipelines"],
+    years: "7年以上",
+  },
+  "セキュリティ": {
+    items: ["IAM", "SSO (Okta)", "JPKI", "ゼロトラストアーキテクチャ", "セキュリティ監査"],
+    years: "5年以上",
+  },
+  "QA & テスト自動化": {
+    items: ["JUnit", "Selenium", "TestNG", "REST Assured", "テスト計画"],
+    years: "12年以上",
+  },
+  "AI & ツール": {
+    items: ["Claude", "ChatGPT", "Amazon Q", "Amazon Bedrock", "Slack自動化"],
+    years: "2年以上",
+  },
+};
+
+const certifications = [
+  { name: "AWS ソリューションアーキテクト", issuer: "Amazon Web Services" },
+];
+
+const achievements = [
+  "デンソー初のクラウド/ITソフトウェアアーキテクト（ソフトウェアソムリエ制度）",
+  "Cloud Tech Friendsコミュニティを創設（2,000人以上のエンジニア）",
+  "全社展開されたAWS GameDayトレーニングプラットフォームを構築",
+  "ZeroKey認証システムに関する研究を発表",
+];
+---
+
+<BaseLayout
+  title="職務経歴書 - 冨田 晋"
+  description="冨田 晋の職務経歴書 - ソフトウェアアーキテクト＆クラウドエンジニア"
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 print:py-8 print:px-4 print:max-w-none">
+    <!-- Print Controls -->
+    <div class="mb-8 flex justify-end gap-3 print:hidden">
+      <button
+        id="printBtn"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        PDFダウンロード
+      </button>
+      <a
+        href="/ja/cover-letter"
+        class="inline-flex items-center gap-2 px-4 py-2 border border-light-border dark:border-dark-border hover:border-accent-500 rounded-lg transition-colors"
+      >
+        カバーレターを見る
+      </a>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-16 print:mb-8 flex flex-wrap items-start justify-between gap-6">
+      <div>
+        <h1 class="font-display text-4xl md:text-5xl font-bold mb-4">冨田 晋</h1>
+        <p class="text-xl text-accent-500 font-medium mb-4">
+          ソフトウェアエンジニア
+        </p>
+        <p class="text-light-muted dark:text-dark-muted max-w-2xl leading-relaxed">
+          セキュアでスケーラブルなシステムとエンジニアリング文化を構築。
+          QA自動化からクラウドアーキテクチャまで、スタートアップからエンタープライズまで。
+          AWS、IoT、Web3、開発者体験を専門としています。
+        </p>
+      </div>
+      <div class="flex gap-3">
+        <a
+          href={LINKS.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path>
+          </svg>
+          LinkedIn
+        </a>
+        <a
+          href={LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <!-- Key Achievements -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6 pb-2 border-b border-light-border dark:border-dark-border">
+        主な実績
+      </h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        {achievements.map((achievement) => (
+          <div class="flex items-start gap-3 p-4 rounded-lg bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border">
+            <svg class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+            <span class="text-sm">{achievement}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6 pb-2 border-b border-light-border dark:border-dark-border">
+        スキル
+      </h2>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {Object.entries(skills).map(([category, { items, years }]) => (
+          <div class="p-4 rounded-lg bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-display font-semibold text-accent-500">{category}</h3>
+              <span class="text-xs px-2 py-1 bg-accent-500/10 text-accent-500 rounded">{years}</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {items.map((item) => (
+                <span class="px-2 py-1 text-xs bg-light-border/50 dark:bg-dark-border/50 rounded">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Experience -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6 pb-2 border-b border-light-border dark:border-dark-border">
+        職歴
+      </h2>
+      <div class="space-y-8">
+        {experiences.map((exp) => (
+          <div class="relative pl-6 border-l-2 border-light-border dark:border-dark-border">
+            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-accent-500"></div>
+            <div class="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+              <h3 class="font-display font-semibold text-lg">{exp.company}</h3>
+              <span class="text-sm text-light-muted dark:text-dark-muted">{exp.period}</span>
+            </div>
+            <p class="text-accent-500 font-medium mb-1">{exp.role}</p>
+            <p class="text-sm text-light-muted dark:text-dark-muted mb-3">{exp.location}</p>
+            <ul class="space-y-1 mb-3">
+              {exp.highlights.map((highlight) => (
+                <li class="flex items-start gap-2 text-sm text-light-muted dark:text-dark-muted">
+                  <span class="text-accent-500 mt-1">•</span>
+                  {highlight}
+                </li>
+              ))}
+            </ul>
+            {exp.tech && (
+              <div class="flex flex-wrap gap-1">
+                {exp.tech.map((t) => (
+                  <span class="px-2 py-0.5 text-xs bg-accent-500/10 text-accent-500 rounded">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Certifications -->
+    <section>
+      <h2 class="font-display text-2xl font-bold mb-6 pb-2 border-b border-light-border dark:border-dark-border">
+        資格
+      </h2>
+      <div class="space-y-4">
+        {certifications.map((cert) => (
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+            <div>
+              <p class="font-medium">{cert.name}</p>
+              <p class="text-sm text-light-muted dark:text-dark-muted">{cert.issuer}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  @media print {
+    :global(body) {
+      background: white !important;
+      color: black !important;
+      font-size: 11px !important;
+    }
+    :global(header),
+    :global(footer),
+    :global(.print\:hidden) {
+      display: none !important;
+    }
+    :global(.dark) {
+      color-scheme: light;
+    }
+    :global(.bg-light-surface),
+    :global(.dark .bg-dark-surface) {
+      background: white !important;
+    }
+    :global(.text-light-muted),
+    :global(.dark .text-dark-muted) {
+      color: #666 !important;
+    }
+    :global(.text-accent-500) {
+      color: #2563eb !important;
+    }
+    :global(.border-light-border),
+    :global(.dark .border-dark-border) {
+      border-color: #ddd !important;
+    }
+  }
+</style>
+
+<script>
+  document.getElementById("printBtn")?.addEventListener("click", () => {
+    window.print();
+  });
+</script>

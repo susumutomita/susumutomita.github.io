@@ -1,0 +1,307 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { LINKS } from "../../lib/constants";
+
+// Status badge types
+type ProjectStatus = "active" | "learning" | "experimental";
+
+interface Project {
+  title: string;
+  description: string;
+  tags: string[];
+  github: string;
+  featured?: boolean;
+  status?: ProjectStatus;
+  highlights?: string[];
+  paper?: string;
+  isContribution?: boolean;
+}
+
+const statusConfig: Record<ProjectStatus, { label: string; class: string }> = {
+  active: { label: "Activo", class: "bg-accent-500/20 text-accent-400 border-accent-500/30" },
+  learning: { label: "Aprendizaje", class: "bg-hybrid-cyan/20 text-hybrid-brightCyan border-hybrid-cyan/30" },
+  experimental: { label: "Experimental", class: "bg-hybrid-magenta/20 text-hybrid-brightMagenta border-hybrid-magenta/30" },
+};
+
+const projects: Project[] = [
+  {
+    title: "ZeroKey",
+    description: "Un modelo de ejecución distribuida que separa instrucción, ejecución y responsabilidad en sistemas blockchain. Artículo de investigación con implementación funcional.",
+    tags: ["Blockchain", "Investigación", "Criptografía de Umbral"],
+    github: "https://github.com/susumutomita/ZeroKeyCI",
+    featured: true,
+    status: "active",
+    highlights: [
+      "Nueva separación de instrucción y ejecución",
+      "Firma de criptografía de umbral (t-de-n)",
+      "Modelo formal con pruebas de seguridad",
+      "Artículo listo para publicación"
+    ],
+    paper: "/es/papers/zerokey",
+  },
+  {
+    title: "Integración Slither Claude",
+    description: "Integración de Claude AI enviada a Slither, el analizador estático de Solidity líder de Trail of Bits. Permite análisis de vulnerabilidades impulsado por IA para contratos inteligentes.",
+    tags: ["Seguridad", "IA", "Código Abierto", "Solidity"],
+    github: "https://github.com/crytic/slither/pull/2842",
+    isContribution: true,
+    highlights: [
+      "Pull request enviado a Trail of Bits",
+      "Detección de vulnerabilidades con IA",
+      "Integración con API de Claude"
+    ],
+  },
+  {
+    title: "Navegador desde Cero",
+    description: "Construyendo un navegador web desde cero en Rust. Profundizando en motores de renderizado, análisis HTML/CSS, redes y estándares web modernos.",
+    tags: ["Rust", "Programación de Sistemas", "WebDev"],
+    github: "https://github.com/susumutomita/browser",
+    status: "learning",
+  },
+  {
+    title: "SO desde Cero",
+    description: "Implementando un sistema operativo en Rust. Cubre bootloader, gestión de memoria, multitarea, manejo de interrupciones y controladores de dispositivos.",
+    tags: ["Rust", "Desarrollo de SO", "Bajo Nivel"],
+    github: "https://github.com/susumutomita/os",
+    status: "learning",
+  },
+  {
+    title: "Blockchain en Zig",
+    description: "Una implementación de blockchain en Zig, explorando el modelo de memoria único del lenguaje, evaluación en tiempo de compilación y garantías de seguridad.",
+    tags: ["Zig", "Blockchain", "Programación de Sistemas"],
+    github: "https://github.com/susumutomita/BlockChain",
+    status: "experimental",
+  },
+  {
+    title: "GitHub Vector Issue Processor",
+    description: "Herramienta impulsada por IA que procesa issues de GitHub usando embeddings vectoriales. Permite búsqueda semántica, coincidencia de similitud y clasificación inteligente de issues.",
+    tags: ["Python", "IA/ML", "Herramientas de Desarrollo", "RAG"],
+    github: "https://github.com/susumutomita/GitHubVectorIssueProcessor",
+    status: "active",
+  },
+];
+---
+
+<BaseLayout
+  title="Proyectos - Susumu Tomita"
+  description="Proyectos de código abierto y experimentos por Susumu Tomita"
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <!-- Header -->
+    <div class="mb-16">
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">Proyectos</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted max-w-3xl mb-6">
+        Construyendo cosas para entender cómo funcionan. Desde artículos de investigación hasta experimentos de programación de sistemas.
+      </p>
+      <div class="flex flex-wrap gap-3 text-sm">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-500/30 bg-accent-500/10">
+          <span class="w-2 h-2 rounded-full bg-accent-400"></span>
+          Activo
+        </span>
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-hybrid-cyan/30 bg-hybrid-cyan/10">
+          <span class="w-2 h-2 rounded-full bg-hybrid-brightCyan"></span>
+          Aprendizaje
+        </span>
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-hybrid-magenta/30 bg-hybrid-magenta/10">
+          <span class="w-2 h-2 rounded-full bg-hybrid-brightMagenta"></span>
+          Experimental
+        </span>
+      </div>
+    </div>
+
+    <!-- Featured Project -->
+    {
+      projects.filter(p => p.featured).map((project) => (
+        <section class="mb-12">
+          <div class="p-8 rounded-xl border-2 border-accent-500/50 bg-gradient-to-br from-accent-500/5 to-transparent">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-xs font-medium text-accent-500 uppercase tracking-wider">Investigación Destacada</span>
+              {project.status && (
+                <span class={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusConfig[project.status].class}`}>
+                  {statusConfig[project.status].label}
+                </span>
+              )}
+            </div>
+            <h2 class="font-display text-3xl font-bold mb-4">{project.title}</h2>
+            <p class="text-light-muted dark:text-dark-muted mb-6 text-lg">{project.description}</p>
+
+            {project.highlights && (
+              <div class="mb-6 p-4 rounded-lg bg-light-surface dark:bg-dark-surface/50 border border-light-border dark:border-dark-border">
+                <h4 class="text-sm font-semibold mb-3 text-accent-500">Puntos Clave</h4>
+                <ul class="grid gap-2 sm:grid-cols-2">
+                  {project.highlights.map((highlight) => (
+                    <li class="flex items-start gap-2 text-sm text-light-muted dark:text-dark-muted">
+                      <svg class="w-4 h-4 text-hybrid-brightGreen mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div class="flex flex-wrap gap-2 mb-6">
+              {project.tags.map((tag) => (
+                <span class="px-3 py-1 text-sm bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <div class="flex flex-wrap gap-4">
+              {project.paper && (
+                <a
+                  href={project.paper}
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Leer Artículo
+                </a>
+              )}
+              {project.github && (
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-4 py-2 border border-light-border dark:border-dark-border hover:border-accent-500 rounded-lg transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      fill-rule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  Ver Código
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      ))
+    }
+
+    <!-- Open Source Contribution -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6 flex items-center gap-3">
+        <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+        Contribuciones Open Source
+      </h2>
+      <div class="grid gap-6">
+        {
+          projects.filter(p => p.isContribution && !p.featured).map((project) => (
+            <div class="p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                  <h3 class="font-display font-semibold text-lg mb-2">{project.title}</h3>
+                  <p class="text-sm text-light-muted dark:text-dark-muted mb-4">{project.description}</p>
+                  {project.highlights && (
+                    <ul class="mb-4 space-y-1">
+                      {project.highlights.map((highlight) => (
+                        <li class="flex items-center gap-2 text-sm text-light-muted dark:text-dark-muted">
+                          <svg class="w-3 h-3 text-accent-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                          </svg>
+                          {highlight}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div class="flex flex-wrap gap-2">
+                    {project.tags.map((tag) => (
+                      <span class="px-2 py-0.5 text-xs bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex-shrink-0 p-2 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Learning & Experiments -->
+    <section>
+      <h2 class="font-display text-2xl font-bold mb-6 flex items-center gap-3">
+        <svg class="w-6 h-6 text-hybrid-brightCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        Aprendizaje & Experimentos
+      </h2>
+      <div class="grid gap-6 md:grid-cols-2">
+        {
+          projects.filter(p => !p.featured && !p.isContribution).map((project) => (
+            <div class="p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group">
+              <div class="flex items-center gap-3 mb-3">
+                <h3 class="font-display font-semibold text-lg">{project.title}</h3>
+                {project.status && (
+                  <span class={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusConfig[project.status].class}`}>
+                    {statusConfig[project.status].label}
+                  </span>
+                )}
+              </div>
+              <p class="text-sm text-light-muted dark:text-dark-muted mb-4">{project.description}</p>
+              <div class="flex flex-wrap gap-2 mb-4">
+                {project.tags.map((tag) => (
+                  <span class="px-2 py-0.5 text-xs bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <a
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-sm font-medium text-accent-500 hover:text-accent-600 group-hover:underline"
+              >
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                </svg>
+                Ver Código
+              </a>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- More Projects CTA -->
+    <section class="mt-16 text-center">
+      <div class="p-8 rounded-xl bg-gradient-to-r from-accent-500/10 via-hybrid-cyan/10 to-hybrid-magenta/10 border border-light-border dark:border-dark-border">
+        <h3 class="font-display text-xl font-bold mb-3">130+ Repositorios</h3>
+        <p class="text-light-muted dark:text-dark-muted mb-6">
+          Explora más experimentos, herramientas y contribuciones en GitHub
+        </p>
+        <a
+          href={LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              fill-rule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              clip-rule="evenodd"></path>
+          </svg>
+          Ver Todo en GitHub
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

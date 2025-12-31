@@ -1,0 +1,339 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { LINKS } from "../../lib/constants";
+
+const posts = await getCollection("blog");
+const recentPosts = posts
+  .sort((a, b) => {
+    const dateA = a.data.pubDate ? new Date(a.data.pubDate).getTime() : 0;
+    const dateB = b.data.pubDate ? new Date(b.data.pubDate).getTime() : 0;
+    return dateB - dateA;
+  })
+  .slice(0, 3);
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("es-ES", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+};
+
+const stats = [
+  { value: "18+", label: "Años de Experiencia" },
+  { value: "2,000+", label: "Ingenieros en CCoE" },
+  { value: "1M+", label: "Dispositivos IoT" },
+  { value: "80%+", label: "Automatización de Tests" },
+];
+
+const featuredWork = [
+  {
+    title: "ZeroKey",
+    description: "Paper de investigación sobre un modelo de ejecución distribuida que separa instrucción, ejecución y responsabilidad en sistemas blockchain.",
+    tags: ["Investigación", "Blockchain", "Criptografía"],
+    link: "/papers/zerokey",
+    github: "https://github.com/susumutomita/ZeroKeyCI",
+  },
+  {
+    title: "Slither + Claude AI",
+    description: "Contribuí la integración de Claude AI al Slither de Trail of Bits, el analizador estático líder para Solidity.",
+    tags: ["Open Source", "Seguridad", "IA"],
+    link: "https://github.com/crytic/slither/pull/2842",
+  },
+];
+---
+
+<BaseLayout>
+  <!-- Hero Section -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+    <div class="space-y-6">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm">
+        Ingeniero de Software
+      </p>
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+        Construyendo el futuro de<br />
+        <span class="text-accent-500">Web3 e Infraestructura Cloud</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-light-muted dark:text-dark-muted max-w-3xl">
+        Soy Susumu Tomita, un Ingeniero de Software en Japón con más de 18 años de experiencia.
+        Me especializo en investigación blockchain, arquitectura cloud a escala y construcción de comunidades de ingeniería.
+      </p>
+      <div class="flex flex-wrap gap-4 pt-4">
+        <a
+          href="/es/projects"
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          Ver Proyectos
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a
+          href="/es/resume"
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          Descargar Currículum
+        </a>
+      </div>
+      <div class="flex items-center gap-4 pt-2">
+        <a
+          href={LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+          aria-label="GitHub"
+        >
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              fill-rule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              clip-rule="evenodd"></path>
+          </svg>
+        </a>
+        <a
+          href={LINKS.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+          aria-label="LinkedIn"
+        >
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+            ></path>
+          </svg>
+        </a>
+        <a
+          href={LINKS.x}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+          aria-label="X (Twitter)"
+        >
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+            ></path>
+          </svg>
+        </a>
+        <a
+          href={LINKS.zenn}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+          aria-label="Zenn"
+        >
+          <svg class="w-6 h-6" viewBox="0 0 88.3 88.3" fill="currentColor">
+            <path d="M2.4 83.3h17c.9 0 1.7-.5 2.2-1.2L68.4 5.2c.6-1-.1-2.2-1.3-2.2H51.6c-.8 0-1.5.4-1.9 1.1L2.1 81.5c-.4.8.1 1.8 1 1.8h-.7zm56.2 0h15.5c.6 0 1.2-.3 1.5-.9l10.2-18.5c.5-.9-.1-2-1.2-2H69.5c-.6 0-1.1.3-1.4.8L57.2 81.5c-.5.8.1 1.8 1 1.8h.4z"/>
+          </svg>
+        </a>
+        <a
+          href={LINKS.qiita}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+          aria-label="Qiita"
+        >
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.824a9.176 9.176 0 110 18.352 9.176 9.176 0 010-18.352zm3.528 4.235a3.529 3.529 0 00-6.588 1.765 3.529 3.529 0 003.06 3.498V16.94h1.176v-4.618a3.53 3.53 0 002.352-5.263z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map((stat) => (
+          <div class="text-center">
+            <div class="font-display text-3xl md:text-4xl font-bold text-accent-500">
+              {stat.value}
+            </div>
+            <div class="text-sm text-light-muted dark:text-dark-muted mt-1">
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Work -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-display text-2xl md:text-3xl font-bold">Trabajo Destacado</h2>
+      <a
+        href="/es/projects"
+        class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        Ver todos los proyectos →
+      </a>
+    </div>
+    <div class="grid gap-6 md:grid-cols-2">
+      {featuredWork.map((work) => (
+        <a
+          href={work.link}
+          target={work.link.startsWith("http") ? "_blank" : undefined}
+          rel={work.link.startsWith("http") ? "noopener noreferrer" : undefined}
+          class="group block p-6 rounded-lg border-2 border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-all hover:shadow-lg"
+        >
+          <div class="flex flex-wrap gap-2 mb-3">
+            {work.tags.map((tag) => (
+              <span class="px-2 py-0.5 text-xs font-medium bg-accent-500/10 text-accent-500 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <h3 class="font-display text-xl font-bold mb-2 group-hover:text-accent-500 transition-colors">
+            {work.title}
+          </h3>
+          <p class="text-light-muted dark:text-dark-muted text-sm">
+            {work.description}
+          </p>
+          <div class="flex items-center gap-2 mt-4 text-accent-500 text-sm font-medium">
+            <span>Saber más</span>
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Companies Worked With -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-light-border dark:border-dark-border">
+    <p class="text-center text-sm text-light-muted dark:text-dark-muted mb-6">
+      Empresas de confianza
+    </p>
+    <div class="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-60">
+      <span class="font-display text-lg font-semibold">DENSO</span>
+      <span class="font-display text-lg font-semibold">Hitachi</span>
+      <span class="font-display text-lg font-semibold">WHILL</span>
+      <span class="font-display text-lg font-semibold">Logomix</span>
+      <span class="font-display text-lg font-semibold">MynaWallet</span>
+    </div>
+  </section>
+
+  <!-- Recent Blog Posts -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-light-border dark:border-dark-border">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-display text-2xl md:text-3xl font-bold">Publicaciones Recientes</h2>
+      <a
+        href="/blog"
+        class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        Ver todo →
+      </a>
+    </div>
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {
+        recentPosts.map((post) => (
+          <a
+            href={`/blog/${post.slug}`}
+            class="group block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
+          >
+            <time class="text-sm text-light-muted dark:text-dark-muted">
+              {formatDate(new Date(post.data.pubDate || new Date()))}
+            </time>
+            <h3 class="mt-2 font-display font-semibold text-lg group-hover:text-accent-500 transition-colors line-clamp-2">
+              {post.data.title}
+            </h3>
+            <p class="mt-2 text-sm text-light-muted dark:text-dark-muted line-clamp-2">
+              {post.data.description}
+            </p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Quick Links -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-light-border dark:border-dark-border">
+    <h2 class="font-display text-2xl md:text-3xl font-bold mb-8 text-center">Explorar Más</h2>
+    <div class="grid gap-6 md:grid-cols-3">
+      <a
+        href="/papers"
+        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors text-center"
+      >
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-accent-500/10 flex items-center justify-center">
+          <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Papers de Investigación</h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          Investigación académica sobre blockchain y sistemas distribuidos
+        </p>
+      </a>
+      <a
+        href="/es/about"
+        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors text-center"
+      >
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-accent-500/10 flex items-center justify-center">
+          <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Sobre Mí</h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          Habilidades, experiencia y trayectoria profesional
+        </p>
+      </a>
+      <a
+        href="/travel"
+        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors text-center"
+      >
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-accent-500/10 flex items-center justify-center">
+          <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Mapa de Viajes</h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          Globo 3D interactivo de países visitados
+        </p>
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 text-center">
+      <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">Construyamos Algo Juntos</h2>
+      <p class="text-light-muted dark:text-dark-muted mb-6 max-w-xl mx-auto">
+        Siempre estoy interesado en nuevas oportunidades, colaboraciones y proyectos desafiantes.
+        ¡No dudes en contactarme!
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href={`mailto:${LINKS.email}`}
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Contactar
+        </a>
+        <a
+          href="/es/cover-letter"
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          Ver Carta de Presentación
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
