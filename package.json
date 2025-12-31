@@ -9,8 +9,8 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "lint": "bunx textlint '**/*.md'",
-    "lint:fix": "bunx textlint --fix '**/*.md'"
+    "lint": "textlint '**/*.md'",
+    "lint:fix": "textlint --fix '**/*.md'"
   },
   "repository": {
     "type": "git",

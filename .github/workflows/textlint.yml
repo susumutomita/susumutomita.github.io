@@ -11,12 +11,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: latest
-          cache: 'npm'
-      - name: Install packages via packages.json
-        run: npm install
+          bun-version: latest
+      - name: Install packages
+        run: bun install
       - name: Run textlint
-        run: |
-          npm run lint
+        run: bun run lint
