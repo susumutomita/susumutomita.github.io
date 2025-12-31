@@ -1,23 +1,79 @@
+# Susumu Tomita - Portfolio
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/caefb044-929a-4195-a9a2-cf5d9ad5b245/deploy-status)](https://app.netlify.com/sites/susumutomita/deploys)
-# My Personal site
 
-This is my personal site built with Astro.
+Personal portfolio site built with Astro, featuring a minimal dark/light theme design.
 
-## 🧞 Commands
+## Features
 
-All commands are run from the root of the project, from a terminal:
+- Dark/Light theme toggle with system preference detection
+- Responsive design optimized for all devices
+- Interactive 3D globe showing visited countries (D3.js)
+- Blog with MDX support
+- Papers/Publications section
+- Resume page
+- Contact page
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Tech Stack
+
+- **Framework**: [Astro](https://astro.build/) 5.x
+- **Styling**: [UnoCSS](https://unocss.dev/) with custom design tokens
+- **Interactive Components**: [Solid.js](https://www.solidjs.com/)
+- **3D Globe**: [D3.js](https://d3js.org/)
+- **Animations**: [Motion](https://motion.dev/)
+- **Deployment**: [Netlify](https://www.netlify.com/)
+
+## Pages
+
+| Page | Description |
+|:-----|:------------|
+| `/` | Home - Hero, featured work, recent blog posts |
+| `/about` | About - Skills, experience, technical writing |
+| `/projects` | Projects - Portfolio of work |
+| `/papers` | Papers - Academic publications |
+| `/blog` | Blog - Technical articles |
+| `/resume` | Resume - Professional experience |
+| `/contact` | Contact - Get in touch |
+| `/travel` | Travel - 3D globe of visited countries |
+
+## Commands
+
+| Command | Action |
+|:--------|:-------|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start dev server at `localhost:4321` |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run textlint on markdown files |
+| `npm run lint:fix` | Fix textlint errors |
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
 
 ## Deployment
 
-This project is deployed to [Netlify](https://www.netlify.com/). You can view the live site at [https://susumutomita.netlify.app/](https://susumutomita.netlify.app/).
+This project is automatically deployed to Netlify on push to the `main` branch.
 
-[![Netlify Deploy button](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/susumutomita/susumutomita.github.io)
+**Live Site**: [https://susumutomita.netlify.app/](https://susumutomita.netlify.app/)
+
+## Author
+
+**Susumu Tomita**
+- GitHub: [@susumutomita](https://github.com/susumutomita)
+- LinkedIn: [susumutomita](https://www.linkedin.com/in/susumutomita/)
+- Zenn: [bull](https://zenn.dev/bull)
+- Qiita: [tonitoni415](https://qiita.com/tonitoni415)
+
+## License
+
+ISC

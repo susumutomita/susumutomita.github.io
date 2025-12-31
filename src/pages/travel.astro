@@ -1,34 +1,22 @@
 ---
 import Globe from "../components/Globe";
-import BasicLayout from "../layouts/BasicLayout.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<script>
-  import { animate } from "motion";
-
-  const sequence: [[string, Record<string, unknown>, Record<string, unknown>]] = [
-    [
-      ".loaderRef",
-      { opacity: [1, 0], pointerEvents: "none" },
-      { easing: "ease-out" },
-    ],
-  ];
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  animate(sequence as any);
-</script>
-
-<BasicLayout
-  title="Susumu Tomita - Visited Countries"
-  description="A 3d globe showing countries that I have visited so far"
-  page="travel"
-
+<BaseLayout
+  title="Visited Countries - Susumu Tomita"
+  description="A 3D globe showing countries that I have visited so far"
+  ogImage="/globe_preview.webp"
 >
-  <a
-    href="/"
-    class="text-white absolute bg-neutral-900 hover:bg-neutral-800 top-4 left-4 px-4 py-2 border-1 border-solid border-neutral-600 rounded-lg"
-    >Back</a
-  >
-
-  <Globe client:load />
-</BasicLayout>
+  <div class="relative min-h-[calc(100vh-200px)] flex flex-col items-center justify-center">
+    <div class="text-center mb-8">
+      <h1 class="font-display text-3xl md:text-4xl font-bold mb-4">Countries I've Visited</h1>
+      <p class="text-light-muted dark:text-dark-muted">
+        Explore the globe to see the countries I've traveled to
+      </p>
+    </div>
+    <div class="w-full max-w-4xl aspect-square">
+      <Globe client:load />
+    </div>
+  </div>
+</BaseLayout>
