@@ -1,0 +1,89 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const papers = [
+  {
+    title: "ZeroKey: A Distributed Execution Model Separating Instruction, Execution, and Accountability in Blockchain Systems",
+    description: "秘密鍵管理の改善ではなく、指示・実行・責任を分離する新しい分散実行モデルの提案",
+    date: "2025-12-30",
+    category: "Blockchain Research",
+    href: "/blog/zerokey-paper",
+    status: "Draft",
+  },
+];
+
+const formatDate = (dateStr: string) => {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(dateStr));
+};
+---
+
+<BaseLayout
+  title="Papers - Susumu Tomita"
+  description="Research papers and technical writings by Susumu Tomita"
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <!-- Header -->
+    <div class="mb-16">
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">Papers</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted max-w-3xl">
+        Research papers and technical writings on blockchain, distributed systems, and software engineering.
+      </p>
+    </div>
+
+    <!-- Papers List -->
+    <section>
+      <div class="space-y-6">
+        {
+          papers.map((paper) => (
+            <a
+              href={paper.href}
+              class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group"
+            >
+              <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span class="px-2 py-0.5 text-xs font-medium bg-accent-500/10 text-accent-500 rounded">
+                  {paper.category}
+                </span>
+                {paper.status && (
+                  <span class="px-2 py-0.5 text-xs font-medium bg-light-border dark:bg-dark-border rounded">
+                    {paper.status}
+                  </span>
+                )}
+                <time class="text-sm text-light-muted dark:text-dark-muted">
+                  {formatDate(paper.date)}
+                </time>
+              </div>
+              <h2 class="font-display font-semibold text-xl mb-2 group-hover:text-accent-500 transition-colors">
+                {paper.title}
+              </h2>
+              <p class="text-light-muted dark:text-dark-muted">
+                {paper.description}
+              </p>
+              <span class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-accent-500">
+                Read paper
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Empty State (for future) -->
+    {papers.length === 0 && (
+      <div class="text-center py-16">
+        <svg class="w-16 h-16 mx-auto text-light-muted dark:text-dark-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p class="text-light-muted dark:text-dark-muted">
+          No papers published yet. Check back soon!
+        </p>
+      </div>
+    )}
+  </div>
+</BaseLayout>

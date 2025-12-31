@@ -1,48 +1,73 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
-import PostRow from "../../components/Blog/PostRow.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const posts = (await getCollection("blog"))?.sort(
   (blogEntryA, blogEntryB) =>
     (blogEntryB.data.pubDate || new Date()).getTime() -
     (blogEntryA.data.pubDate || new Date()).getTime(),
 );
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+};
 ---
 
-<script>
-  import { animate } from "motion";
-  import { loaderAnimation } from "../../lib/constants";
-
-  const sequence: [[string, Record<string, unknown>, Record<string, unknown>]] = [loaderAnimation];
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  animate(sequence as any);
-</script>
-
-<Layout
-  title="Susumu Tomita - Blog"
-  description="Software Engineer based with focus on AWS and Web3 Technologies."
+<BaseLayout
+  title="Blog - Susumu Tomita"
+  description="Blog posts about blockchain, Web3, cloud technologies, and software engineering."
 >
-  <main
-    class="w-screen h-screen flex flex-col justify-start items-start max-w-3xl mx-auto p-8"
-  >
-    <a
-      href="/"
-      class="text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 mb-8 border-1 border-solid border-neutral-600 rounded-lg"
-      >Back</a
-    >
-    <h1 class="text-4xl font-bold mb-4 text-neutral-100">Posts</h1>
-    <ul class="w-full">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <!-- Header -->
+    <div class="mb-12">
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">Blog</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted max-w-3xl">
+        Thoughts on blockchain, Web3, cloud technologies, and software engineering.
+      </p>
+    </div>
+
+    <!-- Posts List -->
+    <div class="space-y-6">
       {
         posts?.map((post) => (
-          <PostRow
-            title={post.data.title || "No title"}
-            date={post.data.pubDate || new Date()}
-            url={post.slug}
-          />
+          <a
+            href={`/blog/${post.slug}`}
+            class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group"
+          >
+            <div class="flex flex-wrap items-center gap-3 mb-2">
+              <time class="text-sm text-light-muted dark:text-dark-muted">
+                {formatDate(post.data.pubDate || new Date())}
+              </time>
+              {post.data.categories && post.data.categories.length > 0 && (
+                <span class="px-2 py-0.5 text-xs font-medium bg-accent-500/10 text-accent-500 rounded">
+                  {post.data.categories[0]}
+                </span>
+              )}
+            </div>
+            <h2 class="font-display font-semibold text-xl group-hover:text-accent-500 transition-colors mb-2">
+              {post.data.title || "No title"}
+            </h2>
+            {post.data.description && (
+              <p class="text-light-muted dark:text-dark-muted line-clamp-2">
+                {post.data.description}
+              </p>
+            )}
+          </a>
         ))
       }
-    </ul>
-  </main>
-</Layout>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

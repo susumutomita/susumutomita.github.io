@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export const prerender = true;
 
@@ -27,106 +28,168 @@ if (entry === undefined) {
 }
 
 const { Content } = await entry.render();
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+};
 ---
 
-<Content />
+<BaseLayout
+  title={`${entry.data.title} - Susumu Tomita`}
+  description={entry.data.description || ""}
+>
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <!-- Header -->
+    <header class="mb-12">
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-1 text-sm text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors mb-6"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to blog
+      </a>
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <time class="text-sm text-light-muted dark:text-dark-muted">
+          {formatDate(entry.data.pubDate || new Date())}
+        </time>
+        {entry.data.categories && entry.data.categories.length > 0 && (
+          <span class="px-2 py-0.5 text-xs font-medium bg-accent-500/10 text-accent-500 rounded">
+            {entry.data.categories[0]}
+          </span>
+        )}
+      </div>
+      <h1 class="font-display text-3xl md:text-4xl font-bold mb-4">
+        {entry.data.title}
+      </h1>
+      {entry.data.description && (
+        <p class="text-lg text-light-muted dark:text-dark-muted">
+          {entry.data.description}
+        </p>
+      )}
+    </header>
+
+    <!-- Content -->
+    <div class="prose prose-lg dark:prose-invert max-w-none">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
 
 <style is:global>
-  body {
-    color: #ffffff;
-    background-color: #1a1a1a;
+  .prose {
+    color: inherit;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: #ffffff;
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    font-family: "CabinetGrotesk", sans-serif;
+    font-weight: 700;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
   }
 
-  h1 {
-    font-size: 32px;
+  .prose h1 { font-size: 2rem; }
+  .prose h2 { font-size: 1.5rem; }
+  .prose h3 { font-size: 1.25rem; }
+  .prose h4 { font-size: 1.125rem; }
+
+  .prose p {
+    margin-bottom: 1.25em;
+    line-height: 1.75;
   }
 
-  h2 {
-    font-size: 28px;
-  }
-
-  h3 {
-    font-size: 24px;
-  }
-
-  h4 {
-    font-size: 20px;
-  }
-
-  h5 {
-    font-size: 18px;
-  }
-
-  h6 {
-    font-size: 16px;
-  }
-
-  p {
-    margin: 0 0 10px 0;
-  }
-
-  a {
-    color: #ff6347;
+  .prose a {
+    color: #ef4444;
     text-decoration: none;
   }
 
-  a:hover {
+  .prose a:hover {
     text-decoration: underline;
   }
 
-  ul,
-  ol {
-    margin-left: 20px;
-    margin-bottom: 10px;
+  .prose ul,
+  .prose ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.25em;
   }
 
-  blockquote {
-    margin: 20px 0;
-    padding-left: 15px;
-    border-left: 5px solid #ccc;
+  .prose li {
+    margin-bottom: 0.5em;
   }
 
-  pre,
-  code {
-    font-family: "Courier New", monospace;
-    background-color: #2a2a2a;
-    border-radius: 5px;
+  .prose blockquote {
+    margin: 1.5em 0;
+    padding-left: 1rem;
+    border-left: 4px solid #ef4444;
+    font-style: italic;
   }
 
-  pre {
-    padding: 10px;
+  .prose pre {
+    background-color: #1a1a1a;
+    border-radius: 0.5rem;
+    padding: 1rem;
     overflow-x: auto;
+    margin: 1.5em 0;
   }
 
-  code {
-    padding: 2px 4px;
-    font-size: 90%;
-    color: white;
+  .dark .prose pre {
+    background-color: #171717;
   }
 
-  img {
+  .prose code {
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 0.875em;
+  }
+
+  .prose :not(pre) > code {
+    background-color: rgba(239, 68, 68, 0.1);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    color: #ef4444;
+  }
+
+  .prose img {
     max-width: 100%;
     height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5em 0;
   }
 
-  table {
-    border-collapse: collapse;
+  .prose table {
     width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
   }
 
-  th,
-  td {
+  .prose th,
+  .prose td {
     text-align: left;
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .dark .prose th,
+  .dark .prose td {
+    border-bottom-color: #262626;
+  }
+
+  .prose hr {
+    border: none;
+    border-top: 1px solid #e5e5e5;
+    margin: 2em 0;
+  }
+
+  .dark .prose hr {
+    border-top-color: #262626;
   }
 </style>

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://susumutomita.xyz/sitemap-index.xml
+Sitemap: https://susumutomita.github.io/sitemap-index.xml

@@ -1,0 +1,180 @@
+---
+import { GoogleAnalytics } from "astro-google-analytics";
+import { SITE, LINKS } from "../lib/constants";
+import Header from "../components/global/Header.astro";
+import Footer from "../components/global/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title = SITE.title,
+  description = SITE.description,
+  ogImage = "/og-image.png",
+  noIndex = false,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, SITE.url);
+const ogImageURL = new URL(ogImage, SITE.url);
+
+const schema = {
+  "@context": "http://schema.org",
+  "@type": "Person",
+  name: SITE.name,
+  url: SITE.url,
+  sameAs: [LINKS.linkedin, LINKS.github],
+  image: ogImageURL.href,
+  jobTitle: "Software Engineer",
+  worksFor: {
+    "@type": "Organization",
+    name: "DENSO / Freelance",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Japan",
+      addressCountry: "JP",
+    },
+  },
+  nationality: {
+    "@type": "Country",
+    name: "Japan",
+  },
+};
+---
+
+<!doctype html>
+<html lang="ja" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:site_name" content={SITE.name} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Google Analytics -->
+    <GoogleAnalytics id="GA_G6S8W732Q9" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://cdn.fontshare.com" />
+
+    <!-- Schema.org -->
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+    <!-- Theme script (prevents flash) -->
+    <script is:inline>
+      (function () {
+        const theme = localStorage.getItem("theme");
+        if (theme === "light") {
+          document.documentElement.classList.remove("dark");
+        } else if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+          document.documentElement.classList.remove("dark");
+        }
+      })();
+    </script>
+  </head>
+  <body
+    class="min-h-screen bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text font-body antialiased transition-colors duration-300"
+  >
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style is:global>
+  @font-face {
+    font-family: "CabinetGrotesk";
+    src: url("/fonts/CabinetGrotesk-Variable.ttf") format("truetype-variations");
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Satoshi";
+    src: url("/fonts/Satoshi-Variable.ttf") format("truetype-variations");
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "CabinetGrotesk", sans-serif;
+  }
+
+  p,
+  span,
+  li,
+  a {
+    font-family: "Satoshi", sans-serif;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid rgb(239, 68, 68);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #a3a3a3;
+    border-radius: 4px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #525252;
+  }
+</style>

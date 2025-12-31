@@ -9,9 +9,14 @@ export default defineConfig({
     boxShadow: {
       custom: `2px 2px 0`,
       "custom-hover": `1px 1px 0`,
+      sm: "0 1px 2px rgba(0,0,0,0.05)",
+      md: "0 4px 6px rgba(0,0,0,0.07)",
+      lg: "0 10px 15px rgba(0,0,0,0.1)",
     },
     fontFamily: {
       sans: ["CabinetGrotesk", "Satoshi"],
+      display: ["CabinetGrotesk"],
+      body: ["Satoshi"],
     },
     gridTemplateRows: {
       "auto-250": "repeat(auto-fill, 250px)",
@@ -38,12 +43,13 @@ export default defineConfig({
         200: "#262626",
         300: "#202020",
         400: "#1A1A1A",
-        500: "#171717" /* Exactly your example for the background */,
+        500: "#171717",
         600: "#141414",
         700: "#111111",
         800: "#0E0E0E",
-        900: "#0B0B0B" /* Deeper and darker */,
+        900: "#0B0B0B",
       },
+      // Keep primary for backwards compatibility
       primary: {
         100: "#F9CDD3",
         200: "#F3A3AA",
@@ -54,6 +60,35 @@ export default defineConfig({
         700: "#B82534",
         800: "#A01B2B",
         900: "#891321",
+      },
+      // New accent colors (refined red)
+      accent: {
+        50: "#fef2f2",
+        100: "#fee2e2",
+        200: "#fecaca",
+        300: "#fca5a5",
+        400: "#f87171",
+        500: "#ef4444",
+        600: "#dc2626",
+        700: "#b91c1c",
+        800: "#991b1b",
+        900: "#7f1d1d",
+      },
+      // Light mode semantic colors
+      light: {
+        bg: "#fafafa",
+        surface: "#ffffff",
+        text: "#171717",
+        muted: "#737373",
+        border: "#e5e5e5",
+      },
+      // Dark mode semantic colors
+      dark: {
+        bg: "#0a0a0a",
+        surface: "#171717",
+        text: "#fafafa",
+        muted: "#a3a3a3",
+        border: "#262626",
       },
     },
   },
