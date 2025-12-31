@@ -40,24 +40,24 @@ Personal portfolio site built with Astro, featuring a minimal dark/light theme d
 
 | Command | Action |
 |:--------|:-------|
-| `npm install` | Install dependencies |
-| `npm run dev` | Start dev server at `localhost:4321` |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run textlint on markdown files |
-| `npm run lint:fix` | Fix textlint errors |
+| `bun install` | Install dependencies |
+| `bun run dev` | Start dev server at `localhost:4321` |
+| `bun run build` | Build for production |
+| `bun run preview` | Preview production build |
+| `bun run lint` | Run textlint on markdown files |
+| `bun run lint:fix` | Fix textlint errors |
 
 ## Development
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Start development server
-npm run dev
+bun run dev
 
 # Build for production
-npm run build
+bun run build
 ```
 
 ## Deployment
@@ -76,4 +76,4 @@ This project is automatically deployed to Netlify on push to the `main` branch.
 
 ## License
 
-ISC
+MIT

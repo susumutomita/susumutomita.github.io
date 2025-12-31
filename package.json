@@ -17,7 +17,7 @@
     "url": "git+https://github.com/susumutomita/susumutomita.github.io.git"
   },
   "author": "Susumu Tomita <oyster880@gmail.com> (https://github.com/susumutomita)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/susumutomita/susumutomita.github.io/issues"
   },
