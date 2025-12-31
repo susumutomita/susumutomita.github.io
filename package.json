@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/susumutomita/susumutomita.github.io#readme",
   "devDependencies": {
-    "@astrojs/partytown": "^2.1.4",
     "@types/d3": "^7.4.3",
     "@unocss/astro": "^66.5.11",
     "@unocss/postcss": "^66.5.11",
