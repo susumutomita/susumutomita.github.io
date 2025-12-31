@@ -38,6 +38,7 @@
     "netlify-plugin-cypress": "^2.2.1",
     "sanitize-html": "^2.17.0",
     "textlint": "^15.5.0",
+    "textlint-filter-rule-allowlist": "^4.0.0",
     "textlint-rule-ja-no-abusage": "^3.0.0",
     "textlint-rule-ja-no-inappropriate-words": "^2.0.0",
     "textlint-rule-no-double-negative-ja": "^2.0.1",
