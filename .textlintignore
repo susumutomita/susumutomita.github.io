@@ -1,0 +1,7 @@
+# Academic papers (use である style instead of ですます style)
+src/content/blog/zerokey-paper.md
+papers/**/*.md
+**/zerokey-paper.md
+
+# Private planning files
+Plan.md
