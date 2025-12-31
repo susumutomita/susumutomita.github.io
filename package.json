@@ -28,7 +28,7 @@
     "@unocss/astro": "^66.5.11",
     "@unocss/postcss": "^66.5.11",
     "@unocss/preset-uno": "^66.5.11",
-    "@unocss/preset-wind4": "^66.5.11",
+    "@unocss/preset-wind4": "^66.5.12",
     "@unocss/reset": "^66.5.11",
     "autoprefixer": "^10.4.23",
     "husky": "^9.1.7",
