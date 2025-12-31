@@ -139,9 +139,28 @@ const achievements = [
   title="Resume - Susumu Tomita"
   description="Professional resume of Susumu Tomita - Software Architect & Cloud Engineer"
 >
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 print:py-8 print:px-4 print:max-w-none">
+    <!-- Print Controls -->
+    <div class="mb-8 flex justify-end gap-3 print:hidden">
+      <button
+        id="printBtn"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        Download PDF
+      </button>
+      <a
+        href="/cover-letter"
+        class="inline-flex items-center gap-2 px-4 py-2 border border-light-border dark:border-dark-border hover:border-accent-500 rounded-lg transition-colors"
+      >
+        View Cover Letter
+      </a>
+    </div>
+
     <!-- Header -->
-    <div class="mb-16 flex flex-wrap items-start justify-between gap-6">
+    <div class="mb-16 print:mb-8 flex flex-wrap items-start justify-between gap-6">
       <div>
         <h1 class="font-display text-4xl md:text-5xl font-bold mb-4">Susumu Tomita</h1>
         <p class="text-xl text-accent-500 font-medium mb-4">
@@ -313,3 +332,42 @@ const achievements = [
     </section>
   </div>
 </BaseLayout>
+
+<style>
+  @media print {
+    :global(body) {
+      background: white !important;
+      color: black !important;
+      font-size: 11px !important;
+    }
+    :global(header),
+    :global(footer),
+    :global(.print\\:hidden) {
+      display: none !important;
+    }
+    :global(.dark) {
+      color-scheme: light;
+    }
+    :global(.bg-light-surface),
+    :global(.dark .bg-dark-surface) {
+      background: white !important;
+    }
+    :global(.text-light-muted),
+    :global(.dark .text-dark-muted) {
+      color: #666 !important;
+    }
+    :global(.text-accent-500) {
+      color: #2563eb !important;
+    }
+    :global(.border-light-border),
+    :global(.dark .border-dark-border) {
+      border-color: #ddd !important;
+    }
+  }
+</style>
+
+<script>
+  document.getElementById("printBtn")?.addEventListener("click", () => {
+    window.print();
+  });
+</script>
