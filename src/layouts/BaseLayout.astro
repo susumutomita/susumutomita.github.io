@@ -1,5 +1,4 @@
 ---
-import { GoogleAnalytics } from "astro-google-analytics";
 import { SITE, LINKS } from "../lib/constants";
 import Header from "../components/global/Header.astro";
 import Footer from "../components/global/Footer.astro";
@@ -71,9 +70,6 @@ const schema = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
-
-    <!-- Google Analytics -->
-    <GoogleAnalytics id="GA_G6S8W732Q9" />
 
     <!-- Fonts - AXIS Std + Noto Sans JP (fallback) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

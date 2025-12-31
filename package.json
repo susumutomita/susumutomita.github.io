@@ -58,7 +58,6 @@
     "@studio-freight/lenis": "^1.0.42",
     "arctic": "^3.7.0",
     "astro": "^5.16.6",
-    "astro-google-analytics": "^1.0.3",
     "astro-icon": "^1.1.5",
     "astro-robots-txt": "^1.0.0",
     "autoprefixer": "^10.4.23",
