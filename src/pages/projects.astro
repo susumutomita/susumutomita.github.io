@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { LINKS } from "../lib/constants";
 
 // Status badge types
-type ProjectStatus = "merged" | "pending" | "active" | "learning" | "experimental";
+type ProjectStatus = "active" | "learning" | "experimental";
 
 interface Project {
   title: string;
@@ -14,11 +14,10 @@ interface Project {
   status?: ProjectStatus;
   highlights?: string[];
   paper?: string;
+  isContribution?: boolean;
 }
 
 const statusConfig: Record<ProjectStatus, { label: string; class: string }> = {
-  merged: { label: "Merged", class: "bg-hybrid-green/20 text-hybrid-brightGreen border-hybrid-green/30" },
-  pending: { label: "PR Open", class: "bg-hybrid-yellow/20 text-hybrid-brightYellow border-hybrid-yellow/30" },
   active: { label: "Active", class: "bg-accent-500/20 text-accent-400 border-accent-500/30" },
   learning: { label: "Learning", class: "bg-hybrid-cyan/20 text-hybrid-brightCyan border-hybrid-cyan/30" },
   experimental: { label: "Experimental", class: "bg-hybrid-magenta/20 text-hybrid-brightMagenta border-hybrid-magenta/30" },
@@ -42,13 +41,13 @@ const projects: Project[] = [
   },
   {
     title: "Slither Claude Integration",
-    description: "Proposed Claude AI integration to Slither, the leading Solidity static analyzer by Trail of Bits. Enables AI-powered vulnerability analysis for smart contracts.",
+    description: "Submitted Claude AI integration to Slither, the leading Solidity static analyzer by Trail of Bits. Enables AI-powered vulnerability analysis for smart contracts.",
     tags: ["Security", "AI", "Open Source", "Solidity"],
     github: "https://github.com/crytic/slither/pull/2842",
-    status: "pending",
+    isContribution: true,
     highlights: [
       "Pull request submitted to Trail of Bits",
-      "AI-powered vulnerability explanation",
+      "AI-powered vulnerability detection",
       "Integration with Claude API"
     ],
   },
@@ -95,14 +94,6 @@ const projects: Project[] = [
         Building things to understand how they work. From research papers to systems programming experiments.
       </p>
       <div class="flex flex-wrap gap-3 text-sm">
-        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-hybrid-green/30 bg-hybrid-green/10">
-          <span class="w-2 h-2 rounded-full bg-hybrid-brightGreen"></span>
-          Merged
-        </span>
-        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-hybrid-yellow/30 bg-hybrid-yellow/10">
-          <span class="w-2 h-2 rounded-full bg-hybrid-brightYellow"></span>
-          PR Open
-        </span>
         <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-500/30 bg-accent-500/10">
           <span class="w-2 h-2 rounded-full bg-accent-400"></span>
           Active
@@ -194,35 +185,24 @@ const projects: Project[] = [
     <!-- Open Source Contribution -->
     <section class="mb-12">
       <h2 class="font-display text-2xl font-bold mb-6 flex items-center gap-3">
-        <svg class="w-6 h-6 text-hybrid-brightYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
         </svg>
         Open Source Contributions
       </h2>
       <div class="grid gap-6">
         {
-          projects.filter(p => (p.status === "merged" || p.status === "pending") && !p.featured).map((project) => (
-            <div class={`p-6 rounded-lg border transition-colors ${
-              project.status === "merged"
-                ? "border-hybrid-green/30 bg-hybrid-green/5 hover:bg-hybrid-green/10"
-                : "border-hybrid-yellow/30 bg-hybrid-yellow/5 hover:bg-hybrid-yellow/10"
-            }`}>
+          projects.filter(p => p.isContribution && !p.featured).map((project) => (
+            <div class="p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors">
               <div class="flex items-start justify-between gap-4">
                 <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-2">
-                    <h3 class="font-display font-semibold text-lg">{project.title}</h3>
-                    {project.status && (
-                      <span class={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusConfig[project.status].class}`}>
-                        {statusConfig[project.status].label}
-                      </span>
-                    )}
-                  </div>
+                  <h3 class="font-display font-semibold text-lg mb-2">{project.title}</h3>
                   <p class="text-sm text-light-muted dark:text-dark-muted mb-4">{project.description}</p>
                   {project.highlights && (
                     <ul class="mb-4 space-y-1">
                       {project.highlights.map((highlight) => (
                         <li class="flex items-center gap-2 text-sm text-light-muted dark:text-dark-muted">
-                          <svg class={`w-3 h-3 ${project.status === "merged" ? "text-hybrid-brightGreen" : "text-hybrid-brightYellow"}`} fill="currentColor" viewBox="0 0 20 20">
+                          <svg class="w-3 h-3 text-accent-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                           </svg>
                           {highlight}
@@ -265,7 +245,7 @@ const projects: Project[] = [
       </h2>
       <div class="grid gap-6 md:grid-cols-2">
         {
-          projects.filter(p => !p.featured && p.status !== "merged").map((project) => (
+          projects.filter(p => !p.featured && !p.isContribution).map((project) => (
             <div class="p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group">
               <div class="flex items-center gap-3 mb-3">
                 <h3 class="font-display font-semibold text-lg">{project.title}</h3>
