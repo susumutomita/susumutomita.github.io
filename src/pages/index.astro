@@ -19,30 +19,61 @@ const formatDate = (date: Date) => {
     day: "numeric",
   }).format(date);
 };
+
+const stats = [
+  { value: "18+", label: "Years Experience" },
+  { value: "2,000+", label: "Engineers in CCoE" },
+  { value: "1M+", label: "IoT Devices Managed" },
+  { value: "80%+", label: "Test Automation" },
+];
+
+const featuredWork = [
+  {
+    title: "ZeroKey",
+    description: "Research paper on distributed execution model separating instruction, execution, and accountability in blockchain systems.",
+    tags: ["Research", "Blockchain", "Threshold Crypto"],
+    link: "/papers/zerokey",
+    github: "https://github.com/susumutomita/ZeroKeyCI",
+  },
+  {
+    title: "Slither + Claude AI",
+    description: "Contributed Claude AI integration to Trail of Bits' Slither, the leading Solidity static analyzer.",
+    tags: ["Open Source", "Security", "AI"],
+    link: "https://github.com/crytic/slither/pull/2842",
+  },
+];
 ---
 
 <BaseLayout>
   <!-- Hero Section -->
-  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
     <div class="space-y-6">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm">
+        Software Engineer
+      </p>
       <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-        Hi, I'm <span class="text-accent-500">Susumu Tomita</span>
+        Building the future of<br />
+        <span class="text-accent-500">Web3 & Cloud Infrastructure</span>
       </h1>
-      <p class="text-xl md:text-2xl text-light-muted dark:text-dark-muted max-w-2xl">
-        Software Engineer based in Japan, specializing in blockchain, Web3, and cloud technologies.
+      <p class="text-xl md:text-2xl text-light-muted dark:text-dark-muted max-w-3xl">
+        I'm Susumu Tomita, a Software Engineer based in Japan with 18+ years of experience.
+        I specialize in blockchain research, cloud architecture at scale, and building engineering communities.
       </p>
       <div class="flex flex-wrap gap-4 pt-4">
         <a
-          href="/about"
+          href="/projects"
           class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
         >
-          About Me
+          View Projects
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
         </a>
         <a
           href="/resume"
           class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
         >
-          View Resume
+          Download Resume
         </a>
       </div>
       <div class="flex items-center gap-4 pt-2">
@@ -112,6 +143,81 @@ const formatDate = (date: Date) => {
     </div>
   </section>
 
+  <!-- Stats Section -->
+  <section class="bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map((stat) => (
+          <div class="text-center">
+            <div class="font-display text-3xl md:text-4xl font-bold text-accent-500">
+              {stat.value}
+            </div>
+            <div class="text-sm text-light-muted dark:text-dark-muted mt-1">
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Work -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-display text-2xl md:text-3xl font-bold">Featured Work</h2>
+      <a
+        href="/projects"
+        class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        View all projects →
+      </a>
+    </div>
+    <div class="grid gap-6 md:grid-cols-2">
+      {featuredWork.map((work) => (
+        <a
+          href={work.link}
+          target={work.link.startsWith("http") ? "_blank" : undefined}
+          rel={work.link.startsWith("http") ? "noopener noreferrer" : undefined}
+          class="group block p-6 rounded-lg border-2 border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-all hover:shadow-lg"
+        >
+          <div class="flex flex-wrap gap-2 mb-3">
+            {work.tags.map((tag) => (
+              <span class="px-2 py-0.5 text-xs font-medium bg-accent-500/10 text-accent-500 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <h3 class="font-display text-xl font-bold mb-2 group-hover:text-accent-500 transition-colors">
+            {work.title}
+          </h3>
+          <p class="text-light-muted dark:text-dark-muted text-sm">
+            {work.description}
+          </p>
+          <div class="flex items-center gap-2 mt-4 text-accent-500 text-sm font-medium">
+            <span>Learn more</span>
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Companies Worked With -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-light-border dark:border-dark-border">
+    <p class="text-center text-sm text-light-muted dark:text-dark-muted mb-6">
+      Trusted by leading companies
+    </p>
+    <div class="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-60">
+      <span class="font-display text-lg font-semibold">DENSO</span>
+      <span class="font-display text-lg font-semibold">Hitachi</span>
+      <span class="font-display text-lg font-semibold">WHILL</span>
+      <span class="font-display text-lg font-semibold">Logomix</span>
+      <span class="font-display text-lg font-semibold">MynaWallet</span>
+    </div>
+  </section>
+
   <!-- Recent Blog Posts -->
   <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-light-border dark:border-dark-border">
     <div class="flex items-center justify-between mb-8">
@@ -147,49 +253,78 @@ const formatDate = (date: Date) => {
 
   <!-- Quick Links -->
   <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-light-border dark:border-dark-border">
+    <h2 class="font-display text-2xl md:text-3xl font-bold mb-8 text-center">Explore More</h2>
     <div class="grid gap-6 md:grid-cols-3">
       <a
-        href="/projects"
-        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
-      >
-        <div class="flex items-center gap-3">
-          <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-          </svg>
-          <h3 class="font-display font-semibold text-lg">Projects</h3>
-        </div>
-        <p class="mt-2 text-sm text-light-muted dark:text-dark-muted">
-          Open source projects and experiments
-        </p>
-      </a>
-      <a
         href="/papers"
-        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
+        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors text-center"
       >
-        <div class="flex items-center gap-3">
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-accent-500/10 flex items-center justify-center">
           <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <h3 class="font-display font-semibold text-lg">Papers</h3>
         </div>
-        <p class="mt-2 text-sm text-light-muted dark:text-dark-muted">
-          Research papers and technical writings
+        <h3 class="font-display font-semibold text-lg mb-2">Research Papers</h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          Academic research on blockchain and distributed systems
+        </p>
+      </a>
+      <a
+        href="/about"
+        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors text-center"
+      >
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-accent-500/10 flex items-center justify-center">
+          <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">About Me</h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          Skills, experience, and professional background
         </p>
       </a>
       <a
         href="/travel"
-        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
+        class="group p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors text-center"
       >
-        <div class="flex items-center gap-3">
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-accent-500/10 flex items-center justify-center">
           <svg class="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h3 class="font-display font-semibold text-lg">Travel</h3>
         </div>
-        <p class="mt-2 text-sm text-light-muted dark:text-dark-muted">
-          Countries I've visited around the world
+        <h3 class="font-display font-semibold text-lg mb-2">Travel Map</h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          Interactive 3D globe of countries I've visited
         </p>
       </a>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 text-center">
+      <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">Let's Build Something Together</h2>
+      <p class="text-light-muted dark:text-dark-muted mb-6 max-w-xl mx-auto">
+        I'm always interested in new opportunities, collaborations, and challenging projects.
+        Feel free to reach out!
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href={`mailto:${LINKS.email}`}
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Get in Touch
+        </a>
+        <a
+          href="/cover-letter"
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          View Cover Letter
+        </a>
+      </div>
     </div>
   </section>
 </BaseLayout>

@@ -1,0 +1,59 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#1d2528"/>
+
+  <!-- Gradient overlay -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#81a2be;stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:#5e8d87;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#85678f;stop-opacity:0.1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#81a2be" />
+      <stop offset="100%" style="stop-color:#5e8d87" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grad1)"/>
+
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="200" fill="#81a2be" fill-opacity="0.03"/>
+  <circle cx="1100" cy="530" r="250" fill="#85678f" fill-opacity="0.03"/>
+
+  <!-- Border accent -->
+  <rect x="40" y="40" width="1120" height="550" rx="8" stroke="url(#accent)" stroke-width="2" fill="none" stroke-opacity="0.3"/>
+
+  <!-- Content -->
+  <text x="100" y="200" fill="#c5c8c6" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="500" letter-spacing="2">
+    SOFTWARE ARCHITECT
+  </text>
+
+  <text x="100" y="300" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700">
+    Susumu Tomita
+  </text>
+
+  <text x="100" y="380" fill="#6c7a80" font-family="system-ui, -apple-system, sans-serif" font-size="28">
+    Cloud Infrastructure | Blockchain | Quality Engineering
+  </text>
+
+  <!-- Stats -->
+  <g transform="translate(100, 450)">
+    <text fill="#81a2be" font-family="system-ui, sans-serif" font-size="36" font-weight="700">18+</text>
+    <text fill="#6c7a80" font-family="system-ui, sans-serif" font-size="16" y="30">Years</text>
+  </g>
+
+  <g transform="translate(280, 450)">
+    <text fill="#81a2be" font-family="system-ui, sans-serif" font-size="36" font-weight="700">2,000+</text>
+    <text fill="#6c7a80" font-family="system-ui, sans-serif" font-size="16" y="30">Engineers</text>
+  </g>
+
+  <g transform="translate(500, 450)">
+    <text fill="#81a2be" font-family="system-ui, sans-serif" font-size="36" font-weight="700">1M+</text>
+    <text fill="#6c7a80" font-family="system-ui, sans-serif" font-size="16" y="30">IoT Devices</text>
+  </g>
+
+  <!-- URL -->
+  <text x="1100" y="560" fill="#6c7a80" font-family="system-ui, sans-serif" font-size="20" text-anchor="end">
+    susumutomita.github.io
+  </text>
+</svg>
