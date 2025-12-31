@@ -1,0 +1,139 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { LINKS } from "../lib/constants";
+
+const currentDate = new Date().toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<BaseLayout
+  title="Cover Letter - Susumu Tomita"
+  description="Cover letter of Susumu Tomita - Software Architect & Cloud Engineer"
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 print:py-8 print:px-0">
+    <!-- Print Button -->
+    <div class="mb-8 flex justify-end gap-3 print:hidden">
+      <button
+        id="printBtn"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        Download PDF
+      </button>
+      <a
+        href="/resume"
+        class="inline-flex items-center gap-2 px-4 py-2 border border-light-border dark:border-dark-border hover:border-accent-500 rounded-lg transition-colors"
+      >
+        View Resume
+      </a>
+    </div>
+
+    <!-- Letter Content -->
+    <div class="bg-white dark:bg-dark-surface print:bg-white p-8 md:p-12 rounded-lg border border-light-border dark:border-dark-border print:border-0 print:p-0">
+      <!-- Header -->
+      <div class="mb-8 print:mb-6">
+        <h1 class="font-display text-2xl md:text-3xl font-bold mb-2 print:text-black">Susumu Tomita</h1>
+        <p class="text-light-muted dark:text-dark-muted print:text-gray-600">
+          Software Architect / Cloud Lead Engineer
+        </p>
+        <div class="flex flex-wrap gap-4 mt-3 text-sm text-light-muted dark:text-dark-muted print:text-gray-600">
+          <span>Tokyo, Japan</span>
+          <span>•</span>
+          <a href={`mailto:${LINKS.email}`} class="hover:text-accent-500">{LINKS.email}</a>
+          <span>•</span>
+          <a href={LINKS.linkedin} class="hover:text-accent-500">LinkedIn</a>
+          <span>•</span>
+          <a href={LINKS.github} class="hover:text-accent-500">GitHub</a>
+        </div>
+      </div>
+
+      <!-- Date -->
+      <p class="mb-8 text-light-muted dark:text-dark-muted print:text-gray-600 print:mb-6">
+        {currentDate}
+      </p>
+
+      <!-- Greeting -->
+      <p class="mb-6 print:text-black">Dear Hiring Manager,</p>
+
+      <!-- Body -->
+      <div class="space-y-4 text-light-text dark:text-dark-text print:text-black leading-relaxed">
+        <p>
+          I am writing to express my strong interest in contributing to your organization as a Software Architect and Cloud Engineer.
+          With over 18 years of experience spanning QA automation, cloud infrastructure, and engineering leadership,
+          I bring a unique perspective that bridges technical excellence with team enablement.
+        </p>
+
+        <p>
+          Throughout my career at Hitachi, DENSO, and various startups, I have consistently delivered impact:
+        </p>
+
+        <ul class="list-disc pl-6 space-y-2">
+          <li>
+            <strong>Cloud Architecture at Scale:</strong> Designed and operated AWS infrastructure for IoT services managing 100K-1M connected devices,
+            achieving high availability for mission-critical automotive applications.
+          </li>
+          <li>
+            <strong>Engineering Culture:</strong> Founded the Cloud Tech Friends (CCoE) community with 2,000+ engineers across DENSO Group,
+            driving cloud adoption and knowledge sharing at enterprise scale.
+          </li>
+          <li>
+            <strong>Quality Engineering:</strong> Built test automation frameworks achieving 80%+ coverage,
+            reducing regression cycles from days to hours while maintaining quality for systems used in banking ATMs and railway IC cards.
+          </li>
+          <li>
+            <strong>Innovation:</strong> Currently working on Web3 infrastructure using Japan's JPKI (Public Key Infrastructure)
+            and lab automation systems for regenerative medicine research.
+          </li>
+        </ul>
+
+        <p>
+          What sets me apart is my ability to see the full picture—from writing robust code to designing scalable systems to fostering team growth.
+          I am passionate about creating environments where engineers can do their best work, whether through better tooling, clearer processes, or hands-on mentorship.
+        </p>
+
+        <p>
+          I am particularly drawn to organizations that value engineering excellence and continuous improvement.
+          I would welcome the opportunity to discuss how my experience in cloud architecture, DevOps practices, and team leadership could contribute to your team's success.
+        </p>
+
+        <p>
+          Thank you for considering my application. I look forward to the possibility of speaking with you.
+        </p>
+      </div>
+
+      <!-- Closing -->
+      <div class="mt-8 print:mt-6">
+        <p class="mb-4 print:text-black">Best regards,</p>
+        <p class="font-display font-semibold text-lg print:text-black">Susumu Tomita</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  @media print {
+    :global(body) {
+      background: white !important;
+      color: black !important;
+    }
+    :global(header),
+    :global(footer),
+    :global(.print\\:hidden) {
+      display: none !important;
+    }
+    :global(.dark) {
+      color-scheme: light;
+    }
+  }
+</style>
+
+<script>
+  document.getElementById("printBtn")?.addEventListener("click", () => {
+    window.print();
+  });
+</script>
