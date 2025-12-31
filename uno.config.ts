@@ -1,5 +1,5 @@
 // uno.config.ts
-import { defineConfig, presetWebFonts } from "unocss";
+import { defineConfig } from "unocss";
 import { presetWind4 } from "@unocss/preset-wind4";
 
 export default defineConfig({
@@ -110,12 +110,5 @@ export default defineConfig({
   },
   presets: [
     presetWind4() as any,
-    presetWebFonts({
-      provider: "fontshare",
-      fonts: {
-        sans: ["Cabinet Grotesk", "Satoshi"],
-        serif: "Zodiak",
-      },
-    }),
   ],
 });
