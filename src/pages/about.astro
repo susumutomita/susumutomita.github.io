@@ -7,20 +7,52 @@ const skills = [
   { category: "Cloud & DevOps", items: ["AWS", "GCP", "Terraform", "Docker", "Kubernetes", "CI/CD"] },
   { category: "Backend", items: ["Python", "Go", "Node.js", "TypeScript", "REST APIs", "GraphQL"] },
   { category: "Frontend", items: ["React", "Next.js", "Astro", "Tailwind CSS", "TypeScript"] },
+  { category: "QA & Test Automation", items: ["JUnit", "Selenium", "TestNG", "REST Assured", "Test Planning"] },
+  { category: "AI & Tools", items: ["Claude", "ChatGPT", "Amazon Q", "Amazon Bedrock", "Slack Automation"] },
 ];
 
 const experiences = [
   {
     company: "DENSO Corporation",
-    role: "Software Engineer",
-    period: "Current",
-    description: "Working on automotive software and cloud infrastructure projects.",
+    role: "Agile Coach (Contract)",
+    period: "2025.1 - Present",
+    description: "Supporting agile transformation and engineering culture improvement across development teams.",
   },
   {
-    company: "Freelance",
-    role: "Blockchain Developer",
-    period: "Ongoing",
-    description: "Building Web3 applications, smart contracts, and DeFi protocols.",
+    company: "DENSO Corporation",
+    role: "Software Architect / Cloud Lead Engineer",
+    period: "2018.10 - 2024.12",
+    description: "First certified Cloud/IT Software Architect under DENSO's \"Software Sommelier\" program. Designed AWS infrastructure for IoT services managing 100K-1M devices. Founded Cloud Tech Friends (CCoE) community with 2,000+ engineers.",
+  },
+  {
+    company: "Logomix Inc.",
+    role: "Software Engineer (Lab Automation / SRE)",
+    period: "2025.6 - Present",
+    description: "Building fully automated iPS cell cultivation system. Integrating Hamilton STAR liquid handling robots with incubators and observation devices. Implementing SRE practices.",
+  },
+  {
+    company: "MynaWallet Inc.",
+    role: "Software Engineer (Web3 / Infrastructure)",
+    period: "2025.8 - Present",
+    description: "Infrastructure design and security audit for Web3 wallet using Japan's JPKI. Built cloud architecture for cryptographic signing and authentication.",
+  },
+  {
+    company: "WHILL Inc.",
+    role: "Software Engineer (Mobility Platform)",
+    period: "2021.9 - 2022.4",
+    description: "Developed cloud application for wheelchair sharing service. Built real-time data pipeline using SORACOM and AWS.",
+  },
+  {
+    company: "Hitachi Vantara",
+    role: "Specialist Software QA / Automation Engineer",
+    period: "2017.2 - 2018.8",
+    description: "QA and test automation for Lumada IoT platform. Led proof-of-concept connecting Lumada with industrial printers.",
+  },
+  {
+    company: "Hitachi, Ltd.",
+    role: "QA Engineer / Technical Lead",
+    period: "2006.4 - 2017.1",
+    description: "QA for JP1 Performance Management used in mission-critical systems (banking ATMs, railway IC cards). Principal QA at Hitachi Data Systems with 80%+ test automation.",
   },
 ];
 ---
@@ -81,6 +113,41 @@ const experiences = [
       </div>
     </section>
 
+    <!-- Technical Writing -->
+    <section class="mb-16">
+      <h2 class="font-display text-2xl font-bold mb-8">Technical Writing</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <a
+          href={LINKS.zenn}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group"
+        >
+          <div class="flex items-center gap-3 mb-2">
+            <svg class="w-6 h-6 text-accent-500" viewBox="0 0 88.3 88.3" fill="currentColor">
+              <path d="M2.4 83.3h17c.9 0 1.7-.5 2.2-1.2L68.4 5.2c.6-1-.1-2.2-1.3-2.2H51.6c-.8 0-1.5.4-1.9 1.1L2.1 81.5c-.4.8.1 1.8 1 1.8h-.7zm56.2 0h15.5c.6 0 1.2-.3 1.5-.9l10.2-18.5c.5-.9-.1-2-1.2-2H69.5c-.6 0-1.1.3-1.4.8L57.2 81.5c-.5.8.1 1.8 1 1.8h.4z"/>
+            </svg>
+            <h3 class="font-display font-semibold text-lg group-hover:text-accent-500 transition-colors">Zenn</h3>
+          </div>
+          <p class="text-sm text-light-muted dark:text-dark-muted">Technical articles and tutorials in Japanese</p>
+        </a>
+        <a
+          href={LINKS.qiita}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group"
+        >
+          <div class="flex items-center gap-3 mb-2">
+            <svg class="w-6 h-6 text-accent-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.824a9.176 9.176 0 110 18.352 9.176 9.176 0 010-18.352zm3.528 4.235a3.529 3.529 0 00-6.588 1.765 3.529 3.529 0 003.06 3.498V16.94h1.176v-4.618a3.53 3.53 0 002.352-5.263z"/>
+            </svg>
+            <h3 class="font-display font-semibold text-lg group-hover:text-accent-500 transition-colors">Qiita</h3>
+          </div>
+          <p class="text-sm text-light-muted dark:text-dark-muted">Technical articles on programming and development</p>
+        </a>
+      </div>
+    </section>
+
     <!-- Contact CTA -->
     <section class="p-8 rounded-lg border border-light-border dark:border-dark-border text-center">
       <h2 class="font-display text-2xl font-bold mb-4">Let's Connect</h2>
@@ -88,7 +155,7 @@ const experiences = [
         I'm always interested in new opportunities and collaborations.
         Feel free to reach out through any of these platforms.
       </p>
-      <div class="flex justify-center gap-4">
+      <div class="flex flex-wrap justify-center gap-4">
         <a
           href={LINKS.github}
           target="_blank"
@@ -115,6 +182,15 @@ const experiences = [
             ></path>
           </svg>
           LinkedIn
+        </a>
+        <a
+          href={`mailto:${LINKS.email}`}
+          class="inline-flex items-center gap-2 px-6 py-3 bg-accent-500 text-white hover:bg-accent-600 font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Contact Me
         </a>
       </div>
     </section>

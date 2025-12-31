@@ -3,6 +3,9 @@ export const LINKS = {
   linkedin: "https://www.linkedin.com/in/susumutomita/",
   x: "https://twitter.com/tonitoni415",
   findy: "https://findy-code.io/share_profiles/534Wg0z099ZcD",
+  email: "oyster880@gmail.com",
+  zenn: "https://zenn.dev/bull",
+  qiita: "https://qiita.com/tonitoni415",
 };
 
 export const NAV_LINKS = [
@@ -12,6 +15,7 @@ export const NAV_LINKS = [
   { href: "/papers", label: "Papers" },
   { href: "/blog", label: "Blog" },
   { href: "/resume", label: "Resume" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
 export const SITE = {
