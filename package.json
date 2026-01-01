@@ -55,7 +55,7 @@
     "@astrojs/sitemap": "^3.6.0",
     "@astrojs/solid-js": "^5.1.3",
     "@astrojs/svelte": "^7.2.4",
-    "@iconify-json/ri": "^1.2.6",
+    "@iconify-json/ri": "^1.2.7",
     "@rive-app/canvas": "^2.33.1",
     "@studio-freight/lenis": "^1.0.42",
     "arctic": "^3.7.0",
