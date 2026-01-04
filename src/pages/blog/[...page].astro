@@ -1,12 +1,28 @@
 ---
+import type { GetStaticPaths, Page } from "astro";
+import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Pagination from "../../components/Pagination.astro";
+import { POSTS_PER_PAGE } from "../../lib/constants";
 
-const posts = (await getCollection("blog"))?.sort(
-  (blogEntryA, blogEntryB) =>
-    (blogEntryB.data.pubDate || new Date()).getTime() -
-    (blogEntryA.data.pubDate || new Date()).getTime(),
-);
+export const prerender = true;
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = (await getCollection("blog"))?.sort(
+    (blogEntryA, blogEntryB) =>
+      (blogEntryB.data.pubDate || new Date()).getTime() -
+      (blogEntryA.data.pubDate || new Date()).getTime(),
+  );
+
+  return paginate(posts, { pageSize: POSTS_PER_PAGE });
+}) satisfies GetStaticPaths;
+
+type Props = {
+  page: Page<CollectionEntry<"blog">>;
+};
+
+const { page } = Astro.props;
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("ja-JP", {
@@ -15,25 +31,34 @@ const formatDate = (date: Date) => {
     day: "numeric",
   }).format(date);
 };
+
+// SEO: Add page number to title and description for pages > 1
+const pageTitle =
+  page.currentPage === 1
+    ? "Blog - Susumu Tomita"
+    : `Blog - Page ${page.currentPage} - Susumu Tomita`;
+
+const pageDescription =
+  page.currentPage === 1
+    ? "Blog posts about blockchain, Web3, cloud technologies, and software engineering."
+    : `Blog posts about blockchain, Web3, cloud technologies, and software engineering. Page ${page.currentPage} of ${page.lastPage}.`;
 ---
 
-<BaseLayout
-  title="Blog - Susumu Tomita"
-  description="Blog posts about blockchain, Web3, cloud technologies, and software engineering."
->
+<BaseLayout title={pageTitle} description={pageDescription}>
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
     <!-- Header -->
     <div class="mb-12">
       <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">Blog</h1>
       <p class="text-lg text-light-muted dark:text-dark-muted max-w-3xl">
-        Thoughts on blockchain, Web3, cloud technologies, and software engineering.
+        Thoughts on blockchain, Web3, cloud technologies, and software
+        engineering.
       </p>
     </div>
 
     <!-- Posts List -->
     <div class="space-y-6">
       {
-        posts?.map((post) => (
+        page.data.map((post) => (
           <a
             href={`/blog/${post.slug}`}
             class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group"
@@ -60,6 +85,14 @@ const formatDate = (date: Date) => {
         ))
       }
     </div>
+
+    <!-- Pagination -->
+    <Pagination
+      currentPage={page.currentPage}
+      totalPages={page.lastPage}
+      prevUrl={page.url.prev}
+      nextUrl={page.url.next}
+    />
   </div>
 </BaseLayout>
 

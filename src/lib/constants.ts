@@ -30,3 +30,6 @@ export const loaderAnimation: [string, Record<string, unknown>, Record<string, u
   { opacity: [1, 0], pointerEvents: "none" },
   { easing: "ease-out" },
 ];
+
+// Blog pagination
+export const POSTS_PER_PAGE = 10;
