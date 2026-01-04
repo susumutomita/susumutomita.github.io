@@ -1,12 +1,19 @@
 ---
+import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const posts = (await getCollection("blog"))?.sort(
-  (blogEntryA, blogEntryB) =>
-    (blogEntryB.data.pubDate || new Date()).getTime() -
-    (blogEntryA.data.pubDate || new Date()).getTime(),
-);
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = (await getCollection("blog"))?.sort(
+    (blogEntryA, blogEntryB) =>
+      (blogEntryB.data.pubDate || new Date()).getTime() -
+      (blogEntryA.data.pubDate || new Date()).getTime(),
+  );
+
+  return paginate(posts, { pageSize: 10 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("ja-JP", {
@@ -33,7 +40,7 @@ const formatDate = (date: Date) => {
     <!-- Posts List -->
     <div class="space-y-6">
       {
-        posts?.map((post) => (
+        page.data.map((post) => (
           <a
             href={`/blog/${post.slug}`}
             class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group"
@@ -60,6 +67,50 @@ const formatDate = (date: Date) => {
         ))
       }
     </div>
+
+    <!-- Pagination -->
+    {
+      (page.lastPage > 1) && (
+        <nav class="flex justify-center items-center gap-2 mt-12" aria-label="ページネーション">
+          {page.url.prev && (
+            <a
+              href={page.url.prev}
+              class="px-4 py-2 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
+              aria-label="前のページ"
+            >
+              ← 前へ
+            </a>
+          )}
+
+          <div class="flex items-center gap-2">
+            {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((num) => (
+              <a
+                href={num === 1 ? "/blog" : `/blog/${num}`}
+                class={`px-3 py-2 rounded-lg transition-colors ${
+                  num === page.currentPage
+                    ? "bg-accent-500 text-white font-semibold"
+                    : "border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500"
+                }`}
+                aria-label={`ページ ${num}`}
+                aria-current={num === page.currentPage ? "page" : undefined}
+              >
+                {num}
+              </a>
+            ))}
+          </div>
+
+          {page.url.next && (
+            <a
+              href={page.url.next}
+              class="px-4 py-2 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
+              aria-label="次のページ"
+            >
+              次へ →
+            </a>
+          )}
+        </nav>
+      )
+    }
   </div>
 </BaseLayout>
 
