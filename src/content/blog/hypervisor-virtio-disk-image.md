@@ -34,9 +34,10 @@ pub struct DeviceTreeConfig {
 }
 ```
 
-デフォルト設定:
-- `virtio_base`: 0x0a00_0000
-- `cmdline`: "console=ttyAMA0 root=/dev/vda rw"
+デフォルト設定。
+
+- `virtio_base`: `0x0a000000`
+- `cmdline`: `"console=ttyAMA0 root=/dev/vda rw"`
 
 ### VirtIO Block ノードの生成
 
@@ -59,7 +60,7 @@ pub fn generate_device_tree(config: &DeviceTreeConfig) -> Result<Vec<u8>, Box<dy
 }
 ```
 
-生成される Device Tree ノード（DTS 形式）:
+生成される Device Tree ノード（DTS 形式）。
 
 ```dts
 virtio_block@a000000 {
@@ -69,7 +70,7 @@ virtio_block@a000000 {
 };
 ```
 
-このノードにより、Linux カーネルの VirtIO ドライバーが MMIO アドレス 0x0a00_0000 で VirtIO Block デバイスを検出できるようになります。
+このノードにより、Linux カーネルの VirtIO ドライバーが MMIO アドレス `0x0a000000` で VirtIO Block デバイスを検出できるようになります。
 
 ### カーネルコマンドラインの更新
 
