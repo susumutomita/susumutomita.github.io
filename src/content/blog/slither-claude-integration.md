@@ -167,15 +167,33 @@ which are non-deterministic and need credentials. This is consistent with
 the existing Codex detector which also lacks e2e tests.
 ```
 
+## 結果：PRはリジェクトされた
+
+2026 年 1 月 5 日、Trail of Bits のメンテナーから以下のフィードバックがあり、PR はクローズされた。
+
+> Hi, thanks for the PR, however we think that using an LLM to find vulnerabilities with a simple prompt is not the way to go for Slither at least at the moment. We are also removing the codex detector #2853
+
+**リジェクトの理由：**
+
+- LLM を使ったシンプルなプロンプトでの脆弱性検出は、現時点で Slither の方向性に合わない
+- 既存の`--codex`オプション（OpenAI Codex detector）も[PR #2853](https://github.com/crytic/slither/pull/2853)で削除される予定
+
+これは技術的な問題ではなく、プロジェクトの方向性に関する判断だ。Slither チームは静的解析に注力しており、LLM ベースの検出は別のアプローチが必要と考えているようだ。
+
+### 学び
+
+1. **OSSへのコントリビューションは結果だけではない** - PR がマージされなくても、実装を通じて多くを学べた
+2. **プロジェクトの方向性を理解する重要性** - 事前にメンテナーと議論するか、Issue で確認するのがベターだった
+3. **コードは残る** - フォーク版は引き続き使える。必要な人は[susumutomita/slither](https://github.com/susumutomita/slither/tree/feat/claude-detector)から利用可能
+
 ## まとめ
 
 - Slither の`--codex`は OpenAI API が必要でコストがかかる
 - Shannon と同じ仕組みで`CLAUDE_CODE_OAUTH_TOKEN`を使えば、Claude Code MAX 契約者は API コストなしで AI 分析が可能
-- **実際に PR #2842 として Trail of Bits に提出した**
+- **PR #2842 として Trail of Bits に提出したが、プロジェクトの方向性に合わないためリジェクトされた**
+- **既存のCodex detectorも削除される予定**
 
-Claude Code MAX を契約している人にとっては、追加コストなしで AI セキュリティ分析ができるのは大きなメリットだ。
-
-PR がマージされるかはレビュー次第だが、OSS へのコントリビューションとして第一歩を踏み出せた。
+PR はマージされなかったが、OSS へのコントリビューションを試みる過程で、Slither の内部構造や Python での静的解析ツールの実装について深く学ぶことができた。フォーク版は引き続き利用可能なので、個人的なプロジェクトでは活用していく。
 
 ## 関連リンク
 
