@@ -1,7 +1,7 @@
 ---
 title: "GPT-2 miniを自作して学ぶTransformerの仕組み - 壊して観測して理解する"
 description: "nn.Transformerを使わずにAttention、MLP、LayerNorm、Residualを自前で実装し、各コンポーネントを無効化する実験を通じてTransformerがなぜ動くのかを理解する"
-pubDate: 2025-01-07
+pubDate: 2026-01-07
 category: "engineering"
 ---
 

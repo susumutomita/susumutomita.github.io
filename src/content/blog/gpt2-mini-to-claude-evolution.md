@@ -1,7 +1,7 @@
 ---
 title: "自作GPT-2 miniを動かして気づいた - これがClaudeのご先祖様"
 description: "400行のPythonコードで実装したGPT-2 miniが文章を生成する瞬間、現代のLLMとの繋がりを実感した"
-pubDate: 2025-01-07
+pubDate: 2026-01-07
 category: "engineering"
 ---
 
