@@ -7,6 +7,8 @@ import icon from "astro-icon";
 
 import solidJs from "@astrojs/solid-js";
 import { remarkReadingTime } from "./src/lib/ remark-reading-time.mjs";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 import svelte from "@astrojs/svelte";
 
@@ -27,7 +29,8 @@ export default defineConfig({
 		svelte(),
 	],
 	markdown: {
-		remarkPlugins: [remarkReadingTime],
+		remarkPlugins: [remarkReadingTime, remarkMath],
+		rehypePlugins: [rehypeKatex],
 	},
 	output: "server",
 	adapter: netlify({ edgeMiddleware: true }),

@@ -68,6 +68,8 @@
     "mdast-util-to-string": "^4.0.0",
     "motion": "^12.23.26",
     "reading-time": "^1.5.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "solid-js": "^1.9.10",
     "svelte": "^5.46.1",
     "typescript": "^5.9.3"

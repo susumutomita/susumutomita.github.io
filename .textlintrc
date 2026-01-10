@@ -1,5 +1,12 @@
 {
-  "filters": {},
+  "filters": {
+    "allowlist": {
+      "allow": [
+        "/\\$\\$[\\s\\S]*?\\$\\$/",
+        "/\\$[^$]+\\$/"
+      ]
+    }
+  },
   "rules": {
     "preset-ja-spacing": {
       "ja-space-between-half-and-full-width": {
