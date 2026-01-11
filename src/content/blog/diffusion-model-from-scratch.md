@@ -47,59 +47,89 @@ category: "engineering"
 
 ### Forward Process（拡散過程）
 
-元画像 x₀ に徐々にガウスノイズを加えていく。
+元画像 $x_0$ に徐々にガウスノイズを加えていく過程を定式化する。以下の式がこの過程を表す。
 
-```
-q(xₜ | xₜ₋₁) = N(xₜ; √(1-βₜ) xₜ₋₁, βₜI)
-```
+$$
+q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t} \, x_{t-1}, \beta_t I)
+$$
 
-ここで βₜ はノイズスケジュールで、時刻 t でどれだけノイズを加えるかを制御する。
+この式が意味することを分解して説明する。
 
-重要な性質として、任意の時刻 t のサンプルを x₀ から直接計算できる。
+- $x_t$：時刻 $t$ における画像（ノイズが加わった状態）
+- $x_{t-1}$：1 ステップ前の画像
+- $\beta_t$：**ノイズスケジュール**。時刻 $t$ でどれだけノイズを加えるかを制御するパラメータ（0 から 1 の間の値）
+- $\sqrt{1-\beta_t}$：元の画像をどれだけ残すかの係数。$\beta_t$ が大きいほど元画像の情報が失われる
+- $\mathcal{N}(\cdot; \mu, \sigma^2 I)$：平均 $\mu$、分散 $\sigma^2$ のガウス分布
 
-```
-q(xₜ | x₀) = N(xₜ; √ᾱₜ x₀, (1-ᾱₜ)I)
-```
+直感的には、「元画像を少し薄めて、ランダムなノイズを少し足す」という操作を繰り返している。
 
-ここで αₜ = 1 - βₜ、ᾱₜ = ∏ᵢ₌₁ᵗ αᵢ（累積積）。
+#### 直接サンプリングの公式
 
-これは以下のように書き換えられる。
+重要な性質として、任意の時刻 $t$ のサンプルを $x_0$ から直接計算できる。これにより、毎回 1 ステップずつ計算する必要がなくなる。
 
-```
-xₜ = √ᾱₜ x₀ + √(1-ᾱₜ) ε,  ε ~ N(0, I)
-```
+$$
+q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} \, x_0, (1-\bar{\alpha}_t) I)
+$$
+
+ここで使われる記号の定義は以下の通り。
+
+- $\alpha_t = 1 - \beta_t$：1 ステップで元画像が残る割合
+- $\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i$：時刻 1 から $t$ までの累積積。$t$ が大きいほど小さくなる（元画像の情報がどんどん失われる）
+
+この式は、実装上非常に便利な形に書き換えられる。
+
+$$
+x_t = \sqrt{\bar{\alpha}_t} \, x_0 + \sqrt{1-\bar{\alpha}_t} \, \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)
+$$
+
+この式の意味は明快である。時刻 $t$ の画像は「元画像 $x_0$ を $\sqrt{\bar{\alpha}_t}$ 倍に薄めたもの」と「純粋なノイズ $\epsilon$ を $\sqrt{1-\bar{\alpha}_t}$ 倍したもの」の和である。$t$ が大きくなるほど元画像の寄与が減り、ノイズの寄与が増える。
 
 ### Reverse Process（逆拡散過程）
 
-ノイズ画像 xₜ から元画像 x₀ を復元する。真の逆過程 q(xₜ₋₁|xₜ, x₀) は解析的に求まる。
+ノイズ画像 $x_t$ から元画像 $x_0$ を復元する過程である。真の逆過程 $q(x_{t-1}|x_t, x_0)$ は解析的に求まる。
 
-```
-q(xₜ₋₁ | xₜ, x₀) = N(xₜ₋₁; μ̃ₜ(xₜ, x₀), β̃ₜI)
-```
+$$
+q(x_{t-1} | x_t, x_0) = \mathcal{N}(x_{t-1}; \tilde{\mu}_t(x_t, x_0), \tilde{\beta}_t I)
+$$
 
-しかし生成時には x₀ は未知なので、ニューラルネットワークで近似する。
+- $\tilde{\mu}_t$：真の平均。$x_t$ と $x_0$ から計算できる
+- $\tilde{\beta}_t$：真の分散。$\beta_t$ から導出される
 
-```
-pθ(xₜ₋₁ | xₜ) = N(xₜ₋₁; μθ(xₜ, t), σₜ²I)
-```
+しかし生成時には $x_0$ は未知である（まさにこれを生成したい）。そこでニューラルネットワーク $\theta$ で近似する。
+
+$$
+p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \sigma_t^2 I)
+$$
+
+- $\mu_\theta(x_t, t)$：ネットワークが予測する平均
+- $\sigma_t^2$：分散（固定値を使用することが多い）
 
 ### 学習目的関数
 
-DDPM の核心的な洞察は、「ノイズ ε を予測する」ことで μθ を間接的に学習できること。
+DDPM の核心的な洞察は、「ノイズ $\epsilon$ を予測する」ことで $\mu_\theta$ を間接的に学習できることである。損失関数は以下のシンプルな形になる。
 
-```
-L = E[||ε - εθ(xₜ, t)||²]
-```
+$$
+L = \mathbb{E}_{x_0, \epsilon, t}\left[\|\epsilon - \epsilon_\theta(x_t, t)\|^2\right]
+$$
 
-つまり、ノイズ画像 xₜ と時刻 t を入力として、加えられたノイズ ε を予測するネットワーク εθ を学習する。
+この式の各要素の意味は以下の通り。
+
+- $\epsilon$：Forward Process で実際に加えたノイズ（正解ラベル）
+- $\epsilon_\theta(x_t, t)$：ネットワークが予測するノイズ
+- $\|\cdot\|^2$：二乗誤差（MSE）
+- $\mathbb{E}$：全てのサンプル、ノイズ、時刻について期待値を取る
+
+つまり、ノイズ画像 $x_t$ と時刻 $t$ を入力として、加えられたノイズ $\epsilon$ を予測するネットワーク $\epsilon_\theta$ を学習する。
 
 これは直感的にも理解しやすい。「この画像にはどんなノイズが乗っているか」を予測できれば、そのノイズを引けば元画像に近づく。
 
 ## ノイズスケジュール
 
+ノイズスケジュール $\beta_t$ は拡散モデルの性能に大きく影響する。どのようにノイズを加えていくかで、生成品質が変わる。
+
 ### Linear Schedule
 
-最も単純なスケジュール。β を β₁ = 10⁻⁴ から βT = 0.02 まで線形に増加させる。
+最も単純なスケジュールである。$\beta_t$ を $\beta_1 = 10^{-4}$ から $\beta_T = 0.02$ まで線形に増加させる。
 
 ```python
 betas = torch.linspace(1e-4, 0.02, timesteps)
@@ -107,7 +137,7 @@ betas = torch.linspace(1e-4, 0.02, timesteps)
 
 ### Cosine Schedule
 
-"Improved DDPM" 論文で提案された。ᾱₜ が滑らかに減少するよう設計されている。
+"Improved DDPM" 論文で提案されたスケジュールである。$\bar{\alpha}_t$ が滑らかに減少するよう設計されている。
 
 ```python
 s = 0.008
@@ -209,6 +239,8 @@ class SinusoidalPositionEmbedding(nn.Module):
 
 ### 学習ループ
 
+学習ループは先述の数式を直接コードに落とし込んだものである。特に重要なのは Forward Process の実装で、$x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon$ をそのまま実装している。
+
 ```python
 for step in range(steps):
     # 1. バッチ取得
@@ -220,13 +252,13 @@ for step in range(steps):
     # 3. ノイズを生成
     noise = torch.randn_like(x_0)
 
-    # 4. Forward process: x_0 → x_t
+    # 4. Forward process: x_t = √ᾱₜ x₀ + √(1-ᾱₜ) ε
     x_t = sqrt_alpha_bar[t] * x_0 + sqrt_one_minus_alpha_bar[t] * noise
 
     # 5. ノイズを予測
     predicted_noise = model(x_t, t)
 
-    # 6. 損失計算（MSE）
+    # 6. 損失計算（MSE）: L = ||ε - εθ(xₜ, t)||²
     loss = F.mse_loss(predicted_noise, noise)
 
     # 7. 逆伝播
@@ -235,6 +267,12 @@ for step in range(steps):
 ```
 
 ### サンプリング（生成）
+
+生成時は Reverse Process を実行する。ネットワークが予測したノイズ $\epsilon_\theta$ から、次のステップの平均 $\mu$ を計算する。以下の式に基づく。
+
+$$
+\mu_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}} \epsilon_\theta(x_t, t) \right)
+$$
 
 ```python
 def sample(model, timesteps):
@@ -246,15 +284,17 @@ def sample(model, timesteps):
         # ノイズを予測
         predicted_noise = model(x, t)
 
-        # x_{t-1} を計算
+        # 上記の式に基づいて x_{t-1} の平均を計算
         mean = (1 / sqrt_alpha[t]) * (
             x - (beta[t] / sqrt_one_minus_alpha_bar[t]) * predicted_noise
         )
 
         if t > 0:
+            # t > 0 の場合はノイズを加える（確率的サンプリング）
             noise = torch.randn_like(x)
             x = mean + sqrt_posterior_variance[t] * noise
         else:
+            # t = 0 では決定論的に生成
             x = mean
 
     return x
@@ -325,7 +365,18 @@ LDM は以下のアプローチで解決する。
 
 ### Cross-Attention によるテキスト条件付け
 
-Stable Diffusion では U-Net に Cross-Attention 層を追加し、テキスト埋め込み（CLIP）を注入する。
+Stable Diffusion では U-Net に Cross-Attention 層を追加し、テキスト埋め込み（CLIP）を注入する。Attention の計算は以下の式で表される。
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d}}\right) V
+$$
+
+この式の各要素の意味は以下の通り。
+
+- $Q$（Query）：画像特徴から生成。「どんな情報が欲しいか」を表す
+- $K$（Key）：テキスト埋め込みから生成。「どんな情報を持っているか」を表す
+- $V$（Value）：テキスト埋め込みから生成。実際に渡す情報
+- $\sqrt{d}$：スケーリング係数。$d$ は特徴次元数
 
 ```python
 class CrossAttention(nn.Module):
