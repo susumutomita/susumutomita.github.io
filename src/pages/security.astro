@@ -98,6 +98,7 @@ import { LINKS } from "../lib/constants";
           <li>委託元の情報を含むリポジトリは Private 設定を原則とする</li>
           <li>委託元ごとにリポジトリまたはオーガナイゼーションを分離する</li>
           <li>Secrets（API キー、認証情報等）は GitHub Secrets または 1Password 等で管理し、コードにハードコードしない</li>
+          <li>委託元情報は個人利用のプロジェクトと論理的に分離し、委託元の指定がある場合は当該指定（委託元管理アカウント等）を優先する</li>
         </ul>
 
         <h3 class="font-display text-lg font-medium mb-3 mt-6">第10条（アクセスログ・認証管理）</h3>
@@ -105,6 +106,7 @@ import { LINKS } from "../lib/constants";
           <li>重要なサービス（GitHub、Google、AWS 等）では多要素認証（MFA/2FA）を必須とする。</li>
           <li>パスワードは十分な強度を持ち、サービスごとに固有のものを使用する（パスワードマネージャー推奨）。</li>
           <li>異常なログイン試行やアクセスを検知した場合は、速やかに調査・対応を行う。</li>
+          <li>可能な範囲で、各サービスのセキュリティ通知（不審ログイン、認証設定変更、アクセストークン発行等）を有効化し、定期的に確認する。</li>
         </ul>
       </section>
 
@@ -200,7 +202,7 @@ import { LINKS } from "../lib/constants";
         <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
           <li><strong>初動対応</strong>：被害の拡大防止措置を講じる（ネットワーク遮断、端末隔離、パスワード変更、遠隔ロック等）</li>
           <li><strong>調査・分析</strong>：原因の調査および影響範囲の特定を行う</li>
-          <li><strong>報告・通知</strong>：委託元、監督官庁、被害者等への報告・通知を速やかに行う</li>
+          <li><strong>報告・通知</strong>：委託元への報告を最優先とし、監督官庁・本人等への報告／通知は、法令・契約および委託元の指示に従い実施する（または委託元が実施する）</li>
           <li><strong>復旧</strong>：システムの復旧およびセキュリティ強化措置を実施する</li>
           <li><strong>再発防止</strong>：原因分析に基づく再発防止策を策定・実施する</li>
         </ul>
