@@ -1,0 +1,577 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import LanguageToggle from "../components/LanguageToggle.astro";
+import BackToHome from "../components/BackToHome.astro";
+import { LINKS } from "../lib/constants";
+---
+
+<BaseLayout
+  title="Information Security Policy - Susumu Tomita"
+  description="Information Security Policy for Susumu Tomita's business operations."
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <LanguageToggle />
+
+    <!-- English Version -->
+    <div id="content-en">
+      <h1 class="font-display text-3xl md:text-4xl font-bold mb-8">Information Security Policy</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted mb-4">(Sole Proprietor)</p>
+
+      <div class="prose prose-neutral dark:prose-invert max-w-none space-y-8">
+        <p class="text-light-muted dark:text-dark-muted">
+          Last updated: January 22, 2026
+        </p>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 1: General Provisions</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 1 (Purpose)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            This policy establishes the basic principles and operational guidelines for information security in business operations as a sole proprietor, aiming to ensure proper management and protection of confidential and personal information.
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 2 (Scope)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            This policy applies to information assets (confidential and personal information) handled by Susumu Tomita (hereinafter "the Operator") in business operations.
+            When external collaborators (subcontractors, etc.) are engaged, the Operator requires them to maintain equivalent management standards.
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 3 (Definitions)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>"Confidential information" refers to trade secrets, technical information, customer information, and other non-public information disclosed by clients.</li>
+            <li>"Personal information" refers to information as defined in Article 2 of the Act on the Protection of Personal Information.</li>
+            <li>"Personal data" refers to personal information that constitutes a personal information database.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 2: Basic Security Principles</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 4 (Basic Principles)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>The Operator appropriately protects information assets and strives to maintain and improve information security.</li>
+            <li>The Operator complies with legal and contractual requirements.</li>
+            <li>The Operator continuously improves knowledge and skills related to information security.</li>
+            <li>The Operator establishes preventive measures and rapid response systems for information security incidents.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 3: Personal Information Protection</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 5 (Privacy Policy)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>The Operator establishes and publishes a Privacy Policy on the website.</li>
+            <li>The Privacy Policy includes purposes of use, third-party disclosure, procedures for disclosure/correction/deletion requests, and contact information.</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 6 (Proper Handling of Personal Data)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Personal data is acquired through lawful and fair means.</li>
+            <li>Personal data is used within the scope of specified purposes.</li>
+            <li>Personal data is stored only for necessary periods with appropriate security measures.</li>
+            <li>Third-party disclosure of personal data is limited to cases required by law or with consent.</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 7 (Disposal of Personal Information)</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            Disposal of personal information (return, deletion, erasure, destruction, etc.) follows these rules:
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>Electronic data: Completely erased using irreversible methods</li>
+            <li>Paper media: Disposed of by shredding or dissolution</li>
+            <li>Storage media: Physically destroyed or processed by specialized vendors</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 8 (Regular Review)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Self-audits of personal information handling are conducted at least annually.</li>
+            <li>Necessary improvements are implemented based on audit results.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 4: Access Management</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 9 (Access Rights Management)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Access rights to files, systems, and databases containing confidential or personal information are limited to what is necessary for business operations.</li>
+            <li>Access rights are configured based on the principle of least privilege.</li>
+            <li>Access rights are promptly revoked or disabled upon project or contract completion.</li>
+          </ul>
+          <p class="text-light-muted dark:text-dark-muted mt-4 font-medium">GitHub Operations:</p>
+          <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>Repositories containing client information are set to Private by default</li>
+            <li>Repositories or organizations are separated by client</li>
+            <li>Secrets (API keys, credentials, etc.) are managed via GitHub Secrets or 1Password, never hardcoded</li>
+            <li>Client information is logically separated from personal projects; client-specified requirements (managed accounts, etc.) take priority</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 10 (Access Logs and Authentication)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Multi-factor authentication (MFA/2FA) is required for critical services (GitHub, Google, AWS, etc.).</li>
+            <li>Passwords are strong and unique per service (password manager recommended).</li>
+            <li>Suspicious login attempts or access are promptly investigated and addressed.</li>
+            <li>Where possible, security notifications (suspicious logins, authentication changes, access token issuance, etc.) are enabled and regularly reviewed.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 5: Physical Security</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 11 (Work Environment)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Work involving sensitive information is performed in environments protected from shoulder surfing.</li>
+            <li>Handling of confidential information in public places is minimized, with privacy screens used when necessary.</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 12 (Clear Desk / Clear Screen)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Computer screens are locked when stepping away.</li>
+            <li>Paper documents containing confidential or personal information are stored in locked locations or properly disposed of after use.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 6: Technical Security</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 13 (Malware Protection)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Business devices have OS-standard or reputable malware protection enabled.</li>
+            <li>OS and applications are kept up to date (automatic updates recommended).</li>
+            <li>Suspicious emails, files, and links are not opened.</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 14 (Network Security)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Home network routers are configured with appropriate passwords and firmware is kept current.</li>
+            <li>Vulnerability information is monitored and promptly addressed when affecting used software/services.</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 15 (Remote Access)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>VPN is used when accessing confidential information from untrusted networks (public Wi-Fi, etc.).</li>
+            <li>Client-specified remote access methods are followed when applicable.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 7: Device Management</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 16 (Business Device Management)</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            Business devices are managed by the Operator and must meet the following requirements:
+          </p>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>Storage encryption (FileVault / BitLocker, etc.)</li>
+            <li>Auto-lock (short timeout) with strong authentication (biometrics + passcode, etc.)</li>
+            <li>Automatic OS / browser updates</li>
+            <li>Malware protection (including OS built-in features)</li>
+            <li>MFA for critical services (GitHub, Google, etc.)</li>
+            <li>Remote lock/wipe capability (Find My Mac, etc.)</li>
+          </ul>
+          <p class="text-light-muted dark:text-dark-muted mt-4">
+            In case of device loss or theft, remote lock/wipe is immediately executed and the client is notified.
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 17 (External Information Sharing)</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            External sharing of confidential or personal information (email forwarding, cloud storage sharing, chat attachments, etc.) is limited to what is permitted by client instructions and contracts.
+          </p>
+          <p class="text-light-muted dark:text-dark-muted">
+            When sharing is necessary, the following measures are taken:
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>Encryption or password protection</li>
+            <li>Access restrictions (specific recipients only)</li>
+            <li>Expiration dates</li>
+            <li>Prompt deletion after purpose is fulfilled</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 8: Self-Audit</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 18 (Regular Self-Audit)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            The Operator conducts self-audits at least annually on compliance with this policy, applicable laws, and client requirements, making improvements as necessary.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 9: Incident Response</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 19 (Incident Response Procedures)</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            When information security incidents (data leaks, unauthorized access, malware infection, device loss, etc.) occur or are suspected, the following procedures are followed:
+          </p>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li><strong>Initial Response</strong>: Take measures to prevent spread (network disconnection, device isolation, password changes, remote lock, etc.)</li>
+            <li><strong>Investigation/Analysis</strong>: Investigate causes and identify scope of impact</li>
+            <li><strong>Reporting</strong>: Prioritize reporting to the client; reporting to regulatory authorities or affected individuals is conducted per legal requirements, contracts, and client instructions (or performed by the client)</li>
+            <li><strong>Recovery</strong>: Restore systems and implement security enhancements</li>
+            <li><strong>Prevention</strong>: Develop and implement recurrence prevention measures based on root cause analysis</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 10: Liability</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 20 (Liability for Violations)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            If this policy is violated and information leakage occurs due to intent or gross negligence, the Operator bears responsibility including damages, contract termination, and recurrence prevention measures under applicable contracts and laws.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 11: Exclusion of Anti-Social Forces</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 21 (Basic Policy)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>The Operator severs all relationships with anti-social forces.</li>
+            <li>Unreasonable demands from anti-social forces are firmly refused.</li>
+            <li>No business transactions are conducted with anti-social forces.</li>
+            <li>No funding or benefits are provided to anti-social forces.</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 22 (Verification and Response)</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>Business partners are verified at contract initiation and periodically to ensure they are not anti-social forces.</li>
+            <li>Contact from anti-social forces is reported to police and handled in coordination with external experts.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 12: Consent to Third-Party Disclosure</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 23 (Information Disclosure to Third Parties)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            The Operator consents to providing personal information to clients when necessary for business operations.
+            This includes identity verification documents, certifications, and other documents required for business execution.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 13: Identity Verification</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 24 (Submission of Identity Documents)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            When clients request identity verification documents (driver's license, My Number Card, etc.) or other necessary documents for contract execution, the Operator complies with such requests.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Chapter 14: Miscellaneous</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 25 (Amendments)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            This policy may be amended by the Operator as necessary. Amendment history is reflected in the last updated date on this page.
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">Article 26 (Effective Date)</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            This policy is effective from January 22, 2026.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Contact</h2>
+          <p class="text-light-muted dark:text-dark-muted">
+            For inquiries regarding this policy, please contact us at:
+          </p>
+          <a
+            href={`mailto:${LINKS.email}`}
+            class="inline-flex items-center gap-2 mt-4 text-accent-500 hover:text-accent-600 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {LINKS.email}
+          </a>
+        </section>
+      </div>
+    </div>
+
+    <!-- Japanese Version -->
+    <div id="content-ja" class="hidden">
+      <h1 class="font-display text-3xl md:text-4xl font-bold mb-8">情報セキュリティ基本方針</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted mb-4">（個人事業主）</p>
+
+      <div class="prose prose-neutral dark:prose-invert max-w-none space-y-8">
+        <p class="text-light-muted dark:text-dark-muted">
+          最終更新日: 2026年1月22日
+        </p>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第1章 総則</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第1条（目的）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            本方針は、個人事業主としての業務における情報セキュリティに関する基本方針および運用事項を定め、機密情報・個人情報の適切な管理と保護を図ることを目的とする。
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第2条（適用範囲）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            本方針は、個人事業主である Susumu Tomita（以下「事業者」）が業務上取り扱う情報資産（機密情報・個人情報）に適用する。
+            事業者が外部協力者（再委託先等）を利用する場合、当該協力者にも本方針と同等の管理を求める。
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第3条（定義）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>「機密情報」とは、委託元から開示された営業秘密、技術情報、顧客情報その他の非公開情報をいう。</li>
+            <li>「個人情報」とは、個人情報の保護に関する法律第2条に定義される個人情報をいう。</li>
+            <li>「個人データ」とは、個人情報データベース等を構成する個人情報をいう。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第2章 情報セキュリティ基本方針</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第4条（基本方針）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>事業者は、情報資産を適切に保護し、情報セキュリティの維持・向上に努める。</li>
+            <li>事業者は、法令および契約上の要求事項を遵守する。</li>
+            <li>事業者は、情報セキュリティに関する知識・スキルの継続的な向上に努める。</li>
+            <li>事業者は、情報セキュリティインシデントに対する予防措置および迅速な対応体制を整備する。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第3章 個人情報保護</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第5条（個人情報保護方針）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>事業者は、個人情報保護方針（プライバシーポリシー）を策定し、ウェブサイト等において公表する。</li>
+            <li>プライバシーポリシーには、個人情報の利用目的、第三者提供に関する事項、開示・訂正・削除等の請求手続き、お問い合わせ窓口を含める。</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第6条（個人データの適正な取扱い）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>個人データの取得は、適法かつ公正な手段により行う。</li>
+            <li>個人データの利用は、あらかじめ特定した利用目的の範囲内で行う。</li>
+            <li>個人データの保存は、必要な期間に限定し、適切な安全管理措置を講じる。</li>
+            <li>個人データの第三者提供は、法令に基づく場合または本人の同意がある場合に限る。</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第7条（個人情報の処分）</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            個人情報等の処分（返却、消去、抹消、破棄等）は、以下のルールに従って実施する。
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>電子データ：復元不可能な方法により完全に消去する</li>
+            <li>紙媒体：シュレッダーによる裁断または溶解処理により廃棄する</li>
+            <li>記録媒体：物理的破壊または専門業者による処分を行う</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第8条（定期的な確認・点検）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>個人情報取扱の適切性について、年1回以上の定期的な自己点検を実施する。</li>
+            <li>点検結果に基づき、必要な改善措置を講じる。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第4章 アクセス管理</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第9条（アクセス権の管理）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>機密情報および個人情報を含むファイル、システム、データベース等へのアクセス権は、業務上必要な範囲に限定する。</li>
+            <li>アクセス権は、最小権限の原則に基づき設定する。</li>
+            <li>プロジェクト終了時や契約終了時には、速やかにアクセス権を削除または無効化する。</li>
+          </ul>
+          <p class="text-light-muted dark:text-dark-muted mt-4 font-medium">GitHub における運用：</p>
+          <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>委託元の情報を含むリポジトリは Private 設定を原則とする</li>
+            <li>委託元ごとにリポジトリまたはオーガナイゼーションを分離する</li>
+            <li>Secrets（API キー、認証情報等）は GitHub Secrets または 1Password 等で管理し、コードにハードコードしない</li>
+            <li>委託元情報は個人利用のプロジェクトと論理的に分離し、委託元の指定がある場合は当該指定（委託元管理アカウント等）を優先する</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第10条（アクセスログ・認証管理）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>重要なサービス（GitHub、Google、AWS 等）では多要素認証（MFA/2FA）を必須とする。</li>
+            <li>パスワードは十分な強度を持ち、サービスごとに固有のものを使用する（パスワードマネージャー推奨）。</li>
+            <li>異常なログイン試行やアクセスを検知した場合は、速やかに調査・対応を行う。</li>
+            <li>可能な範囲で、各サービスのセキュリティ通知（不審ログイン、認証設定変更、アクセストークン発行等）を有効化し、定期的に確認する。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第5章 物理的セキュリティ</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第11条（作業環境の管理）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>機密性の高い業務を行う際は、第三者から画面を覗き見されない環境で作業する。</li>
+            <li>公共の場所での機密情報の取り扱いは、必要最小限とし、覗き見防止フィルター等の対策を講じる。</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第12条（クリアデスク・クリアスクリーン）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>離席時は、パソコンの画面ロックを行う。</li>
+            <li>機密情報・個人情報を含む紙媒体は、使用後は施錠可能な場所に保管または適切に処分する。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第6章 技術的セキュリティ</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第13条（マルウェア対策）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>業務用端末には、OS 標準または信頼性のあるマルウェア対策機能を有効にする。</li>
+            <li>OS およびアプリケーションは、常に最新の状態に維持する（自動アップデート推奨）。</li>
+            <li>不審なメール、ファイル、リンク等は開かない。</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第14条（ネットワークセキュリティ）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>自宅ネットワークのルーターには適切なパスワードを設定し、ファームウェアを最新に保つ。</li>
+            <li>脆弱性情報を収集し、利用しているソフトウェア・サービスに影響がある場合は速やかに対応する。</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第15条（リモートアクセス）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>公衆 Wi-Fi 等の安全性が確認できないネットワークから機密情報にアクセスする場合は、VPN を使用する。</li>
+            <li>委託元が指定するリモートアクセス方法がある場合は、それに従う。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第7章 端末管理</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第16条（業務用端末の管理）</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            業務で使用する端末は、事業者が管理する端末とし、以下の要件を満たすことを必須とする。
+          </p>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>ストレージ暗号化（FileVault / BitLocker 等）</li>
+            <li>自動ロック（短時間）と強固な認証（生体認証＋パスコード等）</li>
+            <li>OS / ブラウザ等の自動アップデート</li>
+            <li>マルウェア対策（OS 標準機能含む）</li>
+            <li>重要サービス（GitHub、Google 等）の多要素認証（MFA）</li>
+            <li>紛失・盗難時の遠隔ロック / 消去が可能な設定（Find My Mac 等）</li>
+          </ul>
+          <p class="text-light-muted dark:text-dark-muted mt-4">
+            業務用端末の紛失・盗難が発生した場合は、直ちに遠隔ロック / 消去を実行し、委託元に報告する。
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第17条（情報の外部共有）</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            機密情報・個人情報の外部共有（メール転送、外部ストレージ共有、チャット添付等）は、委託元の指示・契約で許可された範囲に限定する。
+          </p>
+          <p class="text-light-muted dark:text-dark-muted">
+            やむを得ず共有する場合は、以下の措置を講じる。
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+            <li>暗号化またはパスワード保護</li>
+            <li>アクセス制限（特定の相手のみ）</li>
+            <li>共有期限の設定</li>
+            <li>用務終了後は速やかに削除</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第8章 自己点検</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第18条（定期的な自己点検）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            事業者は、年1回以上、本方針および関連する法令・委託元ルールの遵守状況について自己点検を行い、必要に応じて運用を改善する。
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第9章 インシデント対応</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第19条（インシデント発生時の対応手順）</h3>
+          <p class="text-light-muted dark:text-dark-muted mb-2">
+            情報セキュリティインシデント（情報漏えい、不正アクセス、マルウェア感染、端末紛失等）が発生した場合または発生のおそれがある場合は、以下の手順に従う。
+          </p>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li><strong>初動対応</strong>：被害の拡大防止措置を講じる（ネットワーク遮断、端末隔離、パスワード変更、遠隔ロック等）</li>
+            <li><strong>調査・分析</strong>：原因の調査および影響範囲の特定を行う</li>
+            <li><strong>報告・通知</strong>：委託元への報告を最優先とし、監督官庁・本人等への報告／通知は、法令・契約および委託元の指示に従い実施する（または委託元が実施する）</li>
+            <li><strong>復旧</strong>：システムの復旧およびセキュリティ強化措置を実施する</li>
+            <li><strong>再発防止</strong>：原因分析に基づく再発防止策を策定・実施する</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第10章 責任</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第20条（違反時の責任）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            本方針に違反し、故意または重大な過失により情報漏えい等を生じさせた場合、事業者は契約および法令に基づき、損害賠償、契約解除、再発防止措置等の責任を負う。
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第11章 反社会的勢力の排除</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第21条（反社会的勢力排除の基本方針）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>事業者は、反社会的勢力との一切の関係を遮断する。</li>
+            <li>反社会的勢力による不当要求には毅然と対応し、これを拒絶する。</li>
+            <li>反社会的勢力との取引を行わない。</li>
+            <li>反社会的勢力への資金提供、便宜供与を行わない。</li>
+          </ul>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第22条（確認・対応）</h3>
+          <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+            <li>取引開始時および継続的に、取引先が反社会的勢力に該当しないことを確認する。</li>
+            <li>反社会的勢力からの接触があった場合は、警察等の外部専門機関と連携して対応する。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第12章 第三者提供への同意</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第23条（情報の第三者提供）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            事業者は、業務上必要な場合において、自己の情報を委託元に提供することについて同意する。
+            提供される情報には、本人確認書類、資格証明書、その他業務遂行に必要な書類を含む。
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第13章 本人確認等</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第24条（本人確認書類の提出）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            契約締結に際して、委託元から本人確認書類（運転免許証、マイナンバーカード等）およびその他必要な書類の提出を求められた場合、事業者はこれに応じる。
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">第14章 雑則</h2>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第25条（改定）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            本方針は、事業者が必要に応じて改定する。改定履歴は本ページの最終更新日に反映する。
+          </p>
+
+          <h3 class="font-display text-lg font-medium mb-3 mt-6">第26条（施行日）</h3>
+          <p class="text-light-muted dark:text-dark-muted">
+            本方針は、2026年1月22日より施行する。
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-semibold mb-4">Contact</h2>
+          <p class="text-light-muted dark:text-dark-muted">
+            本方針に関するお問い合わせは、以下までご連絡ください。
+          </p>
+          <a
+            href={`mailto:${LINKS.email}`}
+            class="inline-flex items-center gap-2 mt-4 text-accent-500 hover:text-accent-600 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {LINKS.email}
+          </a>
+        </section>
+      </div>
+    </div>
+
+    <BackToHome />
+  </div>
+</BaseLayout>

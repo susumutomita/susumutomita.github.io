@@ -94,12 +94,21 @@ const currentYear = new Date().getFullYear();
       <p class="text-sm text-light-muted dark:text-dark-muted mb-2">
         &copy; {currentYear} {SITE.name}. All rights reserved.
       </p>
-      <a
-        href="/privacy"
-        class="text-sm text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
-      >
-        Privacy Policy
-      </a>
+      <div class="flex items-center justify-center gap-4">
+        <a
+          href="/privacy"
+          class="text-sm text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+        >
+          Privacy Policy
+        </a>
+        <span class="text-light-muted dark:text-dark-muted">|</span>
+        <a
+          href="/security"
+          class="text-sm text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+        >
+          Security Policy
+        </a>
+      </div>
     </div>
   </div>
 </footer>
