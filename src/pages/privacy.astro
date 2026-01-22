@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import LanguageToggle from "../components/LanguageToggle.astro";
+import BackToHome from "../components/BackToHome.astro";
 import { LINKS } from "../lib/constants";
 ---
 
@@ -8,25 +10,7 @@ import { LINKS } from "../lib/constants";
   description="Privacy Policy for Susumu Tomita's business operations."
 >
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-    <!-- Language Toggle -->
-    <div class="flex justify-end mb-6">
-      <div class="inline-flex rounded-md shadow-sm" role="group">
-        <button
-          type="button"
-          id="lang-en"
-          class="px-4 py-2 text-sm font-medium rounded-l-md border border-light-border dark:border-dark-border bg-accent-500 text-white"
-        >
-          English
-        </button>
-        <button
-          type="button"
-          id="lang-ja"
-          class="px-4 py-2 text-sm font-medium rounded-r-md border border-light-border dark:border-dark-border bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text hover:bg-light-border dark:hover:bg-dark-border"
-        >
-          日本語
-        </button>
-      </div>
-    </div>
+    <LanguageToggle />
 
     <!-- English Version -->
     <div id="content-en">
@@ -272,60 +256,6 @@ import { LINKS } from "../lib/constants";
       </div>
     </div>
 
-    <div class="mt-12 pt-8 border-t border-light-border dark:border-dark-border">
-      <a
-        href="/"
-        class="inline-flex items-center gap-2 text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span id="back-text-en">Back to Home</span>
-        <span id="back-text-ja" class="hidden">ホームに戻る</span>
-      </a>
-    </div>
+    <BackToHome />
   </div>
-
-  <script>
-    const langEn = document.getElementById('lang-en');
-    const langJa = document.getElementById('lang-ja');
-    const contentEn = document.getElementById('content-en');
-    const contentJa = document.getElementById('content-ja');
-    const backTextEn = document.getElementById('back-text-en');
-    const backTextJa = document.getElementById('back-text-ja');
-
-    const activeClass = 'bg-accent-500 text-white';
-    const inactiveClass = 'bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text hover:bg-light-border dark:hover:bg-dark-border';
-
-    function setLang(lang: string) {
-      if (lang === 'en') {
-        contentEn?.classList.remove('hidden');
-        contentJa?.classList.add('hidden');
-        backTextEn?.classList.remove('hidden');
-        backTextJa?.classList.add('hidden');
-        langEn?.classList.remove(...inactiveClass.split(' '));
-        langEn?.classList.add(...activeClass.split(' '));
-        langJa?.classList.remove(...activeClass.split(' '));
-        langJa?.classList.add(...inactiveClass.split(' '));
-      } else {
-        contentEn?.classList.add('hidden');
-        contentJa?.classList.remove('hidden');
-        backTextEn?.classList.add('hidden');
-        backTextJa?.classList.remove('hidden');
-        langJa?.classList.remove(...inactiveClass.split(' '));
-        langJa?.classList.add(...activeClass.split(' '));
-        langEn?.classList.remove(...activeClass.split(' '));
-        langEn?.classList.add(...inactiveClass.split(' '));
-      }
-      localStorage.setItem('policy-lang', lang);
-    }
-
-    // Initialize from localStorage or browser language
-    const savedLang = localStorage.getItem('policy-lang');
-    const browserLang = navigator.language.startsWith('ja') ? 'ja' : 'en';
-    setLang(savedLang || browserLang);
-
-    langEn?.addEventListener('click', () => setLang('en'));
-    langJa?.addEventListener('click', () => setLang('ja'));
-  </script>
 </BaseLayout>

@@ -1,0 +1,78 @@
+---
+/**
+ * Language toggle component for EN/JA content switching.
+ * Used on policy pages (privacy, security) to switch between English and Japanese versions.
+ */
+---
+
+<div class="flex justify-end mb-6">
+  <div class="inline-flex rounded-md shadow-sm" role="group">
+    <button
+      type="button"
+      id="lang-en"
+      class="px-4 py-2 text-sm font-medium rounded-l-md border border-light-border dark:border-dark-border bg-accent-500 text-white"
+    >
+      English
+    </button>
+    <button
+      type="button"
+      id="lang-ja"
+      class="px-4 py-2 text-sm font-medium rounded-r-md border border-light-border dark:border-dark-border bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text hover:bg-light-border dark:hover:bg-dark-border"
+    >
+      日本語
+    </button>
+  </div>
+</div>
+
+<script>
+  function initLanguageToggle(): void {
+    const langEn = document.getElementById("lang-en");
+    const langJa = document.getElementById("lang-ja");
+    const contentEn = document.getElementById("content-en");
+    const contentJa = document.getElementById("content-ja");
+    const backTextEn = document.getElementById("back-text-en");
+    const backTextJa = document.getElementById("back-text-ja");
+
+    const activeClasses = ["bg-accent-500", "text-white"];
+    const inactiveClasses = [
+      "bg-light-surface",
+      "dark:bg-dark-surface",
+      "text-light-text",
+      "dark:text-dark-text",
+      "hover:bg-light-border",
+      "dark:hover:bg-dark-border",
+    ];
+
+    function setLang(lang: string): void {
+      const isEnglish = lang === "en";
+
+      contentEn?.classList.toggle("hidden", !isEnglish);
+      contentJa?.classList.toggle("hidden", isEnglish);
+      backTextEn?.classList.toggle("hidden", !isEnglish);
+      backTextJa?.classList.toggle("hidden", isEnglish);
+
+      if (isEnglish) {
+        langEn?.classList.remove(...inactiveClasses);
+        langEn?.classList.add(...activeClasses);
+        langJa?.classList.remove(...activeClasses);
+        langJa?.classList.add(...inactiveClasses);
+      } else {
+        langJa?.classList.remove(...inactiveClasses);
+        langJa?.classList.add(...activeClasses);
+        langEn?.classList.remove(...activeClasses);
+        langEn?.classList.add(...inactiveClasses);
+      }
+
+      localStorage.setItem("policy-lang", lang);
+    }
+
+    const savedLang = localStorage.getItem("policy-lang");
+    const browserLang = navigator.language.startsWith("ja") ? "ja" : "en";
+    setLang(savedLang || browserLang);
+
+    langEn?.addEventListener("click", () => setLang("en"));
+    langJa?.addEventListener("click", () => setLang("ja"));
+  }
+
+  initLanguageToggle();
+</script>
