@@ -1,64 +1,119 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { SITE, LINKS } from "../lib/constants";
+import { LINKS } from "../lib/constants";
 ---
 
 <BaseLayout
   title="Privacy Policy - Susumu Tomita"
-  description="Privacy Policy for Susumu Tomita's portfolio website."
+  description="Privacy Policy for Susumu Tomita's business operations."
 >
   <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-    <h1 class="font-display text-3xl md:text-4xl font-bold mb-8">Privacy Policy</h1>
+    <h1 class="font-display text-3xl md:text-4xl font-bold mb-8">プライバシーポリシー</h1>
+    <p class="text-lg text-light-muted dark:text-dark-muted mb-4">（個人事業主）</p>
 
     <div class="prose prose-neutral dark:prose-invert max-w-none space-y-8">
       <p class="text-light-muted dark:text-dark-muted">
-        Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        最終更新日: 2026年1月1日
       </p>
 
       <section>
-        <h2 class="font-display text-xl font-semibold mb-4">Overview</h2>
+        <h2 class="font-display text-xl font-semibold mb-4">1. 事業者情報</h2>
         <p class="text-light-muted dark:text-dark-muted">
-          This website ({SITE.url}) is a personal portfolio site operated by {SITE.name}.
-          I respect your privacy and am committed to protecting any personal information you may provide.
+          本ポリシーにおける個人情報取扱事業者は、以下のとおりです。
         </p>
-      </section>
-
-      <section>
-        <h2 class="font-display text-xl font-semibold mb-4">Information Collection</h2>
-        <p class="text-light-muted dark:text-dark-muted mb-4">
-          This website does not actively collect personal information. Specifically:
-        </p>
-        <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted">
-          <li>No analytics or tracking tools are used</li>
-          <li>No cookies are set by this website</li>
-          <li>No personal data is stored on our servers</li>
+        <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+          <li>事業者名：Susumu Tomita</li>
+          <li>連絡先：<a href={`mailto:${LINKS.email}`} class="text-accent-500 hover:text-accent-600">{LINKS.email}</a></li>
         </ul>
       </section>
 
       <section>
-        <h2 class="font-display text-xl font-semibold mb-4">External Services</h2>
-        <p class="text-light-muted dark:text-dark-muted mb-4">
-          This website uses the following external services:
+        <h2 class="font-display text-xl font-semibold mb-4">2. 取得する情報</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          事業者は、本ウェブサイトおよび事業運営において、以下の情報を取得することがあります。
         </p>
-        <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted">
-          <li><strong>Google Fonts:</strong> Web fonts are loaded from Google's servers. Google may collect usage data according to their privacy policy.</li>
-          <li><strong>Netlify:</strong> This site is hosted on Netlify. Server logs may be collected for security and operational purposes.</li>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>お問い合わせ時にご提供いただく情報（氏名、メールアドレス、会社名、問い合わせ内容等）</li>
+          <li>アクセスログ等の情報（IPアドレス、ブラウザ種別、参照元、閲覧ページ、日時等）</li>
+          <li>Cookie 等を用いて収集される情報（識別子、閲覧履歴等）</li>
         </ul>
       </section>
 
       <section>
-        <h2 class="font-display text-xl font-semibold mb-4">External Links</h2>
+        <h2 class="font-display text-xl font-semibold mb-4">3. 利用目的</h2>
         <p class="text-light-muted dark:text-dark-muted">
-          This website contains links to external sites (GitHub, LinkedIn, etc.).
-          I am not responsible for the privacy practices of these external sites.
-          Please review their respective privacy policies.
+          事業者は、取得した情報を以下の目的で利用します。
+        </p>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>お問い合わせへの対応および連絡のため</li>
+          <li>サービスの提供、運営、改善のため</li>
+          <li>不正アクセス等の防止およびセキュリティ確保のため</li>
+          <li>法令または契約上の義務を履行するため</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">4. Cookie 等の利用</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          本ウェブサイトでは、利便性向上やアクセス解析等のために Cookie 等を利用する場合があります。
+          ブラウザ設定により Cookie を無効化することが可能ですが、一部機能が利用できなくなることがあります。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">5. 第三者提供</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          事業者は、法令に基づく場合または本人の同意がある場合を除き、個人情報を第三者に提供しません。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">6. 委託</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          事業者は、利用目的の達成に必要な範囲で、個人情報の取扱いを外部事業者に委託することがあります。
+          この場合、委託先に対し適切な監督を行います。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">7. 安全管理措置</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          事業者は、個人情報の漏えい、滅失、毀損等を防止するため、合理的な安全管理措置を講じます。
+        </p>
+        <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+          <li>アクセス権の最小化、認証強化（多要素認証等）</li>
+          <li>端末の暗号化、画面ロック、アップデートの適用</li>
+          <li>不審なアクセスやインシデント発生時の対応手順の整備</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">8. 開示等の請求</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          本人は、自己の個人情報について、開示、訂正、追加、削除、利用停止等を求めることができます。
+          ご希望の場合は、下記の窓口までご連絡ください。合理的な範囲で対応します。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">9. 保管期間</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          事業者は、利用目的に必要な期間に限り個人情報を保管し、不要となった場合は適切に削除・廃棄します。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">10. 改定</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          本ポリシーは、法令の改正や運用の変更等に応じて、事業者が必要に応じて改定します。
+          改定した場合は、本ページの最終更新日に反映します。
         </p>
       </section>
 
       <section>
         <h2 class="font-display text-xl font-semibold mb-4">Contact</h2>
         <p class="text-light-muted dark:text-dark-muted">
-          If you have any questions about this Privacy Policy, please contact me at:
+          本ポリシーに関するお問い合わせは、以下までご連絡ください。
         </p>
         <a
           href={`mailto:${LINKS.email}`}
@@ -69,14 +124,6 @@ import { SITE, LINKS } from "../lib/constants";
           </svg>
           {LINKS.email}
         </a>
-      </section>
-
-      <section>
-        <h2 class="font-display text-xl font-semibold mb-4">Changes to This Policy</h2>
-        <p class="text-light-muted dark:text-dark-muted">
-          This Privacy Policy may be updated from time to time.
-          Any changes will be posted on this page with an updated revision date.
-        </p>
       </section>
     </div>
 
