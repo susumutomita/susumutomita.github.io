@@ -1,0 +1,298 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { LINKS } from "../lib/constants";
+---
+
+<BaseLayout
+  title="Information Security Policy - Susumu Tomita"
+  description="Information Security Policy for Susumu Tomita's business operations."
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <h1 class="font-display text-3xl md:text-4xl font-bold mb-8">情報セキュリティ基本方針</h1>
+    <p class="text-lg text-light-muted dark:text-dark-muted mb-4">（個人事業主）</p>
+
+    <div class="prose prose-neutral dark:prose-invert max-w-none space-y-8">
+      <p class="text-light-muted dark:text-dark-muted">
+        最終更新日: 2026年1月1日
+      </p>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第1章 総則</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第1条（目的）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          本方針は、個人事業主としての業務における情報セキュリティに関する基本方針および運用事項を定め、機密情報・個人情報の適切な管理と保護を図ることを目的とする。
+        </p>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第2条（適用範囲）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          本方針は、個人事業主である Susumu Tomita（以下「事業者」）が業務上取り扱う情報資産（機密情報・個人情報）に適用する。
+          事業者が外部協力者（再委託先等）を利用する場合、当該協力者にも本方針と同等の管理を求める。
+        </p>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第3条（定義）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>「機密情報」とは、委託元から開示された営業秘密、技術情報、顧客情報その他の非公開情報をいう。</li>
+          <li>「個人情報」とは、個人情報の保護に関する法律第2条に定義される個人情報をいう。</li>
+          <li>「個人データ」とは、個人情報データベース等を構成する個人情報をいう。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第2章 情報セキュリティ基本方針</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第4条（基本方針）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>事業者は、情報資産を適切に保護し、情報セキュリティの維持・向上に努める。</li>
+          <li>事業者は、法令および契約上の要求事項を遵守する。</li>
+          <li>事業者は、情報セキュリティに関する知識・スキルの継続的な向上に努める。</li>
+          <li>事業者は、情報セキュリティインシデントに対する予防措置および迅速な対応体制を整備する。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第3章 個人情報保護</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第5条（個人情報保護方針）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>事業者は、個人情報保護方針（プライバシーポリシー）を策定し、ウェブサイト等において公表する。</li>
+          <li>プライバシーポリシーには、個人情報の利用目的、第三者提供に関する事項、開示・訂正・削除等の請求手続き、お問い合わせ窓口を含める。</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第6条（個人データの適正な取扱い）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>個人データの取得は、適法かつ公正な手段により行う。</li>
+          <li>個人データの利用は、あらかじめ特定した利用目的の範囲内で行う。</li>
+          <li>個人データの保存は、必要な期間に限定し、適切な安全管理措置を講じる。</li>
+          <li>個人データの第三者提供は、法令に基づく場合または本人の同意がある場合に限る。</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第7条（個人情報の処分）</h3>
+        <p class="text-light-muted dark:text-dark-muted mb-2">
+          個人情報等の処分（返却、消去、抹消、破棄等）は、以下のルールに従って実施する。
+        </p>
+        <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+          <li>電子データ：復元不可能な方法により完全に消去する</li>
+          <li>紙媒体：シュレッダーによる裁断または溶解処理により廃棄する</li>
+          <li>記録媒体：物理的破壊または専門業者による処分を行う</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第8条（定期的な確認・点検）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>個人情報取扱の適切性について、年1回以上の定期的な自己点検を実施する。</li>
+          <li>点検結果に基づき、必要な改善措置を講じる。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第4章 アクセス管理</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第9条（アクセス権の管理）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>機密情報および個人情報を含むファイル、システム、データベース等へのアクセス権は、業務上必要な範囲に限定する。</li>
+          <li>アクセス権は、最小権限の原則に基づき設定する。</li>
+          <li>プロジェクト終了時や契約終了時には、速やかにアクセス権を削除または無効化する。</li>
+        </ul>
+        <p class="text-light-muted dark:text-dark-muted mt-4 font-medium">GitHub における運用：</p>
+        <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+          <li>委託元の情報を含むリポジトリは Private 設定を原則とする</li>
+          <li>委託元ごとにリポジトリまたはオーガナイゼーションを分離する</li>
+          <li>Secrets（API キー、認証情報等）は GitHub Secrets または 1Password 等で管理し、コードにハードコードしない</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第10条（アクセスログ・認証管理）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>重要なサービス（GitHub、Google、AWS 等）では多要素認証（MFA/2FA）を必須とする。</li>
+          <li>パスワードは十分な強度を持ち、サービスごとに固有のものを使用する（パスワードマネージャー推奨）。</li>
+          <li>異常なログイン試行やアクセスを検知した場合は、速やかに調査・対応を行う。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第5章 物理的セキュリティ</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第11条（作業環境の管理）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>機密性の高い業務を行う際は、第三者から画面を覗き見されない環境で作業する。</li>
+          <li>公共の場所での機密情報の取り扱いは、必要最小限とし、覗き見防止フィルター等の対策を講じる。</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第12条（クリアデスク・クリアスクリーン）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>離席時は、パソコンの画面ロックを行う。</li>
+          <li>機密情報・個人情報を含む紙媒体は、使用後は施錠可能な場所に保管または適切に処分する。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第6章 技術的セキュリティ</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第13条（マルウェア対策）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>業務用端末には、OS 標準または信頼性のあるマルウェア対策機能を有効にする。</li>
+          <li>OS およびアプリケーションは、常に最新の状態に維持する（自動アップデート推奨）。</li>
+          <li>不審なメール、ファイル、リンク等は開かない。</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第14条（ネットワークセキュリティ）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>自宅ネットワークのルーターには適切なパスワードを設定し、ファームウェアを最新に保つ。</li>
+          <li>脆弱性情報を収集し、利用しているソフトウェア・サービスに影響がある場合は速やかに対応する。</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第15条（リモートアクセス）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>公衆 Wi-Fi 等の安全性が確認できないネットワークから機密情報にアクセスする場合は、VPN を使用する。</li>
+          <li>委託元が指定するリモートアクセス方法がある場合は、それに従う。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第7章 端末管理</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第16条（業務用端末の管理）</h3>
+        <p class="text-light-muted dark:text-dark-muted mb-2">
+          業務で使用する端末は、事業者が管理する端末とし、以下の要件を満たすことを必須とする。
+        </p>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+          <li>ストレージ暗号化（FileVault / BitLocker 等）</li>
+          <li>自動ロック（短時間）と強固な認証（生体認証＋パスコード等）</li>
+          <li>OS / ブラウザ等の自動アップデート</li>
+          <li>マルウェア対策（OS 標準機能含む）</li>
+          <li>重要サービス（GitHub、Google 等）の多要素認証（MFA）</li>
+          <li>紛失・盗難時の遠隔ロック / 消去が可能な設定（Find My Mac 等）</li>
+        </ul>
+        <p class="text-light-muted dark:text-dark-muted mt-4">
+          業務用端末の紛失・盗難が発生した場合は、直ちに遠隔ロック / 消去を実行し、委託元に報告する。
+        </p>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第17条（情報の外部共有）</h3>
+        <p class="text-light-muted dark:text-dark-muted mb-2">
+          機密情報・個人情報の外部共有（メール転送、外部ストレージ共有、チャット添付等）は、委託元の指示・契約で許可された範囲に限定する。
+        </p>
+        <p class="text-light-muted dark:text-dark-muted">
+          やむを得ず共有する場合は、以下の措置を講じる。
+        </p>
+        <ul class="list-disc list-inside space-y-2 text-light-muted dark:text-dark-muted ml-4">
+          <li>暗号化またはパスワード保護</li>
+          <li>アクセス制限（特定の相手のみ）</li>
+          <li>共有期限の設定</li>
+          <li>用務終了後は速やかに削除</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第8章 自己点検</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第18条（定期的な自己点検）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          事業者は、年1回以上、本方針および関連する法令・委託元ルールの遵守状況について自己点検を行い、必要に応じて運用を改善する。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第9章 インシデント対応</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第19条（インシデント発生時の対応手順）</h3>
+        <p class="text-light-muted dark:text-dark-muted mb-2">
+          情報セキュリティインシデント（情報漏えい、不正アクセス、マルウェア感染、端末紛失等）が発生した場合または発生のおそれがある場合は、以下の手順に従う。
+        </p>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li><strong>初動対応</strong>：被害の拡大防止措置を講じる（ネットワーク遮断、端末隔離、パスワード変更、遠隔ロック等）</li>
+          <li><strong>調査・分析</strong>：原因の調査および影響範囲の特定を行う</li>
+          <li><strong>報告・通知</strong>：委託元、監督官庁、被害者等への報告・通知を速やかに行う</li>
+          <li><strong>復旧</strong>：システムの復旧およびセキュリティ強化措置を実施する</li>
+          <li><strong>再発防止</strong>：原因分析に基づく再発防止策を策定・実施する</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第10章 責任</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第20条（違反時の責任）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          本方針に違反し、故意または重大な過失により情報漏えい等を生じさせた場合、事業者は契約および法令に基づき、損害賠償、契約解除、再発防止措置等の責任を負う。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第11章 反社会的勢力の排除</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第21条（反社会的勢力排除の基本方針）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>事業者は、反社会的勢力との一切の関係を遮断する。</li>
+          <li>反社会的勢力による不当要求には毅然と対応し、これを拒絶する。</li>
+          <li>反社会的勢力との取引を行わない。</li>
+          <li>反社会的勢力への資金提供、便宜供与を行わない。</li>
+        </ul>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第22条（確認・対応）</h3>
+        <ul class="list-decimal list-inside space-y-2 text-light-muted dark:text-dark-muted">
+          <li>取引開始時および継続的に、取引先が反社会的勢力に該当しないことを確認する。</li>
+          <li>反社会的勢力からの接触があった場合は、警察等の外部専門機関と連携して対応する。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第12章 第三者提供への同意</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第23条（情報の第三者提供）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          事業者は、業務上必要な場合において、自己の情報を委託元に提供することについて同意する。
+          提供される情報には、本人確認書類、資格証明書、その他業務遂行に必要な書類を含む。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第13章 本人確認等</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第24条（本人確認書類の提出）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          契約締結に際して、委託元から本人確認書類（運転免許証、マイナンバーカード等）およびその他必要な書類の提出を求められた場合、事業者はこれに応じる。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">第14章 雑則</h2>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第25条（改定）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          本方針は、事業者が必要に応じて改定する。改定履歴は本ページの最終更新日に反映する。
+        </p>
+
+        <h3 class="font-display text-lg font-medium mb-3 mt-6">第26条（施行日）</h3>
+        <p class="text-light-muted dark:text-dark-muted">
+          本方針は、2026年1月1日より施行する。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-semibold mb-4">Contact</h2>
+        <p class="text-light-muted dark:text-dark-muted">
+          本方針に関するお問い合わせは、以下までご連絡ください。
+        </p>
+        <a
+          href={`mailto:${LINKS.email}`}
+          class="inline-flex items-center gap-2 mt-4 text-accent-500 hover:text-accent-600 transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          {LINKS.email}
+        </a>
+      </section>
+    </div>
+
+    <div class="mt-12 pt-8 border-t border-light-border dark:border-dark-border">
+      <a
+        href="/"
+        class="inline-flex items-center gap-2 text-light-muted dark:text-dark-muted hover:text-accent-500 transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Home
+      </a>
+    </div>
+  </div>
+</BaseLayout>
