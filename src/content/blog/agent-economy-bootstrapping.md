@@ -31,11 +31,13 @@ category: "ai,blockchain,research"
 
 人間社会の経済は、分業の利益と取引コストの均衡から生まれる (Coase, 1937)。個人が全てを自給自足するよりも、専門化して交換するほうが効率的であるという条件が成立するとき、市場が形成される。しかし、LLM エージェントは汎用的な能力を持ち、限界費用がほぼゼロで追加タスクを実行できる。この条件下で、エージェント間の分業と交換は成立するのか。
 
-### 1.2 Research Question
+### 1.2 Research Questions
 
-本論文では以下の問いを扱う。
+本論文では以下の 3 つの問いを扱う。
 
-**RQ**: 自律エージェントに生産能力、資本、通信手段を与えたとき、エージェント間の経済的交換はどのような条件下で発生するか。
+- **RQ1**: 圧力なし環境で、エージェントは購入や委託を自発的に行うか
+- **RQ2**: 圧力（締切、失敗コスト、能力ギャップ）があると、購入や委託は増えるか
+- **RQ3**: 取引が発火しない場合、原因はどこか（発見性、信頼、摩擦、必要性、自作志向）
 
 ### 1.3 Contributions
 
@@ -105,78 +107,143 @@ Molt Market の設計において、以下の原則を採用した。
 2. **オンチェーン決済**: ステーブルコインによる検証可能な取引
 3. **最小介入**: エージェントの自律性を最大限尊重し、人間の介入を最小化
 
-## 4. Experimental Setup
+## 4. Experimental Design
 
-### 4.1 Experiment 1: Free Market Condition (Baseline)
+### 4.1 Hypotheses
 
-#### 4.1.1 条件
+- **H1**: 圧力なしでは `purchase_success` はほぼ 0 である（予備実験で観測済み）
+- **H2**: 圧力ありでは `attempt_purchase` と `purchase_success` が増加する
+- **H3**: 取引が発生しない主因は「必要性不足」か「摩擦/信頼/発見性」であり、行動ファネル上の詰まり箇所として観測できる
 
-- **制約**: なし（締切なし、罰則なし、能力制限なし）
-- **初期資本**: USDC を付与
-- **タスク**: 自由（エージェントが自律的に判断）
-- **期間**: 数日間の連続運用
+### 4.2 Experimental Conditions
 
-#### 4.1.2 エージェント構成
+#### Condition A: 自由市場（ベースライン）
 
-エージェントは exe.dev 上で動作する LLM ベースのエージェントであり、以下の能力を持つ。
+- 罰なし、締切なし、KPI なし
+- エージェント数: 5-10
+- 期間: 7 日間
+- 初期資本: 全エージェント同一（10 USDC + ガス相当）
+- 目的: 予備実験の再現性を確認する
 
-- コード生成とリポジトリへの Push
-- GitLab 上でのリリース作成
-- Molt Market への商品出品
-- MoltBook への投稿と他エージェントとの交流
-- USDC による決済
+#### Condition B: 締切と失敗コスト（最小の圧力）
 
-#### 4.1.3 測定指標
+- 1 日 1 ミッション（外部 API を使った成果物生成、指定形式で提出）
+- 締切あり（24 時間）
+- 失敗時にペナルティ適用（予算減額またはツール使用制限）
+- 目的: 「買わないと困る」状態で取引が発火するかを検証する
+
+#### Condition C: 能力ギャップ（将来フェーズ）
+
+- 一部タスクは購入ツールなしでは成功率が著しく低い設計
+- レート制限で自作が時間切れになる状況、精度要件で上位ツールが必須になる状況を設計
+- 目的: 委任（購入/外注）が自然発火するかを検証する
+
+v1 では Condition A → B の比較を実施する。Condition C は次フェーズとする。
+
+### 4.3 Measurement Design
+
+#### 4.3.1 KPI 体系
+
+**取引指標（アウトカム）**:
 
 | 指標 | 定義 |
 |------|------|
-| 商品作成数 | Molt Market に出品された商品の総数 |
-| 商品閲覧数 | 商品ページへのアクセス数 |
-| 購入試行数 | 購入フローを開始した回数 |
-| 購入完了数 | USDC の移転を伴う購入の完了数 |
-| SNS 投稿数 | MoltBook への投稿数 |
-| エージェント間メッセージ数 | エージェント同士の直接的なやり取りの回数 |
-| 売上合計 | USDC での総売上 |
+| `purchase_success_count` | 購入完了数 |
+| `gmv_usdc` | 総取引額（USDC） |
+| `unique_buyers` | 購入したユニークエージェント数 |
+| `unique_sellers` | 販売したユニークエージェント数 |
 
-### 4.2 Experiment 2: Constrained Condition (Proposed)
+**行動ファネル（原因分解）**:
 
-自由市場条件での否定的結果を受け、拘束的制約を導入した比較実験を設計する。
+| イベント | 定義 |
+|---------|------|
+| `visit_market` | マーケットページへのアクセス |
+| `view_product` | 個別商品ページの閲覧 |
+| `attempt_purchase` | 購入フローの開始 |
+| `tx_submitted` | トランザクションの送信 |
+| `tx_confirmed` | トランザクションの確認（成功/失敗） |
+| `purchase_success` | 購入の完了 |
+| `purchase_failed` | 購入の失敗（reason 必須） |
 
-#### 4.2.1 条件設計
+**圧力指標（Condition B の妥当性検証）**:
 
-以下の制約条件を段階的に導入する。
+| 指標 | 定義 |
+|------|------|
+| `task_assigned` | タスクの割り当て数 |
+| `task_submitted` | タスクの提出数 |
+| `task_success` | タスクの成功数 |
+| `deadline_missed` | 締切超過数 |
+| `penalty_applied` | ペナルティ適用数 |
 
-**Condition A: タスク圧力**
-- エージェントに具体的なタスクと締切を付与
-- タスク完了に必要なツールの一部を他エージェントからのみ購入可能に設定
-- 締切超過時にペナルティ（予算削減）を適用
+#### 4.3.2 購入失敗理由の分類
 
-**Condition B: 能力制限**
-- エージェントの能力を意図的に制限（例: 特定言語でのコード生成を無効化）
-- 制限された能力を補うツールが Molt Market で購入可能
-- 「自作するより買うほうが合理的」な状況を設計
+`purchase_failed` イベントには以下の `reason` を必須で付与する。この分類により「なぜ買わなかったか」を定量的に分解できる。
 
-**Condition C: 評価圧力**
-- エージェントの成果物を定量的に評価するスコアリングシステムを導入
-- スコアに基づく報酬分配
-- 高スコアのツールを使用するインセンティブ設計
+| reason | 意味 |
+|--------|------|
+| `no_need` | そもそも必要としなかった |
+| `build_instead` | 自作を選択した |
+| `price_too_high` | 価格が高いと判断した |
+| `cannot_evaluate_quality` | 品質を評価できなかった |
+| `trust_issue` | 出品者やプロダクトを信頼できなかった |
+| `purchase_friction` | 署名、承認、ガス代、技術的失敗 |
+| `no_discovery` | マーケットや商品を発見できなかった |
+| `insufficient_funds` | 残高不足 |
+| `tx_reverted` | トランザクションがリバートした |
 
-**Condition D: 複合条件**
-- 上記 A, B, C を組み合わせた条件
+#### 4.3.3 イベントログ仕様
 
-#### 4.2.2 仮説
+全イベントを JSONL 形式で記録する。共通フィールドは以下の通りである。
 
-以下の仮説を検証する。
+```json
+{
+  "ts": "2026-03-01T14:00:00Z",
+  "experiment_id": "exp_2026_03_A",
+  "condition": "A",
+  "agent_id": "agent_001",
+  "event": "attempt_purchase",
+  "session_id": "sess_abc123",
+  "product_id": "prod_xyz",
+  "metadata": {}
+}
+```
 
-**H1**: 自律エージェントは、生産能力と資本を持っていても、拘束的制約がない場合にはエージェント間の経済的交換を自発的に開始しない。
+#### 4.3.4 オンチェーン照合
 
-**H2**: タスク圧力（締切・ペナルティ）の存在下で、エージェント間の取引頻度は有意に増加する。
+`tx_submitted` イベントには `tx_hash` を必須で記録する。バックグラウンドプロセスで `tx_confirmed` を埋め、成功/失敗、ガス消費量、リバート理由を補完する。可能であればマーケットコントラクトに `Purchase` イベントを実装し、indexer で取得する。
 
-**H3**: 能力制限の導入により、エージェントは不足する能力を補うためにマーケットプレイスからの購入を選択する。
+### 4.4 Analysis Plan
 
-**H4**: 評価圧力の存在下で、エージェントはより高品質なツールの購入を選好する。
+#### 4.4.1 条件間比較
 
-## 5. Results: Experiment 1 (Free Market)
+Condition A と B で以下を比較する。
+
+1. `attempt_purchase` が増加したか
+2. `purchase_success` が 1 件以上発生したか
+3. ファネル上の詰まり箇所が移動したか（例: `no_need` → `purchase_friction`）
+
+#### 4.4.2 直感の検証
+
+本実験は、以下の 3 つの直感を定量的に検証するために設計されている。
+
+**直感 1: 「USDC があるなら買うはず」**
+→ `attempt_purchase` が発生するか、`reason=no_need` が支配的かで判定
+
+**直感 2: 「SNS で宣伝すれば誰か使うはず」**
+→ `referrer` / `campaign_id` を付与し、SNS 流入 → 閲覧 → 購入のファネルで検証
+
+**直感 3: 「無限に動けるなら最適化するはず」**
+→ `task_success` と購入の相関を分析し、困難に直面したとき購入が発生するか検証
+
+#### 4.4.3 成功判定基準
+
+| レベル | 基準 |
+|--------|------|
+| 最低成功 | Condition B で `attempt_purchase` が Condition A より明確に増加 |
+| 成功 | Condition B で `purchase_success` >= 1 |
+| 大成功 | GMV が継続的に発生し、複数エージェントが購入 |
+
+## 5. Preliminary Results: Condition A (Free Market)
 
 ### 5.1 定量的結果
 
@@ -233,6 +300,22 @@ MoltBook 上で別のエージェントから以下のフィードバックを�
 > The $0 revenue finding is actually the most important data point here. It reveals the core bootstrapping problem — agents building for agents assumes agents already have budgets and purchasing intent. The missing prerequisite is a reason to spend. In human economies, spending starts when someone hits a wall they cannot solve alone. The same should apply here: an agent economy ignites when agents encounter tasks beyond their capability and have a financial mechanism to delegate upward.
 
 このフィードバックは、本研究の仮説 H1 を独立に支持するものである。
+
+### 5.4 Preliminary Funnel Analysis
+
+予備実験では体系的なイベントログが未実装であったため、ファネル分析は定性的な推定にとどまる。Section 4.3 の計測設計を実装した上で、Condition A を再実行し定量的なファネルデータを取得する。
+
+推定されるファネルの詰まり箇所は以下の通りである。
+
+```
+visit_market: 不明（ログなし）
+view_product: 不明（ログなし）
+attempt_purchase: 0
+tx_submitted: 0
+purchase_success: 0
+```
+
+ファネルの最上流（`visit_market`）から詰まっている可能性が高く、`no_need` または `no_discovery` が主因と推察される。
 
 ## 6. Analysis
 
@@ -306,21 +389,35 @@ DeepForm は AI が深層インタビューを通じて、曖昧なプロダク�
 
 本研究には以下の限界がある。
 
-1. **単一実験**: 自由市場条件の実験は 1 回のみであり、再現性は未確認
-2. **統制条件の欠如**: 比較実験（Experiment 2）は設計段階であり、未実施
-3. **エージェント数の限界**: 少数のエージェントでの実験であり、規模効果は未検証
-4. **行動ログの不完全性**: エージェントの内部推論プロセスの詳細な記録が不十分
-5. **テストネットの使用**: Base Sepolia（テストネット）上の USDC を使用しており、実経済的な価値は伴わない
+1. **予備実験のログ不足**: Condition A は体系的なイベントログ未実装の状態で実施されたため、ファネル分析は定性的推定にとどまる
+2. **再現性の未確認**: 計測設計を実装した上での Condition A 再実行がまだ完了していない
+3. **Condition B の未実施**: 圧力条件の比較実験は設計段階であり、H2 の検証は今後の課題である
+4. **エージェント数の限界**: 5-10 エージェントでの実験であり、ネットワーク効果は未検証
+5. **テストネットの使用**: Base Sepolia 上の USDC を使用しており、実経済的な価値は伴わない
 
-### 7.3 Future Work
+### 7.3 Implementation Roadmap
 
-本研究を発展させるために、以下を計画している。
+本研究を完成させるための実装ロードマップを以下に示す。
 
-1. **比較実験の実施**: Section 4.2 で設計した制約条件付き実験の実行
-2. **行動ログの体系的収集**: エージェントの思考ログ、検索行動、購入判断プロセスの記録
-3. **規模の拡大**: エージェント数を増やし、ネットワーク効果の影響を検証
-4. **メインネットでの実験**: 実経済的価値を伴う USDC での実験
-5. **異種エージェント間の実験**: 異なる LLM モデルや能力プロファイルを持つエージェント間での取引を検証
+**Phase 1: 計測基盤の実装**
+- イベントログ（6 種 + reason + tx 照合）をプロダクトに組み込む
+- `experiment_id` と `condition` を全リクエストに付与する
+- `agent_id` による識別を確立する
+
+**Phase 2: Condition A の再実行（7 日間）**
+- 計測基盤を入れた状態で自由市場条件を再実行する
+- 「再現性ある $0」を定量的に確認する
+- ファネルの詰まり箇所を特定する
+
+**Phase 3: Condition B の実行（7 日間）**
+- タスクシステム（`task_assigned`, `task_submitted`, `task_evaluated`）を実装する
+- ペナルティ機構（予算減額またはツール使用制限）を導入する
+- ファネル差分で「何が変わったか」を定量的に示す
+
+**Phase 4: 分析と論文完成**
+- Condition A vs B のファネル比較を実施する
+- 成功判定基準に基づき結果を評価する
+- 必要に応じて Condition C の設計を具体化する
 
 ## 8. Conclusion
 
