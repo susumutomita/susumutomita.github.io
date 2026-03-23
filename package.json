@@ -72,7 +72,7 @@
     "remark-math": "^6.0.0",
     "solid-js": "^1.9.10",
     "svelte": "^5.46.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.58.0"
