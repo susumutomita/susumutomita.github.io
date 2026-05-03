@@ -1,79 +1,133 @@
-# Susumu Tomita - Portfolio
+<div align="center">
+
+<a href="https://susumutomita.netlify.app">
+  <img src="./public/og-image.svg" alt="Susumu Tomita — Portfolio" width="640" />
+</a>
+
+# susumutomita.github.io
+
+**Personal portfolio of Susumu Tomita — Software Engineer & Architect.**
+Built with Astro, deployed on Netlify, designed for speed and clarity.
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/caefb044-929a-4195-a9a2-cf5d9ad5b245/deploy-status)](https://app.netlify.com/sites/susumutomita/deploys)
+[![License: MIT](https://img.shields.io/github/license/susumutomita/susumutomita.github.io?color=blue)](./LICENSE)
+[![Astro](https://img.shields.io/badge/Astro-5.x-FF5D01?logo=astro&logoColor=white)](https://astro.build)
+[![Bun](https://img.shields.io/badge/Bun-1.x-000?logo=bun&logoColor=white)](https://bun.sh)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Stars](https://img.shields.io/github/stars/susumutomita/susumutomita.github.io?style=social)](https://github.com/susumutomita/susumutomita.github.io/stargazers)
 
-Personal portfolio site built with Astro, featuring a minimal dark/light theme design.
+[**Live site**](https://susumutomita.netlify.app) ·
+[**Blog**](https://susumutomita.netlify.app/blog) ·
+[**Resume**](https://susumutomita.netlify.app/resume) ·
+[**Contact**](https://susumutomita.netlify.app/contact)
 
-## Features
+</div>
 
-- Dark/Light theme toggle with system preference detection
-- Responsive design optimized for all devices
-- Interactive 3D globe showing visited countries (D3.js)
-- Blog with MDX support
-- Papers/Publications section
-- Resume page
-- Contact page
+---
 
-## Tech Stack
+## ✨ Highlights
 
-- **Framework**: [Astro](https://astro.build/) 5.x
-- **Styling**: [UnoCSS](https://unocss.dev/) with custom design tokens
-- **Interactive Components**: [Solid.js](https://www.solidjs.com/)
-- **3D Globe**: [D3.js](https://d3js.org/)
-- **Animations**: [Motion](https://motion.dev/)
-- **Deployment**: [Netlify](https://www.netlify.com/)
+- 🌗 **Adaptive theming** — dark / light with system-preference detection
+- 🌐 **Interactive 3D globe** of visited countries (D3.js)
+- 📝 **MDX-powered blog** with reading time, RSS, and KaTeX math
+- 📄 **Printable resume** with PDF export and a tailored cover letter view
+- 🛰 **OG images, sitemap, robots.txt** generated at build
+- 🎨 **UnoCSS design tokens** — Tailwind-like ergonomics, atomic CSS output
+- ⚡ **Privacy-first** — no Google Analytics, no third-party trackers
 
-## Pages
+## 🚀 Quick start
 
-| Page | Description |
-|:-----|:------------|
-| `/` | Home - Hero, featured work, recent blog posts |
-| `/about` | About - Skills, experience, technical writing |
-| `/projects` | Projects - Portfolio of work |
-| `/papers` | Papers - Academic publications |
-| `/blog` | Blog - Technical articles |
-| `/resume` | Resume - Professional experience |
-| `/contact` | Contact - Get in touch |
-| `/travel` | Travel - 3D globe of visited countries |
-
-## Commands
-
-| Command | Action |
-|:--------|:-------|
-| `bun install` | Install dependencies |
-| `bun run dev` | Start dev server at `localhost:4321` |
-| `bun run build` | Build for production |
-| `bun run preview` | Preview production build |
-| `bun run lint` | Run textlint on markdown files |
-| `bun run lint:fix` | Fix textlint errors |
-
-## Development
+> Requires [Bun](https://bun.sh) `1.x`. **Do not use** `npm` or `yarn` — the lockfile is `bun.lock`.
 
 ```bash
-# Install dependencies
+git clone https://github.com/susumutomita/susumutomita.github.io.git
+cd susumutomita.github.io
 bun install
-
-# Start development server
 bun run dev
-
-# Build for production
-bun run build
 ```
 
-## Deployment
+Open [http://localhost:4321](http://localhost:4321).
 
-This project is automatically deployed to Netlify on push to the `main` branch.
+## 📜 Scripts
 
-**Live Site**: [https://susumutomita.netlify.app/](https://susumutomita.netlify.app/)
+| Command | Description |
+| :------ | :---------- |
+| `bun run dev` | Start the local dev server with HMR |
+| `bun run build` | Type-check (`astro check`) and build to `dist/` |
+| `bun run preview` | Preview the production build locally |
+| `bun run lint` | Run textlint over markdown content |
+| `bun run lint:fix` | Auto-fix textlint issues |
+| `bun run test:e2e` | Run Playwright end-to-end tests |
+| `bun run test:e2e:ui` | Open the Playwright UI runner |
 
-## Author
+## 🗺 Pages
 
-**Susumu Tomita**
-- GitHub: [@susumutomita](https://github.com/susumutomita)
-- LinkedIn: [susumutomita](https://www.linkedin.com/in/susumutomita/)
-- Zenn: [bull](https://zenn.dev/bull)
-- Qiita: [tonitoni415](https://qiita.com/tonitoni415)
+| Route | Purpose |
+| :---- | :------ |
+| `/` | Hero, featured work, latest posts |
+| `/about` | Background, skills, experience timeline |
+| `/projects` | Selected projects and case studies |
+| `/papers` | Academic publications and research notes |
+| `/blog` | Long-form technical writing (MDX) |
+| `/resume` | Career history with print-ready layout |
+| `/contact` | Email, social, and inquiry links |
+| `/travel` | Interactive 3D globe of visited countries |
 
-## License
+## 🧱 Tech stack
 
-MIT
+| Layer | Choice |
+| :---- | :----- |
+| Framework | [Astro 5](https://astro.build) (static + islands) |
+| Styling | [UnoCSS](https://unocss.dev) with custom tokens in `uno.config.ts` |
+| Interactive islands | [Solid.js](https://www.solidjs.com), [Svelte](https://svelte.dev) |
+| 3D / data viz | [D3.js](https://d3js.org) |
+| Animations | [Motion](https://motion.dev), [GSAP](https://gsap.com), [Lenis](https://lenis.studiofreight.com) |
+| Content | MDX with `remark-math` + `rehype-katex` |
+| Testing | [Playwright](https://playwright.dev) |
+| Hosting | [Netlify](https://www.netlify.com) (auto-deploy on `main`) |
+
+## 📁 Project layout
+
+```text
+src/
+├── components/      Reusable UI (header, footer, islands)
+│   └── global/
+├── content/         Blog posts (MDX/MD)
+├── layouts/         Page layouts (BaseLayout.astro)
+├── lib/             Utilities, constants, site metadata
+└── pages/           File-based routes
+public/
+├── fonts/           AXIS Std and fallbacks
+├── images/
+└── og-image.svg
+```
+
+## 🎨 Design system
+
+- **Type stack** — `AXIS Std → Helvetica Neue → Hiragino Kaku Gothic → Noto Sans JP`
+- **Color tokens** — defined in [`uno.config.ts`](./uno.config.ts), with `dark:` variants for every surface
+- **Density** — generous whitespace, max content width tuned for long-form reading
+- **Performance** — Astro islands keep the JS payload small; UnoCSS emits only the classes you use
+
+## 🚢 Deployment
+
+Pushes to `main` trigger an automatic Netlify build via [`netlify.toml`](./netlify.toml). Preview deploys are created for every pull request.
+
+**Production:** <https://susumutomita.netlify.app>
+
+## 🤝 Contributing
+
+This is a personal site, but typo fixes, accessibility improvements, and content suggestions are welcome — open an [issue](https://github.com/susumutomita/susumutomita.github.io/issues) or send a pull request.
+
+## 👤 Author
+
+**Susumu Tomita** — Software Engineer & Architect
+
+[![GitHub](https://img.shields.io/badge/GitHub-susumutomita-181717?logo=github)](https://github.com/susumutomita)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-susumutomita-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/susumutomita/)
+[![Zenn](https://img.shields.io/badge/Zenn-bull-3EA8FF?logo=zenn&logoColor=white)](https://zenn.dev/bull)
+[![Qiita](https://img.shields.io/badge/Qiita-tonitoni415-55C500?logo=qiita&logoColor=white)](https://qiita.com/tonitoni415)
+
+## 📄 License
+
+Source code is released under the [MIT License](./LICENSE). Content (blog posts, papers, images) is © Susumu Tomita and not covered by the MIT grant.
