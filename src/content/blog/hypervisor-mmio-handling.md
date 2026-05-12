@@ -120,7 +120,7 @@ fn handle_data_abort(&mut self, syndrome: u64) -> Result<bool, Box<dyn std::erro
     // WnR ビット: 0 = read, 1 = write
     let is_write = (syndrome & (1 << 6)) != 0;
 
-    // SAS (Syndrome Access Size) ビット [23:22]
+    // SAS (Syndrome Access Size) ビット 23-22
     let sas = (syndrome >> 22) & 0x3;
     let size = 1 << sas; // 1, 2, 4, 8 bytes
 

@@ -62,7 +62,7 @@ pub fn generate_device_tree(config: &DeviceTreeConfig) -> Result<Vec<u8>, Box<dy
 
 生成される Device Tree ノード（DTS 形式）。
 
-```dts
+```text
 virtio_block@a000000 {
     compatible = "virtio,mmio";
     reg = <0x0a000000 0x200>;
