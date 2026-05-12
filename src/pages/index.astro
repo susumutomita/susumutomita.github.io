@@ -29,11 +29,10 @@ const stats = [
 
 const featuredWork = [
   {
-    title: "ZeroKey",
-    description: "Research paper on distributed execution model separating instruction, execution, and accountability in blockchain systems.",
-    tags: ["Research", "Blockchain", "Threshold Crypto"],
-    link: "/blog/zerokey-paper",
-    github: "https://github.com/susumutomita/ZeroKeyCI",
+    title: "TenkaCloud",
+    description: "AWS multi-tenant SaaS platform for cloud competitions (GameDay / JAM style). Delivers Battle and Challenge formats via Control Plane / Application Plane architecture with automated deploys to competitor AWS accounts.",
+    tags: ["AWS", "SaaS", "CDK", "TypeScript"],
+    link: "https://github.com/susumutomita/TenkaCloud",
   },
   {
     title: "Apple Silicon Hypervisor",
@@ -233,7 +232,7 @@ const featuredWork = [
       {
         recentPosts.map((post) => (
           <a
-            href={`/blog/${post.slug}`}
+            href={`/blog/${post.id}`}
             class="group block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
           >
             <time class="text-sm text-light-muted dark:text-dark-muted">

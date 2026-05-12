@@ -1,12 +1,12 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  return (await getCollection("blog")).map(({ slug }) => ({
-    params: { slug },
+  return (await getCollection("blog")).map(({ id }) => ({
+    params: { slug: id },
   }));
 }
 
@@ -22,12 +22,12 @@ const posts = (await getCollection("blog")).sort(
     (blogEntryA.data.pubDate || new Date()).getTime(),
 );
 
-const entry = posts.find((entry) => entry.slug === slug);
+const entry = posts.find((entry) => entry.id === slug);
 if (entry === undefined) {
   return Astro.redirect("/404");
 }
 
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("ja-JP", {
