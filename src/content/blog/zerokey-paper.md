@@ -120,7 +120,7 @@ $$E = (I, policies, riskAssessment, approvals)$$
 
 **定義 3 (Accountability Record)**: 責任レコード $A$ は、実行結果とその監査情報を表す。
 
-$$A = (E, txHash, outcome, explanation, タイムスタンプ)$$
+$$A = (E, txHash, outcome, explanation, timestamp)$$
 
 **状態遷移**: ZeroKey モデルにおける状態遷移は以下の通りである。
 
