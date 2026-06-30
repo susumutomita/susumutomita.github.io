@@ -98,7 +98,7 @@ const VIRTQ_DESC_F_INDIRECT: u16 = 4;
 
 ### 記述子チェイン
 
-複数の Descriptor を `NEXT` フラグでチェインすることで、大きなバッファを表現できます。
+複数の Descriptor を`NEXT`フラグでチェインすることで、大きなバッファを表現できます。
 
 ```rust
 impl Descriptor {
@@ -150,8 +150,8 @@ fn push(&mut self, desc_idx: u16) {
 }
 ```
 
-- `idx` はモノトニックに増加（wrapping add）
-- リングバッファなので `% self.ring.len()` で循環
+- `idx`はモノトニックに増加（wrapping add）
+- リングバッファなので`% self.ring.len()`で循環
 
 ---
 
@@ -254,8 +254,8 @@ pub fn pop_avail(&mut self) -> Option<u16> {
 ```
 
 **ポイント**:
-- `last_avail_idx == avail_ring.idx` の場合、新しい記述子がない
-- `last_avail_idx` をデバイス側で管理（ドライバーは `avail_ring.idx` を更新）
+- `last_avail_idx == avail_ring.idx`の場合、新しい記述子がない
+- `last_avail_idx`をデバイス側で管理（ドライバーは`avail_ring.idx`を更新）
 
 ### push_used メソッド
 
@@ -403,7 +403,7 @@ assert! macro line too long
 cargo fmt
 ```
 
-`assert!` マクロが自動的に複数行に分割されました。
+`assert!`マクロが自動的に複数行に分割されました。
 
 ### 2. clippy dead_code 警告
 
@@ -477,7 +477,7 @@ Split Virtqueues は、以下の 3 つのリング構造で構成されます。
 
 ### 2. 循環バッファの実装
 
-`idx` はモノトニックに増加し、リングバッファとして動作させるために `% ring.len()` でインデックスを計算します。
+`idx`はモノトニックに増加し、リングバッファとして動作させるために`% ring.len()`でインデックスを計算します。
 
 ```rust
 let idx = self.idx as usize % self.ring.len();
@@ -487,7 +487,7 @@ self.idx = self.idx.wrapping_add(1);
 
 ### 3. Rust の #[cfg(test)]
 
-テスト用メソッドを公開する際、`#[cfg(test)]` を使うことで、本番コードに不要なメソッドを含めないようにできます。
+テスト用メソッドを公開する際、`#[cfg(test)]`を使うことで、本番コードに不要なメソッドを含めないようにできます。
 
 ```rust
 #[cfg(test)]

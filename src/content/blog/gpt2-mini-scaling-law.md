@@ -7,7 +7,7 @@ category: "engineering"
 
 ## はじめに
 
-2020 年、OpenAI は [Scaling Laws for Neural Language Models](https://arxiv.org/abs/2001.08361) という論文で、LLM の性能がパラメータ数、データ量、計算量のべき乗則に従うことを示した。この発見は LLM 開発の方向性を決定づけ、GPT-3、GPT-4、そして Claude に至る大規模モデル競争の理論的根拠となった。
+2020 年、OpenAI は[Scaling Laws for Neural Language Models](https://arxiv.org/abs/2001.08361)という論文で、LLM の性能がパラメータ数、データ量、計算量のべき乗則に従うことを示した。この発見は LLM 開発の方向性を決定づけ、GPT-3、GPT-4、そして Claude に至る大規模モデル競争の理論的根拠となった。
 
 本記事では、自作の GPT-2 mini を用いてスケーリング則を実際に観測し、その過程で得られた知見を共有する。単なる実験結果の報告ではなく、理論的背景、実装の詳細、結果の批判的分析、そして実務への示唆まで深掘りする。
 
