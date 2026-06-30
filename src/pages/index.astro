@@ -1,7 +1,12 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { LINKS } from "../lib/constants";
+import { LINKS, bullContactFormUrl } from "../lib/constants";
+import { DEFAULT_LANG } from "../lib/i18n";
+
+// Published bilingual inquiry form (#316). Guarded: falls back to mailto: when
+// the form URL is not a concrete published URL. Shared with /contact.
+const contactFormUrl = bullContactFormUrl(DEFAULT_LANG);
 
 const posts = await getCollection("blog");
 const recentPosts = posts
@@ -303,27 +308,39 @@ const featuredWork = [
   <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div class="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 text-center">
       <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">Let's Build Something Together</h2>
-      <p class="text-light-muted dark:text-dark-muted mb-6 max-w-xl mx-auto">
-        I'm always interested in new opportunities, collaborations, and challenging projects.
-        Feel free to reach out!
+      <p class="text-light-muted dark:text-dark-muted mb-3 max-w-2xl mx-auto">
+        クラウド基盤の構築、コーポレートドメイン・ID移行、IaC・監視・非機能設計を、設計から実装・運用改善まで一気通貫で支援します。
+        アーキテクチャレビューや技術アドバイザリーからのご相談も歓迎です。
+      </p>
+      <p class="text-sm text-light-muted dark:text-dark-muted mb-8 max-w-2xl mx-auto">
+        Cloud foundations, corporate domain &amp; identity migration, IaC, observability and
+        non-functional design &mdash; from design to implementation and operations.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
         <a
-          href={`mailto:${LINKS.email}`}
-          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+          href={contactFormUrl || `mailto:${LINKS.email}`}
+          target={contactFormUrl ? "_blank" : undefined}
+          rel={contactFormUrl ? "noopener noreferrer" : undefined}
+          class="inline-flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
         >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-          Get in Touch
+          お問い合わせフォーム / Start a conversation
         </a>
         <a
-          href="/cover-letter"
-          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+          href="/contact"
+          class="inline-flex items-center gap-2 px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
         >
-          View Cover Letter
+          仕事のご依頼・できること / Work with me
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
         </a>
       </div>
+      <p class="mt-6 text-sm">
+        <a href="/cover-letter" class="text-accent-500 hover:underline">View Cover Letter &rarr;</a>
+      </p>
     </div>
   </section>
 </BaseLayout>
