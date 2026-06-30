@@ -1,0 +1,17 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import ContactBody from "../../components/bull/ContactBody.astro";
+
+export const prerender = true;
+const lang = "en" as const;
+---
+
+<BullLayout
+  lang={lang}
+  sub="/contact"
+  title="Contact — BULL"
+  description="Start a conversation with BULL about cloud foundations, corporate domain and identity migration, IaC and observability, architecture reviews, TenkaCloud, or the AI bootcamp."
+  hideContactCta
+>
+  <ContactBody lang={lang} />
+</BullLayout>

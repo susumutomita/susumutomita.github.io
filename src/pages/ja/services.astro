@@ -1,0 +1,108 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+
+export const prerender = true;
+const lang = "ja" as const;
+
+const services = [
+  {
+    n: "01",
+    title: "コーポレートドメイン・ID移行",
+    points: [
+      "DNS・メール・SSO・SaaS連携の切替",
+      "移行ランブック、ロールバック計画、社内アナウンスのテンプレート",
+      "統合・ブランド変更・分社化のなかでの事業継続",
+    ],
+  },
+  {
+    n: "02",
+    title: "AWSアカウント基盤",
+    points: [
+      "AWS Organizations / Control Tower / ガードレール / 集約ログ",
+      "セキュリティ・コンプライアンスの土台",
+      "安全な立ち上げのための非機能要件",
+    ],
+  },
+  {
+    n: "03",
+    title: "IaC・監視・非機能設計",
+    points: [
+      "Terraform / AWS CDK と CI/CD の統合",
+      "監視・アラート・SLO・可用性・コスト・運用性",
+      "スコープに応じた継続的な運用改善",
+    ],
+  },
+  {
+    n: "04",
+    title: "アーキテクチャレビュー・技術アドバイザリー",
+    points: [
+      "クラウド・ID・アクセス・監査可能性・統合・運用リスクに対する集中的な入口商品",
+      "本格的な実装やより大きな依頼の前に、第三者の技術視点が必要なときに",
+      "実装支援を置き換えるものではなく、補完する位置づけ",
+    ],
+  },
+];
+
+const exclusions = [
+  "PCI / SOC 2 等の正式な認証・監査",
+  "ペネトレーションテスト",
+  "法務・規制に関する助言",
+  "物理セキュリティ・ハードウェア施工の認証",
+  "特定ベンダー実装の保証",
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub="/services"
+  title="サービス — BULL"
+  description="BULLは、コーポレートドメイン・ID移行、AWSアカウント基盤、IaC・監視・非機能設計、そして独立したアーキテクチャレビューを提供します。"
+>
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <div class="max-w-3xl mb-12">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">サービス</p>
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">
+        設計から運用まで、一気通貫の伴走
+      </h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted">
+        BULLは小さなチームのためのエンジニアリングファームです。クラウド・ID・アクセス・監査可能性・統合が
+        交わる領域を設計し、実装し、運用改善まで担います。アーキテクチャレビューは、その入口として用意しています。
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      {services.map((s) => (
+        <div class="p-6 md:p-8 rounded-lg border border-light-border dark:border-dark-border">
+          <div class="flex items-baseline gap-4 mb-4">
+            <span class="font-display text-2xl font-bold text-accent-500">{s.n}</span>
+            <h2 class="font-display text-xl md:text-2xl font-bold">{s.title}</h2>
+          </div>
+          <ul class="space-y-2 text-light-muted dark:text-dark-muted">
+            {s.points.map((p) => (
+              <li class="flex gap-3">
+                <span class="text-accent-500 mt-1">→</span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <!-- 対応範囲外 -->
+    <div class="mt-12 p-6 md:p-8 rounded-lg bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border">
+      <h2 class="font-display text-lg font-bold mb-2">アドバイザリーの対応範囲外</h2>
+      <p class="text-sm text-light-muted dark:text-dark-muted mb-4">
+        誤認を避けるため、以下は明確に対応範囲外とします。
+      </p>
+      <ul class="grid gap-2 sm:grid-cols-2 text-sm text-light-muted dark:text-dark-muted">
+        {exclusions.map((e) => (
+          <li class="flex gap-2">
+            <span class="text-accent-500">×</span>
+            <span>{e}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</BullLayout>

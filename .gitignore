@@ -31,3 +31,6 @@ Plan.md
 # playwright
 playwright-report/
 test-results/
+
+# Cloudflare build/cache artifacts
+.wrangler/

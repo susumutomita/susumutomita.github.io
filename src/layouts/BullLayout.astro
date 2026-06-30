@@ -1,0 +1,39 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import ContactCTA from "../components/bull/ContactCTA.astro";
+import type { Lang, BullSubroute } from "../lib/i18n";
+import { bullAlternates } from "../lib/i18n";
+import { bullGraph } from "../lib/seo";
+
+interface Props {
+  lang: Lang;
+  sub: BullSubroute;
+  title: string;
+  description: string;
+  /** Optional OG image / noindex, forwarded to BaseLayout. */
+  ogImage?: string;
+  noIndex?: boolean;
+  /** Extra schema.org nodes to merge into the @graph (e.g. SoftwareApplication). */
+  extraSchema?: object[];
+  /** Hide the shared contact CTA band (the contact page hides it). */
+  hideContactCta?: boolean;
+}
+
+const { lang, sub, title, description, ogImage, noIndex, extraSchema = [], hideContactCta = false } = Astro.props;
+
+const alternates = bullAlternates(sub);
+const jsonLd = bullGraph(lang, extraSchema);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  lang={lang}
+  alternates={alternates}
+  jsonLd={jsonLd}
+  ogImage={ogImage}
+  noIndex={noIndex}
+>
+  <slot />
+  {!hideContactCta && <ContactCTA lang={lang} />}
+</BaseLayout>

@@ -1,0 +1,17 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import ContactBody from "../../components/bull/ContactBody.astro";
+
+export const prerender = true;
+const lang = "ja" as const;
+---
+
+<BullLayout
+  lang={lang}
+  sub="/contact"
+  title="お問い合わせ — BULL"
+  description="クラウド基盤づくり、コーポレートドメイン・ID移行、IaC・監視、アーキテクチャレビュー、TenkaCloud、生成AIブートキャンプについて、BULLにご相談ください。"
+  hideContactCta
+>
+  <ContactBody lang={lang} />
+</BullLayout>

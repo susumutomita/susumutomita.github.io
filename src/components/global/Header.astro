@@ -1,8 +1,48 @@
 ---
 import { NAV_LINKS, SITE } from "../../lib/constants";
+import {
+  LANGUAGES,
+  LANG_LABELS,
+  BULL_NAV,
+  bullPath,
+  getLangFromPath,
+  switchLangPath,
+} from "../../lib/i18n";
 import ThemeToggle from "./ThemeToggle";
 
-const currentPath = Astro.url.pathname;
+// Normalize the trailing slash so exact-match active checks work whether the
+// path is served as "/en" or "/en/".
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const bullLang = getLangFromPath(currentPath);
+
+// In the BULL bilingual section, swap the navigation and logo for the
+// language-specific entries. Legacy portfolio pages keep the original nav.
+const navLinks = bullLang
+  ? BULL_NAV[bullLang].map((item) => ({
+      href: bullPath(bullLang, item.sub),
+      label: item.label,
+    }))
+  : NAV_LINKS.map((link) => ({ href: link.href, label: link.label }));
+
+const logoHref = bullLang ? bullPath(bullLang, "") : "/";
+
+// Language/site roots must only match exactly, never via startsWith (so "/en"
+// doesn't light up for "/en/services"). Derived from LANGUAGES to stay in sync.
+// hrefs may carry a trailing slash (bullPath), so normalize before comparing.
+const langRoots = new Set<string>(["/", ...LANGUAGES.map((l) => `/${l}`)]);
+const isActiveLink = (href: string) => {
+  const h = href !== "/" ? href.replace(/\/$/, "") : "/";
+  return currentPath === h || (!langRoots.has(h) && currentPath.startsWith(h));
+};
+
+// Language switcher targets (issue #311). Each language points at the
+// corresponding page, falling back to that language's home.
+const langTargets = LANGUAGES.map((lang) => ({
+  lang,
+  label: LANG_LABELS[lang],
+  href: switchLangPath(currentPath, lang),
+  active: bullLang === lang,
+}));
 ---
 
 <header
@@ -12,7 +52,7 @@ const currentPath = Astro.url.pathname;
     <div class="flex items-center justify-between h-16">
       <!-- Logo -->
       <a
-        href="/"
+        href={logoHref}
         class="font-display font-bold text-lg hover:text-accent-500 transition-colors"
       >
         {SITE.name}
@@ -21,10 +61,8 @@ const currentPath = Astro.url.pathname;
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-1">
         {
-          NAV_LINKS.map((link) => {
-            const isActive =
-              currentPath === link.href ||
-              (link.href !== "/" && currentPath.startsWith(link.href));
+          navLinks.map((link) => {
+            const isActive = isActiveLink(link.href);
             return (
               <a
                 href={link.href}
@@ -40,7 +78,32 @@ const currentPath = Astro.url.pathname;
             );
           })
         }
-        <div class="ml-2 pl-2 border-l border-light-border dark:border-dark-border">
+        <!-- Language switcher (only on BULL bilingual pages; legacy pages have
+             no EN/JA equivalent, and policy pages use their own in-page toggle) -->
+        {bullLang && (
+          <div
+            class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center gap-1"
+            role="group"
+            aria-label={bullLang === "ja" ? "言語" : "Language"}
+          >
+            {langTargets.map((t) => (
+              <a
+                href={t.href}
+                hreflang={t.lang}
+                aria-current={t.active ? "page" : undefined}
+                class:list={[
+                  "px-2 py-1 text-xs font-medium rounded transition-colors",
+                  t.active
+                    ? "text-accent-500 bg-accent-500/10"
+                    : "text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text",
+                ]}
+              >
+                {t.label}
+              </a>
+            ))}
+          </div>
+        )}
+        <div class="ml-1 pl-2 border-l border-light-border dark:border-dark-border">
           <ThemeToggle client:load />
         </div>
       </div>
@@ -87,10 +150,8 @@ const currentPath = Astro.url.pathname;
     <div id="mobile-menu" class="hidden md:hidden pb-4">
       <div class="flex flex-col gap-1">
         {
-          NAV_LINKS.map((link) => {
-            const isActive =
-              currentPath === link.href ||
-              (link.href !== "/" && currentPath.startsWith(link.href));
+          navLinks.map((link) => {
+            const isActive = isActiveLink(link.href);
             return (
               <a
                 href={link.href}
@@ -106,6 +167,26 @@ const currentPath = Astro.url.pathname;
             );
           })
         }
+        <!-- Language switcher (mobile, BULL bilingual pages only) -->
+        {bullLang && (
+          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2" role="group" aria-label={bullLang === "ja" ? "言語" : "Language"}>
+            {langTargets.map((t) => (
+              <a
+                href={t.href}
+                hreflang={t.lang}
+                aria-current={t.active ? "page" : undefined}
+                class:list={[
+                  "px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                  t.active
+                    ? "text-accent-500 bg-accent-500/10"
+                    : "text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text hover:bg-light-border/50 dark:hover:bg-dark-border/50",
+                ]}
+              >
+                {t.label}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   </nav>

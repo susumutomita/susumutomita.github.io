@@ -12,6 +12,12 @@ import rehypeKatex from "rehype-katex";
 
 import svelte from "@astrojs/svelte";
 
+// Production deploys to Netlify (SSR). Cloudflare Pages sets CF_PAGES=1 in its
+// build environment; there we emit a fully static build instead, which Pages
+// serves directly. The site has no runtime SSR needs (no Astro.request/cookies,
+// endpoints are build-time), so the static output is equivalent.
+const isCloudflareBuild = Boolean(process.env.CF_PAGES);
+
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://susumutomita.github.io',
@@ -32,8 +38,8 @@ export default defineConfig({
 		remarkPlugins: [remarkReadingTime, remarkMath],
 		rehypePlugins: [rehypeKatex],
 	},
-	output: "server",
-	adapter: netlify({ edgeMiddleware: true }),
+	output: isCloudflareBuild ? "static" : "server",
+	adapter: isCloudflareBuild ? undefined : netlify({ edgeMiddleware: true }),
 	vite: {
 		assetsInclude: "**/*.riv",
 	},

@@ -1,0 +1,81 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import { BULL } from "../../lib/constants";
+import { tenkaCloudSchema } from "../../lib/seo";
+
+export const prerender = true;
+const lang = "ja" as const;
+
+const capabilities = [
+  {
+    title: "マルチテナント運用",
+    body: "コントロールプレーン／アプリケーションプレーン構成で、テナントごとに隔離環境を払い出し、別々のAWSアカウントへ自動デプロイする。",
+  },
+  {
+    title: "ID・アクセス",
+    body: "ロールベースアクセスとSSOにより、主催者・運営・参加者がそれぞれ見るべきものだけを見られる。",
+  },
+  {
+    title: "監査可能性",
+    body: "操作を追跡できる管理者統制と監査証跡。顧客基盤に持ち込むのと同じ規律を備える。",
+  },
+  {
+    title: "運用ツール",
+    body: "ライブイベント中に Battle / Challenge 形式を安定して運営するためのツール群。",
+  },
+];
+
+const links = [
+  { label: "tenkacloud.com", href: BULL.tenkacloudSite },
+  { label: "GitHubのTenkaCloud", href: BULL.tenkacloud },
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub="/tenkacloud"
+  title="TenkaCloud — BULL"
+  description="TenkaCloudは、クラウドチャレンジや学習イベントのためのBULLのオープンソース・マルチテナント基盤。マルチテナント運用・ID・監査可能性の実装証拠でもあります。"
+  extraSchema={[tenkaCloudSchema(lang)]}
+>
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <div class="max-w-3xl mb-12">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">
+        次の柱となる自社プロダクト（受託の成果物ではない）
+      </p>
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">TenkaCloud</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted mb-4">
+        TenkaCloudは、クラウドチャレンジ、GameDay、技術学習イベントを運営するためのオープンソースプロダクトです。
+        エンジニアリングの受託と並ぶ、BULLの次の柱になりつつあります。
+      </p>
+      <p class="text-lg text-light-muted dark:text-dark-muted">
+        同時に、マルチテナント運用・ID・アクセス・監査可能性という、顧客向けにも解いている課題の実装証拠として読めます。
+      </p>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      {capabilities.map((c) => (
+        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+          <h2 class="font-display text-lg font-bold mb-2">{c.title}</h2>
+          <p class="text-sm text-light-muted dark:text-dark-muted">{c.body}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-10 flex flex-wrap gap-4">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          {l.label}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      ))}
+    </div>
+  </section>
+</BullLayout>

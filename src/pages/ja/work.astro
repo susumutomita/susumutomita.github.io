@@ -1,0 +1,118 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import { BULL } from "../../lib/constants";
+
+export const prerender = true;
+const lang = "ja" as const;
+
+const work = [
+  {
+    title: "TenkaCloud",
+    problem:
+      "クラウド競技やGameDayでは、参加者ごとに隔離された再現可能な環境と、公平な採点・厳密な運用統制が必要になる。",
+    role:
+      "コントロールプレーン／アプリケーションプレーンを分離したマルチテナントSaaSを設計・実装し、参加者AWSアカウントへの自動デプロイを実現。",
+    hard:
+      "運用性とデプロイ速度を損なわずに、テナント分離・ロールベースアクセス・SSO・監査可能性を成立させること。",
+    result:
+      "Battle / Challenge 形式を運営できるOSSとして公開。マルチテナント運用設計の公開された証拠にもなっている。",
+    link: BULL.tenkacloud,
+    linkLabel: "GitHub",
+  },
+  {
+    title: "JPKI Web3インフラ",
+    problem:
+      "日本の公的個人認証基盤（JPKI）を用いるウォレット基盤には、監査に耐えるインフラが求められた。",
+    role:
+      "インフラ設計と監査対応。機微なID処理まわりのアクセス境界、ログ、運用統制を設計。",
+    hard:
+      "厳密な監査可能性・最小権限と、開発・運用の実用性を両立させること。",
+    result: "監査対応と安全な運用を見据えたインフラ設計。",
+  },
+  {
+    title: "クラウド・ID移行",
+    problem:
+      "ドメイン・IDプロバイダー・デプロイ先を変える組織は、切替時の停止やアクセス断のリスクを抱える。",
+    role:
+      "ドメイン・DNS・ID・デプロイの切替を、ロールバックと運用継続を最初から織り込んで計画・実行。",
+    hard:
+      "メール・SSO・SaaS連携の順序を設計し、移行中もユーザーが業務を続けられるようにすること。",
+    result: "ビッグバン型のリスクではなく、明確なロールバック経路と継続性を備えた切替。",
+  },
+  {
+    title: "大規模IoT・クラウド運用",
+    problem:
+      "巨大なデバイス群を管理するクラウド基盤の運用には、規模に応じた信頼性・可観測性・コスト規律が要る。",
+    role:
+      "100万台超の管理対象を扱う基盤のクラウドアーキテクチャ・運用設計。",
+    hard: "可観測性と運用性を保ちながら、信頼性とコストを両立させること。",
+    result: "監視と自動化を組み込み、規模に耐えて稼働する運用基盤。",
+  },
+  {
+    title: "CCoE / DevSecOps / 監査自動化",
+    problem:
+      "多くのチームを抱える組織には、共通のガードレール、セキュリティ実践、再現可能な監査証跡が必要になる。",
+    role:
+      "2,000名超のエンジニア組織で、監査自動化を含むCCoE・DevSecOps実践の構築を支援。",
+    hard: "チームの速度を落とさず標準化し、コンプライアンスをパイプラインの副産物にすること。",
+    result: "共通のガードレールと自動化された監査証跡を、複数チームに展開。",
+  },
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub="/work"
+  title="実績 — BULL"
+  description="BULLの実績：TenkaCloud、JPKI Web3インフラ、クラウド・ID移行、大規模IoT運用、CCoE / DevSecOps。技術名の羅列ではなく、課題・責任範囲・難所・結果で示します。"
+>
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <div class="max-w-3xl mb-12">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">実績</p>
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">
+        技術名の羅列ではなく、仕事の信頼材料として
+      </h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted">
+        各実績は、課題・担当した責任範囲・設計上の難所・成果で示します。顧客名や内部情報は、公開を許された範囲に限定します。
+      </p>
+    </div>
+
+    <div class="space-y-8">
+      {work.map((w) => (
+        <article class="p-6 md:p-8 rounded-lg border border-light-border dark:border-dark-border">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-5">
+            <h2 class="font-display text-xl md:text-2xl font-bold">{w.title}</h2>
+            {w.link && (
+              <a
+                href={w.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm font-medium text-accent-500 hover:text-accent-600"
+              >
+                {w.linkLabel} →
+              </a>
+            )}
+          </div>
+          <dl class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">課題</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.problem}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">担当範囲</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.role}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">難所</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.hard}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">成果</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.result}</dd>
+            </div>
+          </dl>
+        </article>
+      ))}
+    </div>
+  </section>
+</BullLayout>
