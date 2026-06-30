@@ -40,12 +40,19 @@ export const BULL = {
   tenkacloud: "https://github.com/susumutomita/TenkaCloud",
   github: LINKS.github,
   /**
-   * Google Form endpoints for the bilingual contact flow (issue #314).
-   * Leave empty to fall back to a pre-filled mailto: link until the Forms are
-   * published. The field spec lives in docs/google-form-spec.md.
+   * Published bilingual Google Form for general inquiries (issues #314 / #316).
+   * The form itself carries the JA/EN content and topic branching; the site just
+   * opens it. Leave empty to fall back to a mailto: link. Field spec lives in
+   * docs/google-form-spec.md. (No tracking params are appended — see CLAUDE.md.)
    */
-  contactFormEn: "",
-  contactFormJa: "",
+  contactFormEn: "https://forms.gle/cHK2onML5vpTonKL8",
+  contactFormJa: "https://forms.gle/cHK2onML5vpTonKL8",
+  /**
+   * TenkaCloud is a separate product (#316): inquiries go to its own site and
+   * dedicated form, not the general BULL inquiry form.
+   */
+  tenkacloudSite: "https://tenkacloud.com",
+  tenkacloudForm: "https://forms.gle/djVprYmq3hFgJA7P9",
 };
 
 export const loaderAnimation: [string, Record<string, unknown>, Record<string, unknown>] = [

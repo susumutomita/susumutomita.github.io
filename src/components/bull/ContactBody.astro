@@ -26,13 +26,17 @@ const t = {
       "AWS account foundations",
       "IaC, observability, or non-functional design",
       "Architecture review or technical advisory",
-      "TenkaCloud — cloud challenge or technical event",
       "Generative AI product development bootcamp",
       "Other",
     ],
     cta: "Start a conversation",
     ctaHelpForm: "Opens the BULL inquiry form in a new tab.",
-    ctaHelpMail: "Opens your email client. A Google Form will replace this soon.",
+    ctaHelpMail: "Opens your email client to reach BULL directly.",
+    tenkacloud: {
+      title: "Running a cloud challenge or technical event?",
+      body: "TenkaCloud is a separate product with its own site and inquiry form.",
+      cta: "Go to TenkaCloud",
+    },
     consentTitle: "Before you send",
     consent: [
       "This form is an inquiry only and does not create a consulting engagement.",
@@ -53,13 +57,17 @@ const t = {
       "AWSアカウント基盤",
       "IaC・監視・非機能設計",
       "アーキテクチャレビュー・技術アドバイザリー",
-      "TenkaCloud・技術イベント",
       "生成AIプロダクト開発ブートキャンプ",
       "その他",
     ],
     cta: "お問い合わせ",
     ctaHelpForm: "BULLの問い合わせフォームを新しいタブで開きます。",
-    ctaHelpMail: "メールソフトが開きます。近日中にGoogle Formに置き換えます。",
+    ctaHelpMail: "メールソフトが開き、BULLへ直接ご連絡いただけます。",
+    tenkacloud: {
+      title: "クラウド競技・技術イベントをお考えですか？",
+      body: "TenkaCloud は専用サイトと専用フォームをご用意しています。",
+      cta: "TenkaCloud へ",
+    },
     consentTitle: "送信の前に",
     consent: [
       "このフォーム送信は問い合わせのみであり、契約・業務開始を意味しません。",
@@ -95,10 +103,6 @@ const t = {
   <!-- CTA -->
   <div class="mb-10 p-6 md:p-8 rounded-lg bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 text-center">
     <a
-      id="bull-contact-cta"
-      data-lang={lang}
-      data-form-url={formUrl}
-      data-email={LINKS.email}
       href={formUrl || `mailto:${LINKS.email}`}
       target={formUrl ? "_blank" : undefined}
       rel={formUrl ? "noopener noreferrer" : undefined}
@@ -112,6 +116,25 @@ const t = {
     <p class="text-sm text-light-muted dark:text-dark-muted mt-4">
       {formUrl ? t.ctaHelpForm : t.ctaHelpMail}
     </p>
+  </div>
+
+  <!-- TenkaCloud — separate product, its own site and form (#316) -->
+  <div class="mb-10 p-6 rounded-lg border border-light-border dark:border-dark-border flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+    <div>
+      <h2 class="font-display text-base font-bold mb-1">{t.tenkacloud.title}</h2>
+      <p class="text-sm text-light-muted dark:text-dark-muted">{t.tenkacloud.body}</p>
+    </div>
+    <a
+      href={BULL.tenkacloudForm}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="shrink-0 inline-flex items-center gap-2 px-5 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+    >
+      {t.tenkacloud.cta}
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    </a>
   </div>
 
   <!-- Consent / disclaimer -->
@@ -130,52 +153,3 @@ const t = {
     </p>
   </div>
 </section>
-
-<script>
-  // Attach inbound campaign breadcrumbs (UTM params only) to the contact CTA so
-  // we can tell which campaigns lead to inquiries (issue #314 / #315). We do NOT
-  // forward document.referrer to the third-party Google Form, to stay aligned
-  // with the site's privacy-focused, no-tracking policy (CLAUDE.md). The mailto
-  // fallback may include more context because it is sent first-party, directly
-  // to the site owner, and remains fully editable by the visitor before sending.
-  function initContactCta(): void {
-    const el = document.getElementById("bull-contact-cta") as HTMLAnchorElement | null;
-    if (!el) return;
-
-    const lang = el.dataset.lang ?? "en";
-    const formUrl = el.dataset.formUrl ?? "";
-    const email = el.dataset.email ?? "";
-
-    const params = new URLSearchParams(window.location.search);
-    const referrer = document.referrer || "";
-    const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
-
-    if (formUrl) {
-      try {
-        const url = new URL(formUrl);
-        for (const key of utmKeys) {
-          const value = params.get(key);
-          if (value) url.searchParams.set(key, value);
-        }
-        el.href = url.toString();
-      } catch {
-        // Leave the original href if the configured URL is malformed.
-      }
-      return;
-    }
-
-    // mailto fallback with a context footer.
-    const lines = [
-      lang === "ja" ? "（ご相談内容をご記入ください）" : "(Please describe your inquiry)",
-      "",
-      "--- context (auto) ---",
-      `source page: ${window.location.href}`,
-      `referrer: ${referrer}`,
-      ...utmKeys.map((key) => `${key}: ${params.get(key) ?? ""}`),
-    ];
-    const subject = lang === "ja" ? "BULLへのお問い合わせ" : "Inquiry to BULL";
-    el.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
-  }
-
-  initContactCta();
-</script>

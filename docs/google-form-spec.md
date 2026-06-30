@@ -110,7 +110,7 @@ includes the source page, referrer, and UTM parameters in the body.
 
 ## Inbound source capture
 
-The site CTA appends `ref` (document.referrer) and any `utm_*` parameters to the
-form URL. To persist them into responses, add short-answer questions named
-`ref`, `utm_source`, `utm_medium`, `utm_campaign` and prefill them via the form's
-"Get pre-filled link" entry IDs, or simply review them from the appended URL.
+To stay aligned with the site's privacy-focused, no-tracking policy (CLAUDE.md),
+the site CTA opens the form **without appending** `document.referrer` or `utm_*`
+parameters. If submission-source measurement is needed later, rely on Google
+Forms' own response metadata rather than forwarding tracking params from the site.

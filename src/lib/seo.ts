@@ -19,8 +19,9 @@ export function organizationSchema(lang: Lang) {
     "@type": "Organization",
     "@id": `${SITE.url}/#organization`,
     name: BULL.name,
-    // Trailing slash to match the canonical URL emitted by BaseLayout.
-    url: `${SITE.url}/${lang}/`,
+    // Stable entity URL (the org root), since the @id is shared across the EN and
+    // JA pages — a per-language url would make the same @id assert conflicting urls.
+    url: SITE.url,
     description: ORG_DESCRIPTION[lang],
     founder: {
       "@type": "Person",
@@ -51,6 +52,11 @@ export function personSchema() {
   };
 }
 
+const TENKACLOUD_DESCRIPTION: Record<Lang, string> = {
+  en: "An open-source, multi-tenant platform for cloud challenges, GameDays, and technical learning events, with role-based access, SSO, and auditability.",
+  ja: "クラウドチャレンジ、GameDay、技術学習イベントのためのオープンソース・マルチテナント基盤。ロールベースアクセス、SSO、監査可能性を備える。",
+};
+
 /** schema.org SoftwareApplication node for TenkaCloud. */
 export function tenkaCloudSchema(lang: Lang) {
   return {
@@ -59,10 +65,7 @@ export function tenkaCloudSchema(lang: Lang) {
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
     url: BULL.tenkacloud,
-    description:
-      lang === "en"
-        ? "An open-source, multi-tenant platform for cloud challenges, GameDays, and technical learning events, with role-based access, SSO, and auditability."
-        : "クラウドチャレンジ、GameDay、技術学習イベントのためのオープンソース・マルチテナント基盤。ロールベースアクセス、SSO、監査可能性を備える。",
+    description: TENKACLOUD_DESCRIPTION[lang],
     author: {
       "@type": "Organization",
       name: BULL.name,

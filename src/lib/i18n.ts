@@ -74,14 +74,18 @@ export function switchLangPath(pathname: string, target: Lang): string {
     const sub = path.replace(/^\/(en|ja)/, "");
     // Only mirror sub-routes that exist in both languages; otherwise fall back
     // to the target language home so the switcher never points at a 404.
-    return (BULL_SUBROUTES as readonly string[]).includes(sub) ? `/${target}${sub}` : `/${target}`;
+    return (BULL_SUBROUTES as readonly string[]).includes(sub) ? bullPath(target, sub as BullSubroute) : bullPath(target, "");
   }
-  return `/${target}`;
+  return bullPath(target, "");
 }
 
-/** Builds the absolute path for a BULL page in a given language. */
+/**
+ * Builds the absolute path for a BULL page. Carries a trailing slash so internal
+ * links match the canonical/hreflang URLs (directory build format), keeping the
+ * self-referential hreflang set consistent (#315).
+ */
 export function bullPath(lang: Lang, sub: BullSubroute): string {
-  return `/${lang}${sub}`;
+  return `/${lang}${sub}/`;
 }
 
 /**

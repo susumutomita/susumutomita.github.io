@@ -1,6 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { LINKS } from "../lib/constants";
+import { LINKS, BULL } from "../lib/constants";
+
+// "What I can help with / できること" — BULL consultation areas (#316),
+// shown bilingually. TenkaCloud is handled separately below.
+const helpAreas = [
+  { en: "Corporate domain & identity migration", ja: "コーポレートドメイン・ID移行" },
+  { en: "IaC, observability & non-functional design", ja: "IaC・監視・非機能設計" },
+  { en: "Architecture review & technical advisory", ja: "アーキテクチャレビュー・技術アドバイザリー" },
+  { en: "Generative AI product development bootcamp", ja: "生成AIプロダクト開発ブートキャンプ" },
+];
 ---
 
 <BaseLayout
@@ -15,6 +24,26 @@ import { LINKS } from "../lib/constants";
         I'm available for freelance projects, consulting, and collaboration opportunities.
         Feel free to reach out to discuss your project.
       </p>
+    </div>
+
+    <!-- Primary CTA: published bilingual Google Form (#316) -->
+    <div class="mb-8 p-8 rounded-lg bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 text-center">
+      <h2 class="font-display text-2xl font-bold mb-3">Start a conversation / お問い合わせ</h2>
+      <p class="text-light-muted dark:text-dark-muted mb-6 max-w-xl mx-auto">
+        Tell me about your project through the inquiry form (English / 日本語).<br />
+        プロジェクトについて、問い合わせフォーム（日英対応）からお気軽にどうぞ。
+      </p>
+      <a
+        href={BULL.contactFormEn}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-8 py-4 bg-accent-500 text-white hover:bg-accent-600 font-medium rounded-lg transition-colors text-lg"
+      >
+        Start a conversation / お問い合わせ
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </a>
     </div>
 
     <!-- Email CTA -->
@@ -42,40 +71,37 @@ import { LINKS } from "../lib/constants";
       </p>
     </div>
 
-    <!-- Services -->
+    <!-- What I can help with / できること (#316) -->
     <div class="mb-12">
-      <h2 class="font-display text-2xl font-bold mb-6 text-center">What I Can Help With</h2>
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-          <h3 class="font-display font-semibold text-lg mb-2 text-accent-500">QA & Test Automation</h3>
+      <h2 class="font-display text-2xl font-bold mb-6 text-center">What I can help with / できること</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        {helpAreas.map((area) => (
+          <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+            <h3 class="font-display font-semibold text-lg mb-1 text-accent-500">{area.en}</h3>
+            <p class="text-sm text-light-muted dark:text-dark-muted">{area.ja}</p>
+          </div>
+        ))}
+      </div>
+
+      <!-- TenkaCloud — separate product / form (#316) -->
+      <div class="mt-4 p-6 rounded-lg border border-light-border dark:border-dark-border flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+        <div>
+          <h3 class="font-display font-semibold text-lg mb-1">TenkaCloud — cloud challenge / technical event</h3>
           <p class="text-sm text-light-muted dark:text-dark-muted">
-            Test strategy, automation frameworks (Selenium, Cypress), CI/CD integration, and quality processes
+            A separate product with its own site and inquiry form. / 専用サイト・専用フォームをご用意しています。
           </p>
         </div>
-        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-          <h3 class="font-display font-semibold text-lg mb-2 text-accent-500">Cloud Architecture</h3>
-          <p class="text-sm text-light-muted dark:text-dark-muted">
-            AWS infrastructure design, Terraform, serverless architectures, and DevOps practices
-          </p>
-        </div>
-        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-          <h3 class="font-display font-semibold text-lg mb-2 text-accent-500">Web3 / Blockchain</h3>
-          <p class="text-sm text-light-muted dark:text-dark-muted">
-            Smart contract development, DeFi protocols, and decentralized applications
-          </p>
-        </div>
-        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-          <h3 class="font-display font-semibold text-lg mb-2 text-accent-500">Lab Automation</h3>
-          <p class="text-sm text-light-muted dark:text-dark-muted">
-            Automated cell cultivation systems, robot integration, and SRE practices
-          </p>
-        </div>
-        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-          <h3 class="font-display font-semibold text-lg mb-2 text-accent-500">Agile Coaching</h3>
-          <p class="text-sm text-light-muted dark:text-dark-muted">
-            Agile transformation, engineering culture, and team development
-          </p>
-        </div>
+        <a
+          href={BULL.tenkacloudForm}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="shrink-0 inline-flex items-center gap-2 px-5 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          Go to TenkaCloud / TenkaCloud へ
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
       </div>
     </div>
 
