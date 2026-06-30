@@ -77,7 +77,9 @@ export function switchLangPath(pathname: string, target: Lang): string {
   const current = getLangFromPath(path);
   if (current) {
     const sub = path.replace(/^\/(en|ja)/, "");
-    return `/${target}${sub}`;
+    // Only mirror sub-routes that exist in both languages; otherwise fall back
+    // to the target language home so the switcher never points at a 404.
+    return (BULL_SUBROUTES as readonly string[]).includes(sub) ? `/${target}${sub}` : `/${target}`;
   }
   return `/${target}`;
 }

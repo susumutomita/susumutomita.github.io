@@ -33,7 +33,12 @@ const {
 
 const ogLocale = lang === "en" ? "en_US" : "ja_JP";
 
-const canonicalURL = new URL(Astro.url.pathname, SITE.url);
+// For bilingual pages (which pass `alternates`), force a trailing slash so the
+// canonical URL always matches the trailing-slash hreflang set, regardless of
+// how the path was requested (#315).
+let canonicalPath = Astro.url.pathname;
+if (alternates && !canonicalPath.endsWith("/")) canonicalPath += "/";
+const canonicalURL = new URL(canonicalPath, SITE.url);
 const ogImageURL = new URL(ogImage, SITE.url);
 
 const defaultSchema = {
@@ -60,6 +65,9 @@ const defaultSchema = {
 };
 
 const schema = jsonLd ?? defaultSchema;
+// Escape "<" so a value containing "</script>" cannot terminate the inline
+// JSON-LD script element early (set:html bypasses HTML escaping).
+const schemaJson = JSON.stringify(schema).replace(/</g, "\\u003c");
 ---
 
 <!doctype html>
@@ -104,7 +112,7 @@ const schema = jsonLd ?? defaultSchema;
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous" />
 
     <!-- Schema.org -->
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script is:inline type="application/ld+json" set:html={schemaJson} />
 
     <!-- Theme script (prevents flash) -->
     <script is:inline>

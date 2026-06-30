@@ -8,7 +8,11 @@ interface Props {
 
 const { lang } = Astro.props;
 
-const formUrl = lang === "en" ? BULL.contactFormEn : BULL.contactFormJa;
+// Only treat the configured value as a real form when it is a concrete https
+// URL — guards against an unreplaced template like ".../<EN_FORM_ID>/..." being
+// truthy and silently skipping the mailto fallback (which would lose inquiries).
+const rawFormUrl = lang === "en" ? BULL.contactFormEn : BULL.contactFormJa;
+const formUrl = rawFormUrl.startsWith("https://") && !rawFormUrl.includes("<") ? rawFormUrl : "";
 
 const t = {
   en: {

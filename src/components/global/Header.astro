@@ -10,7 +10,9 @@ import {
 } from "../../lib/i18n";
 import ThemeToggle from "./ThemeToggle";
 
-const currentPath = Astro.url.pathname;
+// Normalize the trailing slash so exact-match active checks work whether the
+// path is served as "/en" or "/en/".
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 const bullLang = getLangFromPath(currentPath);
 
 // In the BULL bilingual section, swap the navigation and logo for the
@@ -80,7 +82,7 @@ const langTargets = LANGUAGES.map((lang) => ({
               <a
                 href={t.href}
                 hreflang={t.lang}
-                aria-current={t.active ? "true" : undefined}
+                aria-current={t.active ? "page" : undefined}
                 class:list={[
                   "px-2 py-1 text-xs font-medium rounded transition-colors",
                   t.active
@@ -164,7 +166,7 @@ const langTargets = LANGUAGES.map((lang) => ({
               <a
                 href={t.href}
                 hreflang={t.lang}
-                aria-current={t.active ? "true" : undefined}
+                aria-current={t.active ? "page" : undefined}
                 class:list={[
                   "px-3 py-2 text-sm font-medium rounded-md transition-colors",
                   t.active
