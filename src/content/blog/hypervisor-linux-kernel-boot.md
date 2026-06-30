@@ -7,7 +7,7 @@ category: "system"
 
 ## はじめに
 
-自作ハイパーバイザーで **本物の Linux カーネル (v6.6)** を起動することに成功した。
+自作ハイパーバイザーで**本物の Linux カーネル (v6.6)**を起動することに成功した。
 
 これまでの開発では、自分で書いた ARM64 機械語のテストプログラム（Fibonacci 計算など）を動かしていたが、今回は実際の OS カーネルという大きなプログラムを動かすことができた。
 
@@ -57,9 +57,9 @@ arch_timer: cp15 timer(s) running at 24.00MHz (virt)
 
 ### Hypervisor.framework
 
-Apple は macOS 向けに `Hypervisor.framework` という仮想化フレームワークを提供している。これを使うと、カーネルモジュールを書かなくてもユーザー空間からハイパーバイザーを作成できる。
+Apple は macOS 向けに`Hypervisor.framework`という仮想化フレームワークを提供している。これを使うと、カーネルモジュールを書かなくてもユーザー空間からハイパーバイザーを作成できる。
 
-今回のプロジェクトでは、Rust から `Hypervisor.framework` を使うために [applevisor](https://github.com/impalabs/applevisor) というクレートを利用した。
+今回のプロジェクトでは、Rust から`Hypervisor.framework`を使うために[applevisor](https://github.com/impalabs/applevisor)というクレートを利用した。
 
 ## Linux カーネルを起動するために必要なもの
 
@@ -126,11 +126,11 @@ let config = DeviceTreeConfig {
 
 **問題**: Linux カーネルが UART に文字を書き込もうとしても、正しいアドレスが取得できなかった。
 
-ARM アーキテクチャでは、ゲストがマップされていないメモリにアクセスすると **Data Abort** という例外が発生する。この例外をハイパーバイザーで捕捉して、UART などの MMIO（Memory-Mapped I/O）デバイスをエミュレートする。
+ARM アーキテクチャでは、ゲストがマップされていないメモリにアクセスすると**Data Abort**という例外が発生する。この例外をハイパーバイザーで捕捉して、UART などの MMIO（Memory-Mapped I/O）デバイスをエミュレートする。
 
-最初は `FAR_EL1`（Fault Address Register）からアドレスを読み取ろうとしたが、Stage 2 フォールト（ゲスト物理アドレスからホスト物理アドレスへの変換失敗）では正しい値が取得できなかった。
+最初は`FAR_EL1`（Fault Address Register）からアドレスを読み取ろうとしたが、Stage 2 フォールト（ゲスト物理アドレスからホスト物理アドレスへの変換失敗）では正しい値が取得できなかった。
 
-**解決策**: `Hypervisor.framework` が提供する `exit_info.exception.physical_address` を使用した。
+**解決策**: `Hypervisor.framework`が提供する`exit_info.exception.physical_address`を使用した。
 
 ```rust
 fn handle_data_abort(
@@ -183,7 +183,7 @@ Ok(true) // 続行
 
 **問題**: ARM64 命令のエンコーディングを間違えていて、意図した動作をしなかった。
 
-例えば `MOVK X0, #0x8400, LSL #16` という命令は、X0 レジスタの上位 16 ビットに `0x8400` を設定する。しかし、`hw`（shift amount）フィールドのエンコードを間違えていた。
+例えば`MOVK X0, #0x8400, LSL #16`という命令は、X0 レジスタの上位 16 ビットに`0x8400`を設定する。しかし、`hw`（shift amount）フィールドのエンコードを間違えていた。
 
 ```
 間違い: 0xF2A1_0800  → hw=00 (no shift)
@@ -291,7 +291,7 @@ fn linux_カーネルが起動してuart出力する() {
 
 カーネルが正常に起動し、以下のことが確認できた。
 
-- **CPU 検出**: Apple Silicon の CPU ID `0x610f0000` を認識
+- **CPU 検出**: Apple Silicon の CPU ID `0x610f0000`を認識
 - **メモリ管理**: 256MB のメモリを正しくマッピング
 - **タイマー動作**: 24MHz のタイマーが動作
 - **UART 出力**: シリアルコンソールへのログ出力
@@ -317,7 +317,7 @@ fn linux_カーネルが起動してuart出力する() {
 
 現時点では、カーネルの起動ログは表示されるが、シェル（`/bin/sh`）は起動しない。理由は以下の 2 つである。
 
-1. **initramfs がない**: カーネルだけでは `/bin/sh` などのプログラムがない。BusyBox などを含む initramfs が必要になる。
+1. **initramfs がない**: カーネルだけでは`/bin/sh`などのプログラムがない。BusyBox などを含む initramfs が必要になる。
 
 2. **GIC の MMIO 未対応**: 割り込みコントローラへのアクセスがまだ完全にエミュレートされていない。
 
@@ -336,7 +336,7 @@ MMIO write to unhandled address: 0x8000000 = 0x0 (size: 4)
 
 ## まとめ
 
-macOS の `Hypervisor.framework` を使って、実際の Linux カーネル（v6.6）を起動することに成功した。
+macOS の`Hypervisor.framework`を使って、実際の Linux カーネル（v6.6）を起動することに成功した。
 
 テストプログラムから始めて、UART、タイマー、Device Tree と段階的に機能を追加し、ついに本物の OS カーネルを動かせるようになった。
 

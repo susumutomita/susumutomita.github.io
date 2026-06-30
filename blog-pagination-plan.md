@@ -131,7 +131,7 @@ Features:
 - [x] Test page generation
 
 ### Step 3: Update Index Page ✅
-- [x] Decide on strategy (Astro auto-generates /blog/ as page 1)
+- [x] Decide on strategy (Astro auto-generates/blog/as page 1)
 - [x] Remove old `index.astro` (no longer needed)
 - [x] Ensure SEO best practices
 - [x] Test that `/blog/` works correctly
