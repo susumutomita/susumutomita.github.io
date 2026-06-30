@@ -27,7 +27,7 @@ Built with Astro, deployed on Netlify, designed for speed and clarity.
 
 ## ✨ Highlights
 
-- 🌗 **Adaptive theming** — dark / light with system-preference detection
+- 🌗 **Adaptive theming** — dark/light with system-preference detection
 - 🌐 **Interactive 3D globe** of visited countries (D3.js)
 - 📝 **MDX-powered blog** with reading time, RSS, and KaTeX math
 - 📄 **Printable resume** with PDF export and a tailored cover letter view

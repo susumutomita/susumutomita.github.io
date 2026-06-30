@@ -48,11 +48,11 @@ Dock.io は、ブロックチェイン技術を活用して、個人や組織の
 
 **なぜDock.ioを調べているのか**
 
-私たちは、https://github.com/knocks-public/2024-CircuitBreaker で Inro というプロダクトを開発しました。このプロダクトを世に出すために Orange DAO S24 フェローシップに申し込みましたが、残念ながら投資は見送られました。フィードバックとして、実際の需要や使用例の明確化が求められました。
+私たちは、https://github.com/knocks-public/2024-CircuitBreakerで Inro というプロダクトを開発しました。このプロダクトを世に出すために Orange DAO S24 フェローシップに申し込みましたが、残念ながら投資は見送られました。フィードバックとして、実際の需要や使用例の明確化が求められました。
 
 Dock.io を発見し、すでに同様の製品を成功裏にローンチしていることから、ユーザー体験の違いや彼らがどのようなニーズを把握し、満たしているのかを理解したいと考えています。これにより、Inro を改善し、ユーザーのニーズを特定し、成功する実装と採用の可能性を高めたいです。
 調べてみたり話を聞いてみた感想は KYC(Know Your Customer) 実現するフルスタックプラットフォームであり必ずしも Decentraized にこだわっているというわけではなさそうでした。
-Inro のコンセプトを話してみると [SpruceID](https://spruceid.com/)や[Scytáles](https://www.scytales.com/)を調べてみるとよいよとアドバイスも貰えてありがたかったです。
+Inro のコンセプトを話してみると[SpruceID](https://spruceid.com/)や[Scytáles](https://www.scytales.com/)を調べてみるとよいよとアドバイスも貰えてありがたかったです。
 
 **まとめ**
 
