@@ -63,6 +63,10 @@ function normalize(pathname: string): string {
   return pathname;
 }
 
+/** Module-level helpers (built once, not per call). */
+const LANG_PREFIX_RE = new RegExp(`^/(${LANGUAGES.join("|")})`);
+const BULL_SUBROUTE_SET: ReadonlySet<string> = new Set(BULL_SUBROUTES);
+
 /**
  * Returns the equivalent path in the target language. Inside the BULL section
  * the sub-route is preserved (e.g. `/en/services` -> `/ja/services`). For any
@@ -72,10 +76,10 @@ export function switchLangPath(pathname: string, target: Lang): string {
   const path = normalize(pathname);
   const current = getLangFromPath(path);
   if (current) {
-    const sub = path.replace(new RegExp(`^/(${LANGUAGES.join("|")})`), "");
+    const sub = path.replace(LANG_PREFIX_RE, "");
     // Only mirror sub-routes that exist in both languages; otherwise fall back
     // to the target language home so the switcher never points at a 404.
-    return (BULL_SUBROUTES as readonly string[]).includes(sub) ? bullPath(target, sub as BullSubroute) : bullPath(target, "");
+    return BULL_SUBROUTE_SET.has(sub) ? bullPath(target, sub as BullSubroute) : bullPath(target, "");
   }
   return bullPath(target, "");
 }

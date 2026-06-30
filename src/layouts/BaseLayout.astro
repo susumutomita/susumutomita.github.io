@@ -66,9 +66,15 @@ const defaultSchema = {
 };
 
 const schema = jsonLd ?? defaultSchema;
-// Escape "<" so a value containing "</script>" cannot terminate the inline
-// JSON-LD script element early (set:html bypasses HTML escaping).
-const schemaJson = JSON.stringify(schema).replace(/</g, "\\u003c");
+// Escape characters that are unsafe in inline JSON-in-HTML (OWASP): "<" (so a
+// value containing "</script>" can't terminate the script early), plus ">", "&",
+// and the U+2028/U+2029 line separators. set:html bypasses HTML escaping.
+const schemaJson = JSON.stringify(schema)
+  .replace(/</g, "\\u003c")
+  .replace(/>/g, "\\u003e")
+  .replace(/&/g, "\\u0026")
+  .replace(/\u2028/g, "\\u2028")
+  .replace(/\u2029/g, "\\u2029");
 ---
 
 <!doctype html>
