@@ -5,3 +5,6 @@ papers/**/*.md
 
 # Private planning files
 Plan.md
+
+# Developer documentation / specs (bilingual reference, not editorial prose)
+docs/**/*.md
