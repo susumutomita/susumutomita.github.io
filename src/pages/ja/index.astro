@@ -2,6 +2,7 @@
 import BullLayout from "../../layouts/BullLayout.astro";
 import { bullPath } from "../../lib/i18n";
 import { BULL } from "../../lib/constants";
+import { tenkaCloudSchema } from "../../lib/seo";
 
 export const prerender = true;
 const lang = "ja" as const;
@@ -53,6 +54,7 @@ const proof = [
   sub=""
   title="BULL — 動くもので、意思決定する。"
   description="BULLは、クラウド基盤づくり、コーポレートドメイン・ID移行、IaC・監視・非機能設計を、設計から実装・運用改善まで一気通貫で担う小規模事業者向けエンジニアリングファームです。"
+  extraSchema={[tenkaCloudSchema(lang)]}
 >
   <!-- Hero -->
   <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">

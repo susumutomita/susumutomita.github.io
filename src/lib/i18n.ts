@@ -102,7 +102,7 @@ export function bullPath(lang: Lang, sub: BullSubroute): string {
 export function bullAlternates(sub: BullSubroute): { lang: string; href: string }[] {
   // Built via bullPath so hreflang hrefs can never drift from canonical URLs.
   return [
-    ...LANGUAGES.map((lang) => ({ lang: lang as string, href: bullPath(lang, sub) })),
+    ...LANGUAGES.map((lang) => ({ lang, href: bullPath(lang, sub) })),
     { lang: "x-default", href: bullPath(DEFAULT_LANG, sub) },
   ];
 }

@@ -19,9 +19,9 @@ export function organizationSchema(lang: Lang) {
     "@type": "Organization",
     "@id": `${SITE.url}/#organization`,
     name: BULL.name,
-    // Stable entity URL (the org root), since the @id is shared across the EN and
-    // JA pages — a per-language url would make the same @id assert conflicting urls.
-    url: SITE.url,
+    // Stable entity URL (the org root, trailing slash to match the site-root
+    // canonical), since the @id is shared across the EN and JA pages.
+    url: `${SITE.url}/`,
     description: ORG_DESCRIPTION[lang],
     sameAs: [LINKS.github, LINKS.linkedin],
     knowsAbout: [
@@ -43,7 +43,7 @@ export function personSchema() {
     "@type": "Person",
     "@id": `${SITE.url}/#person`,
     name: SITE.name,
-    url: SITE.url,
+    url: `${SITE.url}/`,
     jobTitle: "Software Engineer",
     sameAs: [LINKS.github, LINKS.linkedin],
   };
