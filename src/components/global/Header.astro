@@ -168,7 +168,7 @@ const langTargets = LANGUAGES.map((lang) => ({
         }
         <!-- Language switcher (mobile, BULL bilingual pages only) -->
         {bullLang && (
-          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2">
+          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2" aria-label="Language">
             {langTargets.map((t) => (
               <a
                 href={t.href}

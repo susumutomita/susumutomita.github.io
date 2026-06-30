@@ -1,6 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { LINKS, BULL } from "../lib/constants";
+import { LINKS, BULL, bullContactFormUrl } from "../lib/constants";
+
+// Guarded form URL (falls back to mailto: if not a real published form).
+const formUrl = bullContactFormUrl("en");
 
 // "What I can help with / できること" — BULL consultation areas (#316),
 // shown bilingually. TenkaCloud is handled separately below.
@@ -34,9 +37,9 @@ const helpAreas = [
         プロジェクトについて、問い合わせフォーム（日英対応）からお気軽にどうぞ。
       </p>
       <a
-        href={BULL.contactFormEn}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={formUrl || `mailto:${LINKS.email}`}
+        target={formUrl ? "_blank" : undefined}
+        rel={formUrl ? "noopener noreferrer" : undefined}
         class="inline-flex items-center gap-2 px-8 py-4 bg-accent-500 text-white hover:bg-accent-600 font-medium rounded-lg transition-colors text-lg"
       >
         Start a conversation / お問い合わせ
