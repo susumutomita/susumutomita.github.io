@@ -132,10 +132,12 @@ const t = {
 </section>
 
 <script>
-  // Attach inbound source breadcrumbs (referrer + UTM) to the contact CTA so we
-  // can tell which traffic leads to inquiries (issue #314 / #315). Unknown query
-  // params are ignored by Google Forms, and folded into the mailto body as a
-  // fallback while the Forms are being built.
+  // Attach inbound campaign breadcrumbs (UTM params only) to the contact CTA so
+  // we can tell which campaigns lead to inquiries (issue #314 / #315). We do NOT
+  // forward document.referrer to the third-party Google Form, to stay aligned
+  // with the site's privacy-focused, no-tracking policy (CLAUDE.md). The mailto
+  // fallback may include more context because it is sent first-party, directly
+  // to the site owner, and remains fully editable by the visitor before sending.
   function initContactCta(): void {
     const el = document.getElementById("bull-contact-cta") as HTMLAnchorElement | null;
     if (!el) return;
@@ -151,7 +153,6 @@ const t = {
     if (formUrl) {
       try {
         const url = new URL(formUrl);
-        if (referrer) url.searchParams.set("ref", referrer);
         for (const key of utmKeys) {
           const value = params.get(key);
           if (value) url.searchParams.set(key, value);

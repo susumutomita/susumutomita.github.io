@@ -19,7 +19,8 @@ export function organizationSchema(lang: Lang) {
     "@type": "Organization",
     "@id": `${SITE.url}/#organization`,
     name: BULL.name,
-    url: `${SITE.url}/${lang}`,
+    // Trailing slash to match the canonical URL emitted by BaseLayout.
+    url: `${SITE.url}/${lang}/`,
     description: ORG_DESCRIPTION[lang],
     founder: {
       "@type": "Person",

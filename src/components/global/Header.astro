@@ -26,8 +26,11 @@ const navLinks = bullLang
 
 const logoHref = bullLang ? bullPath(bullLang, "") : "/";
 
+// Language/site roots must only match exactly, never via startsWith (so "/en"
+// doesn't light up for "/en/services"). Derived from LANGUAGES to stay in sync.
+const langRoots = new Set<string>(["/", ...LANGUAGES.map((l) => `/${l}`)]);
 const isActiveLink = (href: string) =>
-  currentPath === href || (href !== "/" && href !== "/en" && href !== "/ja" && currentPath.startsWith(href));
+  currentPath === href || (!langRoots.has(href) && currentPath.startsWith(href));
 
 // Language switcher targets (issue #311). Each language points at the
 // corresponding page, falling back to that language's home.
