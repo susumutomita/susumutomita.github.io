@@ -1,0 +1,120 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import { BULL } from "../../lib/constants";
+
+export const prerender = true;
+const lang = "en" as const;
+
+const work = [
+  {
+    title: "TenkaCloud",
+    problem:
+      "Cloud competitions and GameDays need isolated, reproducible environments per participant, with fair scoring and tight operational control.",
+    role:
+      "Designed and built a multi-tenant SaaS platform with a control plane / application plane split and automated deploys into competitor AWS accounts.",
+    hard:
+      "Tenant isolation, role-based access, SSO, and auditability without sacrificing operability or deploy speed.",
+    result:
+      "An open-source platform that runs Battle and Challenge formats and doubles as public evidence of multi-tenant operations design.",
+    link: BULL.tenkacloud,
+    linkLabel: "GitHub",
+  },
+  {
+    title: "JPKI Web3 Infrastructure",
+    problem:
+      "A wallet platform built on Japan's public-key infrastructure (JPKI) needed infrastructure that could stand up to audit scrutiny.",
+    role:
+      "Infrastructure design and audit readiness — access boundaries, logging, and operational controls around sensitive identity flows.",
+    hard:
+      "Balancing strict auditability and least privilege with a workable developer and operations experience.",
+    result: "An infrastructure design positioned for audit readiness and safe operation.",
+  },
+  {
+    title: "Cloud & Identity Migration",
+    problem:
+      "Organizations changing domains, identity providers, or deployment targets risk outages and broken access during cutover.",
+    role:
+      "Planned and executed domain, DNS, identity, and deployment cutovers with rollback and operational continuity designed in from the start.",
+    hard:
+      "Sequencing email, SSO, and SaaS integrations so users keep working through the transition.",
+    result: "Cutovers with explicit rollback paths and continuity, not big-bang risk.",
+  },
+  {
+    title: "Large-scale IoT & Cloud Operations",
+    problem:
+      "Operating cloud platforms managing very large device fleets demands reliability, observability, and cost discipline at scale.",
+    role:
+      "Cloud architecture and operational design for platforms handling over a million managed devices.",
+    hard: "Reliability and cost control while keeping the platform observable and operable.",
+    result: "Operational platforms running at scale with monitoring and automation in place.",
+  },
+  {
+    title: "CCoE / DevSecOps / Audit Automation",
+    problem:
+      "Engineering organizations need shared guardrails, security practices, and repeatable audit evidence across many teams.",
+    role:
+      "Helped build a Cloud Center of Excellence and DevSecOps practices, including audit automation, across a 2,000+ engineer organization.",
+    hard: "Standardizing without slowing teams down; making compliance a by-product of the pipeline.",
+    result: "Shared guardrails and automated audit evidence adopted across teams.",
+  },
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub="/work"
+  title="Work — BULL"
+  description="Selected work from BULL: TenkaCloud, JPKI Web3 infrastructure, cloud and identity migrations, large-scale IoT operations, and CCoE / DevSecOps."
+>
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <div class="max-w-3xl mb-12">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Work</p>
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">
+        Evidence, not a tech stack list
+      </h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted">
+        Each engagement is described by the problem, what we owned, the hard design
+        decisions, and where it landed. Client names and internal details are limited to
+        what we are permitted to share.
+      </p>
+    </div>
+
+    <div class="space-y-8">
+      {work.map((w) => (
+        <article class="p-6 md:p-8 rounded-lg border border-light-border dark:border-dark-border">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-5">
+            <h2 class="font-display text-xl md:text-2xl font-bold">{w.title}</h2>
+            {w.link && (
+              <a
+                href={w.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm font-medium text-accent-500 hover:text-accent-600"
+              >
+                {w.linkLabel} →
+              </a>
+            )}
+          </div>
+          <dl class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">Problem</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.problem}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">Our role</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.role}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">Hard part</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.hard}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-accent-500 mb-1">Result</dt>
+              <dd class="text-sm text-light-muted dark:text-dark-muted">{w.result}</dd>
+            </div>
+          </dl>
+        </article>
+      ))}
+    </div>
+  </section>
+</BullLayout>

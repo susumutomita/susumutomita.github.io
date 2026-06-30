@@ -1,0 +1,176 @@
+---
+import type { Lang } from "../../lib/i18n";
+import { BULL, LINKS } from "../../lib/constants";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const formUrl = lang === "en" ? BULL.contactFormEn : BULL.contactFormJa;
+
+const t = {
+  en: {
+    eyebrow: "Contact",
+    heading: "Start a conversation",
+    intro:
+      "Tell us which part of your business you would like help with. The form branches by topic, so you only answer what is relevant.",
+    categoriesTitle: "What would you like help with?",
+    categories: [
+      "Corporate domain and identity migration",
+      "AWS account foundations",
+      "IaC, observability, or non-functional design",
+      "Architecture review or technical advisory",
+      "TenkaCloud — cloud challenge or technical event",
+      "Generative AI product development bootcamp",
+      "Other",
+    ],
+    cta: "Start a conversation",
+    ctaHelpForm: "Opens the BULL inquiry form in a new tab.",
+    ctaHelpMail: "Opens your email client. A Google Form will replace this soon.",
+    consentTitle: "Before you send",
+    consent: [
+      "This form is an inquiry only and does not create a consulting engagement.",
+      "Please do not include passwords, API keys, personal data, or production credentials.",
+      "BULL will use the information solely to respond to your inquiry.",
+    ],
+    privacy: "Privacy Policy",
+    privacyHref: "/privacy",
+  },
+  ja: {
+    eyebrow: "お問い合わせ",
+    heading: "ご相談をはじめる",
+    intro:
+      "どの事業についてのご相談かをお選びください。フォームは相談種別に応じて分岐し、関係する項目だけにお答えいただけます。",
+    categoriesTitle: "相談したい内容",
+    categories: [
+      "コーポレートドメイン・ID移行",
+      "AWSアカウント基盤",
+      "IaC・監視・非機能設計",
+      "アーキテクチャレビュー・技術アドバイザリー",
+      "TenkaCloud・技術イベント",
+      "生成AIプロダクト開発ブートキャンプ",
+      "その他",
+    ],
+    cta: "お問い合わせ",
+    ctaHelpForm: "BULLの問い合わせフォームを新しいタブで開きます。",
+    ctaHelpMail: "メールソフトが開きます。近日中にGoogle Formに置き換えます。",
+    consentTitle: "送信の前に",
+    consent: [
+      "このフォーム送信は問い合わせのみであり、契約・業務開始を意味しません。",
+      "パスワード、APIキー、個人情報、本番認証情報は送信しないでください。",
+      "いただいた情報は、お問い合わせへの対応に必要な範囲でのみ利用します。",
+    ],
+    privacy: "プライバシーポリシー",
+    privacyHref: "/privacy",
+  },
+}[lang];
+---
+
+<section class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+  <div class="mb-10">
+    <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">{t.eyebrow}</p>
+    <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">{t.heading}</h1>
+    <p class="text-lg text-light-muted dark:text-dark-muted">{t.intro}</p>
+  </div>
+
+  <!-- Categories -->
+  <div class="mb-10">
+    <h2 class="font-display text-lg font-bold mb-4">{t.categoriesTitle}</h2>
+    <ul class="grid gap-2 sm:grid-cols-2 text-sm text-light-muted dark:text-dark-muted">
+      {t.categories.map((c) => (
+        <li class="flex gap-2 p-3 rounded-lg border border-light-border dark:border-dark-border">
+          <span class="text-accent-500">→</span>
+          <span>{c}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- CTA -->
+  <div class="mb-10 p-6 md:p-8 rounded-lg bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 text-center">
+    <a
+      id="bull-contact-cta"
+      data-lang={lang}
+      data-form-url={formUrl}
+      data-email={LINKS.email}
+      href={formUrl || `mailto:${LINKS.email}`}
+      target={formUrl ? "_blank" : undefined}
+      rel={formUrl ? "noopener noreferrer" : undefined}
+      class="inline-flex items-center gap-2 px-8 py-4 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors text-lg"
+    >
+      {t.cta}
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    </a>
+    <p class="text-sm text-light-muted dark:text-dark-muted mt-4">
+      {formUrl ? t.ctaHelpForm : t.ctaHelpMail}
+    </p>
+  </div>
+
+  <!-- Consent / disclaimer -->
+  <div class="p-6 rounded-lg border border-light-border dark:border-dark-border bg-light-surface dark:bg-dark-surface">
+    <h2 class="font-display text-base font-bold mb-3">{t.consentTitle}</h2>
+    <ul class="space-y-2 text-sm text-light-muted dark:text-dark-muted">
+      {t.consent.map((c) => (
+        <li class="flex gap-2">
+          <span class="text-accent-500 mt-0.5">•</span>
+          <span>{c}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4 text-sm">
+      <a href={t.privacyHref} class="text-accent-500 hover:text-accent-600 underline">{t.privacy}</a>
+    </p>
+  </div>
+</section>
+
+<script>
+  // Attach inbound source breadcrumbs (referrer + UTM) to the contact CTA so we
+  // can tell which traffic leads to inquiries (issue #314 / #315). Unknown query
+  // params are ignored by Google Forms, and folded into the mailto body as a
+  // fallback while the Forms are being built.
+  function initContactCta(): void {
+    const el = document.getElementById("bull-contact-cta") as HTMLAnchorElement | null;
+    if (!el) return;
+
+    const lang = el.dataset.lang ?? "en";
+    const formUrl = el.dataset.formUrl ?? "";
+    const email = el.dataset.email ?? "";
+
+    const params = new URLSearchParams(window.location.search);
+    const referrer = document.referrer || "";
+    const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
+
+    if (formUrl) {
+      try {
+        const url = new URL(formUrl);
+        if (referrer) url.searchParams.set("ref", referrer);
+        for (const key of utmKeys) {
+          const value = params.get(key);
+          if (value) url.searchParams.set(key, value);
+        }
+        el.href = url.toString();
+      } catch {
+        // Leave the original href if the configured URL is malformed.
+      }
+      return;
+    }
+
+    // mailto fallback with a context footer.
+    const lines = [
+      lang === "ja" ? "（ご相談内容をご記入ください）" : "(Please describe your inquiry)",
+      "",
+      "--- context (auto) ---",
+      `source page: ${window.location.href}`,
+      `referrer: ${referrer}`,
+      ...utmKeys.map((key) => `${key}: ${params.get(key) ?? ""}`),
+    ];
+    const subject = lang === "ja" ? "BULLへのお問い合わせ" : "Inquiry to BULL";
+    el.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`;
+  }
+
+  initContactCta();
+</script>

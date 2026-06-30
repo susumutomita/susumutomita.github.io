@@ -3,11 +3,22 @@ import { SITE, LINKS } from "../lib/constants";
 import Header from "../components/global/Header.astro";
 import Footer from "../components/global/Footer.astro";
 
+interface Alternate {
+  lang: string;
+  href: string;
+}
+
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
   noIndex?: boolean;
+  /** Document language. Defaults to "ja" to preserve legacy page behavior. */
+  lang?: "en" | "ja";
+  /** hreflang alternates for bilingual pages (issue #311 / #315). */
+  alternates?: Alternate[];
+  /** Optional JSON-LD object(s) overriding the default Person schema. */
+  jsonLd?: object;
 }
 
 const {
@@ -15,12 +26,17 @@ const {
   description = SITE.description,
   ogImage = "/og-image.svg",
   noIndex = false,
+  lang = "ja",
+  alternates,
+  jsonLd,
 } = Astro.props;
+
+const ogLocale = lang === "en" ? "en_US" : "ja_JP";
 
 const canonicalURL = new URL(Astro.url.pathname, SITE.url);
 const ogImageURL = new URL(ogImage, SITE.url);
 
-const schema = {
+const defaultSchema = {
   "@context": "http://schema.org",
   "@type": "Person",
   name: SITE.name,
@@ -42,15 +58,22 @@ const schema = {
     name: "Japan",
   },
 };
+
+const schema = jsonLd ?? defaultSchema;
 ---
 
 <!doctype html>
-<html lang="ja" class="dark">
+<html lang={lang} class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="canonical" href={canonicalURL} />
+    {
+      alternates?.map((alt) => (
+        <link rel="alternate" hreflang={alt.lang} href={new URL(alt.href, SITE.url)} />
+      ))
+    }
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
@@ -64,6 +87,7 @@ const schema = {
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={ogImageURL} />
     <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={ogLocale} />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />

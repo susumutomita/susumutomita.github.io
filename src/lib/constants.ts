@@ -25,6 +25,29 @@ export const SITE = {
   url: "https://susumutomita.github.io",
 };
 
+/**
+ * BULL business configuration.
+ *
+ * BULL is a small engineering firm for small teams that delivers cloud
+ * foundations, corporate domain/identity migrations, and IaC/observability/
+ * non-functional design end-to-end — design, implementation, and operational
+ * improvement. Architecture reviews are an entry engagement, not the only
+ * offering. See issues #310-#315.
+ */
+export const BULL = {
+  name: "BULL",
+  // External links used as proof of public implementation/operational ability.
+  tenkacloud: "https://github.com/susumutomita/TenkaCloud",
+  github: LINKS.github,
+  /**
+   * Google Form endpoints for the bilingual contact flow (issue #314).
+   * Leave empty to fall back to a pre-filled mailto: link until the Forms are
+   * published. The field spec lives in docs/google-form-spec.md.
+   */
+  contactFormEn: "",
+  contactFormJa: "",
+};
+
 export const loaderAnimation: [string, Record<string, unknown>, Record<string, unknown>] = [
   ".loader",
   { opacity: [1, 0], pointerEvents: "none" },

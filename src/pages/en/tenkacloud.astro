@@ -1,0 +1,82 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import { BULL } from "../../lib/constants";
+import { tenkaCloudSchema } from "../../lib/seo";
+
+export const prerender = true;
+const lang = "en" as const;
+
+const capabilities = [
+  {
+    title: "Multi-tenant operations",
+    body: "A control plane / application plane architecture that provisions isolated environments per tenant and automates deploys into separate AWS accounts.",
+  },
+  {
+    title: "Identity & access",
+    body: "Role-based access and SSO so organizers, operators, and participants each see exactly what they should.",
+  },
+  {
+    title: "Auditability",
+    body: "Administrative controls and audit trails that make actions traceable — the same discipline we bring to client platforms.",
+  },
+  {
+    title: "Operational tooling",
+    body: "Tooling for running Battle and Challenge formats reliably during live events.",
+  },
+];
+
+const links = [
+  { label: "TenkaCloud on GitHub", href: BULL.tenkacloud },
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub="/tenkacloud"
+  title="TenkaCloud — BULL"
+  description="TenkaCloud is BULL's open-source, multi-tenant platform for cloud challenges and learning events, and evidence of our multi-tenant operations, identity, and auditability work."
+  extraSchema={[tenkaCloudSchema(lang)]}
+>
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <div class="max-w-3xl mb-12">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">
+        Our next pillar — a product, not a contract deliverable
+      </p>
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">TenkaCloud</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted mb-4">
+        TenkaCloud is an open-source platform for running cloud challenges, GameDays, and
+        technical learning events. It is becoming the next pillar of BULL alongside our
+        engineering engagements.
+      </p>
+      <p class="text-lg text-light-muted dark:text-dark-muted">
+        It also reads as proof of implementation: multi-tenant operations, identity and
+        access, and auditability — the exact problems we solve for clients.
+      </p>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      {capabilities.map((c) => (
+        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+          <h2 class="font-display text-lg font-bold mb-2">{c.title}</h2>
+          <p class="text-sm text-light-muted dark:text-dark-muted">{c.body}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-10 flex flex-wrap gap-4">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          {l.label}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      ))}
+    </div>
+  </section>
+</BullLayout>

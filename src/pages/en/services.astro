@@ -1,0 +1,109 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+
+export const prerender = true;
+const lang = "en" as const;
+
+const services = [
+  {
+    n: "01",
+    title: "Corporate Domain & Identity Migration",
+    points: [
+      "DNS, email, SSO, and SaaS integration cutovers",
+      "Migration runbooks, rollback plans, and internal communication templates",
+      "Business continuity during mergers, rebrands, and carve-outs",
+    ],
+  },
+  {
+    n: "02",
+    title: "AWS Account Foundations",
+    points: [
+      "AWS Organizations, Control Tower, guardrails, and centralized logging",
+      "Security and compliance foundations",
+      "Non-functional requirements for a safe launch",
+    ],
+  },
+  {
+    n: "03",
+    title: "IaC, Observability & Non-Functional Design",
+    points: [
+      "Terraform / AWS CDK and CI/CD integration",
+      "Monitoring, alerting, SLOs, availability, cost, and operability",
+      "Ongoing operational improvement where scoped",
+    ],
+  },
+  {
+    n: "04",
+    title: "Architecture Review & Advisory",
+    points: [
+      "A focused entry engagement for cloud, identity, access, auditability, integrations, and operational risks",
+      "Use when an independent technical perspective is needed before implementation or a larger engagement",
+      "Complements — but does not replace — our delivery work",
+    ],
+  },
+];
+
+const exclusions = [
+  "PCI / SOC 2 and similar formal certification or audit",
+  "Penetration testing",
+  "Legal or regulatory advice",
+  "Physical security or hardware installation certification",
+  "Vendor-specific implementation guarantees",
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub="/services"
+  title="Services — BULL"
+  description="BULL delivers corporate domain and identity migration, AWS account foundations, IaC, observability, and non-functional design, plus independent architecture reviews."
+>
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <div class="max-w-3xl mb-12">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Services</p>
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">
+        Engineering engagements, end to end
+      </h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted">
+        BULL is an engineering firm for small teams. We design, implement, and improve the
+        systems where cloud, identity, access, auditability, and integrations meet — and we
+        offer architecture reviews as a focused way to start.
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      {services.map((s) => (
+        <div class="p-6 md:p-8 rounded-lg border border-light-border dark:border-dark-border">
+          <div class="flex items-baseline gap-4 mb-4">
+            <span class="font-display text-2xl font-bold text-accent-500">{s.n}</span>
+            <h2 class="font-display text-xl md:text-2xl font-bold">{s.title}</h2>
+          </div>
+          <ul class="space-y-2 text-light-muted dark:text-dark-muted">
+            {s.points.map((p) => (
+              <li class="flex gap-3">
+                <span class="text-accent-500 mt-1">→</span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <!-- Scope exclusions -->
+    <div class="mt-12 p-6 md:p-8 rounded-lg bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border">
+      <h2 class="font-display text-lg font-bold mb-2">Scope exclusions for advisory work</h2>
+      <p class="text-sm text-light-muted dark:text-dark-muted mb-4">
+        To keep engagements honest, the following are explicitly out of scope:
+      </p>
+      <ul class="grid gap-2 sm:grid-cols-2 text-sm text-light-muted dark:text-dark-muted">
+        {exclusions.map((e) => (
+          <li class="flex gap-2">
+            <span class="text-accent-500">×</span>
+            <span>{e}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</BullLayout>

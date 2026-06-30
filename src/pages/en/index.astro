@@ -1,0 +1,198 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import { bullPath } from "../../lib/i18n";
+import { BULL } from "../../lib/constants";
+
+export const prerender = true;
+const lang = "en" as const;
+
+const services = [
+  {
+    title: "Corporate Domain & Identity Migration",
+    description:
+      "DNS, email, SSO, and SaaS cutovers with runbooks, rollback plans, and business continuity through mergers, rebrands, and carve-outs.",
+  },
+  {
+    title: "AWS Account Foundations",
+    description:
+      "AWS Organizations, Control Tower, guardrails, centralized logging, and security baselines that make a safe launch the default.",
+  },
+  {
+    title: "IaC, Observability & Non-Functional Design",
+    description:
+      "Terraform / AWS CDK, CI/CD, monitoring, SLOs, cost, and operability — implemented and improved, not just diagrammed.",
+  },
+  {
+    title: "Architecture Review & Advisory",
+    description:
+      "A focused entry engagement for an independent perspective on cloud, identity, access, auditability, and integration risks before a larger build.",
+  },
+];
+
+const proof = [
+  {
+    title: "TenkaCloud",
+    summary:
+      "Multi-tenant SaaS platform for cloud competitions and learning events. Role-based access, SSO, auditability, and operational tooling.",
+  },
+  {
+    title: "JPKI Web3 Infrastructure",
+    summary:
+      "Infrastructure design and audit readiness for a wallet platform built on Japan's public-key infrastructure.",
+  },
+  {
+    title: "Cloud & Identity Migration",
+    summary:
+      "Domain, DNS, identity, and deployment cutovers designed with rollback and operational continuity in mind.",
+  },
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub=""
+  title="BULL — Build working systems. Make better decisions."
+  description="BULL is a small engineering firm helping teams with cloud foundations, corporate domain and identity migrations, and IaC, observability, and non-functional design — from design through implementation and operations."
+>
+  <!-- Hero -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+    <div class="space-y-6">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm">
+        Engineering engagements & architecture reviews
+      </p>
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+        Build working systems.<br />
+        <span class="text-accent-500">Make better decisions.</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-light-muted dark:text-dark-muted max-w-3xl">
+        From cloud foundations and corporate domain migrations to internal products and
+        AI-enabled learning, BULL helps small teams move decisions forward with working
+        software—not slide decks.
+      </p>
+      <div class="flex flex-wrap gap-4 pt-4">
+        <a
+          href={bullPath(lang, "/contact")}
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          Start a conversation
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a
+          href={bullPath(lang, "/services")}
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          View services
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- What we do -->
+  <section class="bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="font-display text-2xl md:text-3xl font-bold">What we do</h2>
+        <a
+          href={bullPath(lang, "/services")}
+          class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+        >
+          All services →
+        </a>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2">
+        {services.map((s) => (
+          <a
+            href={bullPath(lang, "/services")}
+            class="group block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
+          >
+            <h3 class="font-display text-lg font-bold mb-2 group-hover:text-accent-500 transition-colors">
+              {s.title}
+            </h3>
+            <p class="text-sm text-light-muted dark:text-dark-muted">{s.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Proof / Work -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-display text-2xl md:text-3xl font-bold">Proof of work</h2>
+      <a
+        href={bullPath(lang, "/work")}
+        class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        See all work →
+      </a>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {proof.map((p) => (
+        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+          <h3 class="font-display text-lg font-bold mb-2">{p.title}</h3>
+          <p class="text-sm text-light-muted dark:text-dark-muted">{p.summary}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- TenkaCloud pillar -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-light-border dark:border-dark-border">
+    <div class="grid gap-8 md:grid-cols-2 md:items-center">
+      <div>
+        <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">
+          Our next pillar
+        </p>
+        <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">TenkaCloud</h2>
+        <p class="text-light-muted dark:text-dark-muted mb-6">
+          An open-source product for running cloud challenges, GameDays, and technical
+          learning events. It is also evidence of how we design multi-tenant operations,
+          identity, access, and auditability.
+        </p>
+        <a
+          href={bullPath(lang, "/tenkacloud")}
+          class="inline-flex items-center gap-2 text-accent-500 hover:text-accent-600 font-medium transition-colors"
+        >
+          Explore TenkaCloud
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+      <div class="p-6 rounded-lg border border-light-border dark:border-dark-border bg-light-surface dark:bg-dark-surface">
+        <ul class="space-y-3 text-sm text-light-muted dark:text-dark-muted">
+          <li>• Multi-tenant control plane and application plane</li>
+          <li>• Role-based access and SSO</li>
+          <li>• Auditability and administrative controls</li>
+          <li>• Automated deploys into competitor AWS accounts</li>
+        </ul>
+        <a
+          href={BULL.tenkacloud}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-block mt-4 text-sm font-medium text-accent-500 hover:text-accent-600"
+        >
+          View on GitHub →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bootcamp -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-light-border dark:border-dark-border">
+    <div class="p-6 md:p-8 rounded-lg border border-light-border dark:border-dark-border">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-2">
+        Learning & enablement
+      </p>
+      <h2 class="font-display text-xl md:text-2xl font-bold mb-3">
+        AI-enabled product development bootcamp
+      </h2>
+      <p class="text-light-muted dark:text-dark-muted max-w-3xl">
+        A hands-on program where teams ship a working prototype with generative AI,
+        learning how to turn a business problem into running software rather than a deck.
+      </p>
+    </div>
+  </section>
+</BullLayout>

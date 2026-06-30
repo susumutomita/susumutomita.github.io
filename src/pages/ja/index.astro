@@ -1,0 +1,196 @@
+---
+import BullLayout from "../../layouts/BullLayout.astro";
+import { bullPath } from "../../lib/i18n";
+import { BULL } from "../../lib/constants";
+
+export const prerender = true;
+const lang = "ja" as const;
+
+const services = [
+  {
+    title: "コーポレートドメイン・ID移行",
+    description:
+      "DNS・メール・SSO・SaaS連携の切替を、ランブックとロールバック計画つきで。統合・ブランド変更・分社化のなかでも業務を止めない。",
+  },
+  {
+    title: "AWSアカウント基盤",
+    description:
+      "Organizations、Control Tower、ガードレール、集約ログ、セキュリティベースライン。安全な立ち上げを既定値にする。",
+  },
+  {
+    title: "IaC・監視・非機能設計",
+    description:
+      "Terraform / AWS CDK、CI/CD、監視、SLO、コスト、運用性。図だけで終わらせず、実装し改善する。",
+  },
+  {
+    title: "アーキテクチャレビュー・技術アドバイザリー",
+    description:
+      "クラウド・ID・アクセス・監査可能性・統合のリスクを、本格的な開発の前に第三者視点で見る入口商品。",
+  },
+];
+
+const proof = [
+  {
+    title: "TenkaCloud",
+    summary:
+      "クラウド競技・学習イベントのためのマルチテナントSaaS基盤。ロールベースアクセス、SSO、監査可能性、運用ツールを備える。",
+  },
+  {
+    title: "JPKI Web3インフラ",
+    summary:
+      "日本の公的個人認証基盤（JPKI）を用いるウォレット基盤のインフラ設計と監査対応。",
+  },
+  {
+    title: "クラウド・ID移行",
+    summary:
+      "ドメイン・DNS・ID・デプロイの切替を、ロールバックと運用継続を前提に設計。",
+  },
+];
+---
+
+<BullLayout
+  lang={lang}
+  sub=""
+  title="BULL — 動くもので、意思決定する。"
+  description="BULLは、クラウド基盤づくり、コーポレートドメイン・ID移行、IaC・監視・非機能設計を、設計から実装・運用改善まで一気通貫で担う小規模事業者向けエンジニアリングファームです。"
+>
+  <!-- Hero -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+    <div class="space-y-6">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm">
+        エンジニアリング伴走 ＋ アーキテクチャレビュー
+      </p>
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+        動くもので、<br />
+        <span class="text-accent-500">意思決定する。</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-light-muted dark:text-dark-muted max-w-3xl">
+        AWS基盤づくり、コーポレートドメイン移行、IaC／監視／非機能設計を、設計・実装・運用改善まで一気通貫で。
+        BULLは小さなチームの意思決定を、スライドではなく動くソフトウェアで前に進めます。
+      </p>
+      <div class="flex flex-wrap gap-4 pt-4">
+        <a
+          href={bullPath(lang, "/contact")}
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          お問い合わせ
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a
+          href={bullPath(lang, "/services")}
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          サービスを見る
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 提供サービス -->
+  <section class="bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="font-display text-2xl md:text-3xl font-bold">提供できること</h2>
+        <a
+          href={bullPath(lang, "/services")}
+          class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+        >
+          サービス一覧 →
+        </a>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2">
+        {services.map((s) => (
+          <a
+            href={bullPath(lang, "/services")}
+            class="group block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors"
+          >
+            <h3 class="font-display text-lg font-bold mb-2 group-hover:text-accent-500 transition-colors">
+              {s.title}
+            </h3>
+            <p class="text-sm text-light-muted dark:text-dark-muted">{s.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 実績 -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-display text-2xl md:text-3xl font-bold">実績の証拠</h2>
+      <a
+        href={bullPath(lang, "/work")}
+        class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        実績をすべて見る →
+      </a>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {proof.map((p) => (
+        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+          <h3 class="font-display text-lg font-bold mb-2">{p.title}</h3>
+          <p class="text-sm text-light-muted dark:text-dark-muted">{p.summary}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- TenkaCloud -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-light-border dark:border-dark-border">
+    <div class="grid gap-8 md:grid-cols-2 md:items-center">
+      <div>
+        <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">
+          次の柱となる自社プロダクト
+        </p>
+        <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">TenkaCloud</h2>
+        <p class="text-light-muted dark:text-dark-muted mb-6">
+          クラウドチャレンジ、GameDay、技術学習イベントを運営するためのオープンソースプロダクト。
+          マルチテナント運用・ID・アクセス・監査可能性の設計力を示す証拠でもあります。
+        </p>
+        <a
+          href={bullPath(lang, "/tenkacloud")}
+          class="inline-flex items-center gap-2 text-accent-500 hover:text-accent-600 font-medium transition-colors"
+        >
+          TenkaCloudを見る
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+      <div class="p-6 rounded-lg border border-light-border dark:border-dark-border bg-light-surface dark:bg-dark-surface">
+        <ul class="space-y-3 text-sm text-light-muted dark:text-dark-muted">
+          <li>• マルチテナントのコントロールプレーン／アプリケーションプレーン</li>
+          <li>• ロールベースアクセスとSSO</li>
+          <li>• 監査可能性と管理者統制</li>
+          <li>• 参加者AWSアカウントへの自動デプロイ</li>
+        </ul>
+        <a
+          href={BULL.tenkacloud}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-block mt-4 text-sm font-medium text-accent-500 hover:text-accent-600"
+        >
+          GitHubで見る →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ブートキャンプ -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-light-border dark:border-dark-border">
+    <div class="p-6 md:p-8 rounded-lg border border-light-border dark:border-dark-border">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-2">
+        学習・人材育成
+      </p>
+      <h2 class="font-display text-xl md:text-2xl font-bold mb-3">
+        生成AIプロダクト開発ブートキャンプ
+      </h2>
+      <p class="text-light-muted dark:text-dark-muted max-w-3xl">
+        生成AIを使い、業務課題を動くプロトタイプに落とし込むハンズオン形式のプログラム。
+        スライドではなく、動くソフトウェアでアイデアを検証する力を身につけます。
+      </p>
+    </div>
+  </section>
+</BullLayout>
