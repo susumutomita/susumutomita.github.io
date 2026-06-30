@@ -10,6 +10,7 @@ const formUrl = bullContactFormUrl(DEFAULT_LANG);
 // shown bilingually. TenkaCloud is handled separately below.
 const helpAreas = [
   { en: "Corporate domain & identity migration", ja: "コーポレートドメイン・ID移行" },
+  { en: "AWS account foundations", ja: "AWSアカウント基盤" },
   { en: "IaC, observability & non-functional design", ja: "IaC・監視・非機能設計" },
   { en: "Architecture review & technical advisory", ja: "アーキテクチャレビュー・技術アドバイザリー" },
   { en: "Generative AI product development bootcamp", ja: "生成AIプロダクト開発ブートキャンプ" },
@@ -32,10 +33,10 @@ const helpAreas = [
 
     <!-- Primary CTA: published bilingual Google Form (#316) -->
     <div class="mb-8 p-8 rounded-lg bg-gradient-to-br from-accent-500/10 to-accent-600/5 border border-accent-500/20 text-center">
-      <h2 class="font-display text-2xl font-bold mb-3">Start a conversation / お問い合わせ</h2>
+      <h2 class="font-display text-2xl font-bold mb-3">Start a conversation / <span lang="ja">お問い合わせ</span></h2>
       <p class="text-light-muted dark:text-dark-muted mb-6 max-w-xl mx-auto">
-        Tell me about your project through the inquiry form (English / 日本語).<br />
-        プロジェクトについて、問い合わせフォーム（日英対応）からお気軽にどうぞ。
+        Tell me about your project through the inquiry form (English / <span lang="ja">日本語</span>).<br />
+        <span lang="ja">プロジェクトについて、問い合わせフォーム（日英対応）からお気軽にどうぞ。</span>
       </p>
       <a
         href={formUrl || `mailto:${LINKS.email}`}
@@ -43,7 +44,7 @@ const helpAreas = [
         rel={formUrl ? "noopener noreferrer" : undefined}
         class="inline-flex items-center gap-2 px-8 py-4 bg-accent-500 text-white hover:bg-accent-600 font-medium rounded-lg transition-colors text-lg"
       >
-        Start a conversation / お問い合わせ
+        Start a conversation / <span lang="ja">お問い合わせ</span>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
         </svg>
@@ -77,12 +78,12 @@ const helpAreas = [
 
     <!-- What I can help with / できること (#316) -->
     <div class="mb-12">
-      <h2 class="font-display text-2xl font-bold mb-6 text-center">What I can help with / できること</h2>
+      <h2 class="font-display text-2xl font-bold mb-6 text-center">What I can help with / <span lang="ja">できること</span></h2>
       <div class="grid gap-4 md:grid-cols-2">
         {helpAreas.map((area) => (
           <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
             <h3 class="font-display font-semibold text-lg mb-1 text-accent-500">{area.en}</h3>
-            <p class="text-sm text-light-muted dark:text-dark-muted">{area.ja}</p>
+            <p lang="ja" class="text-sm text-light-muted dark:text-dark-muted">{area.ja}</p>
           </div>
         ))}
       </div>
@@ -92,7 +93,7 @@ const helpAreas = [
         <div>
           <h3 class="font-display font-semibold text-lg mb-1">TenkaCloud — cloud challenge / technical event</h3>
           <p class="text-sm text-light-muted dark:text-dark-muted">
-            A separate product with its own site and inquiry form. / 専用サイト・専用フォームをご用意しています。
+            A separate product with its own site and inquiry form. / <span lang="ja">専用サイト・専用フォームをご用意しています。</span>
           </p>
         </div>
         <a
@@ -101,7 +102,7 @@ const helpAreas = [
           rel="noopener noreferrer"
           class="shrink-0 inline-flex items-center gap-2 px-5 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
         >
-          Go to TenkaCloud / TenkaCloud へ
+          Go to TenkaCloud / <span lang="ja">TenkaCloud へ</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>

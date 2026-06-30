@@ -64,7 +64,7 @@ function normalize(pathname: string): string {
 }
 
 /** Module-level helpers (built once, not per call). */
-const LANG_PREFIX_RE = new RegExp(`^/(${LANGUAGES.join("|")})`);
+const LANG_PREFIX_RE = new RegExp(`^/(${LANGUAGES.join("|")})(?=/|$)`);
 const BULL_SUBROUTE_SET: ReadonlySet<string> = new Set(BULL_SUBROUTES);
 
 /**

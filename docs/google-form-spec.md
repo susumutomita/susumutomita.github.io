@@ -12,8 +12,8 @@ export const BULL = {
 };
 ```
 
-Until they are set, the CTA falls back to a pre-filled `mailto:` link that
-includes the source page, referrer, and UTM parameters in the body.
+Until they are set, the CTA falls back to a plain `mailto:` link to the contact
+address (no referrer/UTM data is forwarded — see the privacy note below).
 
 ## Approach
 

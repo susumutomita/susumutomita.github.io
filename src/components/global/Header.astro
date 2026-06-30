@@ -84,7 +84,7 @@ const langTargets = LANGUAGES.map((lang) => ({
           <div
             class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center gap-1"
             role="group"
-            aria-label="Language"
+            aria-label={bullLang === "ja" ? "言語" : "Language"}
           >
             {langTargets.map((t) => (
               <a
@@ -169,7 +169,7 @@ const langTargets = LANGUAGES.map((lang) => ({
         }
         <!-- Language switcher (mobile, BULL bilingual pages only) -->
         {bullLang && (
-          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2" role="group" aria-label="Language">
+          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2" role="group" aria-label={bullLang === "ja" ? "言語" : "Language"}>
             {langTargets.map((t) => (
               <a
                 href={t.href}

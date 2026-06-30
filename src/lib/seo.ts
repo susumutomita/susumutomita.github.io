@@ -23,11 +23,6 @@ export function organizationSchema(lang: Lang) {
     // JA pages — a per-language url would make the same @id assert conflicting urls.
     url: SITE.url,
     description: ORG_DESCRIPTION[lang],
-    founder: {
-      "@type": "Person",
-      name: SITE.name,
-      url: SITE.url,
-    },
     sameAs: [LINKS.github, LINKS.linkedin],
     knowsAbout: [
       "AWS",
@@ -37,6 +32,8 @@ export function organizationSchema(lang: Lang) {
       "Observability",
       "Domain and DNS migration",
     ],
+    // Link to the shared Person node instead of duplicating it.
+    founder: { "@id": `${SITE.url}/#person` },
   };
 }
 
@@ -67,10 +64,8 @@ export function tenkaCloudSchema(lang: Lang) {
     // Canonical product home page (not the GitHub source repo).
     url: BULL.tenkacloudSite,
     description: TENKACLOUD_DESCRIPTION[lang],
-    author: {
-      "@type": "Organization",
-      name: BULL.name,
-    },
+    // Link to the shared Organization node instead of duplicating it.
+    author: { "@id": `${SITE.url}/#organization` },
   };
 }
 
