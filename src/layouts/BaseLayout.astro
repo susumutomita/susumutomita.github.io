@@ -1,5 +1,6 @@
 ---
 import { SITE, LINKS } from "../lib/constants";
+import { OG_LOCALE } from "../lib/i18n";
 import Header from "../components/global/Header.astro";
 import Footer from "../components/global/Footer.astro";
 
@@ -31,7 +32,7 @@ const {
   jsonLd,
 } = Astro.props;
 
-const ogLocale = lang === "en" ? "en_US" : "ja_JP";
+const ogLocale = OG_LOCALE[lang];
 
 // For bilingual pages (which pass `alternates`), force a trailing slash so the
 // canonical URL always matches the trailing-slash hreflang set, regardless of

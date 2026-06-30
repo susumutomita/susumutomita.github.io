@@ -17,11 +17,6 @@ export const LANG_LABELS: Record<Lang, string> = {
   ja: "日本語",
 };
 
-export const HTML_LANG: Record<Lang, string> = {
-  en: "en",
-  ja: "ja",
-};
-
 export const OG_LOCALE: Record<Lang, string> = {
   en: "en_US",
   ja: "ja_JP",

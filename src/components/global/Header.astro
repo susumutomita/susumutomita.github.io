@@ -75,13 +75,14 @@ const langTargets = LANGUAGES.map((lang) => ({
             );
           })
         }
-        <!-- Language switcher -->
-        <div
-          class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center gap-1"
-          aria-label="Language"
-        >
-          {
-            langTargets.map((t) => (
+        <!-- Language switcher (only on BULL bilingual pages; legacy pages have
+             no EN/JA equivalent, and policy pages use their own in-page toggle) -->
+        {bullLang && (
+          <div
+            class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center gap-1"
+            aria-label="Language"
+          >
+            {langTargets.map((t) => (
               <a
                 href={t.href}
                 hreflang={t.lang}
@@ -95,9 +96,9 @@ const langTargets = LANGUAGES.map((lang) => ({
               >
                 {t.label}
               </a>
-            ))
-          }
-        </div>
+            ))}
+          </div>
+        )}
         <div class="ml-1 pl-2 border-l border-light-border dark:border-dark-border">
           <ThemeToggle client:load />
         </div>
@@ -162,10 +163,10 @@ const langTargets = LANGUAGES.map((lang) => ({
             );
           })
         }
-        <!-- Language switcher (mobile) -->
-        <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2">
-          {
-            langTargets.map((t) => (
+        <!-- Language switcher (mobile, BULL bilingual pages only) -->
+        {bullLang && (
+          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2">
+            {langTargets.map((t) => (
               <a
                 href={t.href}
                 hreflang={t.lang}
@@ -179,9 +180,9 @@ const langTargets = LANGUAGES.map((lang) => ({
               >
                 {t.label}
               </a>
-            ))
-          }
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   </nav>
