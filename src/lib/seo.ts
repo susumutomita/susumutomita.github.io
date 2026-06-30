@@ -64,7 +64,8 @@ export function tenkaCloudSchema(lang: Lang) {
     name: "TenkaCloud",
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
-    url: BULL.tenkacloud,
+    // Canonical product home page (not the GitHub source repo).
+    url: BULL.tenkacloudSite,
     description: TENKACLOUD_DESCRIPTION[lang],
     author: {
       "@type": "Organization",
