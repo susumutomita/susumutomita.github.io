@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import netlify from "@astrojs/netlify";
+import cloudflare from "@astrojs/cloudflare";
 import robotsTxt from "astro-robots-txt";
 import UnoCSS from "@unocss/astro";
 import icon from "astro-icon";
@@ -11,6 +12,11 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
 import svelte from "@astrojs/svelte";
+
+// Production deploys to Netlify. Cloudflare Pages sets CF_PAGES=1 in its build
+// environment, so when building there we swap to the Cloudflare adapter (which
+// emits Cloudflare-compatible output); everywhere else we use Netlify.
+const isCloudflare = Boolean(process.env.CF_PAGES);
 
 // https://astro.build/config
 export default defineConfig({
@@ -33,7 +39,7 @@ export default defineConfig({
 		rehypePlugins: [rehypeKatex],
 	},
 	output: "server",
-	adapter: netlify({ edgeMiddleware: true }),
+	adapter: isCloudflare ? cloudflare() : netlify({ edgeMiddleware: true }),
 	vite: {
 		assetsInclude: "**/*.riv",
 	},

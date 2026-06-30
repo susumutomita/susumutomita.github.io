@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/susumutomita/susumutomita.github.io#readme",
   "devDependencies": {
+    "@astrojs/cloudflare": "^14.0.1",
     "@playwright/test": "^1.60.0",
     "@types/d3": "^7.4.3",
     "@unocss/astro": "^66.6.8",
