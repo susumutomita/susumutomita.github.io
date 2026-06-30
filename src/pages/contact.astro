@@ -6,14 +6,51 @@ import { DEFAULT_LANG } from "../lib/i18n";
 // Guarded form URL (falls back to mailto: if not a real published form).
 const formUrl = bullContactFormUrl(DEFAULT_LANG);
 
-// "What I can help with / できること" — BULL consultation areas (#316),
-// shown bilingually. TenkaCloud is handled separately below.
+// "What I can help with / できること" — BULL consultation areas (#316), shown
+// bilingually with a concrete one-line description so visitors can tell what is
+// actually delivered. Copy is reused from /services and the homepage bootcamp
+// section. TenkaCloud is handled separately below.
 const helpAreas = [
-  { en: "Corporate domain & identity migration", ja: "コーポレートドメイン・ID移行" },
-  { en: "AWS account foundations", ja: "AWSアカウント基盤" },
-  { en: "IaC, observability & non-functional design", ja: "IaC・監視・非機能設計" },
-  { en: "Architecture review & technical advisory", ja: "アーキテクチャレビュー・技術アドバイザリー" },
-  { en: "Generative AI product development bootcamp", ja: "生成AIプロダクト開発ブートキャンプ" },
+  {
+    en: "Corporate domain & identity migration",
+    ja: "コーポレートドメイン・ID移行",
+    descEn:
+      "DNS, email, SSO and SaaS cutovers with migration runbooks and rollback plans — keeping the business running through mergers, rebrands and carve-outs.",
+    descJa:
+      "DNS・メール・SSO・SaaS連携の切替を、移行ランブックとロールバック計画つきで実施。統合・リブランド・分社化のなかでも事業を止めません。",
+  },
+  {
+    en: "AWS account foundations",
+    ja: "AWSアカウント基盤",
+    descEn:
+      "AWS Organizations, Control Tower, guardrails and centralized logging — security and compliance foundations with the non-functional basics for a safe launch.",
+    descJa:
+      "AWS Organizations・Control Tower・ガードレール・集約ログでセキュリティとコンプライアンスの土台を構築し、安全な立ち上げに必要な非機能要件を整えます。",
+  },
+  {
+    en: "IaC, observability & non-functional design",
+    ja: "IaC・監視・非機能設計",
+    descEn:
+      "Terraform / AWS CDK with CI/CD, plus monitoring, alerting, SLOs, availability, cost and operability — through to ongoing operational improvement where scoped.",
+    descJa:
+      "Terraform / AWS CDK と CI/CD を統合し、監視・アラート・SLO・可用性・コスト・運用性を設計。スコープに応じて継続的な運用改善まで担います。",
+  },
+  {
+    en: "Architecture review & technical advisory",
+    ja: "アーキテクチャレビュー・技術アドバイザリー",
+    descEn:
+      "A focused review of cloud, identity, access, auditability, integrations and operational risk — an independent technical perspective before a larger engagement.",
+    descJa:
+      "クラウド・ID・アクセス・監査可能性・統合・運用リスクを対象にした集中レビュー。本格実装や大型案件の前に、第三者の技術視点が必要なときに。",
+  },
+  {
+    en: "Generative AI product development bootcamp",
+    ja: "生成AIプロダクト開発ブートキャンプ",
+    descEn:
+      "A hands-on program where teams ship a working prototype with generative AI — learning to turn a business problem into running software rather than a deck.",
+    descJa:
+      "生成AIを使い、業務課題を動くプロトタイプに落とし込むハンズオン形式のプログラム。スライドではなく、動くソフトウェアでアイデアを検証します。",
+  },
 ];
 ---
 
@@ -82,8 +119,10 @@ const helpAreas = [
       <div class="grid gap-4 md:grid-cols-2">
         {helpAreas.map((area) => (
           <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-            <h3 class="font-display font-semibold text-lg mb-1 text-accent-500">{area.en}</h3>
-            <p lang="ja" class="text-sm text-light-muted dark:text-dark-muted">{area.ja}</p>
+            <h3 class="font-display font-semibold text-lg text-accent-500">{area.en}</h3>
+            <p lang="ja" class="text-sm font-medium mb-3">{area.ja}</p>
+            <p lang="ja" class="text-sm text-light-muted dark:text-dark-muted mb-2">{area.descJa}</p>
+            <p class="text-sm text-light-muted dark:text-dark-muted">{area.descEn}</p>
           </div>
         ))}
       </div>
