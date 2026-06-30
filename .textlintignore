@@ -2,6 +2,7 @@
 src/content/blog/zerokey-paper.md
 papers/**/*.md
 **/zerokey-paper.md
+**/koto-ai-native-ime.md
 
 # Private planning files
 Plan.md
