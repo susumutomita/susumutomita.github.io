@@ -1,9 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { LINKS, BULL, bullContactFormUrl } from "../lib/constants";
+import { DEFAULT_LANG } from "../lib/i18n";
 
 // Guarded form URL (falls back to mailto: if not a real published form).
-const formUrl = bullContactFormUrl("en");
+const formUrl = bullContactFormUrl(DEFAULT_LANG);
 
 // "What I can help with / できること" — BULL consultation areas (#316),
 // shown bilingually. TenkaCloud is handled separately below.

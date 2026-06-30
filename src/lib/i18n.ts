@@ -51,8 +51,9 @@ export const BULL_NAV: Record<Lang, NavItem[]> = {
 
 /** Returns the active BULL language for a pathname, or null for legacy pages. */
 export function getLangFromPath(pathname: string): Lang | null {
-  if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
-  if (pathname === "/ja" || pathname.startsWith("/ja/")) return "ja";
+  for (const lang of LANGUAGES) {
+    if (pathname === `/${lang}` || pathname.startsWith(`/${lang}/`)) return lang;
+  }
   return null;
 }
 
@@ -71,7 +72,7 @@ export function switchLangPath(pathname: string, target: Lang): string {
   const path = normalize(pathname);
   const current = getLangFromPath(path);
   if (current) {
-    const sub = path.replace(/^\/(en|ja)/, "");
+    const sub = path.replace(new RegExp(`^/(${LANGUAGES.join("|")})`), "");
     // Only mirror sub-routes that exist in both languages; otherwise fall back
     // to the target language home so the switcher never points at a 404.
     return (BULL_SUBROUTES as readonly string[]).includes(sub) ? bullPath(target, sub as BullSubroute) : bullPath(target, "");
@@ -95,10 +96,9 @@ export function bullPath(lang: Lang, sub: BullSubroute): string {
  * (directory build format), keeping the hreflang set self-consistent (#315).
  */
 export function bullAlternates(sub: BullSubroute): { lang: string; href: string }[] {
-  const href = (lang: Lang) => `/${lang}${sub}/`;
+  // Built via bullPath so hreflang hrefs can never drift from canonical URLs.
   return [
-    { lang: "en", href: href("en") },
-    { lang: "ja", href: href("ja") },
-    { lang: "x-default", href: href(DEFAULT_LANG) },
+    ...LANGUAGES.map((lang) => ({ lang: lang as string, href: bullPath(lang, sub) })),
+    { lang: "x-default", href: bullPath(DEFAULT_LANG, sub) },
   ];
 }
