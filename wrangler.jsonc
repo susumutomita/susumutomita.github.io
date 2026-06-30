@@ -1,0 +1,19 @@
+{
+  // Cloudflare Pages configuration.
+  //
+  // The site builds to a fully static `dist/` (see astro.config.mjs: when
+  // CF_PAGES is set, Astro emits `output: "static"` with no SSR adapter).
+  // Cloudflare injects CF_PAGES=1 automatically during the Pages build, so no
+  // extra env var is needed here.
+  //
+  // Dashboard build settings should be:
+  //   Build command:    bun run build
+  //   Output directory: dist
+  //
+  // `name` is only used for local/CI `wrangler pages deploy`; Git-integrated
+  // builds use the project connected in the Cloudflare dashboard. If you deploy
+  // with the CLI, make this match your Pages project name.
+  "name": "susumutomita-portfolio",
+  "compatibility_date": "2026-06-30",
+  "pages_build_output_dir": "dist"
+}
