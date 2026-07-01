@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://susumutomita.netlify.app">
+<a href="https://www.susumutomita.com">
   <img src="./public/og-image.svg" alt="Susumu Tomita — Portfolio" width="640" />
 </a>
 
@@ -16,10 +16,10 @@ Bilingual (JA/EN) site built with Astro, deployed on Netlify and Cloudflare Page
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Stars](https://img.shields.io/github/stars/susumutomita/susumutomita.github.io?style=social)](https://github.com/susumutomita/susumutomita.github.io/stargazers)
 
-[**Live site**](https://susumutomita.netlify.app) ·
-[**Blog**](https://susumutomita.netlify.app/blog) ·
-[**Resume**](https://susumutomita.netlify.app/resume) ·
-[**Contact**](https://susumutomita.netlify.app/contact)
+[**Live site**](https://www.susumutomita.com) ·
+[**Blog**](https://www.susumutomita.com/blog) ·
+[**Resume**](https://www.susumutomita.com/resume) ·
+[**Contact**](https://www.susumutomita.com/contact)
 
 </div>
 
@@ -119,7 +119,7 @@ public/
 
 **Cloudflare Pages.** Configured via [`wrangler.jsonc`](./wrangler.jsonc) (`pages_build_output_dir: dist`). When `CF_PAGES` is set, `astro.config.mjs` emits a fully static build (no adapter). Build command: `bun run build` — note that Cloudflare auto-runs `npm install` first, so the build command must **not** add a second `bun install` (the npm + bun hybrid `node_modules` breaks ESM resolution).
 
-**Production:** <https://susumutomita.netlify.app>
+**Production:** <https://www.susumutomita.com>
 
 ## 🤝 Contributing
 
