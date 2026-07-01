@@ -22,7 +22,7 @@ export const SITE = {
   name: "Susumu Tomita",
   title: "Susumu Tomita - Software Engineer",
   description: "Software Engineer specializing in blockchain, Web3, and cloud technologies.",
-  url: "https://susumutomita.github.io",
+  url: "https://www.susumutomita.com",
 };
 
 /**

@@ -11,7 +11,7 @@ Personal portfolio website for Susumu Tomita, built with Astro and deployed on N
 - **Framework**: Astro
 - **Styling**: UnoCSS (Tailwind-like utility classes)
 - **Package Manager**: bun (NOT npm/yarn)
-- **Deployment**: Netlify
+- **Deployment**: Netlify (production, SSR) and Cloudflare Pages (static via `CF_PAGES`)
 - **Language**: TypeScript
 
 ## Commands
