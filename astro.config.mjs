@@ -28,13 +28,13 @@ const netlify = isCloudflareBuild
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://susumutomita.netlify.app',
+	site: 'https://www.susumutomita.com',
 	integrations: [
 		sitemap(),
 		robotsTxt({
 			sitemap: [
-				"https://susumutomita.netlify.app/sitemap-index.xml",
-				"https://susumutomita.netlify.app/sitemap-0.xml",
+				"https://www.susumutomita.com/sitemap-index.xml",
+				"https://www.susumutomita.com/sitemap-0.xml",
 			],
 		}),
 		solidJs(),
