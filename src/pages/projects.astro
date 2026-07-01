@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { LINKS } from "../lib/constants";
+import { LINKS, BULL } from "../lib/constants";
 
 // Status badge types
 type ProjectStatus = "active" | "learning" | "experimental";
@@ -11,9 +11,11 @@ interface Project {
   tags: string[];
   github: string;
   featured?: boolean;
+  featuredLabel?: string;
   status?: ProjectStatus;
   highlights?: string[];
   paper?: string;
+  site?: string;
   isContribution?: boolean;
 }
 
@@ -53,6 +55,22 @@ const projects: Project[] = [
       "Position paper published",
     ],
     paper: "/blog/koto-ai-native-ime",
+  },
+  {
+    title: "TenkaCloud",
+    description: "BULL's open-source, multi-tenant platform for running cloud challenges, GameDays, and technical learning events. It is becoming the next pillar of BULL alongside our engineering engagements, and reads as proof of implementation for multi-tenant operations, identity and access, and auditability — the exact problems we solve for clients.",
+    tags: ["AWS", "Multi-tenant", "Platform", "Open Source"],
+    github: BULL.tenkacloud,
+    site: BULL.tenkacloudSite,
+    featured: true,
+    featuredLabel: "Featured Product",
+    status: "active",
+    highlights: [
+      "Multi-tenant control-plane / application-plane architecture",
+      "Role-based access and SSO for organizers, staff, and participants",
+      "Admin controls and audit trails for accountability",
+      "Operational tooling to run live Battle / Challenge events",
+    ],
   },
   {
     title: "Browser from Scratch",
@@ -95,6 +113,13 @@ const projects: Project[] = [
     github: "https://github.com/susumutomita/GitHubVectorIssueProcessor",
     status: "active",
   },
+  {
+    title: "annai.nvim",
+    description: "Ask your Neovim, in plain language, “how do I…?” — an on-device LLM (Apple Intelligence, with an Ollama fallback) answers with a real keybinding picked from your own keymaps. No cloud, no API key, no telemetry.",
+    tags: ["Neovim", "Lua", "Local LLM", "Apple Intelligence"],
+    github: "https://github.com/susumutomita/annai.nvim",
+    status: "active",
+  },
 ];
 ---
 
@@ -131,7 +156,7 @@ const projects: Project[] = [
         <section class="mb-12">
           <div class="p-8 rounded-xl border-2 border-accent-500/50 bg-gradient-to-br from-accent-500/5 to-transparent">
             <div class="flex items-center gap-3 mb-4">
-              <span class="text-xs font-medium text-accent-500 uppercase tracking-wider">Featured Research</span>
+              <span class="text-xs font-medium text-accent-500 uppercase tracking-wider">{project.featuredLabel ?? "Featured Research"}</span>
               {project.status && (
                 <span class={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusConfig[project.status].class}`}>
                   {statusConfig[project.status].label}
@@ -174,6 +199,19 @@ const projects: Project[] = [
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Read Paper
+                </a>
+              )}
+              {project.site && (
+                <a
+                  href={project.site}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Visit Site
                 </a>
               )}
               {project.github && (
