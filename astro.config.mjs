@@ -8,6 +8,7 @@ import solidJs from "@astrojs/solid-js";
 import { remarkReadingTime } from "./src/lib/ remark-reading-time.mjs";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import rehypeMermaid from "rehype-mermaid";
 
 import svelte from "@astrojs/svelte";
 
@@ -43,8 +44,17 @@ export default defineConfig({
 		svelte(),
 	],
 	markdown: {
+		// Keep Shiki for real code, but exclude `mermaid` so the fenced block is
+		// left as `<code class="language-mermaid">` for rehype-mermaid to pick up.
+		// Without this, Shiki highlights it into spans first and rehype-mermaid
+		// never sees a diagram.
+		syntaxHighlight: { type: "shiki", excludeLangs: ["mermaid"] },
 		remarkPlugins: [remarkReadingTime, remarkMath],
-		rehypePlugins: [rehypeKatex],
+		// rehype-mermaid runs with the `pre-mermaid` strategy: it rewrites each
+		// mermaid fenced block into a `mermaid`-classed pre element at build time
+		// WITHOUT launching a browser (so Netlify / Cloudflare Pages builds stay
+		// browser-free). The actual SVG is rendered client-side in BaseLayout.
+		rehypePlugins: [rehypeKatex, [rehypeMermaid, { strategy: "pre-mermaid" }]],
 	},
 	output: isCloudflareBuild ? "static" : "server",
 	adapter: isCloudflareBuild ? undefined : netlify({ edgeMiddleware: true }),
