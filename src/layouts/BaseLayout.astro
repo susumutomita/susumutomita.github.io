@@ -143,6 +143,38 @@ const schemaJson = JSON.stringify(schema)
       <slot />
     </main>
     <Footer />
+
+    <!--
+      Mermaid client-side rendering. rehype-mermaid (pre-mermaid strategy) emits
+      a mermaid-classed pre element at build time; mermaid is dynamically
+      imported only on pages that actually contain a diagram, then re-rendered
+      when the light/dark theme toggles (the dark class on the html element).
+    -->
+    <script>
+      async function renderMermaid() {
+        const blocks = Array.from(
+          document.querySelectorAll("pre.mermaid"),
+        ) as HTMLElement[];
+        if (blocks.length === 0) return;
+        const { default: mermaid } = await import("mermaid");
+        const theme = document.documentElement.classList.contains("dark")
+          ? "dark"
+          : "default";
+        for (const el of blocks) {
+          if (!el.dataset.src) el.dataset.src = el.textContent ?? "";
+          el.removeAttribute("data-processed");
+          el.innerHTML = el.dataset.src ?? "";
+        }
+        mermaid.initialize({ startOnLoad: false, theme });
+        await mermaid.run({ nodes: blocks });
+      }
+
+      renderMermaid();
+      new MutationObserver(() => renderMermaid()).observe(
+        document.documentElement,
+        { attributes: true, attributeFilter: ["class"] },
+      );
+    </script>
   </body>
 </html>
 
