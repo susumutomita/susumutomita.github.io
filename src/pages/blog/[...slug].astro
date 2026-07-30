@@ -41,6 +41,7 @@ const formatDate = (date: Date) => {
 <BaseLayout
   title={`${entry.data.title} - Susumu Tomita`}
   description={entry.data.description || ""}
+  ogImage={entry.data.heroImage}
 >
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
     <!-- Header -->
@@ -82,6 +83,10 @@ const formatDate = (date: Date) => {
 </BaseLayout>
 
 <style is:global>
+  article > header h1 {
+    text-wrap: balance;
+  }
+
   .prose {
     color: inherit;
   }
