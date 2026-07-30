@@ -1,5 +1,5 @@
 ---
-import { SITE, LINKS } from "../lib/constants";
+import { SITE, LINKS, BULL } from "../lib/constants";
 import { OG_LOCALE } from "../lib/i18n";
 import Header from "../components/global/Header.astro";
 import Footer from "../components/global/Footer.astro";
@@ -49,10 +49,10 @@ const defaultSchema = {
   url: SITE.url,
   sameAs: [LINKS.linkedin, LINKS.github],
   image: ogImageURL.href,
-  jobTitle: "Software Engineer",
+  jobTitle: "Founder & Software Engineer",
   worksFor: {
     "@type": "Organization",
-    name: "DENSO / Freelance",
+    name: BULL.name,
     address: {
       "@type": "PostalAddress",
       addressLocality: "Japan",
