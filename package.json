@@ -50,7 +50,7 @@
     "unocss": "^66.6.8"
   },
   "dependencies": {
-    "@astrojs/check": "0.9.9",
+    "@astrojs/check": "0.9.10",
     "@astrojs/mdx": "7.0.3",
     "@astrojs/netlify": "8.1.2",
     "@astrojs/rss": "4.0.19",
