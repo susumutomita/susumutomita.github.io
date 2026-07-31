@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import PublishedBooks from "../components/PublishedBooks.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { LINKS, bullContactFormUrl } from "../lib/constants";
 import { DEFAULT_LANG } from "../lib/i18n";
@@ -65,19 +66,19 @@ const featuredWork = [
       </p>
       <div class="flex flex-wrap gap-4 pt-4">
         <a
-          href="/projects"
+          href="#books"
           class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
         >
-          View Projects
+          Read My Books
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </a>
         <a
-          href="/resume"
+          href="/projects"
           class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 font-medium rounded-lg transition-colors"
         >
-          Download Resume
+          View Projects
         </a>
       </div>
       <div class="flex items-center gap-4 pt-2">
@@ -146,6 +147,8 @@ const featuredWork = [
       </div>
     </div>
   </section>
+
+  <PublishedBooks />
 
   <!-- Stats Section -->
   <section class="bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border">
