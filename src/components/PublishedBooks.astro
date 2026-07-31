@@ -1,0 +1,152 @@
+---
+const books = [
+  {
+    title: "Zig言語で学ぶブロックチェイン",
+    eyebrow: "Zig · Blockchain · EVM",
+    description:
+      "Build a blockchain, P2P networking, chain synchronization, and a minimal EVM from scratch in Zig.",
+    covers: [
+      {
+        src: "/images/books/zig-blockchain.webp",
+        alt: "Cover of Zig言語で学ぶブロックチェイン",
+        width: 1366,
+        height: 768,
+      },
+    ],
+    editions: [
+      {
+        label: "日本語版を読む",
+        platform: "Zenn",
+        href: "https://zenn.dev/bull/books/zig-blockchain",
+      },
+    ],
+  },
+  {
+    title: "Build Your Own Cloud Competition",
+    eyebrow: "AWS · GameDay · TenkaCloud",
+    description:
+      "Design, build, and run GameDay-inspired AWS Challenges and Battles with TenkaCloud. Published in Japanese and English.",
+    covers: [
+      {
+        src: "/images/books/cloud-competition-ja.webp",
+        alt: "Cover of 自分で作るクラウド競技",
+        width: 500,
+        height: 700,
+      },
+      {
+        src: "/images/books/cloud-competition-en.webp",
+        alt: "Cover of Build Your Own Cloud Competition",
+        width: 500,
+        height: 700,
+      },
+    ],
+    editions: [
+      {
+        label: "日本語版",
+        platform: "Zenn",
+        href: "https://zenn.dev/bull/books/cloud-competition",
+      },
+      {
+        label: "English",
+        platform: "Leanpub",
+        href: "https://leanpub.com/build-your-own-cloud-competition",
+      },
+    ],
+  },
+];
+---
+
+<section
+  id="books"
+  aria-labelledby="books-heading"
+  class="scroll-mt-20 border-y border-light-border dark:border-dark-border bg-gradient-to-br from-accent-500/5 via-transparent to-hybrid-cyan/10"
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+    <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between mb-8">
+      <div class="max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-accent-500/30 bg-accent-500/10 text-accent-500 text-xs font-medium tracking-wide uppercase">
+          2 books · 3 editions
+        </div>
+        <h2 id="books-heading" class="font-display text-3xl md:text-4xl font-bold">
+          Published Technical Books
+        </h2>
+        <p class="mt-3 text-light-muted dark:text-dark-muted">
+          Hands-on books built from working repositories, reproducible steps, and
+          the same review discipline used for software.
+        </p>
+      </div>
+      <a
+        href="/blog/writing-technical-books-with-github-cicd"
+        class="shrink-0 text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        How I write them →
+      </a>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      {
+        books.map((book) => (
+          <article class="flex h-full flex-col overflow-hidden rounded-2xl border border-light-border dark:border-dark-border bg-light-bg dark:bg-dark-bg shadow-sm">
+            <div
+              class:list={[
+                "h-64 sm:h-72 overflow-hidden",
+                book.covers.length > 1
+                  ? "flex items-center justify-center gap-3 p-4 bg-[#06101f]"
+                  : "bg-white",
+              ]}
+            >
+              {book.covers.map((cover) => (
+                <div class:list={["h-full min-w-0", book.covers.length > 1 ? "flex-1" : "w-full"]}>
+                  <img
+                    src={cover.src}
+                    alt={cover.alt}
+                    width={cover.width}
+                    height={cover.height}
+                    loading="lazy"
+                    decoding="async"
+                    class="w-full h-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div class="flex flex-1 flex-col p-6">
+              <p class="text-xs font-medium tracking-wide uppercase text-accent-500 mb-2">
+                {book.eyebrow}
+              </p>
+              <h3 class="font-display text-xl md:text-2xl font-bold">{book.title}</h3>
+              <p class="mt-3 text-sm text-light-muted dark:text-dark-muted">
+                {book.description}
+              </p>
+
+              <div class="mt-auto pt-6 flex flex-wrap gap-3">
+                {book.editions.map((edition, index) => (
+                  <a
+                    href={edition.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class:list={[
+                      "inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                      index === 0
+                        ? "bg-accent-500 hover:bg-accent-600 text-white"
+                        : "border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500",
+                    ]}
+                    aria-label={`${edition.label} on ${edition.platform}`}
+                  >
+                    <span>{edition.label}</span>
+                    <span class:list={["text-xs", index === 0 ? "text-white/75" : "text-light-muted dark:text-dark-muted"]}>
+                      {edition.platform}
+                    </span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5H19.5V10.5M19 5L11 13M9 6H6.75A1.75 1.75 0 005 7.75V17.25A1.75 1.75 0 006.75 19H16.25A1.75 1.75 0 0018 17.25V15" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
