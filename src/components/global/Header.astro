@@ -4,8 +4,11 @@ import {
   LANGUAGES,
   LANG_LABELS,
   BULL_NAV,
+  PORTFOLIO_NAV,
   bullPath,
   getLangFromPath,
+  getPortfolioContext,
+  portfolioPath,
   switchLangPath,
 } from "../../lib/i18n";
 import ThemeToggle from "./ThemeToggle";
@@ -14,22 +17,37 @@ import ThemeToggle from "./ThemeToggle";
 // path is served as "/en" or "/en/".
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 const bullLang = getLangFromPath(currentPath);
+const portfolio = getPortfolioContext(currentPath);
 
-// In the BULL bilingual section, swap the navigation and logo for the
-// language-specific entries. Legacy portfolio pages keep the original nav.
+// Three navigation flavours:
+//   BULL section      -> the language-specific business nav
+//   portfolio page    -> the language-specific personal nav
+//   any other page    -> the original (English) portfolio nav
 const navLinks = bullLang
   ? BULL_NAV[bullLang].map((item) => ({
       href: bullPath(bullLang, item.sub),
       label: item.label,
     }))
-  : NAV_LINKS.map((link) => ({ href: link.href, label: link.label }));
+  : portfolio
+    ? PORTFOLIO_NAV[portfolio.lang].map((item) => ({ href: item.href, label: item.label }))
+    : NAV_LINKS.map((link) => ({ href: link.href, label: link.label }));
 
-const logoHref = bullLang ? bullPath(bullLang, "") : "/";
+const logoHref = bullLang
+  ? bullPath(bullLang, "")
+  : portfolio
+    ? portfolioPath(portfolio.lang, "")
+    : "/";
 
 // Language/site roots must only match exactly, never via startsWith (so "/en"
 // doesn't light up for "/en/services"). Derived from LANGUAGES to stay in sync.
 // hrefs may carry a trailing slash (bullPath), so normalize before comparing.
-const langRoots = new Set<string>(["/", ...LANGUAGES.map((l) => `/${l}`)]);
+// The Japanese portfolio root is a root too: "/ja/me" must not light up for
+// "/ja/me/projects".
+const langRoots = new Set<string>([
+  "/",
+  ...LANGUAGES.map((l) => `/${l}`),
+  portfolioPath("ja", "").replace(/\/$/, ""),
+]);
 const isActiveLink = (href: string) => {
   const h = href !== "/" ? href.replace(/\/$/, "") : "/";
   return currentPath === h || (!langRoots.has(h) && currentPath.startsWith(h));
@@ -41,8 +59,14 @@ const langTargets = LANGUAGES.map((lang) => ({
   lang,
   label: LANG_LABELS[lang],
   href: switchLangPath(currentPath, lang),
-  active: bullLang === lang,
+  active: bullLang === lang || portfolio?.lang === lang,
 }));
+
+// The switcher only appears where a real counterpart page exists: the BULL
+// section and the bilingual portfolio pages. Elsewhere (papers, blog, policy
+// pages) it would point at an unrelated page, so it stays hidden.
+const showLangSwitcher = Boolean(bullLang) || Boolean(portfolio);
+const switcherLang = bullLang ?? portfolio?.lang ?? "en";
 ---
 
 <header
@@ -80,11 +104,11 @@ const langTargets = LANGUAGES.map((lang) => ({
         }
         <!-- Language switcher (only on BULL bilingual pages; legacy pages have
              no EN/JA equivalent, and policy pages use their own in-page toggle) -->
-        {bullLang && (
+        {showLangSwitcher && (
           <div
             class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center gap-1"
             role="group"
-            aria-label={bullLang === "ja" ? "言語" : "Language"}
+            aria-label={switcherLang === "ja" ? "言語" : "Language"}
           >
             {langTargets.map((t) => (
               <a
@@ -167,9 +191,9 @@ const langTargets = LANGUAGES.map((lang) => ({
             );
           })
         }
-        <!-- Language switcher (mobile, BULL bilingual pages only) -->
-        {bullLang && (
-          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2" role="group" aria-label={bullLang === "ja" ? "言語" : "Language"}>
+        <!-- Language switcher (mobile, bilingual pages only) -->
+        {showLangSwitcher && (
+          <div class="mt-2 pt-2 border-t border-light-border dark:border-dark-border flex items-center gap-2" role="group" aria-label={switcherLang === "ja" ? "言語" : "Language"}>
             {langTargets.map((t) => (
               <a
                 href={t.href}

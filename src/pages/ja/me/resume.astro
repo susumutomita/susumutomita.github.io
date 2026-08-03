@@ -1,0 +1,251 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { LINKS } from "../../../lib/constants";
+import { portfolioAlternates, portfolioPath } from "../../../lib/i18n";
+
+const experiences = [
+  {
+    company: "株式会社デンソー",
+    role: "アジャイルコーチ（業務委託）",
+    period: "2026.2 - 現在",
+    location: "日本",
+    highlights: [
+      "開発チーム横断で、アジャイル変革とエンジニアリング文化の改善を支援",
+      "Scrum・カンバン・DevOps の実践をコーチング",
+      "ふりかえりと継続的改善の取り組みをファシリテート",
+      "毎週金曜 14 時に成果を届ける「毎週工房」の取り組みを推進",
+    ],
+    tech: ["Scrum", "Kanban", "DevOps", "Agile Coaching"],
+  },
+  {
+    company: "株式会社デンソー",
+    role: "ソフトウェアエンジニア",
+    period: "2018.10 - 2025.12",
+    location: "日本",
+    highlights: [
+      "社内「ソフトウェアソムリエ」制度で、クラウド / IT ソフトウェアアーキテクト第 1 号の認定",
+      "10 万〜100 万台規模の IoT サービス（mobi-Crews、Drive Agent Personal）の AWS 基盤を設計・運用",
+      "Jamf Pro・Okta・Druva・Microsoft Defender による Mac のセキュリティ環境を構築",
+      "セキュリティとクラウド教育のための社内 AWS GameDay 基盤を開発",
+      "デンソーグループ横断の社内コミュニティ Cloud Tech Friends（CCoE、2,000 名超）を立ち上げ",
+      "クラウドエンジニア・SRE・アーキテクトの採用プロセスと技術評価基準を整備",
+    ],
+    tech: ["AWS", "Terraform", "Ruby on Rails", "Python", "Go", "TypeScript", "Docker", "GitHub Actions"],
+  },
+  {
+    company: "Logomix Inc.",
+    role: "ソフトウェアエンジニア（ラボ自動化 / SRE）",
+    period: "2025.6 - 2026.4",
+    location: "リモート（フリーランス）",
+    highlights: [
+      "再生医療研究に向けた iPS 細胞培養の全自動化システムを構築",
+      "Hamilton STAR の分注ロボットを、インキュベータや観察装置と連携",
+      "監視・インシデント対応・ポストモーテム文化といった SRE の実践を導入",
+    ],
+    tech: ["Python", "HSL", "AWS", "Terraform", "GitHub Actions"],
+  },
+  {
+    company: "MynaWallet Inc.",
+    role: "ソフトウェアエンジニア（Web3 / インフラ）",
+    period: "2025.8 - 現在",
+    location: "リモート（フリーランス）",
+    highlights: [
+      "マイナンバーカード（JPKI）を用いた本人確認とウォレットの実装",
+      "スマートコントラクトとインフラの設計・運用",
+    ],
+    tech: ["Solidity", "TypeScript", "AWS", "JPKI"],
+  },
+  {
+    company: "WHILL株式会社",
+    role: "ソフトウェアエンジニア（モビリティ基盤）",
+    period: "2021.9 - 2022.4",
+    location: "リモート（フリーランス）",
+    highlights: [
+      "車椅子シェアリングサービスのクラウドアプリケーションを開発",
+      "SORACOM Beam と AWS Lambda で、車椅子からクラウドへのリアルタイムデータパイプラインを構築",
+      "AWS AppSync による GraphQL API で、車椅子の状態をリアルタイムに監視",
+      "OTIS のエレベータと車椅子を連携させるプロトタイプを実装",
+    ],
+    tech: ["TypeScript", "Express", "AWS AppSync", "DynamoDB", "AWS CDK", "SORACOM"],
+  },
+  {
+    company: "Hitachi Vantara",
+    role: "スペシャリスト ソフトウェア QA / 自動化エンジニア",
+    period: "2017.2 - 2018.8",
+    location: "日本 / 米国（サンタクララ、シアトル、ボストン、デンバー）",
+    highlights: [
+      "Lumada IoT プラットフォームの QA とテスト自動化",
+      "データ可視化モジュールのテスト計画と自動化フレームワークを設計",
+      "Lumada と日立の産業用プリンタを接続する PoC をリード",
+      "プロジェクト立ち上げ時から、開発文化とソフトウェアプロセスの確立に貢献",
+    ],
+    tech: ["Java", "TestNG", "Selenium", "REST Assured", "Jenkins", "GitLab CI"],
+  },
+  {
+    company: "株式会社日立製作所",
+    role: "QA エンジニア / テクニカルリード",
+    period: "2006.4 - 2017.1",
+    location: "日本 / 米国",
+    highlights: [
+      "銀行 ATM・鉄道 IC カード・株式取引などミッションクリティカルな領域で使われる JP1 Performance Management（サーバ監視ソフトウェア）の QA",
+      "Hitachi Data Systems でストレージ管理ソフトウェアの主任 QA エンジニア（テスト自動化率 80% 超）",
+      "UCP Director（統合インフラ製品）で、米国チームと連携しつつ日本側の開発・QA チームをリード",
+      "QA プロセスとテスト自動化フレームワークをゼロから確立",
+    ],
+    tech: ["Java", "JUnit", "Silk Test", "Jenkins", "Visual Studio", "Git", "SVN"],
+  },
+];
+
+const skills = {
+  "クラウド / インフラ": { items: ["AWS", "GCP", "Azure", "Terraform", "AWS CDK", "Docker", "Kubernetes"], years: "7年+" },
+  "プログラミング言語": { items: ["Python", "TypeScript", "Go", "Ruby", "Solidity", "Cairo"], years: "8年+" },
+  "CI/CD・DevOps": { items: ["GitHub Actions", "GitLab CI", "CircleCI", "Jenkins", "Bitbucket Pipelines"], years: "7年+" },
+  "セキュリティ": { items: ["IAM", "SSO (Okta)", "JPKI", "ゼロトラスト", "セキュリティ監査"], years: "5年+" },
+  "QA・テスト自動化": { items: ["JUnit", "Selenium", "TestNG", "REST Assured", "テスト計画"], years: "12年+" },
+  "AI・ツール": { items: ["Claude", "ChatGPT", "Amazon Q", "Amazon Bedrock", "Slack 自動化"], years: "2年+" },
+};
+
+const certifications = [{ name: "AWS Solutions Architect", issuer: "Amazon Web Services" }];
+
+const achievements = [
+  "デンソーにおけるクラウド / IT ソフトウェアアーキテクト第 1 号（ソフトウェアソムリエ制度）",
+  "社内コミュニティ Cloud Tech Friends を立ち上げ（2,000 名超）",
+  "全社導入された AWS GameDay 研修基盤を構築",
+  "ZeroKey 認証システムに関する研究を公開",
+];
+---
+
+<BaseLayout
+  title="経歴 - 富田 晋"
+  description="富田晋の職務経歴。ソフトウェアアーキテクト／クラウドエンジニア。"
+  lang="ja"
+  alternates={portfolioAlternates("/resume")}
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <!-- Header -->
+    <div class="mb-12">
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-3">富田 晋</h1>
+      <p class="text-xl text-accent-500 mb-4">ソフトウェアアーキテクト / クラウドエンジニア</p>
+      <p class="text-light-muted dark:text-dark-muted max-w-3xl">
+        品質エンジニアリングから始め、クラウドアーキテクチャ、ブロックチェイン、そしてアジャイルコーチングへ。
+        18 年以上、ミッションクリティカルな領域と新しい技術の両方で手を動かしてきました。
+      </p>
+    </div>
+
+    <!-- Achievements -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6">主な実績</h2>
+      <ul class="grid gap-3 md:grid-cols-2">
+        {
+          achievements.map((a) => (
+            <li class="flex items-start gap-3 p-4 rounded-lg border border-light-border dark:border-dark-border">
+              <svg class="w-5 h-5 text-hybrid-brightGreen mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="text-sm text-light-muted dark:text-dark-muted">{a}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Experience -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6">職務経歴</h2>
+      <div class="grid gap-6">
+        {
+          experiences.map((exp) => (
+            <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+              <div class="flex flex-wrap items-baseline justify-between gap-2 mb-1">
+                <h3 class="font-display font-semibold text-lg">{exp.company}</h3>
+                <span class="text-sm text-light-muted dark:text-dark-muted">{exp.period}</span>
+              </div>
+              <p class="text-accent-500 text-sm font-medium">{exp.role}</p>
+              <p class="text-xs text-light-muted dark:text-dark-muted mb-4">{exp.location}</p>
+              <ul class="grid gap-2 mb-4">
+                {exp.highlights.map((h) => (
+                  <li class="flex items-start gap-2 text-sm text-light-muted dark:text-dark-muted">
+                    <span class="mt-2 w-1 h-1 rounded-full bg-accent-500 flex-shrink-0" />
+                    {h}
+                  </li>
+                ))}
+              </ul>
+              <div class="flex flex-wrap gap-2">
+                {exp.tech.map((t) => (
+                  <span class="px-2 py-0.5 text-xs bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6">スキル</h2>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {
+          Object.entries(skills).map(([category, data]) => (
+            <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+              <div class="flex items-baseline justify-between gap-2 mb-3">
+                <h3 class="font-display font-semibold">{category}</h3>
+                <span class="text-xs text-accent-500">{data.years}</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                {data.items.map((item) => (
+                  <span class="px-2 py-0.5 text-xs bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Certifications -->
+    <section class="mb-12">
+      <h2 class="font-display text-2xl font-bold mb-6">資格</h2>
+      <ul class="grid gap-3">
+        {
+          certifications.map((c) => (
+            <li class="flex items-baseline justify-between gap-3 p-4 rounded-lg border border-light-border dark:border-dark-border">
+              <span class="font-medium text-sm">{c.name}</span>
+              <span class="text-xs text-light-muted dark:text-dark-muted">{c.issuer}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Links -->
+    <section>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href={portfolioPath("ja", "/about")}
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          自己紹介を見る
+        </a>
+        <a
+          href="/contact"
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          お問い合わせ
+        </a>
+        <a
+          href={LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          GitHub
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

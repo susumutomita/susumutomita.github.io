@@ -1,0 +1,227 @@
+---
+import { getCollection } from "astro:content";
+import PublishedBooks from "../../../components/PublishedBooks.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { LINKS } from "../../../lib/constants";
+import { portfolioAlternates, portfolioPath } from "../../../lib/i18n";
+
+const posts = await getCollection("blog");
+const recentPosts = posts
+  .sort((a, b) => {
+    const dateA = a.data.pubDate ? new Date(a.data.pubDate).getTime() : 0;
+    const dateB = b.data.pubDate ? new Date(b.data.pubDate).getTime() : 0;
+    return dateB - dateA;
+  })
+  .slice(0, 3);
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "short", day: "numeric" }).format(date);
+
+const stats = [
+  { value: "18年+", label: "エンジニア歴" },
+  { value: "2,000名+", label: "CCoE の対象エンジニア" },
+  { value: "100万台+", label: "運用した IoT デバイス" },
+  { value: "80%+", label: "テスト自動化率" },
+];
+
+const featuredWork = [
+  {
+    title: "TenkaCloud",
+    description:
+      "クラウド競技（GameDay / JAM 形式）のための AWS マルチテナント SaaS 基盤。コントロールプレーンとアプリケーションプレーンを分けた構成で、参加者それぞれの AWS アカウントへ自動デプロイし、Battle と Challenge の 2 形式を提供します。",
+    tags: ["AWS", "SaaS", "CDK", "TypeScript"],
+    link: "https://github.com/susumutomita/TenkaCloud",
+  },
+  {
+    title: "Apple Silicon 上のハイパーバイザ",
+    description:
+      "Apple の Hypervisor.framework を使って、ハイパーバイザをゼロから作っています。ARM64 の低レイヤ仮想化を実際に手を動かして学ぶ試みです。",
+    tags: ["Rust", "Virtualization", "Systems Programming"],
+    link: "/blog/building-hypervisor-apple-silicon",
+  },
+];
+---
+
+<BaseLayout
+  title="富田 晋 — ソフトウェアエンジニア"
+  description="ブロックチェイン研究、大規模クラウドアーキテクチャ、エンジニアリング文化づくり。18 年以上の経験を持つ日本のソフトウェアエンジニア、富田晋のポートフォリオ。"
+  lang="ja"
+  alternates={portfolioAlternates("")}
+>
+  <!-- Hero -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+    <div class="space-y-6">
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm">Software Engineer</p>
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+        作って確かめる、<br />
+        <span class="text-accent-500">Web3 とクラウドの基盤</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-light-muted dark:text-dark-muted max-w-3xl">
+        富田晋です。日本を拠点に 18 年以上、ソフトウェアエンジニアとして働いています。
+        ブロックチェインの研究、大規模なクラウドアーキテクチャ、そしてエンジニアリング文化づくりが専門です。
+      </p>
+      <div class="flex flex-wrap gap-4 pt-4">
+        <a
+          href="#books"
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          書いた本を読む
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a
+          href={portfolioPath("ja", "/projects")}
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          プロジェクトを見る
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {
+        stats.map((stat) => (
+          <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
+            <div class="font-display text-3xl font-bold text-accent-500 mb-1">{stat.value}</div>
+            <div class="text-sm text-light-muted dark:text-dark-muted">{stat.label}</div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Published Books（コンポーネント側で id="books" を持つ） -->
+  <PublishedBooks />
+
+  <!-- Featured Work -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="font-display text-3xl font-bold mb-8">主な取り組み</h2>
+    <div class="grid gap-6 md:grid-cols-2">
+      {
+        featuredWork.map((work) => (
+          <a
+            href={work.link}
+            class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors group"
+          >
+            <h3 class="font-display font-semibold text-xl mb-3 group-hover:text-accent-500 transition-colors">
+              {work.title}
+            </h3>
+            <p class="text-sm text-light-muted dark:text-dark-muted mb-4">{work.description}</p>
+            <div class="flex flex-wrap gap-2">
+              {work.tags.map((tag) => (
+                <span class="px-2 py-0.5 text-xs bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Recent Posts -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="flex items-baseline justify-between mb-8">
+      <h2 class="font-display text-3xl font-bold">最近の記事</h2>
+      <a href="/blog" class="text-sm font-medium text-accent-500 hover:text-accent-600">
+        すべて見る →
+      </a>
+    </div>
+    <div class="grid gap-6">
+      {
+        recentPosts.map((post) => (
+          <a
+            href={`/blog/${post.id}`}
+            class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors group"
+          >
+            {post.data.pubDate && (
+              <time class="text-xs text-light-muted dark:text-dark-muted">
+                {formatDate(new Date(post.data.pubDate))}
+              </time>
+            )}
+            <h3 class="font-display font-semibold text-lg mt-1 mb-2 group-hover:text-accent-500 transition-colors">
+              {post.data.title}
+            </h3>
+            {post.data.description && (
+              <p class="text-sm text-light-muted dark:text-dark-muted line-clamp-2">
+                {post.data.description}
+              </p>
+            )}
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Explore More -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="font-display text-3xl font-bold mb-8">ほかのページ</h2>
+    <div class="grid gap-6 md:grid-cols-3">
+      <a
+        href={portfolioPath("ja", "/about")}
+        class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors group"
+      >
+        <h3 class="font-display font-semibold text-lg mb-2 group-hover:text-accent-500 transition-colors">
+          自己紹介
+        </h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          これまでの経歴と、いま力を入れている領域
+        </p>
+      </a>
+      <a
+        href={portfolioPath("ja", "/resume")}
+        class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors group"
+      >
+        <h3 class="font-display font-semibold text-lg mb-2 group-hover:text-accent-500 transition-colors">
+          経歴
+        </h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          職務経歴とスキルの一覧
+        </p>
+      </a>
+      <a
+        href="/papers"
+        class="block p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 transition-colors group"
+      >
+        <h3 class="font-display font-semibold text-lg mb-2 group-hover:text-accent-500 transition-colors">
+          論文
+        </h3>
+        <p class="text-sm text-light-muted dark:text-dark-muted">
+          研究成果と技術文書
+        </p>
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <div class="p-8 md:p-12 rounded-xl bg-gradient-to-r from-accent-500/10 via-hybrid-cyan/10 to-hybrid-magenta/10 border border-light-border dark:border-dark-border text-center">
+      <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">一緒に何か作りましょう</h2>
+      <p class="text-light-muted dark:text-dark-muted mb-8 max-w-2xl mx-auto">
+        クラウド基盤、ブロックチェイン、エンジニアリング文化づくり。
+        相談も雑談も歓迎です。
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="/contact"
+          class="inline-flex items-center px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          お問い合わせ
+        </a>
+        <a
+          href={LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center px-6 py-3 border border-light-border dark:border-dark-border hover:border-accent-500 font-medium rounded-lg transition-colors"
+        >
+          GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

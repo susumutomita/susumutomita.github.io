@@ -49,12 +49,87 @@ export const BULL_NAV: Record<Lang, NavItem[]> = {
   ],
 };
 
+/**
+ * Portfolio (personal) pages.
+ *
+ * English keeps the original top-level routes ("/", "/about", ...). Japanese
+ * lives under "/ja/me" so it never collides with the BULL business pages that
+ * already occupy "/ja" (issue: bilingual portfolio).
+ */
+export const PORTFOLIO_SUBROUTES = ["", "/about", "/projects", "/resume"] as const;
+export type PortfolioSubroute = (typeof PORTFOLIO_SUBROUTES)[number];
+
+/** Path prefix for the Japanese portfolio. */
+const JA_PORTFOLIO_PREFIX = "/ja/me";
+
+/** Builds the absolute path for a portfolio page in the given language. */
+export function portfolioPath(lang: Lang, sub: PortfolioSubroute): string {
+  if (lang === "ja") return `${JA_PORTFOLIO_PREFIX}${sub}/`;
+  return sub === "" ? "/" : `${sub}/`;
+}
+
+/**
+ * Portfolio navigation. Pages that exist in one language only (papers, blog,
+ * contact) point at the shared route so the nav never loses an entry.
+ */
+export const PORTFOLIO_NAV: Record<Lang, { href: string; label: string }[]> = {
+  en: [
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
+    { href: "/projects", label: "Projects" },
+    { href: "/papers", label: "Papers" },
+    { href: "/blog", label: "Blog" },
+    { href: "/resume", label: "Resume" },
+    { href: "/contact", label: "Contact" },
+  ],
+  ja: [
+    { href: portfolioPath("ja", ""), label: "ホーム" },
+    { href: portfolioPath("ja", "/about"), label: "自己紹介" },
+    { href: portfolioPath("ja", "/projects"), label: "プロジェクト" },
+    { href: "/papers", label: "論文" },
+    { href: "/blog", label: "ブログ" },
+    { href: portfolioPath("ja", "/resume"), label: "経歴" },
+    { href: "/contact", label: "お問い合わせ" },
+  ],
+};
+
 /** Returns the active BULL language for a pathname, or null for legacy pages. */
 export function getLangFromPath(pathname: string): Lang | null {
+  // "/ja/me" belongs to the portfolio, not to the BULL section.
+  if (pathname === JA_PORTFOLIO_PREFIX || pathname.startsWith(`${JA_PORTFOLIO_PREFIX}/`)) {
+    return null;
+  }
   for (const lang of LANGUAGES) {
     if (pathname === `/${lang}` || pathname.startsWith(`/${lang}/`)) return lang;
   }
   return null;
+}
+
+/**
+ * Identifies a portfolio page from a pathname. Returns the language and the
+ * sub-route, or null when the path is not a bilingual portfolio page.
+ */
+export function getPortfolioContext(
+  pathname: string,
+): { lang: Lang; sub: PortfolioSubroute } | null {
+  const path = normalize(pathname);
+
+  if (path === JA_PORTFOLIO_PREFIX) return { lang: "ja", sub: "" };
+  if (path.startsWith(`${JA_PORTFOLIO_PREFIX}/`)) {
+    const sub = path.slice(JA_PORTFOLIO_PREFIX.length);
+    return PORTFOLIO_SUBROUTE_SET.has(sub) ? { lang: "ja", sub: sub as PortfolioSubroute } : null;
+  }
+
+  if (path === "/") return { lang: "en", sub: "" };
+  return PORTFOLIO_SUBROUTE_SET.has(path) ? { lang: "en", sub: path as PortfolioSubroute } : null;
+}
+
+/** hreflang alternates for a portfolio sub-route, including x-default. */
+export function portfolioAlternates(sub: PortfolioSubroute): { lang: string; href: string }[] {
+  return [
+    ...LANGUAGES.map((lang) => ({ lang, href: portfolioPath(lang, sub) })),
+    { lang: "x-default", href: portfolioPath(DEFAULT_LANG, sub) },
+  ];
 }
 
 /** Strips a trailing slash (except for the root "/"). */
@@ -66,6 +141,7 @@ function normalize(pathname: string): string {
 /** Module-level helpers (built once, not per call). */
 const LANG_PREFIX_RE = new RegExp(`^/(${LANGUAGES.join("|")})(?=/|$)`);
 const BULL_SUBROUTE_SET: ReadonlySet<string> = new Set(BULL_SUBROUTES);
+const PORTFOLIO_SUBROUTE_SET: ReadonlySet<string> = new Set(PORTFOLIO_SUBROUTES);
 
 /**
  * Returns the equivalent path in the target language. Inside the BULL section
@@ -74,6 +150,11 @@ const BULL_SUBROUTE_SET: ReadonlySet<string> = new Set(BULL_SUBROUTES);
  */
 export function switchLangPath(pathname: string, target: Lang): string {
   const path = normalize(pathname);
+
+  // Bilingual portfolio pages map to their counterpart, keeping the sub-route.
+  const portfolio = getPortfolioContext(path);
+  if (portfolio) return portfolioPath(target, portfolio.sub);
+
   const current = getLangFromPath(path);
   if (current) {
     const sub = path.replace(LANG_PREFIX_RE, "");
