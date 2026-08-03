@@ -6,6 +6,8 @@ export const LINKS = {
   email: "oyster880@gmail.com",
   zenn: "https://zenn.dev/bull",
   qiita: "https://qiita.com/tonitoni415",
+  speakerdeck: "https://speakerdeck.com/susumutomita",
+  sessionize: "https://sessionize.com/susumutomita/",
 };
 
 export const NAV_LINKS = [
@@ -20,8 +22,11 @@ export const NAV_LINKS = [
 
 export const SITE = {
   name: "Susumu Tomita",
-  title: "Susumu Tomita - Software Engineer",
-  description: "Software Engineer specializing in blockchain, Web3, and cloud technologies.",
+  // Always carry BULL / TenkaCloud in the title so the English name alone is
+  // distinguishable from unrelated people with the same name (issue #366).
+  title: "Susumu Tomita — Founder of BULL LLC and Creator of TenkaCloud",
+  description:
+    "Susumu Tomita (冨田 進) is the founder of BULL LLC and the creator of TenkaCloud, an open-source platform for running cloud competitions on real AWS accounts. Cloud infrastructure, IaC, DevOps, security, and hands-on engineering education.",
   url: "https://www.susumutomita.com",
 };
 

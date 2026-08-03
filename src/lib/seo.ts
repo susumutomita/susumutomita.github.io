@@ -37,15 +37,41 @@ export function organizationSchema(lang: Lang) {
   };
 }
 
-/** schema.org Person node for the operator. */
+/**
+ * schema.org Person node for the operator.
+ *
+ * `alternateName` and the full `sameAs` set connect the Japanese and English
+ * spellings and every public profile to one entity, so search engines can
+ * distinguish this Susumu Tomita from unrelated people with the same name
+ * (issue #366).
+ */
 export function personSchema() {
   return {
     "@type": "Person",
     "@id": `${SITE.url}/#person`,
     name: SITE.name,
+    alternateName: ["冨田 進", "冨田進", "susumutomita"],
     url: `${SITE.url}/`,
-    jobTitle: "Software Engineer",
-    sameAs: [LINKS.github, LINKS.linkedin],
+    jobTitle: "Founder of BULL LLC / Creator of TenkaCloud",
+    worksFor: { "@id": `${SITE.url}/#organization` },
+    sameAs: [
+      LINKS.github,
+      LINKS.linkedin,
+      LINKS.sessionize,
+      LINKS.zenn,
+      LINKS.speakerdeck,
+      LINKS.x,
+      BULL.tenkacloudSite,
+    ],
+    knowsAbout: [
+      "Cloud infrastructure",
+      "AWS",
+      "Infrastructure as Code",
+      "Terraform",
+      "DevOps",
+      "Security",
+      "Hands-on engineering education",
+    ],
   };
 }
 
