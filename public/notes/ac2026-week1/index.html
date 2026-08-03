@@ -662,21 +662,24 @@
         <p class="eyebrow">週の地図</p>
         <div class="table-scroll">
           <table class="data">
-            <thead><tr><th>週</th><th>テーマ</th><th>課題</th></tr></thead>
+            <thead><tr><th>週</th><th>講義（スライドの 7 週間カリキュラム）</th><th>課題（リポジトリ）</th></tr></thead>
             <tbody>
-              <tr><td>0</td><td>導入</td><td>スライドのみ</td></tr>
-              <tr class="here"><td>1</td><td>Programmable Cryptography の全体像／算術回路</td><td>proof-of-exploit ← 今ここ</td></tr>
-              <tr><td>2</td><td>準備中</td><td>—</td></tr>
-              <tr><td>3</td><td>楕円曲線暗号と Schnorr プロトコル</td><td>schnorr-from-scratch</td></tr>
-              <tr><td>4</td><td>準備中</td><td>—</td></tr>
-              <tr><td>5</td><td>TFHE（Programmable Bootstrapping）</td><td>tfhe-toy-python</td></tr>
-              <tr><td>6</td><td>zkVM / vFHE / co-SNARK の組み合わせ</td><td>co-snark-prove／zkvm-exploit</td></tr>
+              <tr><td>0</td><td>有限体と楕円曲線（事前学習スライド）</td><td>—</td></tr>
+              <tr class="here"><td>1</td><td>Programmable Cryptography 概要</td><td>proof-of-exploit ← 今ここ</td></tr>
+              <tr><td>2</td><td>MPC 秘密計算</td><td>未公開</td></tr>
+              <tr><td>3</td><td>ZKP・SNARK / STARK</td><td>schnorr-from-scratch</td></tr>
+              <tr><td>4</td><td>FHE・格子暗号 / LWE</td><td>未公開</td></tr>
+              <tr><td>5</td><td>Advanced（vFHE / zkVM）</td><td>tfhe-toy-python</td></tr>
+              <tr><td>6–7</td><td>プロジェクト／Demo Day</td><td>co-snark-prove／zkvm-exploit</td></tr>
             </tbody>
           </table>
         </div>
         <p class="caption">
-          Week 3 は有限体 → 楕円曲線 → シグマプロトコル → Fiat-Shamir を下から積み上げる構成。
-          Week 5 は暗号文のまま NAND を計算する。Week 6 でそれらを組み合わせて 1 つのスタックにする。
+          毎週土曜に講義 2 時間 ＋ ホワイトボードセッション 2.5 時間、日〜木で自習・実装、金曜に課題提出という周期。
+          Week 3 の課題は有限体 → 楕円曲線 → シグマプロトコル → Fiat-Shamir と積み上げる構成で、
+          講義の「ZKP・SNARK / STARK」の土台にあたる。
+          <strong>Week 5 だけ講義（vFHE / zkVM）と課題（TFHE）がずれて見える</strong>ので、
+          進行に合わせて確認する。
         </p>
       </div>
     </div>
@@ -881,6 +884,86 @@ f_role * (role-2)*(role-5)*(role-6) == 0</pre>
   </div>
 </section>
 
+<!-- ============================================================ 0.5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">動機</p>
+      <h2>なぜ、この課題が <code>proof-of-exploit</code> という名前なのか</h2>
+      <p>
+        Week 1 の講義は、ある事件を題材にしています。課題名はそこから来ていて、
+        <strong>今週書くコードは講義の主題そのもの</strong>です。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <h3>題材 — ブリッジが壊された</h3>
+        <p>
+          講義では KelpDAO のブリッジが攻撃された事件（想定シナリオ）を扱います。
+          この種の攻撃で厄介なのは、<strong>発見から実行までが分単位</strong>だという点です。
+          人間のガバナンス投票では間に合いません。
+        </p>
+        <p>
+          では自動で止めればいいかというと、そう簡単でもない。
+          <strong>誤検知で勝手に止められるリスク</strong>があるからです。
+          「危ないと思ったので止めました」を無条件に信じる仕組みは、それ自体が攻撃対象になります。
+        </p>
+        <h3>対策 — 証拠を出させて、自動で遮断する</h3>
+        <p>
+          講義が示す答えが <strong>Proof-of-Exploit × Circuit-Breaker</strong> です。
+        </p>
+        <p>
+          off-chain の AI Auditor が攻撃手順を見つけたら、<strong>その手順を誰にも見せないまま</strong>
+          「この手順でコントラクトが壊れる」ことを証明する。on-chain の検証が通ったときだけ、自動で止める。
+        </p>
+        <p>
+          <strong>止める権限を、人の判断ではなく検証可能な証拠に紐づける。</strong>
+          これがこの週のいちばん大きな考え方です。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <p class="eyebrow">仕組みを 1 枚で</p>
+<pre>攻撃手順 W を発見（AI Auditor / off-chain）
+        │
+        │  W は<span class="k">見せない</span>
+        ▼
+「W を入れるとこの契約は壊れる」
+  という<span class="k">証明</span>だけを作る
+        │
+        ▼
+on-chain のコントラクトが検証
+        │
+        ├─ 通った → <span class="k">自動で遮断</span>
+        └─ 通らない → 何も起きない</pre>
+        <p class="caption">
+          W を公開してしまうと、それを見た誰かが先に攻撃できます。
+          だから<strong>隠したまま、壊れることだけを示す</strong>必要がある。
+          ゼロ知識証明がここで効く理由がこれです。
+        </p>
+
+        <div class="callout">
+          <p class="eyebrow">今週の課題との対応</p>
+          <p class="strong-line">
+            Part B で書く <code>attack()</code> は、この「W」を素手で作る練習。
+          </p>
+          <p>
+            回路の穴を突く witness を見つけ、それが本当に全制約を満たすことを示す——
+            スケールは小さいですが、やっていることは Proof-of-Exploit と同じ形です。
+            そして Part A は、<strong>そもそも穴を作らない側</strong>の練習になります。
+          </p>
+          <p>
+            成果物テーマにも「AI エージェント × Proof-of-Exploit による DeFi 自動停止」と
+            「SPECA を使った ZK / FHE / MPC 回路のバグ発見」が並んでいます。
+            <strong>今週の 8 本の式は、その入口ではなく縮小版</strong>です。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============================================================ 1.2 -->
 <section class="band">
   <div class="wrap stack">
@@ -1056,6 +1139,8 @@ f_role * (role-2)*(role-5)*(role-6) == 0</pre>
           <tr><td>計算する人</td><td>prover 自身</td><td>参加者全員で分担</td><td>受託者（クラウド）</td></tr>
           <tr><td>相手に渡るもの</td><td>証明（SNARK 系なら数百バイト）</td><td>計算結果だけ</td><td>暗号化された結果</td></tr>
           <tr><td>相手が学ぶこと</td><td>主張が正しいという事実のみ</td><td>結果のみ（他人の入力は不明）</td><td>何も学ばない</td></tr>
+          <tr class="here"><td>信頼前提</td><td>prover を信頼しなくてよい（数学が保証）</td><td>n 人中 k 人を信頼（不正が t 人未満なら安全）</td><td>利用者の鍵管理が信頼の起点</td></tr>
+          <tr class="here"><td>敵対モデル</td><td>prover の偽証／verifier による witness 窃取</td><td>参加者の逸脱（最大 t 名・準正直／悪意）</td><td>盗聴者／サーバ（計算の正しさは別途 = vFHE）</td></tr>
           <tr><td>典型例</td><td>残高を見せずに送金の正当性を示す</td><td>各社の給与を明かさず平均だけ出す</td><td>暗号化した医療データをクラウドで解析</td></tr>
         </tbody>
       </table>
@@ -1089,6 +1174,58 @@ f_role * (role-2)*(role-5)*(role-6) == 0</pre>
             資格を暗号化してクラウドに送る。クラウドは暗号文のまま判定を<strong>計算し</strong>、
             暗号化された <code>granted</code> を返す。復号できるのは依頼者だけ。
             <strong>ここにも証明は無い</strong>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">選ぶときの軸 — 「誰を信頼しないで済むか」</p>
+      <p class="strong-line">
+        3 方式の本当の違いは、隠し方ではなく<b>信頼の置きどころ</b>。
+      </p>
+      <p>
+        ZK は<strong>相手を信頼しなくていい</strong>（嘘は数学が弾く）。
+        MPC は<strong>全員は信頼しなくていいが、一定数は信頼する</strong>（t 名未満の逸脱なら安全）。
+        FHE は<strong>計算する相手にデータの機密は預けないが、鍵の管理は自分の責任</strong>で、
+        しかも<b>計算が正しく行われた保証は別物</b>（そこを埋めるのが vFHE）。
+      </p>
+      <p>
+        要件が「相手が嘘をつくかもしれない」なら ZK、「複数人の秘密を突き合わせたい」なら MPC、
+        「計算を外に出したい」なら FHE。<strong>隠したいものではなく、疑いたい相手から決まる。</strong>
+      </p>
+    </div>
+
+    <div class="stack-sm">
+      <h3>そして 3 つは、真ん中で同じものを使う</h3>
+      <div class="split">
+        <div class="stack-sm">
+<pre><span class="c">① SOURCE — 用途ごとに書く</span>
+  ZK  : 年齢証明     age_check(dob, today)
+  MPC : 秘密入札     auction(b1, b2, b3)
+  FHE : AI 診断      diagnose(data)
+        │
+        │ compile（circom / halo2 / noir / arkworks）
+        ▼
+<span class="k">② CIRCUIT — 共通の中間表現</span>
+        y = (a × b) + c
+        gates と wires だけの低レベル表現
+        │
+        ▼
+<span class="c">③ EXECUTABLE — backend が裏で動く</span>
+  ZK prover / MPC protocol / FHE eval</pre>
+        </div>
+        <div class="prose">
+          <p>
+            上と下は用途ごとに違いますが、<strong>真ん中の「回路」は共通</strong>です。
+            書く言語も、最後に走る暗号も入れ替わるのに、間にある表現だけは同じ。
+          </p>
+          <p>
+            <strong>Week 1 でやっているのは、この真ん中の層を素手で組む練習</strong>です。
+            暗号を一切使わないのは手抜きではなく、そこが 3 方式の交差点だから。
+          </p>
+          <p>
+            そして交差点が間違っていれば、上に何を載せても間違ったまま動きます。
           </p>
         </div>
       </div>
@@ -2113,6 +2250,77 @@ witness[<span class="k">"granted"</span>]  = <span class="k">1</span>   <span cl
           </p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 11.4 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">設計</p>
+      <h2>実際に組み込むときは、4 つの問いから始める</h2>
+      <p>
+        暗号を選ぶのが先ではありません。<strong>要件を 4 つの問いで確定させてから</strong>、
+        それを満たすプロトコルを探しにいきます。順番を逆にすると、道具に合わせて問題を歪める羽目になります。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>誰が</h4>
+        <div class="body">
+          <p>証明したり計算したりする主体は誰か。1 人か、複数人か、委託先か。</p>
+          <p class="why"><b>KelpDAO の例:</b> off-chain の AI Auditor。</p>
+        </div>
+      </li>
+      <li>
+        <h4>何の情報を、誰から隠して</h4>
+        <div class="body">
+          <p>
+            隠す対象と、<strong>隠す相手</strong>を両方書き出す。ここを「誰から」まで詰めないと、方式が決まりません。
+          </p>
+          <p class="why">
+            <b>KelpDAO の例:</b> 発見した攻撃手順 W を、事業者・サードパーティ・他の利用者から隠す。
+            <b>先に公開すると、見た人が先に攻撃できてしまう</b>から。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>どういう計算をして</h4>
+        <div class="body">
+          <p>隠したまま何を計算・主張するのか。これが回路になる部分です。</p>
+          <p class="why"><b>KelpDAO の例:</b> 「W を入れるとこのコントラクトが壊れる」という計算。</p>
+        </div>
+      </li>
+      <li>
+        <h4>誰が検証するか</h4>
+        <div class="body">
+          <p>結果を受け取って判断するのは誰か。人か、コントラクトか、別のサーバか。</p>
+          <p class="why">
+            <b>KelpDAO の例:</b> on-chain のコントラクトが検証し、通れば自動で遮断する。
+            <b>検証者がコントラクトだからこそ、人の判断を待たずに止められる。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout">
+      <p class="eyebrow">この 4 つが埋まって、はじめて方式が決まる</p>
+      <p>
+        「相手が嘘をつくかもしれない」が問題なら ZK。「複数人の秘密を突き合わせたい」なら MPC。
+        「計算を外に出したい」なら FHE。<strong>4 つの問いの答えが、そのまま選択の根拠になります。</strong>
+      </p>
+      <p class="strong-line">
+        今週の課題を 4 つに当てはめると——<br>
+        ① prover が ② 資格 (role, clearance, region) を verifier から隠して
+        ③「権限がある」ことを計算し ④ verifier が制約 8 本で検証する。
+      </p>
+      <p>
+        ただし Week 1 では ② の「隠す」部分だけを外してあります。
+        witness は丸見えのまま渡していて、隠すのは上に暗号を載せてからの話。
+        <strong>今週は ③ と ④ を正しく作ることに集中している</strong>、という位置づけです。
+      </p>
     </div>
   </div>
 </section>
