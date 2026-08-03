@@ -11,7 +11,6 @@
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
 <style>
-  /* artifact ホストが入れていた最小リセット相当 */
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; }
@@ -22,29 +21,40 @@
 </head>
 <body>
 <style>
+  /* 個人サイト (susumutomita.com) と同じフォント。ホストされていない環境では
+     フォールバックが効くので、単体で開いても崩れない。 */
+  @font-face {
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root {
     color-scheme: light dark;
 
-    --ground:      #F2F4F8;
+    /* 配色は uno.config.ts の light / dark / accent / hybrid に合わせている */
+    --ground:      #F5F7F8;
     --panel:       #FFFFFF;
-    --panel-2:     #F7F8FB;
-    --line:        #DDE1EA;
-    --line-strong: #C3C9D6;
-    --ink:         #11151E;
-    --ink-2:       #3B4354;
-    --muted:       #5A6172;
-    --accent:      #2743E8;
-    --accent-soft: #E6E9FD;
-    --pass:        #096A49;
-    --pass-soft:   #E1F3EC;
-    --fail:        #BE2038;
-    --fail-soft:   #FBE6E9;
-    --free:        #96620A;
-    --free-soft:   #FAEFDC;
+    --panel-2:     #F5F7F8;
+    --line:        #D4DADE;
+    --line-strong: #B4BEC4;
+    --ink:         #242E33;
+    --ink-2:       #46535A;
+    --muted:       #6C7A80;
+    --accent:      #3E5A7C;
+    --accent-soft: #E4EDF4;
+    --pass:        #55632B;
+    --pass-soft:   #EDF0DF;
+    --fail:        #A54242;
+    --fail-soft:   #F7E7E7;
+    --free:        #8A5A28;
+    --free-soft:   #FAEEDF;
 
-    --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium",
-            "Yu Gothic", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
-            "Segoe UI", system-ui, sans-serif;
+    --sans: "AXIS Std", "Helvetica Neue", Helvetica, Arial,
+            "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+            "Noto Sans JP", sans-serif;
     --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
             "Cascadia Mono", Consolas, monospace;
 
@@ -63,61 +73,61 @@
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --ground:      #0B0E15;
-      --panel:       #141924;
-      --panel-2:     #1A2130;
-      --line:        #262E3E;
-      --line-strong: #3A455B;
-      --ink:         #E8EBF3;
-      --ink-2:       #BCC3D4;
-      --muted:       #8B93A8;
-      --accent:      #8496FF;
-      --accent-soft: #1D2542;
-      --pass:        #45D194;
-      --pass-soft:   #102C24;
-      --fail:        #FF7387;
-      --fail-soft:   #33161E;
-      --free:        #E5A548;
-      --free-soft:   #2E2313;
+      --ground:      #1D2528;
+      --panel:       #242E33;
+      --panel-2:     #1D2528;
+      --line:        #3A4449;
+      --line-strong: #4E5B61;
+      --ink:         #C5C8C6;
+      --ink-2:       #A9B0AE;
+      --muted:       #8A979D;
+      --accent:      #99DBFF;
+      --accent-soft: #24333C;
+      --pass:        #B5BD68;
+      --pass-soft:   #2B3122;
+      --fail:        #CC6666;
+      --fail-soft:   #3A2626;
+      --free:        #F0C674;
+      --free-soft:   #3A3122;
     }
   }
 
   :root[data-theme="dark"] {
-    --ground:      #0B0E15;
-    --panel:       #141924;
-    --panel-2:     #1A2130;
-    --line:        #262E3E;
-    --line-strong: #3A455B;
-    --ink:         #E8EBF3;
-    --ink-2:       #BCC3D4;
-    --muted:       #8B93A8;
-    --accent:      #8496FF;
-    --accent-soft: #1D2542;
-    --pass:        #45D194;
-    --pass-soft:   #102C24;
-    --fail:        #FF7387;
-    --fail-soft:   #33161E;
-    --free:        #E5A548;
-    --free-soft:   #2E2313;
+    --ground:    #1D2528;
+    --panel:     #242E33;
+    --panel-2:     #1D2528;
+    --line:      #3A4449;
+    --line-strong: #4E5B61;
+    --ink:       #C5C8C6;
+    --ink-2:     #A9B0AE;
+    --muted:     #8A979D;
+    --accent:    #99DBFF;
+    --accent-soft: #24333C;
+    --pass:      #B5BD68;
+    --pass-soft:   #2B3122;
+    --fail:      #CC6666;
+    --fail-soft:   #3A2626;
+    --free:      #F0C674;
+    --free-soft:   #3A3122;
   }
 
   :root[data-theme="light"] {
-    --ground:      #F2F4F8;
+    --ground:      #F5F7F8;
     --panel:       #FFFFFF;
-    --panel-2:     #F7F8FB;
-    --line:        #DDE1EA;
-    --line-strong: #C3C9D6;
-    --ink:         #11151E;
-    --ink-2:       #3B4354;
-    --muted:       #5A6172;
-    --accent:      #2743E8;
-    --accent-soft: #E6E9FD;
-    --pass:        #096A49;
-    --pass-soft:   #E1F3EC;
-    --fail:        #BE2038;
-    --fail-soft:   #FBE6E9;
-    --free:        #96620A;
-    --free-soft:   #FAEFDC;
+    --panel-2:     #F5F7F8;
+    --line:        #D4DADE;
+    --line-strong: #B4BEC4;
+    --ink:         #242E33;
+    --ink-2:       #46535A;
+    --muted:       #6C7A80;
+    --accent:      #3E5A7C;
+    --accent-soft: #E4EDF4;
+    --pass:        #55632B;
+    --pass-soft:   #EDF0DF;
+    --fail:        #A54242;
+    --fail-soft:   #F7E7E7;
+    --free:        #8A5A28;
+    --free-soft:   #FAEEDF;
   }
 
   body {
@@ -163,6 +173,25 @@
   code { font-size: 0.925em; }
 
   .lead { color: var(--ink-2); }
+
+  /* ---------- site bar（個人サイトのヘッダーに合わせた細いバー）---------- */
+  .sitebar {
+    position: sticky; top: 0; z-index: 50;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--ground) 80%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .sitebar-inner {
+    height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .sitebar-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); text-decoration: none; }
+  .sitebar-name:hover { color: var(--accent); }
+  .sitebar-links { display: flex; align-items: center; gap: 0.35rem; }
+  .sitebar-links a {
+    font-size: var(--fs-xs); color: var(--muted); text-decoration: none;
+    padding: 0.35rem 0.6rem; border-radius: var(--r-md); transition: color 120ms ease, background 120ms ease;
+  }
+  .sitebar-links a:hover { color: var(--ink); background: color-mix(in srgb, var(--line) 60%, transparent); }
 
   /* ---------- masthead ---------- */
   .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
@@ -558,6 +587,17 @@
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
+
+<!-- サイトに埋め込んだときに戻る導線が消えないよう、細いバーを置く -->
+<div class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a class="sitebar-name" href="/">Susumu Tomita</a>
+    <nav class="sitebar-links">
+      <a href="/blog/arithmetic-circuit-under-constrained/">解説記事</a>
+      <a href="https://github.com/susumutomita/advanced-cryptography-note">ノート一覧</a>
+    </nav>
+  </div>
+</div>
 
 <header class="masthead">
   <div class="wrap masthead-inner">

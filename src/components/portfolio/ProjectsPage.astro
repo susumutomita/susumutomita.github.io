@@ -1,0 +1,408 @@
+---
+/**
+ * Projects page, shared by the English (/projects) and Japanese
+ * (/ja/me/projects) routes. Markup lives here once; only the copy is localized
+ * so the two languages can never drift structurally.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { LINKS, BULL } from "../../lib/constants";
+import type { Lang } from "../../lib/i18n";
+import { portfolioAlternates } from "../../lib/i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+type ProjectStatus = "active" | "learning" | "experimental";
+type Localized = Record<Lang, string>;
+
+interface Project {
+  title: string;
+  description: Localized;
+  tags: string[];
+  github: string;
+  featured?: boolean;
+  featuredLabel?: Localized;
+  status?: ProjectStatus;
+  highlights?: Localized[];
+  paper?: string;
+  site?: string;
+  book?: string;
+}
+
+const statusConfig: Record<ProjectStatus, { label: Localized; class: string }> = {
+  active: {
+    label: { en: "Active", ja: "進行中" },
+    class: "bg-accent-500/20 text-accent-400 border-accent-500/30",
+  },
+  learning: {
+    label: { en: "Learning", ja: "学習中" },
+    class: "bg-hybrid-cyan/20 text-hybrid-brightCyan border-hybrid-cyan/30",
+  },
+  experimental: {
+    label: { en: "Experimental", ja: "実験中" },
+    class: "bg-hybrid-magenta/20 text-hybrid-brightMagenta border-hybrid-magenta/30",
+  },
+};
+
+const t = {
+  title: { en: "Projects - Susumu Tomita", ja: "プロジェクト - 富田 晋" },
+  metaDesc: {
+    en: "Open source projects and experiments by Susumu Tomita",
+    ja: "富田晋のオープンソースプロジェクトと実験",
+  },
+  heading: { en: "Projects", ja: "プロジェクト" },
+  intro: {
+    en: "Building things to understand how they work. From research papers to systems programming experiments.",
+    ja: "仕組みを理解するために、作って確かめています。論文からシステムプログラミングの実験まで。",
+  },
+  legendActive: { en: "Active", ja: "進行中" },
+  legendLearning: { en: "Learning", ja: "学習中" },
+  legendExperimental: { en: "Experimental", ja: "実験中" },
+  featuredDefault: { en: "Featured Research", ja: "注目の研究" },
+  keyHighlights: { en: "Key Highlights", ja: "主なポイント" },
+  readPaper: { en: "Read Paper", ja: "論文を読む" },
+  visitSite: { en: "Visit Site", ja: "サイトを見る" },
+  viewSource: { en: "View Source", ja: "ソースを見る" },
+  readBook: { en: "Read Book", ja: "本を読む" },
+  learningHeading: { en: "Learning & Experiments", ja: "学習と実験" },
+  ctaTitle: { en: "130+ Repositories", ja: "130 以上のリポジトリ" },
+  ctaBody: {
+    en: "Explore more experiments, tools, and contributions on GitHub",
+    ja: "GitHub には、ほかにも実験やツール、コントリビューションがあります",
+  },
+  ctaButton: { en: "View All on GitHub", ja: "GitHub で全部見る" },
+} satisfies Record<string, Localized>;
+
+const projects: Project[] = [
+  {
+    title: "TenkaCloud",
+    description: {
+      en: "BULL's open-source, multi-tenant platform for running cloud challenges, GameDays, and technical learning events. It is becoming the next pillar of BULL alongside our engineering engagements, and reads as proof of implementation for multi-tenant operations, identity and access, and auditability — the exact problems we solve for clients.",
+      ja: "クラウド競技・GameDay・技術学習イベントを開催するための、BULL のオープンソース マルチテナント基盤。受託開発と並ぶ BULL のもう一本の柱になりつつあり、マルチテナント運用・認証認可・監査可能性という、まさに顧客に提供している課題への実装証明でもあります。",
+    },
+    tags: ["AWS", "Multi-tenant", "Platform", "Open Source"],
+    github: BULL.tenkacloud,
+    site: BULL.tenkacloudSite,
+    featured: true,
+    featuredLabel: { en: "Featured Product", ja: "注目のプロダクト" },
+    status: "active",
+    highlights: [
+      {
+        en: "Multi-tenant control-plane / application-plane architecture",
+        ja: "コントロールプレーンとアプリケーションプレーンを分けたマルチテナント構成",
+      },
+      {
+        en: "Role-based access and SSO for organizers, staff, and participants",
+        ja: "主催者・運営・参加者それぞれのロール制御と SSO",
+      },
+      {
+        en: "Admin controls and audit trails for accountability",
+        ja: "説明責任を果たすための管理機能と監査ログ",
+      },
+      {
+        en: "Operational tooling to run live Battle / Challenge events",
+        ja: "Battle / Challenge を実際に運営するための運用ツール",
+      },
+    ],
+  },
+  {
+    title: "Koto",
+    description: {
+      en: "A local-first AI Native IME that turns rough intent into context-aware input candidates — reframing input from reading-to-text to intent-to-text, while suggesting (never acting) under user control.",
+      ja: "「あれやっといて」を、次の入力候補に変える AI Native IME。読みから文字へではなく、意図から文字へと入力を捉え直します。あくまで提案にとどめ、勝手に実行はしません。手元で完結します。",
+    },
+    tags: ["AI Native IME", "Local-first", "Intent-to-Text", "HCI"],
+    github: "https://github.com/susumutomita/koto-input",
+    featured: true,
+    status: "active",
+    highlights: [
+      { en: "Defines a new category: AI Native IME", ja: "AI Native IME という新しいカテゴリを定義" },
+      {
+        en: "Intent-to-Text Transformation from local working context",
+        ja: "手元の作業文脈から、意図を文字に変換する",
+      },
+      { en: "`Suggest, not act` — user stays in control", ja: "提案するが実行はしない。主導権は使う人に残す" },
+      { en: "Position paper published", ja: "ポジションペーパーを公開済み" },
+    ],
+    paper: "/blog/koto-ai-native-ime",
+  },
+  {
+    title: "Browser from Scratch",
+    description: {
+      en: "Building a web browser from scratch in Rust. Deep dive into rendering engines, HTML/CSS parsing, networking, and modern web standards.",
+      ja: "Rust でウェブブラウザをゼロから作っています。レンダリングエンジン、HTML/CSS のパース、ネットワーク、そして現代のウェブ標準に踏み込みます。",
+    },
+    tags: ["Rust", "Systems Programming", "WebDev"],
+    github: "https://github.com/susumutomita/browser",
+    status: "learning",
+  },
+  {
+    title: "OS from Scratch",
+    description: {
+      en: "Implementing an operating system in Rust. Covers bootloader, memory management, multitasking, interrupt handling, and device drivers.",
+      ja: "Rust で OS を実装しています。ブートローダ、メモリ管理、マルチタスク、割り込み処理、デバイスドライバまで。",
+    },
+    tags: ["Rust", "OS Development", "Low-level"],
+    github: "https://github.com/susumutomita/os",
+    status: "learning",
+  },
+  {
+    title: "Blockchain in Zig",
+    description: {
+      en: "Building a blockchain from scratch in Zig, now written up as a free book. Covers blocks and PoW, P2P networking with gossip-based chain sync (verified across 3 nodes), and a simplified EVM that runs a subset of Solidity opcodes and ABI calls. A hands-on toolkit for learning by implementing — PoS is intentionally left as an open exercise.",
+      ja: "Zig でブロックチェインをゼロから作り、無料の本にまとめました。ブロックと PoW、gossip によるチェイン同期を含む P2P ネットワーク（3 ノードで検証済み）、Solidity のオペコードと ABI 呼び出しの一部を実行する簡易 EVM まで扱います。PoS はあえて未完の課題として残してあります。",
+    },
+    tags: ["Zig", "Blockchain", "P2P", "EVM", "Systems Programming"],
+    github: "https://github.com/susumutomita/BlockChain",
+    book: "https://zenn.dev/bull/books/zig-blockchain",
+    status: "learning",
+  },
+  {
+    title: "DeepForm",
+    description: {
+      en: "AI-powered depth interview tool that transforms vague product ideas into production-ready specifications. Bridges non-technical stakeholders and engineering teams with evidence-traced requirements.",
+      ja: "曖昧なプロダクトの構想を、実装できる仕様に変える AI デプスインタビューツール。根拠をたどれる要件で、非エンジニアと開発チームの間をつなぎます。",
+    },
+    tags: ["TypeScript", "AI", "Bun", "Hono", "SQLite"],
+    github: "https://github.com/susumutomita/DeepForm",
+    status: "active",
+    highlights: [
+      {
+        en: "Structured AI depth interviews for requirement extraction",
+        ja: "要件を引き出すための、構造化された AI デプスインタビュー",
+      },
+      { en: "Evidence-linked requirements with source traceability", ja: "根拠と紐づき、出典をたどれる要件" },
+      { en: "PRD generation with ISO 25010 quality criteria", ja: "ISO 25010 の品質特性に沿った PRD の生成" },
+      { en: "Machine-readable spec export for coding agents", ja: "コーディングエージェント向けの機械可読な仕様出力" },
+    ],
+  },
+  {
+    title: "GitHub Vector Issue Processor",
+    description: {
+      en: "AI-powered tool that processes GitHub issues using vector embeddings. Enables semantic search, similarity matching, and intelligent issue triage.",
+      ja: "ベクトル埋め込みで GitHub の issue を処理するツール。意味による検索、類似 issue の照合、トリアージの自動化ができます。",
+    },
+    tags: ["Python", "AI/ML", "Developer Tools", "RAG"],
+    github: "https://github.com/susumutomita/GitHubVectorIssueProcessor",
+    status: "active",
+  },
+  {
+    title: "annai.nvim",
+    description: {
+      en: "Ask your Neovim, in plain language, “how do I…?” — an on-device LLM (Apple Intelligence, with an Ollama fallback) answers with a real keybinding picked from your own keymaps. No cloud, no API key, no telemetry.",
+      ja: "Neovim に「この操作どのキーだっけ」と普通の言葉で聞けます。端末内の LLM（Apple Intelligence、なければ Ollama）が、あなた自身の keymap から実在するキーを選んで答えます。クラウドも API キーも計測も使いません。",
+    },
+    tags: ["Neovim", "Lua", "Local LLM", "Apple Intelligence"],
+    github: "https://github.com/susumutomita/annai.nvim",
+    status: "active",
+  },
+];
+
+const featured = projects.filter((p) => p.featured);
+const rest = projects.filter((p) => !p.featured);
+---
+
+<BaseLayout
+  title={t.title[lang]}
+  description={t.metaDesc[lang]}
+  lang={lang}
+  alternates={portfolioAlternates("/projects")}
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <!-- Header -->
+    <div class="mb-16">
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6">{t.heading[lang]}</h1>
+      <p class="text-lg text-light-muted dark:text-dark-muted max-w-3xl mb-6">
+        {t.intro[lang]}
+      </p>
+      <div class="flex flex-wrap gap-3 text-sm">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-500/30 bg-accent-500/10">
+          <span class="w-2 h-2 rounded-full bg-accent-400"></span>
+          {t.legendActive[lang]}
+        </span>
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-hybrid-cyan/30 bg-hybrid-cyan/10">
+          <span class="w-2 h-2 rounded-full bg-hybrid-brightCyan"></span>
+          {t.legendLearning[lang]}
+        </span>
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-hybrid-magenta/30 bg-hybrid-magenta/10">
+          <span class="w-2 h-2 rounded-full bg-hybrid-brightMagenta"></span>
+          {t.legendExperimental[lang]}
+        </span>
+      </div>
+    </div>
+
+    <!-- Featured Projects -->
+    {
+      featured.map((project) => (
+        <section class="mb-12">
+          <div class="p-8 rounded-xl border-2 border-accent-500/50 bg-gradient-to-br from-accent-500/5 to-transparent">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-xs font-medium text-accent-500 uppercase tracking-wider">
+                {project.featuredLabel ? project.featuredLabel[lang] : t.featuredDefault[lang]}
+              </span>
+              {project.status && (
+                <span class={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusConfig[project.status].class}`}>
+                  {statusConfig[project.status].label[lang]}
+                </span>
+              )}
+            </div>
+            <h2 class="font-display text-3xl font-bold mb-4">{project.title}</h2>
+            <p class="text-light-muted dark:text-dark-muted mb-6 text-lg">{project.description[lang]}</p>
+
+            {project.highlights && (
+              <div class="mb-6 p-4 rounded-lg bg-light-surface dark:bg-dark-surface/50 border border-light-border dark:border-dark-border">
+                <h4 class="text-sm font-semibold mb-3 text-accent-500">{t.keyHighlights[lang]}</h4>
+                <ul class="grid gap-2 sm:grid-cols-2">
+                  {project.highlights.map((highlight) => (
+                    <li class="flex items-start gap-2 text-sm text-light-muted dark:text-dark-muted">
+                      <svg class="w-4 h-4 text-hybrid-brightGreen mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {highlight[lang]}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div class="flex flex-wrap gap-2 mb-6">
+              {project.tags.map((tag) => (
+                <span class="px-3 py-1 text-sm bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <div class="flex flex-wrap gap-4">
+              {project.paper && (
+                <a
+                  href={project.paper}
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {t.readPaper[lang]}
+                </a>
+              )}
+              {project.site && (
+                <a
+                  href={project.site}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  {t.visitSite[lang]}
+                </a>
+              )}
+              {project.github && (
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-4 py-2 border border-light-border dark:border-dark-border hover:border-accent-500 rounded-lg transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      fill-rule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  {t.viewSource[lang]}
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      ))
+    }
+
+    <!-- Learning & Experiments -->
+    <section>
+      <h2 class="font-display text-2xl font-bold mb-6 flex items-center gap-3">
+        <svg class="w-6 h-6 text-hybrid-brightCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        {t.learningHeading[lang]}
+      </h2>
+      <div class="grid gap-6 md:grid-cols-2">
+        {
+          rest.map((project) => (
+            <div class="p-6 rounded-lg border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 transition-colors group">
+              <div class="flex items-center gap-3 mb-3">
+                <h3 class="font-display font-semibold text-lg">{project.title}</h3>
+                {project.status && (
+                  <span class={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusConfig[project.status].class}`}>
+                    {statusConfig[project.status].label[lang]}
+                  </span>
+                )}
+              </div>
+              <p class="text-sm text-light-muted dark:text-dark-muted mb-4">{project.description[lang]}</p>
+              <div class="flex flex-wrap gap-2 mb-4">
+                {project.tags.map((tag) => (
+                  <span class="px-2 py-0.5 text-xs bg-light-border/50 dark:bg-dark-border/50 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div class="flex flex-wrap items-center gap-4">
+                {project.book && (
+                  <a
+                    href={project.book}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 text-sm font-medium text-accent-500 hover:text-accent-600 group-hover:underline"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    {t.readBook[lang]}
+                  </a>
+                )}
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 text-sm font-medium text-accent-500 hover:text-accent-600 group-hover:underline"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                  </svg>
+                  {t.viewSource[lang]}
+                </a>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- More Projects CTA -->
+    <section class="mt-16 text-center">
+      <div class="p-8 rounded-xl bg-gradient-to-r from-accent-500/10 via-hybrid-cyan/10 to-hybrid-magenta/10 border border-light-border dark:border-dark-border">
+        <h3 class="font-display text-xl font-bold mb-3">{t.ctaTitle[lang]}</h3>
+        <p class="text-light-muted dark:text-dark-muted mb-6">
+          {t.ctaBody[lang]}
+        </p>
+        <a
+          href={LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              fill-rule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              clip-rule="evenodd"></path>
+          </svg>
+          {t.ctaButton[lang]}
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
