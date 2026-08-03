@@ -102,29 +102,32 @@ const switcherLang = bullLang ?? portfolio?.lang ?? "en";
             );
           })
         }
-        <!-- Language switcher (only on BULL bilingual pages; legacy pages have
-             no EN/JA equivalent, and policy pages use their own in-page toggle) -->
+        <!-- Language switcher. Rendered as a segmented control so it reads as a
+             control, not as two more nav links. Only shown where a real
+             counterpart page exists (BULL section and bilingual portfolio). -->
         {showLangSwitcher && (
-          <div
-            class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center gap-1"
-            role="group"
-            aria-label={switcherLang === "ja" ? "言語" : "Language"}
-          >
-            {langTargets.map((t) => (
-              <a
-                href={t.href}
-                hreflang={t.lang}
-                aria-current={t.active ? "page" : undefined}
-                class:list={[
-                  "px-2 py-1 text-xs font-medium rounded transition-colors",
-                  t.active
-                    ? "text-accent-500 bg-accent-500/10"
-                    : "text-light-muted dark:text-dark-muted hover:text-light-text dark:hover:text-dark-text",
-                ]}
-              >
-                {t.label}
-              </a>
-            ))}
+          <div class="ml-2 pl-2 border-l border-light-border dark:border-dark-border flex items-center">
+            <div
+              class="flex items-center rounded-md border border-light-border dark:border-dark-border overflow-hidden"
+              role="group"
+              aria-label={switcherLang === "ja" ? "言語を切り替える" : "Switch language"}
+            >
+              {langTargets.map((t) => (
+                <a
+                  href={t.href}
+                  hreflang={t.lang}
+                  aria-current={t.active ? "page" : undefined}
+                  class:list={[
+                    "px-2.5 py-1 text-xs font-semibold transition-colors",
+                    t.active
+                      ? "bg-accent-500 text-white"
+                      : "text-light-muted dark:text-dark-muted hover:bg-light-border/50 dark:hover:bg-dark-border/50 hover:text-light-text dark:hover:text-dark-text",
+                  ]}
+                >
+                  {t.lang === "ja" ? "日本語" : "EN"}
+                </a>
+              ))}
+            </div>
           </div>
         )}
         <div class="ml-1 pl-2 border-l border-light-border dark:border-dark-border">
