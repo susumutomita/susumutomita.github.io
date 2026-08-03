@@ -12,6 +12,7 @@ zk-tokyo の[Advanced Cryptography Program 2026](https://github.com/zk-tokyo/adv
 この記事はその要点をまとめたものです。手を動かせる自習ノートも別に用意しました。
 
 - 自習ノート: [算術回路の作り方と、壊し方](/notes/ac2026-week1/)
+- 週ごとの目次: [Advanced Cryptography 2026 自習ノート](https://susumutomita.github.io/advanced-cryptography-note/)
 - リポジトリ: [susumutomita/advanced-cryptography-note](https://github.com/susumutomita/advanced-cryptography-note)
 
 ## 回路には if が書けない
