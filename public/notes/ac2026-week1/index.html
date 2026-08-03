@@ -1,0 +1,3109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>算術回路の作り方と、壊し方 — Week 1 自習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 1「proof-of-exploit」の自習ノート。算術回路とアンダー制約を、対話型のラボと検問クイズで理解する。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="算術回路の作り方と、壊し方 — Week 1 自習ノート">
+<meta property="og:description" content="算術回路とアンダー制約を、壊しながら理解する自習ノート。">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+<style>
+  /* artifact ホストが入れていた最小リセット相当 */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { display: block; max-width: 100%; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  table { border-collapse: collapse; }
+</style>
+</head>
+<body>
+<style>
+  :root {
+    color-scheme: light dark;
+
+    --ground:      #F2F4F8;
+    --panel:       #FFFFFF;
+    --panel-2:     #F7F8FB;
+    --line:        #DDE1EA;
+    --line-strong: #C3C9D6;
+    --ink:         #11151E;
+    --ink-2:       #3B4354;
+    --muted:       #5A6172;
+    --accent:      #2743E8;
+    --accent-soft: #E6E9FD;
+    --pass:        #096A49;
+    --pass-soft:   #E1F3EC;
+    --fail:        #BE2038;
+    --fail-soft:   #FBE6E9;
+    --free:        #96620A;
+    --free-soft:   #FAEFDC;
+
+    --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium",
+            "Yu Gothic", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
+            "Segoe UI", system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+            "Cascadia Mono", Consolas, monospace;
+
+    --fs-label: 0.6875rem;
+    --fs-xs:    0.8125rem;
+    --fs-sm:    0.875rem;
+    --fs-base:  1rem;
+    --fs-lg:    1.25rem;
+    --fs-xl:    1.6875rem;
+    --fs-2xl:   clamp(2.1rem, 5.5vw, 3.1rem);
+
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:      #0B0E15;
+      --panel:       #141924;
+      --panel-2:     #1A2130;
+      --line:        #262E3E;
+      --line-strong: #3A455B;
+      --ink:         #E8EBF3;
+      --ink-2:       #BCC3D4;
+      --muted:       #8B93A8;
+      --accent:      #8496FF;
+      --accent-soft: #1D2542;
+      --pass:        #45D194;
+      --pass-soft:   #102C24;
+      --fail:        #FF7387;
+      --fail-soft:   #33161E;
+      --free:        #E5A548;
+      --free-soft:   #2E2313;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0B0E15;
+    --panel:       #141924;
+    --panel-2:     #1A2130;
+    --line:        #262E3E;
+    --line-strong: #3A455B;
+    --ink:         #E8EBF3;
+    --ink-2:       #BCC3D4;
+    --muted:       #8B93A8;
+    --accent:      #8496FF;
+    --accent-soft: #1D2542;
+    --pass:        #45D194;
+    --pass-soft:   #102C24;
+    --fail:        #FF7387;
+    --fail-soft:   #33161E;
+    --free:        #E5A548;
+    --free-soft:   #2E2313;
+  }
+
+  :root[data-theme="light"] {
+    --ground:      #F2F4F8;
+    --panel:       #FFFFFF;
+    --panel-2:     #F7F8FB;
+    --line:        #DDE1EA;
+    --line-strong: #C3C9D6;
+    --ink:         #11151E;
+    --ink-2:       #3B4354;
+    --muted:       #5A6172;
+    --accent:      #2743E8;
+    --accent-soft: #E6E9FD;
+    --pass:        #096A49;
+    --pass-soft:   #E1F3EC;
+    --fail:        #BE2038;
+    --fail-soft:   #FBE6E9;
+    --free:        #96620A;
+    --free-soft:   #FAEFDC;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--fs-base);
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 2.5rem);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: var(--fs-label);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+    line-height: 1.35;
+    margin: 0;
+    font-weight: 700;
+  }
+  h1 { font-size: var(--fs-2xl); letter-spacing: -0.02em; line-height: 1.15; }
+  h2 { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+  h3 { font-size: var(--fs-lg); }
+  h4 { font-size: var(--fs-base); }
+
+  p { margin: 0; }
+  /* display を持つクラスに hidden 属性が負けないようにする */
+  [hidden] { display: none !important; }
+  code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  code { font-size: 0.925em; }
+
+  .lead { color: var(--ink-2); }
+
+  /* ---------- masthead ---------- */
+  .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .masthead-inner {
+    display: flex; flex-direction: column; gap: 1.1rem;
+    padding: clamp(2.5rem, 7vw, 4.5rem) 0 clamp(2rem, 5vw, 3rem);
+  }
+  .masthead h1 span { color: var(--accent); }
+  .masthead .lead { max-width: 60ch; font-size: 1.0625rem; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }
+  .tag {
+    font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em;
+    padding: 0.25rem 0.55rem; border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm); color: var(--ink-2);
+  }
+
+  /* ---------- sections ---------- */
+  .band { padding: clamp(2.5rem, 6vw, 4rem) 0; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band-head {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    margin-bottom: 1.75rem; max-width: 64ch;
+  }
+  .band-head p { color: var(--ink-2); }
+
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose strong { color: var(--ink); font-weight: 700; }
+  .prose .strong-line {
+    color: var(--ink); font-weight: 700;
+    border-left: 3px solid var(--accent); padding-left: 1.1rem;
+  }
+  .prose h3 { margin-top: 0.5rem; }
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .stack-sm { display: flex; flex-direction: column; gap: 0.9rem; }
+
+  /* ---------- definition trio ---------- */
+  .defs {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .def { background: var(--panel); padding: 1.35rem 1.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .def dt { font-family: var(--mono); font-size: var(--fs-xs); letter-spacing: 0.06em; color: var(--accent); }
+  .def dd { margin: 0; font-size: var(--fs-sm); color: var(--ink-2); }
+  .def .jp { font-weight: 700; color: var(--ink); font-size: var(--fs-base); }
+  .def .ex {
+    font-size: var(--fs-xs); color: var(--muted);
+    border-top: 1px dashed var(--line-strong); padding-top: 0.6rem; margin-top: 0.2rem;
+  }
+
+  /* ---------- numbered steps ---------- */
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .steps > li {
+    counter-increment: step; background: var(--panel);
+    padding: 1.25rem 1.4rem 1.35rem;
+    display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem; align-items: start;
+  }
+  .steps > li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-xs); font-weight: 700;
+    color: var(--accent); letter-spacing: 0.06em; padding-top: 0.35rem;
+  }
+  .steps h4 { grid-column: 2; }
+  .steps .body { grid-column: 2; display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.35rem; }
+  .steps p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .steps .why {
+    font-size: var(--fs-sm); color: var(--ink-2);
+    border-left: 2px solid var(--line-strong); padding-left: 0.85rem;
+  }
+  .steps .why b { color: var(--ink); }
+
+  /* ---------- lab ---------- */
+  .lab { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 940px) {
+    .lab { grid-template-columns: minmax(300px, 350px) minmax(0, 1fr); }
+    .lab .console { position: sticky; top: 1.25rem; }
+  }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .card-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+    padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--panel-2);
+  }
+  .card-head h3 { font-size: var(--fs-sm); letter-spacing: 0.02em; }
+  .card-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field-label {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+  }
+  .field-label .allow { color: var(--muted); font-size: var(--fs-label); }
+
+  .segments { display: flex; gap: 3px; }
+  .segments button {
+    flex: 1; font-family: var(--mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+    padding: 0.4rem 0; background: var(--panel-2); color: var(--ink-2);
+    border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+  .segments button:hover { border-color: var(--line-strong); }
+  .segments button[data-inlist="1"] { color: var(--pass); border-color: color-mix(in srgb, var(--pass) 35%, var(--line)); }
+  .segments button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  :root[data-theme="light"] .segments button[aria-pressed="true"] { color: #fff; }
+  :root[data-theme="dark"]  .segments button[aria-pressed="true"] { color: #0B0E15; }
+  @media (prefers-color-scheme: light) { .segments button[aria-pressed="true"] { color: #fff; } }
+  @media (prefers-color-scheme: dark)  { .segments button[aria-pressed="true"] { color: #0B0E15; } }
+
+  .flags { display: flex; flex-direction: column; gap: 0.4rem; }
+  .flag-row {
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.75rem;
+    padding: 0.4rem 0.55rem; border: 1px solid var(--line);
+    border-radius: var(--r-md); background: var(--panel-2);
+  }
+  .flag-row .name { font-family: var(--mono); font-size: var(--fs-xs); }
+  .flag-row.free { border-color: color-mix(in srgb, var(--free) 45%, var(--line)); background: var(--free-soft); }
+  .flag-row .hint { display: block; font-size: var(--fs-label); color: var(--free); font-family: var(--sans); line-height: 1.5; }
+
+  .bit { display: flex; gap: 2px; }
+  .bit button {
+    font-family: var(--mono); font-size: var(--fs-xs); width: 2.1rem; padding: 0.25rem 0;
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink-2); cursor: pointer;
+  }
+  .bit button:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); }
+  .bit button:last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+  .bit button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 700; }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .preset {
+    font-size: var(--fs-xs); padding: 0.35rem 0.7rem; border-radius: 999px;
+    border: 1px solid var(--line-strong); background: transparent; color: var(--ink-2);
+    cursor: pointer; transition: border-color 120ms ease, color 120ms ease;
+  }
+  .preset:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- verdict ---------- */
+  .verdict { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.1rem; border-bottom: 1px solid var(--line); }
+  .verdict-line { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: var(--fs-sm); color: var(--ink-2); }
+  .pill {
+    font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em;
+    padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid transparent;
+  }
+  .pill.ok   { background: var(--pass-soft); color: var(--pass); border-color: color-mix(in srgb, var(--pass) 30%, transparent); }
+  .pill.bad  { background: var(--fail-soft); color: var(--fail); border-color: color-mix(in srgb, var(--fail) 30%, transparent); }
+  .pill.warn { background: var(--free-soft); color: var(--free); border-color: color-mix(in srgb, var(--free) 35%, transparent); }
+
+  .banner { font-weight: 700; font-size: var(--fs-base); padding: 0.7rem 0.9rem; border-radius: var(--r-md); border-left: 4px solid; }
+  .banner.ok    { background: var(--pass-soft); color: var(--pass); border-color: var(--pass); }
+  .banner.rej   { background: var(--panel-2); color: var(--ink-2); border-color: var(--line-strong); }
+  .banner.breach{ background: var(--fail-soft); color: var(--fail); border-color: var(--fail); }
+
+  /* ---------- ledger ---------- */
+  .ledger { display: flex; flex-direction: column; }
+  .ledger-group {
+    font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); padding: 0.75rem 1.1rem 0.35rem;
+  }
+  .row {
+    display: grid; grid-template-columns: 2.1rem minmax(0, 1fr) 5.5rem 4.75rem;
+    align-items: center; gap: 0.6rem; padding: 0.6rem 1.1rem;
+    border-top: 1px solid var(--line); border-left: 4px solid transparent;
+    font-family: var(--mono); font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
+  }
+  .row.sat  { border-left-color: var(--pass); }
+  .row.viol { border-left-color: var(--fail); background: var(--fail-soft); }
+  .row.off  { opacity: 0.45; border-left-color: var(--line-strong); }
+  .row .idx { color: var(--muted); }
+  .row .expr { overflow-x: auto; white-space: nowrap; color: var(--ink); }
+  .row .val { text-align: right; font-weight: 700; }
+  .row.sat  .val { color: var(--pass); }
+  .row.viol .val { color: var(--fail); }
+  .row.off  .val { color: var(--muted); }
+
+  .switch { justify-self: end; display: inline-flex; align-items: center; gap: 0.35rem; font-size: var(--fs-label); color: var(--muted); cursor: pointer; user-select: none; }
+  .switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .track { width: 30px; height: 17px; border-radius: 999px; background: var(--line-strong); position: relative; transition: background 140ms ease; flex: none; }
+  .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--panel); transition: transform 140ms ease; }
+  .switch input:checked + .track { background: var(--accent); }
+  .switch input:checked + .track::after { transform: translateX(13px); }
+  .switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- grader ---------- */
+  .grader { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.1rem; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; }
+  .stat { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.7rem 0.85rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.15rem; }
+  .stat .k { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .stat .v { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.3; }
+  .stat .v.ok  { color: var(--pass); }
+  .stat .v.bad { color: var(--fail); }
+  .stat .note { font-size: var(--fs-label); color: var(--muted); line-height: 1.5; }
+
+  .examples { font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+  .examples button {
+    font-family: var(--mono); font-size: var(--fs-xs); padding: 0.2rem 0.55rem;
+    border: 1px dashed color-mix(in srgb, var(--fail) 45%, var(--line));
+    background: transparent; color: var(--fail); border-radius: var(--r-sm); cursor: pointer;
+  }
+  .examples button:hover { background: var(--fail-soft); }
+
+  /* ---------- callout ---------- */
+  .callout {
+    border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    border-radius: var(--r-md); background: var(--panel); padding: 1.1rem 1.25rem;
+    display: flex; flex-direction: column; gap: 0.65rem; max-width: 68ch;
+  }
+  .callout .eyebrow { color: var(--accent); }
+  .callout p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .callout p.strong-line { color: var(--ink); }
+  .callout.amber { border-left-color: var(--free); }
+  .callout.amber .eyebrow { color: var(--free); }
+
+  pre {
+    margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono);
+    font-size: var(--fs-xs); line-height: 1.75; color: var(--ink);
+  }
+  pre .c { color: var(--muted); }
+  pre .k { color: var(--accent); }
+
+  /* minmax(0,1fr) にしないと、中の表や pre の min-content でトラックが膨らみ横スクロールする */
+  .split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 860px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .note-inline { display: block; margin-top: 0.4rem; color: var(--muted); }
+
+  /* ---------- tables ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 0.5rem 0.85rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data th { color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: var(--fs-label); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data td.res-bad { color: var(--fail); }
+  table.data td.res-ok  { color: var(--pass); }
+  .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+  table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+
+  /* ---------- table of contents ---------- */
+  .toc {
+    list-style: none; margin: 0; padding: 0; counter-reset: toc;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .toc li { counter-increment: toc; background: var(--panel); }
+  .toc a {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: baseline;
+    padding: 0.7rem 1rem; text-decoration: none; color: var(--ink-2);
+    font-size: var(--fs-sm); line-height: 1.5;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--ink); }
+
+  /* ---------- experiments ---------- */
+  .exps { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+  .exp { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel); padding: 1.2rem 1.3rem; display: flex; flex-direction: column; gap: 0.65rem; }
+  .exp .eyebrow { color: var(--accent); }
+  .exp h4 { font-size: var(--fs-base); }
+  .exp ol { margin: 0; padding-left: 1.15rem; font-size: var(--fs-sm); color: var(--ink-2); display: flex; flex-direction: column; gap: 0.3rem; }
+  .exp .expect { font-size: var(--fs-sm); border-top: 1px dashed var(--line-strong); padding-top: 0.65rem; color: var(--ink); }
+  .exp .expect b { color: var(--accent); }
+
+  /* ---------- glossary ---------- */
+  .gloss { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  @media (min-width: 760px) { .gloss { grid-template-columns: 1fr 1fr; } }
+  .gloss > div { background: var(--panel); padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.2rem; }
+  .gloss .term { font-family: var(--mono); font-size: var(--fs-xs); color: var(--accent); }
+  .gloss .jp { font-weight: 700; font-size: var(--fs-sm); }
+  .gloss .desc { font-size: var(--fs-sm); color: var(--ink-2); }
+
+  /* ---------- quiz ---------- */
+  .quiz-pane { padding: 1.25rem 1.35rem 1.35rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .quiz-hero { display: flex; flex-direction: column; gap: 0.35rem; }
+
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem; }
+  .mode {
+    text-align: left; cursor: pointer; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 0.8rem 0.95rem; display: flex; flex-direction: column; gap: 0.2rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .m-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .mode .m-desc { font-size: var(--fs-label); color: var(--muted); line-height: 1.6; }
+  .mode.primary { background: var(--accent); border-color: var(--accent); }
+  .mode.primary .m-name { color: #fff; }
+  .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+  :root[data-theme="dark"] .mode.primary .m-name { color: #0B0E15; }
+  :root[data-theme="dark"] .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  @media (prefers-color-scheme: dark) {
+    .mode.primary .m-name { color: #0B0E15; }
+    .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  }
+  :root[data-theme="light"] .mode.primary .m-name { color: #fff; }
+  :root[data-theme="light"] .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+
+  .quiz-best { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); margin: 0; }
+
+  .quiz-bar {
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
+  }
+  .quiz-bar .qcat {
+    padding: 0.1rem 0.5rem; border: 1px solid var(--line-strong);
+    border-radius: 999px; color: var(--ink-2); font-size: var(--fs-label); letter-spacing: 0.06em;
+  }
+  .quiz-bar .lives { margin-left: auto; letter-spacing: 0.2em; color: var(--fail); font-size: 0.95rem; }
+  .quiz-bar .lives .gone { color: var(--line-strong); }
+
+  .qmain { display: flex; flex-direction: column; gap: 0.9rem; }
+  .qtext { font-weight: 700; font-size: 1.0625rem; line-height: 1.7; }
+  .qbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .qbody table.data td, .qbody table.data th { padding: 0.35rem 0.7rem; }
+  .qbody .clist { display: flex; flex-direction: column; gap: 2px; }
+  .qbody .cline {
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+    padding: 0.3rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2);
+    border-left: 3px solid var(--line-strong); overflow-x: auto; white-space: nowrap;
+  }
+  .qbody .cline.missing {
+    color: var(--fail); border-left-color: var(--fail);
+    background: var(--fail-soft); text-decoration: line-through;
+  }
+  .qbody .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); }
+
+  .choices { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .choices.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    text-align: left; cursor: pointer; font-size: var(--fs-sm); line-height: 1.6;
+    padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:disabled { cursor: default; }
+  .choice.is-correct { border-color: var(--pass); background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  .choice.is-wrong   { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); }
+  .choice.dim { opacity: 0.5; }
+
+  .fb { border-radius: var(--r-md); padding: 0.85rem 1rem; border-left: 4px solid; font-size: var(--fs-sm); line-height: 1.75; }
+  .fb.ok  { background: var(--pass-soft); border-color: var(--pass); }
+  .fb.bad { background: var(--fail-soft); border-color: var(--fail); }
+  .fb .fb-head { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+  .fb.ok  .fb-head { color: var(--pass); }
+  .fb.bad .fb-head { color: var(--fail); }
+  .fb code { color: var(--ink); }
+
+  .quiz-foot { display: flex; gap: 0.6rem; align-items: center; justify-content: flex-end; }
+  .btn-main {
+    cursor: pointer; font-size: var(--fs-sm); font-weight: 700; padding: 0.55rem 1.2rem;
+    border-radius: var(--r-md); border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  :root[data-theme="dark"] .btn-main { color: #0B0E15; }
+  @media (prefers-color-scheme: dark) { .btn-main { color: #0B0E15; } }
+  :root[data-theme="light"] .btn-main { color: #fff; }
+  .btn-ghost {
+    cursor: pointer; font-size: var(--fs-sm); padding: 0.55rem 1rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--ink-2); border-color: var(--ink-2); }
+
+  .rank-box { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .rank {
+    font-family: var(--mono); font-size: 3.5rem; font-weight: 700; line-height: 1;
+    width: 5rem; height: 5rem; display: grid; place-items: center;
+    border-radius: var(--r-lg); border: 2px solid currentColor; flex: none;
+  }
+  .rank.s { color: var(--accent); }
+  .rank.a { color: var(--pass); }
+  .rank.b { color: var(--free); }
+  .rank.f { color: var(--fail); }
+  .rank-meta { display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank-title { font-weight: 700; font-size: var(--fs-lg); }
+  .rank-sub { font-size: var(--fs-sm); color: var(--ink-2); }
+
+  .cat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+  .cstat {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+    padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .cstat .cn { font-size: var(--fs-label); color: var(--muted); }
+  .cstat .cv { font-family: var(--mono); font-size: var(--fs-base); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cstat .cv.full { color: var(--pass); }
+  .cstat .cv.weak { color: var(--fail); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
+
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 1 自習ノート</p>
+    <h1>算術回路の<span>作り方</span>と、<span>壊し方</span></h1>
+    <p class="lead">
+      Week 1 の課題 <code>proof-of-exploit</code> を、前提から順に理解するためのページ。
+      「そもそもなぜ回路で書くのか」から始めて、制約を 1 本ずつ数値で読み、
+      最後は<strong>実際に制約を外して回路を壊せる対話型のラボ</strong>まで通します。
+    </p>
+    <p class="lead">
+      この週で掴むことを 1 行にすると——
+      <strong>回路には <code>if</code> が無く、あるのは「この式は 0 でなければならない」という条件だけ。
+      条件を 1 本書き忘れると、その信号は攻撃者の持ち物になる。</strong>
+    </p>
+    <div class="meta-row">
+      <span class="tag">読了 15〜25 分</span>
+      <span class="tag">対話ラボあり</span>
+      <span class="tag">前提知識なし</span>
+      <span class="tag">外部通信なし</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================ 0 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">全体像</p>
+      <h2>このプログラムは、何を目指しているのか</h2>
+      <p>
+        Week 1 だけ見ると「なぜ 8 本の式をいじっているのか」が分からない。先に地図を置く。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <h3>プログラムの目的</h3>
+        <p class="strong-line">
+          ゼロ知識証明の理論と実装の理解を促し、Ethereum エコシステムや実社会に
+          コミットする技術者を養成する。
+        </p>
+        <p>
+          ゴールは知識ではなく<strong>成果物</strong>。成果物テーマ案として、実際の企業が出した課題
+          （Intmax・Nyx Foundation・SMBC日興証券・キリフダ ほか）が並んでいる。
+          MPC ウォレットの鍵復元、プライバシー決済の匿名性、規制産業での機密 LLM、
+          AI エージェントの行動証跡——どれも「<strong>見せずに正しさを示す</strong>」という同じ形をしている。
+        </p>
+        <h3>各週に共通する構造</h3>
+        <p>
+          このプログラムには一貫した型がある。<strong>自分で作り、自分で壊す。</strong>
+          Week 1 は回路を組んでその穴を突く。Week 3 は Schnorr 署名を作って nonce の使い回しから鍵を抜く。
+          Week 6 は zkVM の中で動く exploit を書く。
+        </p>
+        <p>
+          攻撃側に立たないと、何を守っていたのかが分からない——という思想で組まれている。
+          だから Week 1 の課題名は <code>proof-of-exploit</code>（脆弱性の証明）になっている。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <p class="eyebrow">週の地図</p>
+        <div class="table-scroll">
+          <table class="data">
+            <thead><tr><th>週</th><th>テーマ</th><th>課題</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>導入</td><td>スライドのみ</td></tr>
+              <tr class="here"><td>1</td><td>Programmable Cryptography の全体像／算術回路</td><td>proof-of-exploit ← 今ここ</td></tr>
+              <tr><td>2</td><td>準備中</td><td>—</td></tr>
+              <tr><td>3</td><td>楕円曲線暗号と Schnorr プロトコル</td><td>schnorr-from-scratch</td></tr>
+              <tr><td>4</td><td>準備中</td><td>—</td></tr>
+              <tr><td>5</td><td>TFHE（Programmable Bootstrapping）</td><td>tfhe-toy-python</td></tr>
+              <tr><td>6</td><td>zkVM / vFHE / co-SNARK の組み合わせ</td><td>co-snark-prove／zkvm-exploit</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">
+          Week 3 は有限体 → 楕円曲線 → シグマプロトコル → Fiat-Shamir を下から積み上げる構成。
+          Week 5 は暗号文のまま NAND を計算する。Week 6 でそれらを組み合わせて 1 つのスタックにする。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">Week 1 が最初に来る理由</p>
+      <p class="strong-line">
+        ZK も MPC も FHE も、計算を「算術回路」に翻訳してから暗号をかける。回路は 3 つの共通言語。
+      </p>
+      <p>
+        つまり <strong>回路が間違っていれば、その上にどんな暗号を積んでも意味がない</strong>。
+        Week 1 が暗号を一切使わず、Python の小さなライブラリだけで回路を扱うのは、そこが土台だから。
+      </p>
+      <p>
+        そして今週学ぶ「制約の書き忘れ（アンダー制約）」は、実務でそのまま使える。
+        成果物テーマにも <strong>Proof-of-Exploit による DeFi 自動停止</strong>、
+        <strong>ZK/FHE/MPC 回路のバグ発見</strong>、<strong>形式証明された ZK 回路の実装</strong>が並んでいる。
+        Week 1 でやることは、その入口そのもの。
+      </p>
+    </div>
+
+    <div class="stack-sm">
+      <p class="eyebrow">このページの構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>なぜ、わざわざ「回路」で書くのか</h2>
+      <p>
+        ここが腑に落ちていないと、以降の制約がただの奇妙な数式に見えてしまう。
+        「そもそも何がしたくて、なぜ普通のコードでは駄目なのか」から順に片付ける。
+      </p>
+    </div>
+
+    <div class="prose">
+      <h3>やりたいこと</h3>
+      <p>
+        今回の題材で言えば、こういう主張を通したい。
+      </p>
+      <p class="strong-line" style="font-size:1.0625rem;">
+        「私はこのシステムにアクセスする権限を持っている。<br>
+        ただし、<strong>自分の役職も、クリアランスも、所属地域も一切明かさない</strong>。」
+      </p>
+      <p>
+        年齢確認なら「18 歳以上である。ただし生年月日は見せない」。
+        送金なら「残高は足りている。ただし残高は見せない」。
+        <strong>結論だけを、根拠を隠したまま、相手に確信させたい</strong>——これが共通の願い。
+      </p>
+    </div>
+
+    <div class="stack-sm">
+      <h3>素朴な方法は、どれも壊れる</h3>
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>案</th><th>やること</th><th>何が起きるか</th></tr></thead>
+          <tbody>
+            <tr><td>① 自己申告</td><td>「権限あります」と送る</td><td class="res-bad">嘘がつける。検証が存在しない</td></tr>
+            <tr><td>② 資格を全部見せる</td><td>role/clearance/region を送る</td><td class="res-bad">通るが、隠したかった情報が全部漏れる</td></tr>
+            <tr><td>③ サーバに預けて判定してもらう</td><td>暗号化して送り、向こうで復号</td><td class="res-bad">サーバを全面的に信用することになる。漏洩・内部犯行に無防備</td></tr>
+            <tr><td>④ 信頼できる第三者に証明書を出させる</td><td>「権限あり」と署名してもらう</td><td class="res-bad">その第三者は全員の資格を知っている。信頼の一点集中が残る</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        欲しいのは「<strong>本人にしか作れず、中身を明かさず、相手が数学的に確認できる証拠</strong>」。
+        誰かを信用する話に落とさずに、これを作る道具が ZK（ゼロ知識証明）であり、
+        同じ土台を共有するのが MPC（複数人で分担計算）と FHE（暗号化したまま計算）。
+      </p>
+    </div>
+
+    <div class="stack-sm">
+      <h3>ところが、暗号が貸してくれる操作は 2 つしかない</h3>
+      <ol class="steps">
+        <li>
+          <h4>使えるのは「足し算」と「掛け算」だけ</h4>
+          <div class="body">
+            <p>
+              FHE なら暗号文のまま <code>E(a) + E(b) = E(a+b)</code>、<code>E(a) × E(b) = E(a×b)</code> ができる。
+              MPC なら秘密分散されたシェアどうしで加算・乗算ができる。
+              ZK の証明系が扱うのは多項式で、多項式を作る操作もやはり加算と乗算。
+            </p>
+            <p class="why">
+              <b>共通点:</b> どの技術も「+ と ×」だけを提供する。
+              比較・分岐・ループ・配列アクセスといった、普段プログラムを書くときの道具は<b>1 つも入っていない</b>。
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>だから計算を「+ と × だけの式」に翻訳する</h4>
+          <div class="body">
+            <p>
+              この翻訳結果が<strong>算術回路</strong>。プログラムを、加算と乗算だけで組み立てた
+              巨大な式の集まりに書き直したものだ。
+            </p>
+            <p class="why">
+              <b>なぜ「回路」と呼ぶのか:</b> 論理回路が AND/OR/NOT ゲートの組み合わせであるように、
+              こちらは加算ゲートと乗算ゲートの組み合わせだから。ただし電気は流れないし、
+              実行順序という概念もない。<b>全部の条件が同時に成り立っているかどうか</b>だけが問われる。
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>分岐は「両方計算して混ぜる」で置き換える</h4>
+          <div class="body">
+            <p>
+              <code>if s: out = a else: out = b</code> は、回路では
+              <code>out = s·a + (1−s)·b</code> と書く（s は 0 か 1）。
+              <strong>どちらの枝も必ず計算され、選択子で片方を消す</strong>。
+            </p>
+            <p class="why">
+              <b>なぜこうなるのか:</b> ① 値が見えないので、どちらに進むか判断できない。
+              ② かりに判断できても、<b>どちらに進んだかという事実自体が秘密を漏らす</b>。
+              実行時間や回路の形が入力によって変われば、そこから中身が推測できてしまう。
+              だから回路は常に全経路を計算する。<b>後の「構造を入力値に依存させるな」という要求は、ここに根がある。</b>
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>判定はすべて「= 0」の形に揃える</h4>
+          <div class="body">
+            <p>
+              verifier ができるのは、突き詰めれば「<strong>この等式は成り立っているか</strong>」の確認だけ。
+              だから「x はリストに入っている」「フラグは 0 か 1」といった条件を、
+              全部「ある式の値が 0」という同じ形に書き直す。
+            </p>
+            <p class="why">
+              <b>揃えると何が嬉しいか:</b> 形が同じなら、何千本もの条件をまとめて 1 本の多項式に畳み込み、
+              ランダムな 1 点で評価するだけで全部を一括検査できる。
+              ZK の効率はこの「形の統一」に支えられている。
+              <b>true/false という型が存在しないのは、手抜きではなく設計。</b>
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="stack-sm">
+      <h3>そして最大の転換 — 回路は計算しない。答え合わせをする</h3>
+      <div class="split">
+        <div class="prose">
+          <p>
+            普通のプログラムは、入力から答えを<strong>計算して</strong>返す。
+            回路は違う。<strong>prover が答えを先に主張し、回路はその主張が嘘でないことだけを確かめる</strong>。
+          </p>
+          <p>
+            分かりやすい例が割り算だ。回路に除算ゲートは無い。ではどうするか——
+            prover に「<code>1/x</code> の答えは <code>y</code> です」と<strong>言わせる</strong>。
+            回路が書く制約はたった 1 本、<code>x · y − 1 = 0</code>。
+            これで <code>y</code> が本当に逆数であることが保証される。
+            <strong>難しい計算は prover にやらせ、verifier は掛け算 1 回で検算する。</strong>
+          </p>
+          <p>
+            今回のフラグもまったく同じ発想でできている。
+            「role が許可リストに入っているか」を回路が<strong>計算するのではない</strong>。
+            prover が <code>f_role = 1</code> と<strong>主張し</strong>、
+            回路は「その主張が嘘なら 0 にならない式」を 1 本置くだけ。
+          </p>
+        </div>
+        <div class="stack-sm">
+          <p class="eyebrow">同じ判定を、2 つの世界で書くと</p>
+<pre><span class="c"># 普通のプログラム — 計算して決める</span>
+<span class="k">if</span> role <span class="k">in</span> {2, 5, 6}:
+    f_role = 1
+<span class="k">else</span>:
+    f_role = 0
+
+<span class="c"># 回路 — prover が主張し、嘘を禁じる</span>
+<span class="c">#   f_role の値は prover が勝手に決めてよい</span>
+<span class="c">#   回路が言えるのは「1 と言うなら嘘は許さない」だけ</span>
+f_role * f_role - f_role        == 0
+f_role * (role-2)*(role-5)*(role-6) == 0</pre>
+          <p class="caption">
+            上は手続き、下は条件。下には「f_role を 1 にせよ」と命じる行がどこにも無いことに注目。
+            <strong>値を入れるのは prover の自由で、回路にできるのは禁止だけ</strong>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">ここから、回路に固有のバグが生まれる</p>
+      <p class="strong-line">
+        主張ベースの設計なので、<b>「その主張が嘘でないことの確認」を書き忘れると、嘘がそのまま通る。</b>
+      </p>
+      <p>
+        普通のプログラムなら、計算を書き忘れれば動かない。すぐバグとして表に出る。
+        しかし回路では、確認を書き忘れても<strong>正直に使っている限り完璧に正常動作する</strong>。
+        テストも通る。壊れていることに誰も気づかない。
+      </p>
+      <p>
+        これが<strong>アンダー制約</strong>で、Week 1 の主題であり、
+        現実の ZK プロジェクトで報告される脆弱性の最頻出パターンでもある。
+        以降のページは全部、この 1 種類のバグを見る目を作るためにある。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 1.2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">核心</p>
+      <h2>なぜ「回路」にするとプライバシーが守れるのか</h2>
+      <p>
+        ここが一番よく分からないところ。先に結論から言うと——
+      </p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">まず誤解を外す</p>
+      <p class="strong-line">回路そのものは、プライバシーを守らない。</p>
+      <p>
+        証拠に、今週作った回路は <strong>witness を 7 個まるごと検証側に渡している</strong>。
+        role も clearance も丸見えで、隠れているものは何もない。
+      </p>
+      <p>
+        プライバシーを作るのは、その上に乗る<strong>暗号</strong>のほう。
+        ただしその暗号は「等式が成り立つかを確かめる」ことしかできない。
+        だから<strong>回路の役割は、確かめたいことを全部「等式」に翻訳しておくこと</strong>——
+        暗号をかけられる形に、計算をあらかじめ整えておく係だ。
+      </p>
+    </div>
+
+    <div class="stack-sm">
+      <h3>では、その暗号は何をしているのか</h3>
+      <ol class="steps">
+        <li>
+          <h4>秘密の値を「箱」に入れる</h4>
+          <div class="body">
+            <p>
+              値 <code>x</code> を、乱数 <code>r</code> と一緒に <code>C(x) = g^x · h^r</code> のような形に潰す
+              （コミットメント）。<strong>中身は見えない</strong>（r が隠す）が、
+              <strong>後から x を差し替えることもできない</strong>（拘束）。
+            </p>
+            <p class="why">
+              <b>この 2 つが同時に成り立つのが重要:</b> 見えないだけなら、あとで嘘をつける。
+              変えられないだけなら、中身が漏れる。両方あって初めて「隠したまま約束する」ができる。
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>箱を開けずに、箱のまま足し算ができる</h4>
+          <div class="body">
+            <p>
+              <code>C(x) · C(y) = g^(x+y) · h^(r+r') = C(x+y)</code>。
+              箱どうしを掛け合わせると、<strong>中身が足し算された箱</strong>が出てくる。
+              これは指数法則の副作用で、誰かが機能として足したわけではない。
+            </p>
+            <p class="why">
+              <b>ここでプライバシーが生まれる:</b> 「x + y = z です」という主張は、
+              <code>C(x)·C(y)</code> と <code>C(z)</code> が同じものを指すかを見るだけで確かめられる。
+              <b>一度も箱を開けていないのに、等式が正しいことだけが分かった。</b>
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>確かめられるのは「等式」だけ。だから全部 = 0 に直す</h4>
+          <div class="body">
+            <p>
+              箱の外から言えるのは「この箱とこの箱は同じ中身か」まで。
+              「x のほうが大きいか」は言えない（言えたら箱が壊れている——次の節で説明する）。
+            </p>
+            <p class="why">
+              <b>だから回路が要る:</b> 「権限がある」という言いたいことを、
+              足し算と掛け算と等号だけで書き直す。その翻訳結果が算術回路。
+              <b>回路は暗号を「かけられる形」を用意する工程であって、隠す仕事はしていない。</b>
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>実際の SNARK は、これを一気にやる</h4>
+          <div class="body">
+            <p>
+              信号を 1 つずつ箱に入れるのではなく、witness 全体を<strong>多項式にまとめて</strong>コミットする。
+              そして「全制約が満たされている」を「<strong>ある多項式が恒等的に 0</strong>」に変換し、
+              検証者が選んだ<strong>ランダムな 1 点</strong>での値だけを開示させる。
+            </p>
+            <p class="why">
+              <b>なぜ漏れないのか:</b> 1 点の値から元の多項式（＝witness）は復元できないうえ、
+              あらかじめ乱数で撹乱してある。<b>なぜ騙せないのか:</b> 制約が 1 本でも破れていれば
+              その多項式は 0 でなくなり、ランダムな点でたまたま 0 になる確率は無視できるほど小さいから。
+              <b>「隠す」と「騙せない」が同時に立つ。</b>
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data">
+        <thead><tr><th>層</th><th>担当</th><th>今週やること</th></tr></thead>
+        <tbody>
+          <tr class="here"><td>算術回路</td><td>言いたいことを等式に翻訳する</td><td>これ（暗号は使わない）</td></tr>
+          <tr><td>コミットメント</td><td>値を隠しつつ、後から変えられなくする</td><td>—</td></tr>
+          <tr><td>証明系</td><td>全制約をまとめて 1 点で検査する</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      下の 2 層があってもいちばん上が間違っていれば、<strong>「嘘の主張に対する完璧な証明」</strong>ができあがる。
+      Week 1 が土台と呼ばれるのはそういう意味。
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 1.5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">三兄弟</p>
+      <h2>ZK・MPC・FHE は、それぞれ違う「信用できなさ」を解いている</h2>
+      <p>
+        いつも 3 つ並べて語られるので混ざりやすい。だが解いている問題はまったく別物で、
+        共通しているのは<strong>道具立てのほう</strong>だけ。まず言葉の意味から。
+      </p>
+    </div>
+
+    <dl class="defs">
+      <div class="def">
+        <dt>ZK / zero-knowledge proof</dt>
+        <dd class="jp">ゼロ知識証明</dd>
+        <dd>
+          <strong>秘密を渡さずに、条件を満たしていることだけを相手に納得させる技術。</strong>
+          「ゼロ知識」は<b>相手に知識を一切与えない</b>という意味で、
+          「証明」は<b>それでも嘘はつけない</b>という意味。この 2 つが同時に立つのが肝。
+        </dd>
+        <dd class="ex">
+          例: 身分証を見せずに「20 歳以上」だけを示す。残高を見せずに「足りている」だけを示す。<br>
+          今回なら: 資格 (2, 3, 1) を明かさずに「granted = 1 にできる」ことだけを示す。
+        </dd>
+      </div>
+      <div class="def">
+        <dt>MPC / multi-party computation</dt>
+        <dd class="jp">秘密計算（マルチパーティ計算）</dd>
+        <dd>
+          <strong>複数人が秘密を持ち寄り、誰も他人の値を知らないまま、計算結果だけを全員で得る技術。</strong>
+          値を意味のない断片（シェア）に割って配り、<b>断片のまま計算する</b>。
+          断片を 1 つ見ても何も分からないが、規定の人数分そろえば元に戻る。
+        </dd>
+        <dd class="ex">
+          例: 3 人が年収を明かさずに、平均年収だけを知る。<br>
+          今回なら: 人事部が role、セキュリティ部が clearance、拠点管理が region を持ち、
+          互いの値を知らないまま granted を出す。
+        </dd>
+      </div>
+      <div class="def">
+        <dt>FHE / fully homomorphic encryption</dt>
+        <dd class="jp">完全準同型暗号</dd>
+        <dd>
+          <strong>暗号化したまま計算できる暗号。</strong>
+          「準同型」は<b>構造を保つ</b>という意味で、暗号文どうしを操作すると
+          中身にも同じ計算が反映される。「完全」は<b>何回でも、どんな組み合わせでも</b>できるということ。
+          計算する側は最後まで中身を知らない。
+        </dd>
+        <dd class="ex">
+          例: 暗号化した医療データをクラウドに解析させる。クラウドは何も学ばない。<br>
+          今回なら: 暗号化した資格を送り、暗号のまま判定した暗号化 granted を受け取る。
+        </dd>
+      </div>
+    </dl>
+
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr><th></th><th>ZK ゼロ知識証明</th><th>MPC 秘密計算</th><th>FHE 準同型暗号</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>解く問題</td><td>本当に正しく計算したか</td><td>自分の値を他人に見せたくない</td><td>計算は任せたいが中身は渡したくない</td></tr>
+          <tr><td>秘密を持つ人</td><td>1 人（prover）</td><td>参加者それぞれ</td><td>依頼者 1 人</td></tr>
+          <tr><td>計算する人</td><td>prover 自身</td><td>参加者全員で分担</td><td>受託者（クラウド）</td></tr>
+          <tr><td>相手に渡るもの</td><td>証明（SNARK 系なら数百バイト）</td><td>計算結果だけ</td><td>暗号化された結果</td></tr>
+          <tr><td>相手が学ぶこと</td><td>主張が正しいという事実のみ</td><td>結果のみ（他人の入力は不明）</td><td>何も学ばない</td></tr>
+          <tr><td>典型例</td><td>残高を見せずに送金の正当性を示す</td><td>各社の給与を明かさず平均だけ出す</td><td>暗号化した医療データをクラウドで解析</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="stack-sm">
+      <h3>今回のアクセス制御回路を、3 方式で動かすと</h3>
+      <div class="exps">
+        <div class="exp">
+          <p class="eyebrow">ZK で使うと</p>
+          <h4>本人が証明を作る</h4>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;">
+            資格を持っているのは本人。<code>granted = 1</code> を満たす witness を知っていることの証明を作り、
+            サーバに送る。サーバは role も clearance も region も<strong>永遠に知らない</strong>まま、
+            アクセスを許可する。
+          </p>
+        </div>
+        <div class="exp">
+          <p class="eyebrow">MPC で使うと</p>
+          <h4>3 部署が分担して判定する</h4>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;">
+            人事部が role、セキュリティ部が clearance、拠点管理が region を持つ。
+            誰も他部署の値を知らないまま、3 者で判定を<strong>計算して</strong> <code>granted</code> を得る。
+            主張する人がいないので、<strong>証明は登場しない</strong>。
+          </p>
+        </div>
+        <div class="exp">
+          <p class="eyebrow">FHE で使うと</p>
+          <h4>クラウドが暗号のまま判定する</h4>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;">
+            資格を暗号化してクラウドに送る。クラウドは暗号文のまま判定を<strong>計算し</strong>、
+            暗号化された <code>granted</code> を返す。復号できるのは依頼者だけ。
+            <strong>ここにも証明は無い</strong>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">だから、回路は ZK 固有の産物ではない</p>
+      <p class="strong-line">
+        3 方式とも、同じ判定ロジック（メンバーシップと AND）を算術回路にする。
+      </p>
+      <p>
+        ただし<strong>組み方の形が違う</strong>。ZK は<strong>検証の形</strong>——
+        フラグは prover が主張し、回路は「その主張が嘘なら 0 にならない式」を置くだけ（これが今週の 8 本）。
+        MPC と FHE は<strong>計算の形</strong>——主張してくれる人がいないので、
+        フラグ自体を「メンバーシップ積が 0 か」から計算しなければならない。
+      </p>
+      <p>
+        それでも<strong>「加算と乗算だけの式に翻訳する」という土台は完全に共通</strong>で、
+        そこだけを扱う Week 1 が「暗号を一切使わない」のはそういう理由。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">語彙</p>
+      <h2>この課題で使う 3 つの言葉</h2>
+    </div>
+    <dl class="defs">
+      <div class="def">
+        <dt>signal</dt>
+        <dd class="jp">信号</dd>
+        <dd>回路に出てくる変数。値は有限体 F_p の元。今回は 7 本（資格 3 本 + フラグ 3 本 + 出力 1 本）。</dd>
+      </div>
+      <div class="def">
+        <dt>constraint</dt>
+        <dd class="jp">制約</dd>
+        <dd>「この式は 0」という条件。今回は 8 本。回路の安全性は、この 8 本で全部決まる。</dd>
+      </div>
+      <div class="def">
+        <dt>witness</dt>
+        <dd class="jp">witness（証拠）</dd>
+        <dd>7 本すべてに値を入れた割当。prover が「これで全制約を 0 にできる」と主張して差し出すもの。</dd>
+      </div>
+    </dl>
+
+    <div class="callout">
+      <p class="eyebrow">検証の手続き — たった 2 行</p>
+      <p class="strong-line">① prover が witness を出す　② verifier が 8 本の式に代入して、全部 0 かを見る</p>
+      <p>
+        本物の ZK では ② を「witness を見ずに」やるための暗号がかぶさるが、
+        判定内容そのものは何も変わらない。だから<strong>回路が間違っていれば、上にどんな暗号を載せても無駄</strong>。
+        Week 1 が暗号抜きで回路だけを扱うのは、そこが土台だから。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">前提</p>
+      <h2>有限体 F_p について、必要な分だけ</h2>
+      <p>
+        Week 0 のスライド「有限体と楕円曲線」で通った道。今回使うのは、そのうち 3 つの性質だけ。
+      </p>
+    </div>
+
+    <div class="stack-sm">
+      <p class="eyebrow">事前学習（Week 0）との接続</p>
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>Week 0 で出てきたもの</th><th>今週どこで効くか</th></tr></thead>
+          <tbody>
+            <tr class="here"><td>群 ⊃ 環 ⊃ 体 の包含関係<br>「環 = 加法と乗法」「体 = 環 + 乗法逆元」</td><td><b>「+ と × しかない」の根拠そのもの</b>。環の定義に演算が 2 つしか無いことが、この講座全体の制約になる</td></tr>
+            <tr><td>mod 演算・時計の比喩（Z₁₃）</td><td>p 回足すと 0 に戻る ＝ <b>順序が存在しない</b>理由。だから比較が書けない</td></tr>
+            <tr><td>加法逆元・乗法逆元</td><td>引き算・割り算ができる根拠。採点器 <code>solver.py</code> は <code>pow(a, P−2, P)</code>（フェルマーの小定理）で逆元を取っている</td></tr>
+            <tr><td>位数（要素の個数）</td><td>今週の p は BN254 の scalar field、位数は約 2²⁵⁴</td></tr>
+            <tr><td>離散対数問題</td><td><b>コミットメント <code>g^x</code> を開けられない根拠</b>。前の節の「箱」が箱でいられるのはこれのおかげ</td></tr>
+            <tr><td>有限体上の楕円曲線／演習の拡張ユークリッド法</td><td>Week 3 の <code>schnorr-from-scratch</code> でそのまま実装する</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        Week 0 が「数学の準備」に見えて実は伏線だった、という構造。
+        とくに<strong>群・環・体の図</strong>は、今週の「なぜ + と × だけなのか」への直接の答えになっている。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>巨大な素数 p で割った余りの世界</h4>
+        <div class="body">
+          <p>
+            <code>p = 21888242871839275222246405745257275088548364400416034343698204186575808495617</code>（BN254 の scalar field）。
+            足し算も掛け算も、やったあとに p で割った余りを取る。数がいくら大きくなっても、この 1 本の帯の中に収まる。
+          </p>
+          <p class="why">
+            <b>なぜ余りの世界なのか:</b> 暗号は「決まった大きさの数」を扱う必要があるから。
+            実数のように無限に伸びる値は、暗号の道具に載せられない。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>足す・引く・掛ける・割るが全部できる（＝体）</h4>
+        <div class="body">
+          <p>
+            p が素数なので、0 以外のどの元にも逆数がある。負の数も普通に扱える
+            （<code>−6</code> は <code>p − 6</code> と同じもの）。
+          </p>
+          <p class="why">
+            <b>実務上の注意:</b> 一方で「大小比較」と「範囲」は自然には存在しない。
+            <code>x &lt; 8</code> のような条件は、それ専用の制約（range proof）を書かないと表現できない。
+            今回は許可リストが値を 2〜3 個に固定するので、範囲の心配が要らない設計になっている。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>零因子がない — これが今回の主役</h4>
+        <div class="body">
+          <p>
+            <code>a · b = 0</code> なら、<strong>a = 0 か b = 0 のどちらかが必ず成り立つ</strong>。
+            「どちらも 0 でないのに掛けたら 0」は起きない（整数と同じ感覚でよい）。
+          </p>
+          <p class="why">
+            <b>ここから何が言えるか:</b> <code>f · (何かの積) = 0</code> という制約を書いておけば、
+            <code>f ≠ 0</code> だと分かった瞬間、<b>積の方が 0 でなければならない</b>と断言できる。
+            許可リストの強制は、まるごとこの性質の上に乗っている。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ 3.5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">原理</p>
+      <h2>なぜ「足し算と掛け算」だけなのか</h2>
+      <p>
+        制限があるから 2 つに絞っている、のではない。<strong>2 つしか存在しないから 2 つ</strong>、という話。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>暗号がすり抜けさせられるのは「構造がもともと持っている演算」だけ</h4>
+        <div class="body">
+          <p>
+            準同型（homomorphism）とは<strong>構造を保つ写像</strong>のこと。
+            暗号化を E とすると、<code>E(a) ⊕ E(b) = E(a + b)</code> のような性質が成り立つとき、
+            暗号文のまま計算ができる。
+          </p>
+          <p class="why">
+            <b>ここが肝:</b> 保てるのは、<b>その構造がもともと持っている演算だけ</b>。
+            暗号が新しい操作を発明することはできない。すでにある演算を、暗号の壁の向こう側に
+            そのまま持ち越すのが準同型だから。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>そして、体や環という構造には演算が 2 つしかない</h4>
+        <div class="body">
+          <p>
+            平文が住んでいるのは <strong>環</strong>（足し算と掛け算ができる世界）か
+            <strong>体</strong>（さらに割り算もできる世界）。
+            そして環の定義に書かれている演算は、<strong>加法と乗法のちょうど 2 つ</strong>。それだけ。
+          </p>
+          <p class="why">
+            <b>だから比較は「直接には」運べない:</b> 「&lt;」は環の公理に入っていないので、
+            準同型で保ちようがない。<b>「+ と × だけ」は暗号の都合ではなく、代数の定義そのもの。</b>
+            <span class="note-inline">（欲しければビットに分解して + と × から組み立て直す。
+            Week 5 で扱う TFHE の Programmable Bootstrapping は、その組み立てを暗号側で肩代わりして
+            暗号文に任意の表引きを適用できるようにする技術——底では同じ 2 つの演算の上に立っている。）</span>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>実例 — 指数法則を借りるだけで、加算が 1 つ手に入る</h4>
+        <div class="body">
+          <p>
+            平文 m を <code>g^m</code> の形で隠す方式なら、暗号文どうしを掛けると
+            <code>g^a · g^b = g^(a+b)</code>。<strong>平文の足し算になっている。</strong>
+            教科書的な RSA なら <code>m₁^e · m₂^e = (m₁m₂)^e</code> で、こちらは平文の掛け算。
+          </p>
+          <p class="why">
+            <b>何をしているのか:</b> どちらも新しい操作を作ってはいない。
+            指数法則という<b>すでにある構造</b>をそのまま借りているだけ。
+            そして片方しか手に入らない。<b>+ と × を任意の回数こなせる方式（FHE）は
+            2009 年の Gentry まで作れなかった</b>——回数制限つきで両方持つ方式はそれ以前からあったが、
+            制限を外すのがそれほど難しかった。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>比較は、原理的に存在できない</h4>
+        <div class="body">
+          <p>
+            有限体には、+ と × と両立する大小関係が<strong>存在しない</strong>。
+            仮に <code>0 &lt; 1</code> と決めると、両辺に 1 を足して <code>1 &lt; 2</code>、
+            さらに足して……と続き、いつまでも 0 に戻れないはずだが、
+            有限体では <code>p</code> 回足すと 0 に戻ってしまう。<strong>順序と矛盾する。</strong>
+          </p>
+          <p class="why">
+            <b>実務での意味:</b> 「x &lt; 8」という<b>順序</b>は体に備わっていないので、そのままでは書けない。
+            書きたければ + と × から組み立て直す —— x をビットに分解して各ビットに <code>b·b−b=0</code> を課し
+            <code>Σ bᵢ2ⁱ = x</code> で繋ぐか、範囲が狭いなら <code>(x−0)(x−1)…(x−7) = 0</code> と積で書く。
+            <b>range proof が高価なのはこれが理由</b>で、今回の課題が「許可リスト方式」なのも、
+            それを避けた設計になっている。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>MPC でも、まったく同じ壁がある</h4>
+        <div class="body">
+          <p>
+            秘密分散では、各人が持つシェアを足すだけで秘密の和のシェアになる（<strong>通信ゼロ・無料</strong>）。
+            掛け算もできるが、多項式の次数が倍になるので<strong>次数を戻すための通信が要る</strong>。
+          </p>
+          <p class="why">
+            <b>だから MPC のコストは乗算ゲートの数で測る。</b> 加算は無料、乗算は有料、
+            それ以外の操作は<b>そもそも定義されていない</b>。ZK とは技術がまったく違うのに、
+            使える演算が同じ 2 つに落ち着くのは、根が同じ代数だから。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>ZK の検証も、多項式でなければ成立しない</h4>
+        <div class="body">
+          <p>
+            証明系は「全制約が満たされている」を「ある多項式が恒等的に 0」に翻訳し、
+            <strong>ランダムな 1 点で評価するだけ</strong>で検査する。
+            次数 d の 0 でない多項式は零点を高々 d 個しか持てないので、
+            でたらめに選んだ点でたまたま 0 になる確率は無視できるほど小さい。
+          </p>
+          <p class="why">
+            <b>この「1 点で全体を代表できる」性質は多項式だけのもの</b>で、
+            多項式は + と × で作られる。だから制約は多項式でなければならない。
+            <b>SNARK 系の検証がミリ秒で終わる理由は、ここまで遡る。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout amber">
+      <p class="eyebrow">言い換え — 比較が無いのは、暗号が弱いからではない。強いからだ</p>
+      <p class="strong-line">
+        もし「箱の中身を見ずに大小を判定して、答えを<b>そのまま</b>返してくれる」道具があったとする。
+      </p>
+      <p>
+        その道具があれば、<code>x &gt; 100?</code> <code>x &gt; 50?</code> <code>x &gt; 75?</code> …… と
+        二分探索するだけで、<strong>中身の値が完全に特定できてしまう</strong>。
+        つまりその道具の存在は「この暗号は破れている」と同じ意味になる。
+        <b>比較がすり抜けてこないのは、すり抜けたら暗号として成立しないから。</b>
+      </p>
+      <p>
+        では比較は永久に不可能かというと、そうではない。答えを<strong>暗号のまま</strong>返すなら問題ない
+        （中身が漏れないので）。ただしそれは環の演算ではないので、
+        <strong>ビットに分解して + と × から組み立てる</strong>しかない。だから高くつく。
+        「+ と × しかない」の正体は、<b>不可能</b>ではなく<b>この値段</b>のこと。
+      </p>
+      <p class="note-inline">
+        （順序をわざと漏らす暗号も存在する = order-preserving encryption。速い代わりに、
+        設計として大小関係が漏れる。何を諦めるかのトレードオフになっている。）
+      </p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">では、これで全部表現できるのか</p>
+      <p class="strong-line">できる。表現力は失われていない。</p>
+      <p>
+        有限体の上では、<strong>どんな関数も必ず多項式で書ける</strong>（ラグランジュ補間）。
+        入力の全パターンに対して望む出力を通る多項式を、必ず 1 本作れるからだ。
+        比較も、ハッシュも、機械学習の推論も、原理的には + と × だけで書ける。
+      </p>
+      <p>
+        失われるのは表現力ではなく<strong>コスト</strong>。素直に補間すると次数が
+        <code>p</code> 級（p は 2²⁵⁴ 程度）になり、制約が天文学的な本数になって誰も検証できない。
+      </p>
+      <p class="strong-line">
+        だから回路設計とは、<b>「書けるか」ではなく「安く書けるか」を考える仕事</b>になる。
+      </p>
+      <p>
+        今回のメンバーシップ判定がまさにその実例。「role が {2,5,6} に入っているか」を
+        <code>(x−2)(x−5)(x−6)</code> と書けば次数 3 で済む。
+        許可リストが 3 個しかないから安い。<strong>仕様が回路に優しく作られている</strong>のは偶然ではない。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3.6 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">呼び名</p>
+      <h2>なぜ「回路」と呼ぶのか — ゲート、同時性、そして次数</h2>
+      <p>比喩ではなく、構造が本当に論理回路と同じ形をしている。ただし決定的に違う点が 1 つある。</p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          論理回路が AND / OR / NOT ゲートを線で繋いだ図であるように、算術回路は
+          <strong>加算ゲートと乗算ゲートを線で繋いだ図</strong>。
+          入力信号がゲートを通って中間信号になり、最後に出力信号になる。
+          ループのない有向グラフ（DAG）になる。
+        </p>
+        <p>
+          右は、今回の <code>f_role · (role−2)(role−5)(role−6)</code> をゲートに分解したもの。
+          乗算ゲートが 3 つ並び、各ゲートの出口に中間信号が生まれる。
+          <strong>教材の前半で「中間結果に名前を付ける」と言ったのは、この中間信号のこと。</strong>
+        </p>
+        <p>
+          そして <strong>乗算ゲート 1 個が、制約 1 本</strong>になる。
+          <code>t1 = (role−2)·(role−5)</code> のような等式を 0 の形に直すと
+          <code>t1 − (role−2)(role−5) = 0</code>。掛け算は 1 回だけなので次数 2。
+          <strong>R1CS が「次数 2 の制約の集まり」と説明されるのは、これが正体</strong>で、
+          今回の DSL が次数 4 の式を許しているのは学習用の簡略化。
+        </p>
+      </div>
+      <div class="stack-sm">
+        <p class="eyebrow">ゲートに分解すると</p>
+<pre>(role−2) ─┐
+          ├─[ × ]──→ t1      <span class="c">制約: t1 − (role−2)(role−5) = 0</span>
+(role−5) ─┘
+
+t1       ─┐
+          ├─[ × ]──→ t2      <span class="c">制約: t2 − t1·(role−6) = 0</span>
+(role−6) ─┘
+
+t2       ─┐
+          ├─[ × ]──→ t3      <span class="c">制約: t3 − t2·f_role  = 0</span>
+f_role   ─┘
+
+                       t3 = 0 <span class="c">← これが最終的に課す条件</span></pre>
+        <p class="caption">
+          乗算ゲート 3 個 → 中間信号 3 本 → 制約 3 本。R1CS 系では加算（引き算）は
+          <strong>ゲートを消費しない</strong>ので <code>role−2</code> は無料で、コストは乗算の数で決まる
+          （MPC も同じ。ただし PLONK のように加算も行を消費する方式もある）。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">論理回路と決定的に違うところ — 時間が無い</p>
+      <p class="strong-line">
+        回路は「実行する」ものではなく「<b>満たす</b>」もの。順序も状態も存在しない。
+      </p>
+      <p>
+        プログラムは時間軸に沿って状態が変わる。1 行目のあとに 2 行目が動く。
+        回路にはそれが無く、<strong>全部の等式が同時に成り立っているかどうか</strong>だけが問われる。
+        制約を並べる順番を入れ替えても、まったく同じ回路。
+      </p>
+      <p>
+        だから <code>cs.assert_zero(...)</code> は「実行される命令」ではなく
+        「<strong>提出される条件</strong>」。8 本書いたら、8 本が同時に成り立つ witness があるかどうか、
+        という一枚の連立方程式になる。
+      </p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">この「時間が無い」性質が、コストに直結する</p>
+      <p>
+        <strong>ループは全部展開される。</strong> 回数が入力によって変わるループは書けない。
+        最大回数まで必ず展開され、回路のサイズはその最大回数ぶん膨らむ。
+      </p>
+      <p>
+        <strong>配列アクセスは全要素を読む。</strong> <code>a[i]</code> は「i 番目だけ取り出す」ことができない
+        （どこを読んだかが秘密を漏らすし、そもそも添字で分岐できない）。
+        全要素を読み、選択子を掛けて他を 0 で潰す。<strong>要素数に比例したコスト</strong>がかかる。
+      </p>
+      <p>
+        <strong>そして回路の形は、入力によって変わってはいけない。</strong>
+        形が変われば形そのものが秘密を漏らすから。
+        —— 後半で出てくる採点器の <code>test_structure_is_value_independent</code> は、
+        この性質を守らせているテストだ。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">お題</p>
+      <h2>作るもの — アクセス制御</h2>
+    </div>
+    <div class="split">
+      <div class="prose">
+        <p>
+          資格は <code>(role, clearance, region)</code> の 3 つ組。それぞれ 0〜7 の整数で、
+          3 つとも許可リストに入っているときだけ「正当（authorized）」とし、出力 <code>granted</code> を 1 にする。
+        </p>
+        <p>
+          許可リストは公開・固定（<code>tests/spec.py</code>）。秘密なのは資格の方だ。
+          資格の候補は 8 × 8 × 8 = <strong>512 通り</strong>、うち正当なのは 3 × 3 × 2 = <strong>18 通り</strong>、
+          残り <strong>494 通り</strong>は本来 1 つも通ってはいけない。
+        </p>
+        <p>
+          この 494 という数字を覚えておくと、下のラボの採点器が出す数字がそのまま
+          「どれだけ壊れているか」の目盛りになる。
+        </p>
+      </div>
+      <div class="stack-sm">
+        <p class="eyebrow">許可リスト（公開）</p>
+<pre>ROLE_OK      = {<span class="k">2, 5, 6</span>}   <span class="c"># 3 個</span>
+CLEARANCE_OK = {<span class="k">3, 4, 7</span>}   <span class="c"># 3 個</span>
+REGION_OK    = {<span class="k">1, 6</span>}      <span class="c"># 2 個</span>
+
+authorized := role∈ROLE_OK <span class="k">かつ</span>
+              clearance∈CLEARANCE_OK <span class="k">かつ</span>
+              region∈REGION_OK</pre>
+        <p class="caption">
+          region だけ許可が 2 個しかない。この非対称が、あとで「どこを壊すと一番被害が大きいか」に効いてくる。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">部品</p>
+      <h2>制約を、1 本ずつ数値で読む</h2>
+      <p>使う部品は 3 種類だけ。どれも「代入してみれば分かる」ものなので、実際に値を入れて確かめる。</p>
+    </div>
+
+    <div class="stack">
+      <!-- part 1: bit -->
+      <div class="split">
+        <div class="prose">
+          <h3>部品① ビット制約 <code>b · b − b = 0</code></h3>
+          <p>
+            これは「<strong>b は 0 か 1</strong>」を意味する。理由は代入すれば見える。
+            <code>b·b = b</code> を満たす数は、この世界に 0 と 1 の 2 つしかない
+            （<code>b(b−1) = 0</code> と書き直すと、零因子がないので b = 0 か b = 1）。
+          </p>
+          <p>
+            回路に「型」はないので、<strong>ブール値という概念はこの 1 行で自作する</strong>。
+            書き忘れれば、そのフラグは 0/1 以外の値も取れる、ただの数になる。
+          </p>
+        </div>
+        <div class="table-scroll">
+          <table class="data">
+            <thead><tr><th>b</th><th>b · b</th><th>b·b − b</th><th>判定</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td class="res-ok">満たす</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td class="res-ok">満たす</td></tr>
+              <tr><td>2</td><td>4</td><td>2</td><td class="res-bad">違反</td></tr>
+              <tr><td>3</td><td>9</td><td>6</td><td class="res-bad">違反</td></tr>
+              <tr><td>7</td><td>49</td><td>42</td><td class="res-bad">違反</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- part 2: membership -->
+      <div class="split">
+        <div class="prose">
+          <h3>部品② メンバーシップ積 <code>(x − a₁)(x − a₂)…</code></h3>
+          <p>
+            許可リストの各要素を引いて、全部掛ける。
+            <strong>x がリストのどれかに一致するとき、その因子が 0 になり、積全体が 0</strong> になる。
+            一致しなければ、どの因子も 0 でないので積も 0 にならない（零因子がないから）。
+          </p>
+          <p>
+            つまりこの積は「<strong>x ∈ 許可リスト</strong>」という条件を、掛け算だけで表した式になっている。
+            回路で <code>in</code> 演算子を自作するとこうなる、ということ。
+          </p>
+        </div>
+        <div class="table-scroll">
+          <table class="data">
+            <thead><tr><th>role</th><th>(role−2)(role−5)(role−6)</th><th>結果</th><th>意味</th></tr></thead>
+            <tbody>
+              <tr><td>2</td><td>0 · (−3) · (−4)</td><td>0</td><td class="res-ok">リスト内</td></tr>
+              <tr><td>5</td><td>3 · 0 · (−1)</td><td>0</td><td class="res-ok">リスト内</td></tr>
+              <tr><td>6</td><td>4 · 1 · 0</td><td>0</td><td class="res-ok">リスト内</td></tr>
+              <tr><td>0</td><td>(−2) · (−5) · (−6)</td><td>−60</td><td class="res-bad">リスト外</td></tr>
+              <tr><td>3</td><td>1 · (−2) · (−3)</td><td>6</td><td class="res-bad">リスト外</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- part 3: link -->
+      <div class="callout">
+        <p class="eyebrow">部品③ リンク — ①と②を結ぶ 1 行が、回路の心臓</p>
+        <p class="strong-line"><code>f · (x − a₁)(x − a₂)… = 0</code></p>
+        <p>
+          これが「<strong>f = 1 を主張するなら、x は許可リストに入っていなければならない</strong>」を強制する。
+          零因子がないので、<code>f ≠ 0</code> なら積の方が 0 でなければならず、x はリストのどれかに一致するしかない。
+        </p>
+        <p>
+          逆に <code>f = 0</code> なら、この式は x が何であっても 0 になる。
+          <strong>フラグを下ろしている限り、x は自由</strong>ということ。これは仕様どおりで問題ない
+          —— 権限を主張していないのだから。
+        </p>
+      </div>
+
+      <div class="callout amber">
+        <p class="eyebrow">向きに注意 — 保証されるのは片道だけ</p>
+        <p>
+          この 1 行が保証するのは <strong>f = 1 ⟹ x ∈ S</strong> の一方向だけで、
+          逆（x ∈ S ⟹ f = 1）は保証されない。正当な資格を持っている人が、自分の意思で
+          <code>f = 0</code> と置いて「権限がない」ことにするのは自由なままだ。
+        </p>
+        <p>
+          それで困らない。健全性が要求しているのは
+          「<strong>granted = 1 を主張したときに、本当に権限があるか</strong>」だけで、
+          これは前向きの含意で足りる。逆向きは、正直な prover がどう値を選ぶかという
+          witness 生成側の話にすぎない。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">Part A</p>
+      <h2>回路を組み立てる — 実際の思考順序</h2>
+      <p>部品が揃ったので順に積む。各ステップの「なぜ」まで押さえると、次週以降そのまま使える型になる。</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>資格を入力信号として宣言する</h4>
+        <div class="body">
+          <p><code>cs.input("role", role)</code> のように、名前を決めて 3 本置く。</p>
+          <p class="why">
+            <b>なぜ名前が固定なのか:</b> 採点器は名前で信号を探す。ここが違うと、回路が正しくても評価されない。
+            現実でも、証明系は「どの信号が公開入力か」を名前や位置で識別する。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>フィールドごとに補助フラグを 1 本ずつ足す</h4>
+        <div class="body">
+          <p>
+            <code>f_role</code>, <code>f_clearance</code>, <code>f_region</code>。
+            「このフィールドは許可リストに入っている」という主張を表す信号。
+          </p>
+          <p class="why">
+            <b>なぜ補助信号が要るのか:</b> 3 条件の AND を 1 本の巨大な式で書くと次数が跳ね上がり、
+            実際の証明系では扱えない。<b>中間結果に名前を付けて次数を下げる</b>のは回路設計の基本動作で、
+            Circom を書くときも同じことをする。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>フラグをビットに縛る（部品①を 3 本 + 出力用に 1 本）</h4>
+        <div class="body">
+          <p><code>f · f − f = 0</code> を、3 つのフラグと <code>granted</code> に課す。</p>
+          <p class="why">
+            <b>なぜ granted にも要るのか:</b> granted は外に出る出力だから。
+            ビットに縛らなければ <code>granted = 6</code> のような値も許され、
+            「1 かどうか」で判定する検証側が壊れる。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>リンクを 3 本張る（部品③）— ここを 1 本でも落とすと壊れる</h4>
+        <div class="body">
+          <p><code>f_role · (role−2)(role−5)(role−6) = 0</code> を、3 フィールドすべてに。</p>
+          <p class="why">
+            <b>落とすとどうなるか:</b> そのフィールドはフラグと切り離され、
+            「リストに入っていないのにフラグ 1」が成立してしまう。
+            これが今回の Part B で突く穴そのもの。下のラボでスイッチを切れば実物が見られる。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>AND を取って出力にする</h4>
+        <div class="body">
+          <p>
+            <code>granted − f_role · f_clearance · f_region = 0</code>。
+            フラグがビットなら、この積は「3 つとも 1 のときだけ 1」になる。最後に <code>cs.set_output(granted)</code>。
+          </p>
+          <p class="why">
+            <b>これが健全性の要:</b> granted = 1 を主張した瞬間、積が 1 になり、
+            3 つのフラグはどれも 0 でなくなる。すると 3 本のリンクが一斉に発動し、
+            3 フィールドすべてを許可リストに縛りにいく。<b>ここまでが一本の論理の鎖</b>で、
+            どの環が欠けても嘘の証明が通る。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>信号と制約の「形」を入力値に依存させない</h4>
+        <div class="body">
+          <p>
+            <code>if role in ROLE_OK:</code> で制約を出し分けてはいけない。値は入力ごとに変わってよいが、
+            <b>式の集合はどの資格でも完全に同じ</b>でなければならない。
+          </p>
+          <p class="why">
+            <b>なぜそんな制限が:</b> 現実の回路は一度コンパイルされ、全員が同じものを使う。
+            形が秘密で変わるなら、形そのものが秘密を漏らすし、verifier は検証すべき式を固定できない。
+            採点器の <code>test_structure_is_value_independent</code> はこれを見ている。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="split">
+      <div class="stack-sm">
+        <p class="eyebrow">完成した Part A（提出した solution.py の中核）</p>
+<pre><span class="c"># (1) フラグはすべてビット</span>
+cs.assert_zero(f_role * f_role - f_role)
+cs.assert_zero(f_clearance * f_clearance - f_clearance)
+cs.assert_zero(f_region * f_region - f_region)
+cs.assert_zero(granted * granted - granted)
+
+<span class="c"># (2) メンバーシップリンク（3 フィールドすべてに必要）</span>
+cs.assert_zero(f_role      * _membership_product(r, ROLE_OK))
+cs.assert_zero(f_clearance * _membership_product(c, CLEARANCE_OK))
+cs.assert_zero(f_region    * _membership_product(g, REGION_OK))
+
+<span class="c"># (3) granted は 3 フラグの AND</span>
+cs.assert_zero(granted - f_role * f_clearance * f_region)</pre>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">健全性の証明を、言葉で 3 行</p>
+        <p class="strong-line">
+          ① granted = 1 と主張 → 積 = 1 → 3 フラグはどれも 0 ではない<br>
+          ② フラグ ≠ 0 なら、リンクの残り（メンバーシップ積）が 0 でなければならない<br>
+          ③ 積が 0 ⟺ その値は許可リストのどれかに一致
+        </p>
+        <p>
+          よって「granted = 1 にできる」なら 3 フィールドとも許可リストの中。
+          <strong>これが健全性そのもの。</strong>
+          逆に、正当な資格ならフラグを全部 1 に置けて全式が 0 になる —— こちらが完全性。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">2 つの正しさ</p>
+      <h2>完全性と健全性は、別々に壊れる</h2>
+      <p>片方だけ満たす回路はいくらでも作れる。だから採点器も別々にテストしている。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr><th></th><th>完全性 completeness</th><th>健全性 soundness</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>主張</td><td>正当な資格なら granted=1 にできる</td><td>不正な資格では granted=1 にできない</td></tr>
+          <tr><td>守る相手</td><td>正直な利用者</td><td>システムそのもの</td></tr>
+          <tr><td>壊れると</td><td>正しい人が入れない（不便）</td><td>誰でも入れる（事故）</td></tr>
+          <tr><td>壊し方</td><td>制約を足しすぎる</td><td>制約を書き忘れる（アンダー制約）</td></tr>
+          <tr><td>採点器の見方</td><td>18 通りを実際に組んで確認</td><td>494 通りに対し反例を全探索</td></tr>
+          <tr><td>気づきやすさ</td><td class="res-ok">すぐ気づく（自分が困る）</td><td class="res-bad">誰も困らないので気づかない</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      最後の行がこの課題の主題。制約を書き忘れた回路は、正直に使っている限り<strong>完璧に正常動作する</strong>。
+      テストも通る。攻撃されて初めて分かる。だから「壊れているかを自分から探しにいく」道具（＝採点器の全探索）が要る。
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 8 : LAB -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ</p>
+      <h2>実際に壊してみる</h2>
+      <p>
+        左のパネルで prover の主張（witness）を組み立て、右の台帳で 8 本の式が 0 になるかを見る。
+        各行のスイッチを切ると、その 1 本を<strong>書き忘れた回路</strong>になり、
+        下の採点器が「その回路なら何通りの不正資格が通るか」をブラウザ内で総当たりして数える。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card console">
+        <div class="card-head">
+          <h3>prover の主張（witness）</h3>
+          <span class="eyebrow">7 signals</span>
+        </div>
+        <div class="card-body">
+          <div class="presets">
+            <button class="preset" data-preset="honest">正直な資格</button>
+            <button class="preset" data-preset="exploit">攻撃 witness</button>
+            <button class="preset" data-preset="denied">権限のない人</button>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>role</span><span class="allow">許可 2, 5, 6</span></div>
+            <div class="segments" id="seg-role" role="group" aria-label="role の値"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>clearance</span><span class="allow">許可 3, 4, 7</span></div>
+            <div class="segments" id="seg-clearance" role="group" aria-label="clearance の値"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>region</span><span class="allow">許可 1, 6</span></div>
+            <div class="segments" id="seg-region" role="group" aria-label="region の値"></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>補助信号（フラグと出力）</span><span class="allow">bit</span></div>
+            <div class="flags" id="flags"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div class="card">
+          <div class="verdict">
+            <div class="banner" id="banner">—</div>
+            <div class="verdict-line">
+              <span>この witness は</span>
+              <span class="pill" id="pill-sat">—</span>
+              <span class="pill" id="pill-granted">—</span>
+              <span class="pill" id="pill-auth">—</span>
+            </div>
+          </div>
+          <div class="ledger" id="ledger"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>採点器（悪意ある prover 役）</h3>
+            <span class="eyebrow">brute force</span>
+          </div>
+          <div class="grader">
+            <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;">
+              いま有効な制約だけを使い、<strong>権限のない 494 通りの資格</strong>それぞれについて
+              「フラグをどう置けば <code>granted = 1</code> のまま全制約を満たせるか」を総当たりする。
+              1 つでも見つかれば、その回路は嘘の証明を受理する。
+            </p>
+            <div class="stat-grid">
+              <div class="stat">
+                <span class="k">完全性 completeness</span>
+                <span class="v ok" id="stat-comp">18 / 18</span>
+                <span class="note">正当な資格が通る数（多いほどよい）</span>
+              </div>
+              <div class="stat">
+                <span class="k">健全性 soundness</span>
+                <span class="v" id="stat-sound">—</span>
+                <span class="note">通ってしまう不正資格の数（0 でなければ欠陥）</span>
+              </div>
+            </div>
+            <div id="exploit-box" hidden>
+              <p class="eyebrow" style="margin-bottom:0.4rem;">見つかった反例（押すと witness に読み込む）</p>
+              <div class="examples" id="exploit-list"></div>
+            </div>
+            <p class="caption" style="margin:0;">
+              この探索器はフラグを 0/1 に限って総当たりする簡易版。本物の <code>tests/solver.py</code> は
+              ビットを場合分けしつつ、残りを F_p 上の連立一次方程式として解く。
+              結論は今回の回路では一致することを確認済み。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exps">
+      <div class="exp">
+        <p class="eyebrow">実験 1</p>
+        <h4>1 本の書き忘れを再現する</h4>
+        <ol>
+          <li>「正直な資格」を押して、全部 0 が揃う状態を見る</li>
+          <li>#6（region のリンク）のスイッチを切る</li>
+          <li>region を <code>0</code> に、<code>f_region</code> を <code>1</code> のままにする</li>
+        </ol>
+        <p class="expect">
+          <b>起きること:</b> 全制約を満たしたまま granted = 1。
+          これが <code>tests/challenge.py</code> の状態そのもので、Part B の答えでもある。
+        </p>
+      </div>
+      <div class="exp">
+        <p class="eyebrow">実験 2</p>
+        <h4>被害の大きさを比べる</h4>
+        <ol>
+          <li>#4（role のリンク）だけを切り、採点器の数字を見る → 30</li>
+          <li>戻して #6（region）だけを切る → 54</li>
+          <li>戻して #7（AND）だけを切る → 494</li>
+        </ol>
+        <p class="expect">
+          <b>読み取ること:</b> 穴の大きさは「その 1 本が守っていた自由度」で決まる。
+          AND を落とすと 3 フラグ全部が無意味になるため、全滅する。
+        </p>
+      </div>
+      <div class="exp">
+        <p class="eyebrow">実験 3</p>
+        <h4>ビット制約を切っても壊れないことを確かめる</h4>
+        <ol>
+          <li>#0〜#3（ビット制約）を好きに切ってみる</li>
+          <li>採点器の健全性が 0 のまま動かないことを確認する</li>
+        </ol>
+        <p class="expect">
+          <b>ただし結論を急がない:</b> 「反例が出ない」と「安全である」は別のこと。
+          理由は次の節で。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">実測</p>
+      <h2>どの制約が、実際に効いていたか</h2>
+      <p>8 本を 1 本ずつ外して採点器を回した結果。上のラボで同じことが再現できる。</p>
+    </div>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr><th>#</th><th>外した制約</th><th>採点器の結果</th><th>通る不正資格</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>f_role がビット</td><td class="res-ok">破れず</td><td>0</td></tr>
+          <tr><td>1</td><td>f_clearance がビット</td><td class="res-ok">破れず</td><td>0</td></tr>
+          <tr><td>2</td><td>f_region がビット</td><td class="res-ok">破れず</td><td>0</td></tr>
+          <tr><td>3</td><td>granted がビット</td><td class="res-ok">破れず</td><td>0</td></tr>
+          <tr><td>4</td><td>role のメンバーシップリンク</td><td class="res-bad">破れる (0, 3, 1)</td><td>30</td></tr>
+          <tr><td>5</td><td>clearance のメンバーシップリンク</td><td class="res-bad">破れる (2, 0, 1)</td><td>30</td></tr>
+          <tr><td>6</td><td>region のメンバーシップリンク</td><td class="res-bad">破れる (2, 3, 0)</td><td>54</td></tr>
+          <tr><td>7</td><td>AND（granted = 3 フラグの積）</td><td class="res-bad">破れる (0, 0, 0)</td><td>494</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      数字の出どころ: region のリンクを外すと region が 8 通りすべて自由になり、
+      role と clearance は許可内に縛られたままなので 3 × 3 × 8 = 72、
+      うち正当な 18 を引いて <strong>54</strong>。role のリンクを外した場合は
+      8 × 3 × 2 = 48 から 18 を引いて <strong>30</strong>。
+      許可リストが狭いフィールドほど、リンクを失ったときの被害が大きい。
+    </p>
+
+    <div class="callout amber">
+      <p class="eyebrow">「反例なし」は「安全」ではない</p>
+      <p class="strong-line">
+        ビット制約 4 本は、外しても採点器を破れない。それでも消してはいけない。
+      </p>
+      <p>
+        理屈のうえでも破れないのは事実で、granted = 1 を主張すれば積が 1 になり各フラグは 0 でなくなるので、
+        リンクは効き続ける。ここまでは正しい。
+      </p>
+      <p>
+        <strong>理由①:</strong> 「採点器が反例を出さなかった」は「安全である」の証明ではない。
+        本物の <code>tests/solver.py</code> は自分の説明文で「これは形式的な健全性証明ではない」と明言しており、
+        ブールフラグと線形構造を前提にした発見的な探索にすぎない。
+        <span class="note-inline">（この回路では実測したところ、ビット制約を外しても採点器は諦めずに
+        正しく全ケースを棄却していた。つまり表の 0 は本物の 0。ただし<b>それはこの回路がたまたま健全だったから</b>で、
+        一般には別の話。）</span>
+      </p>
+      <p>
+        <strong>理由②:</strong> この回路は「granted = 1 を主張したとき」だけを検査対象にしているから成立している。
+        フラグを他の回路と共有したり、出力を別の式で使い回した瞬間、
+        「フラグは 0 か 1」という前提が要る。<b>安全性が周囲の文脈に依存している状態は、それ自体が危うい。</b>
+      </p>
+      <p>
+        <strong>理由③:</strong> 出力の値域は、回路が自分で保証すべきもの。
+        いまは AND 制約と 3 つのフラグのビット制約が結果的に <code>granted</code> を 0/1 に押し込んでいるが、
+        <b>それは他の制約に頼っているだけ</b>で、granted 自身は何も主張していない。
+        依存先が 1 本消えれば前提も消える。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">Part B</p>
+      <h2>攻撃側に回る — 4 手で破る</h2>
+      <p><code>tests/challenge.py</code> は同じアクセス制御の回路だが、制約が 1 本足りない。読んで、突く。</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>回路を読んで、無い制約を探す</h4>
+        <div class="body">
+          <p>
+            challenge.py には 7 本しか制約がない。自分が組んだ 8 本と突き合わせると、
+            <code>f_region · (region−1)(region−6) = 0</code> だけが無い（コメントとして残っている）。
+          </p>
+          <p class="why">
+            <b>探し方のコツ:</b> 「何が書いてあるか」ではなく「<b>対称性が崩れている場所</b>」を見る。
+            3 フィールドを同じ形で扱っているはずの回路で、1 つだけ扱いが違えば、そこが穴。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>その 1 本が何を守っていたかを言葉にする</h4>
+        <div class="body">
+          <p>
+            守っていたのは「<code>f_region = 1</code> なら region ∈ {1, 6}」という含意。
+            無いということは、<strong>f_region は region の値と完全に無関係になれる</strong>。
+          </p>
+          <p class="why">
+            <b>残っている制約を確認する:</b> <code>f_region</code> をビットに縛る制約と AND の制約は残っている。
+            だが、どちらも region の値そのものには一切触れていない。
+            <b>誰も region を見ていない</b>——これが攻撃可能である証拠。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>正直な witness から出発する</h4>
+        <div class="body">
+          <p>
+            <code>challenge.honest_witness(2, 3, 1)</code> で、正当な資格の割当を作る。
+            これで 7 本の信号名がすべて正しく揃う。
+          </p>
+          <p class="why">
+            <b>ハマりどころ:</b> challenge.py のフラグ名は <code>f_clearance</code> であって
+            <code>f_clear</code> ではない。名前を 1 つでも間違えると、採点器は制約を評価する前に
+            「attack() の witness に足りない信号」として不合格にする
+            （DSL の <code>_resolve</code> を直接叩いた場合は <code>KeyError</code>）。
+            正直な割当から作れば、この事故は起きない。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>縛られていない信号だけを書き換える</h4>
+        <div class="body">
+          <p>
+            <code>region</code> を許可リスト外の <code>0</code> に。<code>f_region</code> は <code>1</code> のまま。
+            <code>granted</code> は 1·1·1 = 1 のまま。<strong>role と clearance には触らない</strong>
+            —— こちらのリンクは生きているので、動かせば即座に違反になる。
+          </p>
+          <p class="why">
+            <b>成立の確認:</b> ビット制約 4 本 ✓／role・clearance のリンク 2 本 ✓（値は正当なまま）／
+            AND ✓。7 本すべて 0 で、granted = 1、しかし資格 (2, 3, 0) は不正。
+            <b>本来入れない人が入れた。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="split">
+      <div class="stack-sm">
+        <p class="eyebrow">提出した attack() の中核</p>
+<pre>witness = challenge.honest_witness(<span class="k">2</span>, <span class="k">3</span>, <span class="k">1</span>)
+witness[<span class="k">"region"</span>]   = <span class="k">0</span>   <span class="c"># 許可リスト {1,6} の外</span>
+witness[<span class="k">"f_region"</span>] = <span class="k">1</span>   <span class="c"># 止める制約が無い</span>
+witness[<span class="k">"granted"</span>]  = <span class="k">1</span>   <span class="c"># 1·1·1 = 1</span>
+<span class="k">return</span> witness</pre>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">同じ witness を、自分の回路にぶつけると</p>
+        <p class="strong-line">challenge.py（制約 7 本）→ 全部 0。通る。</p>
+        <p class="strong-line">自分の build()（制約 8 本）→ #6 で <code>1 · (0−1) · (0−6) = 6</code>。0 でないので拒否。</p>
+        <p>
+          違いは、書いた式が 1 本多いこと。ただそれだけで、
+          <strong>同じ嘘が通る回路と通らない回路に分かれる</strong>。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">分業</p>
+      <h2>値を決めるのは prover、条件を課すのは verifier</h2>
+      <p>この 2 つを混同していると、「なぜ書き忘れが致命傷になるのか」がずっと腑に落ちない。</p>
+    </div>
+    <div class="split">
+      <div class="prose">
+        <p>
+          <code>cs.aux("f_role", 1 if role in ROLE_OK else 0)</code> には 2 つの役割が同居している。
+          第 2 引数は <strong>witness の値</strong>で prover の仕事、
+          <code>cs.assert_zero(...)</code> は <strong>制約</strong>で verifier の仕事。
+        </p>
+        <p>
+          証拠に、フラグの値を <code>1</code> とベタ書きしても Week 1 のテストは 5 本とも通る。
+          完全性テストは正当な資格しか組まないし、健全性テストは値を捨てて制約だけから解き直すので、
+          <strong>採点器には区別がつかない</strong>。
+        </p>
+        <p>
+          つまり <code>solution.py</code> を書くとき、あなたは<strong>2 人分の仕事を同時にしている</strong>。
+          そして攻撃者が守ってくれるのは verifier 側だけ。prover 側のコードを攻撃者が
+          自分用に書き直すのは自由だ ——それが Part B でやったことそのもの。
+        </p>
+      </div>
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">だから、こう読み替える</p>
+          <p class="strong-line">
+            witness の値 = 攻撃者が好きに書き換えられるもの<br>
+            制約 = 攻撃者が絶対に避けて通れないもの
+          </p>
+          <p>
+            回路を書き終えたら、<strong>witness の値の部分を全部消して読み直す</strong>。
+            それでも仕様が守られているなら健全。守られないなら、そこに制約を足す。
+            これが今週いちばん持ち帰る価値のある習慣。
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">採点器が値を無視する理由</p>
+          <p>
+            <code>solver.py</code> は role/clearance/region と granted=1 だけを固定し、
+            残りの信号を<strong>未知数として解き直す</strong>。
+            あなたが用意した witness の値は一切見ない。攻撃者は自分で witness を作るのだから、
+            それが正しいシミュレーションになる。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 11.5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">現場の道具</p>
+      <h2>実際は何で書くのか — そして、同じバグがどう現れるか</h2>
+      <p>
+        今週使った Python の DSL は学習用。実務では専用の言語やライブラリを使う。
+        <strong>どれを選んでも、今日のバグは消えない。</strong>
+      </p>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data">
+        <thead><tr><th>道具</th><th>書き方</th><th>位置づけ</th></tr></thead>
+        <tbody>
+          <tr><td>Circom</td><td>専用 DSL（<code>signal</code> / <code>&lt;==</code> / <code>===</code>）</td><td>R1CS を自分の手で組む。制約が見える</td></tr>
+          <tr><td>Noir</td><td>Rust <b>風</b>の専用言語（Aztec 製）</td><td>Rust そのものではない。コンパイラが Rust 製で、構文が Rust に似ている</td></tr>
+          <tr><td>halo2 / arkworks</td><td>本物の Rust（ライブラリ）</td><td>回路を Rust のコードとして組み立てる</td></tr>
+          <tr><td>gnark</td><td>本物の Go（ライブラリ）</td><td>同上の Go 版</td></tr>
+          <tr class="here"><td>zkVM（RISC Zero / SP1）</td><td>普通の Rust プログラム</td><td>回路を書かない。書いた Rust の<b>実行</b>を証明する ← Week 6 の zkvm-exploit</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">
+      「Noir は Rust で書ける」はほぼ当たり。ただし正確には <strong>Rust に似た独自言語</strong>で、
+      ACIR という中間表現に落ちるため証明系を差し替えられる。
+      <strong>本当に Rust そのものを書くのは halo2 / arkworks（回路をコードで組む）と zkVM（普通のプログラムを書く）</strong>。
+    </p>
+
+    <div class="split">
+      <div class="stack-sm">
+        <p class="eyebrow">Circom — 代入と制約が別の記号になっている</p>
+<pre><span class="c">// &lt;== は「代入 ＋ 制約」</span>
+inter &lt;== in1 * in2;
+
+<span class="c">// &lt;-- は「代入だけ」。制約は作られない</span>
+bit &lt;-- (in1 &gt;&gt; 0) &amp; 1;
+bit * (bit - 1) === 0;   <span class="c">// ← 手で書く</span></pre>
+        <p style="font-size:var(--fs-sm); color:var(--ink-2);">
+          <code>&lt;--</code> は値を入れるだけで、<strong>回路には何も約束させない</strong>。
+          公式ドキュメントの range proof の例ですら、<code>&lt;--</code> の直後に
+          <code>=== 0</code> を手で書いている。<strong>この 1 行を忘れたら、今日の Part B と完全に同じ穴</strong>が空く。
+        </p>
+        <p class="caption">
+          ついでに公開/秘密の指定も Circom にはある: <code>component main {public [in1, in2]}</code> と
+          書いた入力だけが公開で、<strong>それ以外の入力は秘密</strong>。今週の <code>aclib.py</code> に
+          この区別が無いのは、学習用に秘匿性を外してあるから。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <p class="eyebrow">Noir — 「制約されていない」ことを言語が明示させる</p>
+<pre><span class="c">// Safety: 下の assert で out を縛っている</span>
+<span class="k">let</span> out = <span class="k">unsafe</span> { u72_to_u8(num) };
+
+<span class="k">let mut</span> reconstructed: u72 = 0;
+<span class="k">for</span> i <span class="k">in</span> 0..8 {
+    reconstructed += (out[i] <span class="k">as</span> u72 &lt;&lt; (56 - 8*i));
+}
+<span class="k">assert</span>(num == reconstructed);  <span class="c">// ← ここで初めて縛られる</span></pre>
+        <p style="font-size:var(--fs-sm); color:var(--ink-2);">
+          <code>unconstrained fn</code> の戻り値は<strong>制約されていない</strong>ので、
+          呼ぶ側が <code>unsafe { }</code> で囲み、<code>// Safety:</code> コメントで理由を書き、
+          <strong>自分で assert して縛る</strong>ことをコンパイラが要求する。
+        </p>
+        <p style="font-size:var(--fs-sm); color:var(--ink-2);">
+          これは今週の <code>f_role</code> とまったく同じ構造 ——
+          <strong>重い計算は prover にやらせ、回路は答え合わせだけする</strong>。
+          縛り忘れたらそのまま通る、というリスクの形も同じ。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">つまり</p>
+      <p class="strong-line">
+        言語が変わっても、「<b>主張させて、縛り忘れる</b>」というバグの形は変わらない。
+      </p>
+      <p>
+        Circom は <code>&lt;--</code>、Noir は <code>unconstrained</code>、halo2 なら値を置いただけの cell。
+        どれも「値は入るが、回路は何も約束していない」状態を作れる。
+        <strong>今週 8 本の式で覚えた「この信号を縛っている式はどれか」という問いは、そのまま持ち運べる。</strong>
+      </p>
+      <p>
+        zkVM（Week 6）は回路を書かないのでこの形のバグは減るが、代わりに
+        <strong>何を public にして何を witness にするかの設計</strong>が残る。
+        <code>zkvm-exploit</code> が「guest プログラムと public/witness 設計」を課題にしているのは、そこが勝負どころだから。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語</p>
+      <h2>ここまでに出た言葉</h2>
+    </div>
+    <div class="gloss">
+      <div><span class="term">signal</span><span class="jp">信号</span><span class="desc">回路の変数。F_p の元。入力信号と補助信号がある。</span></div>
+      <div><span class="term">constraint</span><span class="jp">制約</span><span class="desc">「この式は 0」という条件。回路の安全性はここだけで決まる。</span></div>
+      <div><span class="term">witness</span><span class="jp">witness</span><span class="desc">全信号への値の割当。prover が作って差し出すもの。</span></div>
+      <div><span class="term">completeness</span><span class="jp">完全性</span><span class="desc">正当な入力なら受理できること。壊れると正直な人が困る。</span></div>
+      <div><span class="term">soundness</span><span class="jp">健全性</span><span class="desc">不正な入力では受理できないこと。壊れても誰も困らないので気づかない。</span></div>
+      <div><span class="term">under-constrained</span><span class="jp">アンダー制約</span><span class="desc">必要な制約が足りない状態。ZK の脆弱性の最頻出パターン。</span></div>
+      <div><span class="term">membership</span><span class="jp">メンバーシップ</span><span class="desc">値が集合に入っていること。積 ∏(x−aᵢ) が 0 になることで表す。</span></div>
+      <div><span class="term">R1CS</span><span class="jp">R1CS</span><span class="desc">今日の「0 になるべき式の集まり」を、次数 2 に揃えて整理した標準形式。</span></div>
+      <div><span class="term">prover</span><span class="jp">証明者</span><span class="desc">秘密を持ち、witness を作って「条件を満たせる」と主張する側。攻撃者もここに座る。</span></div>
+      <div><span class="term">verifier</span><span class="jp">検証者</span><span class="desc">主張を受け取り、制約が全部 0 になるかだけを確かめる側。秘密は見ない（見せない）。</span></div>
+      <div><span class="term">zero-knowledge proof</span><span class="jp">ゼロ知識証明（ZK）</span><span class="desc">秘密を渡さずに「条件を満たしている」ことだけを納得させる技術。渡すのは短い証明データ。</span></div>
+      <div><span class="term">multi-party computation</span><span class="jp">秘密計算（MPC）</span><span class="desc">複数人が秘密を持ち寄り、互いの値を知らないまま計算結果だけを得る技術。値を断片に割って扱う。</span></div>
+      <div><span class="term">fully homomorphic encryption</span><span class="jp">完全準同型暗号（FHE）</span><span class="desc">暗号化したまま何度でも計算できる暗号。計算する側は中身を最後まで知らない。</span></div>
+      <div><span class="term">homomorphism</span><span class="jp">準同型</span><span class="desc">構造を保つ写像。暗号文への操作が中身の演算に対応すること。保てるのは + と × だけ。</span></div>
+      <div><span class="term">commitment</span><span class="jp">コミットメント</span><span class="desc">値を「中身は見えないが、後から差し替えられない」箱に入れる仕掛け。ZK の秘匿性の土台。</span></div>
+      <div><span class="term">finite field</span><span class="jp">有限体 F_p</span><span class="desc">巨大な素数 p で割った余りの世界。四則ができ、零因子が無く、順序は無い。</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 12.5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">理解度チェック</p>
+      <h2>制約検問 — あなたが verifier になる</h2>
+      <p>
+        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
+        提出された witness と回路を審査する。問題は毎回その場で生成され、
+        判定は上のラボとまったく同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <!-- ---------- start ---------- -->
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <!-- ---------- play ---------- -->
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <!-- ---------- result ---------- -->
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">この先</p>
+      <h2>ここで掴んだものが、そのまま次に効く</h2>
+    </div>
+    <div class="prose">
+      <p>
+        今日の 7 信号・8 制約は、<strong>R1CS の一歩手前の形</strong>。
+        中間信号を切って次数 2 に割れば、そのまま Circom が吐く R1CS になる
+        （今回のメンバーシップリンクは次数 4、AND は次数 3 なので、まだ R1CS そのものではない）。
+        <code>aclib.py</code> が使う素数 p は BN254 の scalar field で、実際の Groth16 / PLONK でそのまま出てくる数。
+        <code>cs.input</code> / <code>cs.aux</code> / <code>cs.assert_zero</code> は、Circom の
+        <code>signal input</code> / <code>signal</code> / <code>===</code> にほぼ対応する
+        （Circom の <code>===</code> は次数 2 までしか受け付けない点だけ違う）。
+      </p>
+      <p>
+        ZK・MPC・FHE はどれも「計算を算術回路に翻訳してから暗号をかける」構造を共有している。
+        だから <strong>回路が間違っていれば、その上の暗号がどれだけ正しくても意味がない</strong>。
+        実際、ZK プロジェクトの脆弱性報告の多くは暗号の破れではなく、今日と同じアンダー制約だ。
+      </p>
+      <p>
+        持ち帰る問いは 1 つ。<strong>「この信号を縛っている式は、どれか」</strong>。
+        答えられない信号が 1 本でもあれば、そこが次の穴になる。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    zk-tokyo Advanced Cryptography Program 2026 · Week 1 <code>proof-of-exploit</code> の自習ノート。
+    ラボの数値はすべてこのページ内で計算しています（外部通信なし）。
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var ROLE_OK = [2, 5, 6];
+  var CLEARANCE_OK = [3, 4, 7];
+  var REGION_OK = [1, 6];
+
+  var SIGNALS = ["role", "clearance", "region", "f_role", "f_clearance", "f_region", "granted"];
+
+  function authorized(w) {
+    return ROLE_OK.indexOf(w.role) >= 0 &&
+           CLEARANCE_OK.indexOf(w.clearance) >= 0 &&
+           REGION_OK.indexOf(w.region) >= 0;
+  }
+
+  function prod(x, list) {
+    var out = 1;
+    for (var i = 0; i < list.length; i++) out *= (x - list[i]);
+    return out;
+  }
+
+  // 制約は solution.py と同じ順番・同じ式
+  var CONSTRAINTS = [
+    { group: "フラグをビットに縛る", expr: "f_role² − f_role",
+      f: function (w) { return w.f_role * w.f_role - w.f_role; } },
+    { group: "フラグをビットに縛る", expr: "f_clearance² − f_clearance",
+      f: function (w) { return w.f_clearance * w.f_clearance - w.f_clearance; } },
+    { group: "フラグをビットに縛る", expr: "f_region² − f_region",
+      f: function (w) { return w.f_region * w.f_region - w.f_region; } },
+    { group: "フラグをビットに縛る", expr: "granted² − granted",
+      f: function (w) { return w.granted * w.granted - w.granted; } },
+    { group: "メンバーシップリンク", expr: "f_role · (role−2)(role−5)(role−6)",
+      f: function (w) { return w.f_role * prod(w.role, ROLE_OK); } },
+    { group: "メンバーシップリンク", expr: "f_clearance · (clearance−3)(clearance−4)(clearance−7)",
+      f: function (w) { return w.f_clearance * prod(w.clearance, CLEARANCE_OK); } },
+    { group: "メンバーシップリンク", expr: "f_region · (region−1)(region−6)",
+      f: function (w) { return w.f_region * prod(w.region, REGION_OK); } },
+    { group: "出力の定義", expr: "granted − f_role · f_clearance · f_region",
+      f: function (w) { return w.granted - w.f_role * w.f_clearance * w.f_region; } }
+  ];
+
+  var enabled = CONSTRAINTS.map(function () { return true; });
+
+  var witness = { role: 2, clearance: 3, region: 1,
+                  f_role: 1, f_clearance: 1, f_region: 1, granted: 1 };
+
+  var FLAG_META = [
+    { key: "f_role",      linkIdx: 4, field: "role" },
+    { key: "f_clearance", linkIdx: 5, field: "clearance" },
+    { key: "f_region",    linkIdx: 6, field: "region" },
+    { key: "granted",     linkIdx: -1, field: null }
+  ];
+
+  var ALLOW = { role: ROLE_OK, clearance: CLEARANCE_OK, region: REGION_OK };
+
+  // ---------------- controls ----------------
+  ["role", "clearance", "region"].forEach(function (field) {
+    var host = document.getElementById("seg-" + field);
+    for (var v = 0; v <= 7; v++) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = String(v);
+      b.setAttribute("aria-pressed", "false");
+      b.dataset.value = String(v);
+      b.dataset.inlist = ALLOW[field].indexOf(v) >= 0 ? "1" : "0";
+      b.title = ALLOW[field].indexOf(v) >= 0 ? "許可リストの中" : "許可リストの外";
+      b.addEventListener("click", function (ev) {
+        witness[field] = parseInt(ev.currentTarget.dataset.value, 10);
+        render();
+      });
+      host.appendChild(b);
+    }
+  });
+
+  var flagsHost = document.getElementById("flags");
+  FLAG_META.forEach(function (meta) {
+    var row = document.createElement("div");
+    row.className = "flag-row";
+    row.dataset.key = meta.key;
+
+    var left = document.createElement("div");
+    var name = document.createElement("span");
+    name.className = "name";
+    name.textContent = meta.key;
+    left.appendChild(name);
+    var hint = document.createElement("span");
+    hint.className = "hint";
+    hint.hidden = true;
+    left.appendChild(hint);
+    row.appendChild(left);
+
+    var bit = document.createElement("div");
+    bit.className = "bit";
+    [0, 1].forEach(function (v) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = String(v);
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () { witness[meta.key] = v; render(); });
+      bit.appendChild(b);
+    });
+    row.appendChild(bit);
+    flagsHost.appendChild(row);
+  });
+
+  // ---------------- ledger ----------------
+  var ledger = document.getElementById("ledger");
+  var rowEls = [];
+  var lastGroup = null;
+  CONSTRAINTS.forEach(function (con, i) {
+    if (con.group !== lastGroup) {
+      var g = document.createElement("div");
+      g.className = "ledger-group";
+      g.textContent = con.group;
+      ledger.appendChild(g);
+      lastGroup = con.group;
+    }
+    var row = document.createElement("div");
+    row.className = "row";
+
+    var idx = document.createElement("span");
+    idx.className = "idx";
+    idx.textContent = "#" + i;
+    row.appendChild(idx);
+
+    var expr = document.createElement("span");
+    expr.className = "expr";
+    expr.textContent = con.expr;
+    row.appendChild(expr);
+
+    var val = document.createElement("span");
+    val.className = "val";
+    row.appendChild(val);
+
+    var label = document.createElement("label");
+    label.className = "switch";
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = true;
+    input.setAttribute("aria-label", "制約 #" + i + " を有効にする");
+    input.addEventListener("change", function () { enabled[i] = input.checked; render(); });
+    var track = document.createElement("span");
+    track.className = "track";
+    label.appendChild(input);
+    label.appendChild(track);
+    row.appendChild(label);
+
+    ledger.appendChild(row);
+    rowEls.push({ row: row, val: val, input: input });
+  });
+
+  // ---------------- grader ----------------
+  // en: 有効な制約を示す真偽値の配列。ラボでも検問モードでも同じ判定器を使う。
+  function satisfiesWith(w, en) {
+    for (var i = 0; i < CONSTRAINTS.length; i++) {
+      if (en[i] && CONSTRAINTS[i].f(w) !== 0) return false;
+    }
+    return true;
+  }
+
+  function firstViolation(w, en) {
+    for (var i = 0; i < CONSTRAINTS.length; i++) {
+      if (en[i] && CONSTRAINTS[i].f(w) !== 0) return i;
+    }
+    return -1;
+  }
+
+  function findExploitsWith(en, limit) {
+    var found = [];
+    var total = 0;
+    for (var r = 0; r <= 7; r++) {
+      for (var c = 0; c <= 7; c++) {
+        for (var g = 0; g <= 7; g++) {
+          var base = { role: r, clearance: c, region: g };
+          if (authorized(base)) continue;
+          var hit = null;
+          for (var bits = 0; bits < 8 && !hit; bits++) {
+            var w = { role: r, clearance: c, region: g,
+                      f_role: bits & 1 ? 1 : 0,
+                      f_clearance: bits & 2 ? 1 : 0,
+                      f_region: bits & 4 ? 1 : 0,
+                      granted: 1 };
+            if (satisfiesWith(w, en)) hit = w;
+          }
+          if (hit) {
+            total++;
+            if (found.length < limit) found.push(hit);
+          }
+        }
+      }
+    }
+    return { total: total, samples: found };
+  }
+
+  function satisfiesAll(w) { return satisfiesWith(w, enabled); }
+  function findExploits(limit) { return findExploitsWith(enabled, limit); }
+
+  // 検問モードから同じ判定器を使うために公開する
+  window.__circuit = {
+    CONSTRAINTS: CONSTRAINTS,
+    SIGNALS: SIGNALS,
+    ROLE_OK: ROLE_OK, CLEARANCE_OK: CLEARANCE_OK, REGION_OK: REGION_OK,
+    authorized: authorized,
+    satisfiesWith: satisfiesWith,
+    firstViolation: firstViolation,
+    findExploitsWith: findExploitsWith
+  };
+
+  function countComplete() {
+    var ok = 0, all = 0;
+    for (var r = 0; r <= 7; r++) {
+      for (var c = 0; c <= 7; c++) {
+        for (var g = 0; g <= 7; g++) {
+          var base = { role: r, clearance: c, region: g };
+          if (!authorized(base)) continue;
+          all++;
+          var w = { role: r, clearance: c, region: g,
+                    f_role: 1, f_clearance: 1, f_region: 1, granted: 1 };
+          if (satisfiesAll(w)) ok++;
+        }
+      }
+    }
+    return { ok: ok, all: all };
+  }
+
+  // ---------------- render ----------------
+  var banner = document.getElementById("banner");
+  var pillSat = document.getElementById("pill-sat");
+  var pillGranted = document.getElementById("pill-granted");
+  var pillAuth = document.getElementById("pill-auth");
+  var statComp = document.getElementById("stat-comp");
+  var statSound = document.getElementById("stat-sound");
+  var exploitBox = document.getElementById("exploit-box");
+  var exploitList = document.getElementById("exploit-list");
+
+  function render() {
+    ["role", "clearance", "region"].forEach(function (field) {
+      var host = document.getElementById("seg-" + field);
+      Array.prototype.forEach.call(host.children, function (b) {
+        b.setAttribute("aria-pressed",
+          parseInt(b.dataset.value, 10) === witness[field] ? "true" : "false");
+      });
+    });
+
+    FLAG_META.forEach(function (meta) {
+      var row = flagsHost.querySelector('[data-key="' + meta.key + '"]');
+      var buttons = row.querySelectorAll(".bit button");
+      buttons[0].setAttribute("aria-pressed", witness[meta.key] === 0 ? "true" : "false");
+      buttons[1].setAttribute("aria-pressed", witness[meta.key] === 1 ? "true" : "false");
+
+      var unbound = meta.linkIdx >= 0 && !enabled[meta.linkIdx];
+      row.classList.toggle("free", unbound);
+      var hint = row.querySelector(".hint");
+      hint.hidden = !unbound;
+      if (unbound) hint.textContent = meta.field + " の値と切り離されている";
+    });
+
+    var allSat = true;
+    CONSTRAINTS.forEach(function (con, i) {
+      var v = con.f(witness);
+      var el = rowEls[i];
+      el.val.textContent = v === 0 ? "0 ✓" : String(v);
+      el.row.classList.toggle("off", !enabled[i]);
+      el.row.classList.toggle("sat", enabled[i] && v === 0);
+      el.row.classList.toggle("viol", enabled[i] && v !== 0);
+      if (enabled[i] && v !== 0) allSat = false;
+    });
+
+    var isAuth = authorized(witness);
+    var g1 = witness.granted === 1;
+
+    pillSat.textContent = allSat ? "全制約を満たす" : "制約に違反";
+    pillSat.className = "pill " + (allSat ? "ok" : "bad");
+    pillGranted.textContent = "granted = " + witness.granted;
+    pillGranted.className = "pill " + (g1 ? "ok" : "warn");
+    pillAuth.textContent = isAuth ? "資格は正当" : "資格は不正";
+    pillAuth.className = "pill " + (isAuth ? "ok" : "bad");
+
+    if (allSat && g1 && !isAuth) {
+      banner.className = "banner breach";
+      banner.textContent = "不正アクセス成立 — 権限のない資格が、回路に受理された";
+    } else if (allSat && g1 && isAuth) {
+      banner.className = "banner ok";
+      banner.textContent = "正しく受理 — 正当な資格が通った";
+    } else if (!allSat) {
+      banner.className = "banner rej";
+      banner.textContent = "証明は却下 — 0 になっていない制約がある";
+    } else {
+      banner.className = "banner rej";
+      banner.textContent = "アクセスなし — granted = 0 を主張している";
+    }
+
+    var comp = countComplete();
+    statComp.textContent = comp.ok + " / " + comp.all;
+    statComp.className = "v " + (comp.ok === comp.all ? "ok" : "bad");
+
+    var ex = findExploits(6);
+    statSound.textContent = ex.total === 0 ? "0" : ex.total + " / 494";
+    statSound.className = "v " + (ex.total === 0 ? "ok" : "bad");
+
+    exploitList.textContent = "";
+    if (ex.total === 0) {
+      exploitBox.hidden = true;
+    } else {
+      exploitBox.hidden = false;
+      ex.samples.forEach(function (w) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = "(" + w.role + ", " + w.clearance + ", " + w.region + ")";
+        b.title = "この反例を witness に読み込む";
+        b.addEventListener("click", function () {
+          SIGNALS.forEach(function (k) { witness[k] = w[k]; });
+          render();
+        });
+        exploitList.appendChild(b);
+      });
+      if (ex.total > ex.samples.length) {
+        var more = document.createElement("span");
+        more.textContent = "ほか " + (ex.total - ex.samples.length) + " 件";
+        exploitList.appendChild(more);
+      }
+    }
+  }
+
+  // ---------------- presets ----------------
+  var PRESETS = {
+    honest:  { role: 2, clearance: 3, region: 1, f_role: 1, f_clearance: 1, f_region: 1, granted: 1, links: [true, true, true] },
+    exploit: { role: 2, clearance: 3, region: 0, f_role: 1, f_clearance: 1, f_region: 1, granted: 1, links: [true, true, false] },
+    denied:  { role: 0, clearance: 3, region: 1, f_role: 0, f_clearance: 1, f_region: 1, granted: 0, links: [true, true, true] }
+  };
+
+  Array.prototype.forEach.call(document.querySelectorAll(".preset"), function (btn) {
+    btn.addEventListener("click", function () {
+      var p = PRESETS[btn.dataset.preset];
+      SIGNALS.forEach(function (k) { witness[k] = p[k]; });
+      [4, 5, 6].forEach(function (idx, j) {
+        enabled[idx] = p.links[j];
+        rowEls[idx].input.checked = p.links[j];
+      });
+      [0, 1, 2, 3, 7].forEach(function (idx) {
+        enabled[idx] = true;
+        rowEls[idx].input.checked = true;
+      });
+      render();
+    });
+  });
+
+  render();
+})();
+
+// ---- 目次を h2 から自動生成（章を足しても手で直さなくてよいように） ----
+(function () {
+  "use strict";
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var heads = document.querySelectorAll(".band-head h2");
+  Array.prototype.forEach.call(heads, function (h, i) {
+    if (h.closest("#toc")) return;
+    var section = h.closest(".band");
+    if (!section) return;
+    if (i === 0) return;                 // 「全体像」自身は目次に載せない
+    if (!section.id) section.id = "sec-" + i;
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + section.id;
+    a.textContent = h.textContent.trim();
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+})();
+
+// ---- 制約検問（あなたが verifier になる出題モード） ----
+(function () {
+  "use strict";
+  var C = window.__circuit;
+  if (!C || !document.getElementById("quiz")) return;
+
+  var ROLE_OK = C.ROLE_OK, CLEARANCE_OK = C.CLEARANCE_OK, REGION_OK = C.REGION_OK;
+  var CONS = C.CONSTRAINTS;
+  var ALL_ON = CONS.map(function () { return true; });
+  var NAMES = [
+    "f_role がビット", "f_clearance がビット", "f_region がビット", "granted がビット",
+    "role のメンバーシップリンク", "clearance のメンバーシップリンク",
+    "region のメンバーシップリンク", "AND（granted = 3 フラグの積）"
+  ];
+  var TOTAL = 10, MAX_LIVES = 3, STORE_KEY = "ac26-w1-checkpoint-best";
+
+  function ri(n) { return Math.floor(Math.random() * n); }
+  function pick(a) { return a[ri(a.length)]; }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = ri(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function inList(v, l) { return l.indexOf(v) >= 0; }
+
+  function honestFor(r, c, g) {
+    var fr = inList(r, ROLE_OK) ? 1 : 0;
+    var fc = inList(c, CLEARANCE_OK) ? 1 : 0;
+    var fg = inList(g, REGION_OK) ? 1 : 0;
+    return { role: r, clearance: c, region: g,
+             f_role: fr, f_clearance: fc, f_region: fg,
+             granted: (fr && fc && fg) ? 1 : 0 };
+  }
+
+  function subst(i, w) {
+    switch (i) {
+      case 0: return w.f_role + "² − " + w.f_role;
+      case 1: return w.f_clearance + "² − " + w.f_clearance;
+      case 2: return w.f_region + "² − " + w.f_region;
+      case 3: return w.granted + "² − " + w.granted;
+      case 4: return w.f_role + " · (" + w.role + "−2)(" + w.role + "−5)(" + w.role + "−6)";
+      case 5: return w.f_clearance + " · (" + w.clearance + "−3)(" + w.clearance + "−4)(" + w.clearance + "−7)";
+      case 6: return w.f_region + " · (" + w.region + "−1)(" + w.region + "−6)";
+      default: return w.granted + " − " + w.f_role + "·" + w.f_clearance + "·" + w.f_region;
+    }
+  }
+
+  function wTable(w) {
+    var keys = ["role", "clearance", "region", "f_role", "f_clearance", "f_region", "granted"];
+    return '<div class="table-scroll"><table class="data"><thead><tr>' +
+      keys.map(function (k) { return "<th>" + k + "</th>"; }).join("") +
+      '</tr></thead><tbody><tr>' +
+      keys.map(function (k) { return "<td>" + w[k] + "</td>"; }).join("") +
+      "</tr></tbody></table></div>";
+  }
+
+  // ---------------- 出題器 ----------------
+  function genWitness() {
+    var w = honestFor(ri(8), ri(8), ri(8));
+    if (Math.random() < 0.55) {
+      var k = pick(["f_role", "f_clearance", "f_region", "granted"]);
+      w[k] = w[k] ? 0 : 1;
+    }
+    var bad = C.firstViolation(w, ALL_ON);
+    var ok = bad < 0;
+    return {
+      cat: "witness",
+      q: "提出された witness です。完成版の回路（制約 8 本すべて）で、全制約が 0 になりますか？",
+      body: wTable(w),
+      choices: [
+        { t: "全制約を満たす（受理）", ok: ok },
+        { t: "0 にならない制約がある（却下）", ok: !ok }
+      ],
+      why: ok
+        ? "8 本すべて 0 でした。granted = " + w.granted +
+          (w.granted === 1 ? " なのでアクセスが許可されます。" : " なので、そもそも権限を主張していません。")
+        : "制約 #" + bad + "（" + NAMES[bad] + "）が <code>" + subst(bad, w) + " = " +
+          CONS[bad].f(w) + "</code> で 0 になりません。"
+    };
+  }
+
+  function genAudit() {
+    var en = ALL_ON.slice(), dropped = -1;
+    if (Math.random() < 0.62) { dropped = ri(8); en[dropped] = false; }
+    var res = C.findExploitsWith(en, 1);
+    var sound = res.total === 0;
+    var lines = NAMES.map(function (n, i) {
+      return '<div class="cline' + (en[i] ? "" : " missing") + '">#' + i + "  " + n + "</div>";
+    }).join("");
+    var why;
+    if (!sound) {
+      var s = res.samples[0];
+      why = "制約 #" + dropped + " が抜けているため、権限のない資格が <b>" + res.total +
+            " 通り</b>通ります。例: (role, clearance, region) = (" +
+            s.role + ", " + s.clearance + ", " + s.region + ")。";
+    } else if (dropped >= 0) {
+      why = "抜けているのはビット制約なので、この回路では健全性に影響しません。" +
+            "granted = 1 を主張すると積が 1 になり、フラグはどれも 0 でなくなるため、" +
+            "リンクは効き続けます。<b>ただし消してよいという意味ではありません</b>（教材の実測の節を参照）。";
+    } else {
+      why = "8 本すべて揃っているので健全です。granted = 1 → 3 フラグが 0 でない → 3 本のリンクが発動、の鎖が繋がっています。";
+    }
+    return {
+      cat: "audit",
+      q: "この回路は健全ですか？（権限のない資格で granted = 1 にできないか）",
+      body: '<div class="clist">' + lines + "</div>",
+      choices: [
+        { t: "健全 — 不正な資格は通せない", ok: sound },
+        { t: "アンダー制約 — 通せてしまう", ok: !sound }
+      ],
+      why: why
+    };
+  }
+
+  function genAccess() {
+    var r, c, g;
+    if (Math.random() < 0.45) { r = pick(ROLE_OK); c = pick(CLEARANCE_OK); g = pick(REGION_OK); }
+    else { r = ri(8); c = ri(8); g = ri(8); }
+    var ok = C.authorized({ role: r, clearance: c, region: g });
+    var bads = [];
+    if (!inList(r, ROLE_OK)) bads.push("role=" + r + " は許可 {2,5,6} の外");
+    if (!inList(c, CLEARANCE_OK)) bads.push("clearance=" + c + " は許可 {3,4,7} の外");
+    if (!inList(g, REGION_OK)) bads.push("region=" + g + " は許可 {1,6} の外");
+    return {
+      cat: "access",
+      q: "資格 (role, clearance, region) = (" + r + ", " + c + ", " + g + ")。この資格は正当ですか？",
+      body: '<p class="subst">ROLE_OK = {2, 5, 6}　CLEARANCE_OK = {3, 4, 7}　REGION_OK = {1, 6}</p>',
+      choices: [
+        { t: "正当（authorized）", ok: ok },
+        { t: "不正 — 少なくとも 1 つが許可リストの外", ok: !ok }
+      ],
+      why: ok ? "3 つとも許可リストの中なので authorized です。" : bads.join("／") + "。"
+    };
+  }
+
+  function genCalc() {
+    var i = ri(8);
+    var w = honestFor(ri(8), ri(8), ri(8));
+    if (Math.random() < 0.5) {
+      var k = pick(["f_role", "f_clearance", "f_region", "granted"]);
+      w[k] = w[k] ? 0 : 1;
+    }
+    var v = CONS[i].f(w);
+    var cand = [0, v + 6, v - 6, 6, -6, 2 * v, 42, -60, v + 1, 1];
+    var opts = [];
+    for (var j = 0; j < cand.length && opts.length < 3; j++) {
+      if (cand[j] !== v && opts.indexOf(cand[j]) < 0) opts.push(cand[j]);
+    }
+    var all = shuffle(opts.concat([v]));
+    return {
+      cat: "calc",
+      q: "制約 #" + i + "（" + NAMES[i] + "）に、この witness を代入した値は？",
+      body: '<p class="subst">' + subst(i, w) + " = ?</p>" + wTable(w),
+      choices: all.map(function (x) { return { t: String(x), ok: x === v }; }),
+      why: "<code>" + subst(i, w) + " = " + v + "</code>。" +
+           (v === 0 ? "0 なのでこの制約は満たされています。" : "0 ではないので、この witness は却下されます。")
+    };
+  }
+
+  var THEORY = [
+    { q: "算術回路に <code>if</code> が書けないのはなぜ？",
+      a: "値の中身が見えないので分岐先を選べず、どちらに進んだかという事実自体も秘密を漏らすから",
+      d: ["DSL の実装が追いついていないだけで、原理的には書けるから",
+          "分岐は書けるが、計算が遅くなるので避ける慣習があるから",
+          "有限体には真偽値型があるが、変換コストが高いから"],
+      why: "回路は常に全経路を計算し、選択子 <code>s·a + (1−s)·b</code> で片方を消します。" },
+    { q: "暗号が「足し算と掛け算」しか扱えない根本の理由は？",
+      a: "準同型は構造がもともと持つ演算しか保てず、環・体には加法と乗法しかないから",
+      d: ["他の演算は計算量が大きすぎて現実的でないから",
+          "歴史的にその 2 つから実装が始まり、今も拡張途中だから",
+          "整数の範囲でしか計算できない制限があるから"],
+      why: "準同型 = 構造を保つ写像。保つべき構造に「&lt;」は入っていないので、運びようがありません。" },
+    { q: "有限体 F_p に大小比較が存在しないのはなぜ？",
+      a: "+ と × と両立する順序が原理的に存在しないから（p 回足すと 0 に戻ってしまう）",
+      d: ["p が巨大すぎて比較の計算が終わらないから",
+          "比較は定義できるが、暗号文では実行できないから",
+          "剰余を取る前なら比較でき、取ったあとは不要だから"],
+      why: "0 &lt; 1 と決めると足すたびに大きくなり続けるはずですが、有限体では 0 に戻るため矛盾します。" },
+    { q: "<code>f · (x−a₁)(x−a₂) = 0</code> が保証するのはどちら向き？",
+      a: "f = 1 なら x はリストの中。逆（x がリストの中なら f = 1）は保証しない",
+      d: ["両方向を保証する", "x がリストの中なら f = 1 の向きだけ", "f = 0 なら x はリストの外"],
+      why: "健全性に必要なのは前向きの含意だけ。逆向きは正直な prover の witness 生成の話です。" },
+    { q: "完全性（completeness）が壊れると何が起きる？",
+      a: "正当な資格が受理されなくなる（正直な利用者が困る）",
+      d: ["不正な資格が通ってしまう", "証明のサイズが大きくなる", "回路の制約が入力に依存する"],
+      why: "不正が通るのは健全性（soundness）の破れ。2 つは別々に壊れます。" },
+    { q: "アンダー制約が見つかりにくいのはなぜ？",
+      a: "正直に使っている限り完璧に正常動作し、テストも通ってしまうから",
+      d: ["エラーが出るが、メッセージが分かりにくいから",
+          "計算が遅くなるだけで、動作自体は変わらないから",
+          "コンパイラが警告を出すが、大量に出るので埋もれるから"],
+      why: "困る人がいないので誰も気づきません。だから自分から反例を探しにいく道具が要ります。" },
+    { q: "<code>cs.aux(\"f_role\", 1 if role in ROLE_OK else 0)</code> の第 2 引数は、誰の仕事？",
+      a: "prover の仕事（witness の値）。verifier が見るのは制約だけ",
+      d: ["verifier の仕事", "prover と verifier の両方が検査する", "コンパイラが自動生成する"],
+      why: "値をベタ書きしてもテストは通ります。攻撃者はこの値を自分用に書き直せます。" },
+    { q: "回路の構造を入力値に依存させてはいけないのはなぜ？",
+      a: "形そのものが秘密を漏らし、verifier が検証すべき式を固定できなくなるから",
+      d: ["Python の制約で条件分岐が書けないから",
+          "実行速度が落ちるから", "テストコードが書きにくくなるから"],
+      why: "回路は一度コンパイルされ全員が同じものを使います。採点器の構造テストはこれを見ています。" },
+    { q: "素の形の ZK・MPC・FHE のうち、「証明」が登場するのは？",
+      a: "ZK だけ。MPC は分担計算、FHE は暗号文のままの計算で、証明は出てこない",
+      d: ["3 つとも証明を出す", "MPC と FHE の 2 つ", "FHE だけ"],
+      why: "3 方式は同じ判定ロジックを回路にしますが、上に被せるものが違います。" +
+           "なお Week 6 の co-SNARK（MPC が証明を作る）や vFHE のように、<b>組み合わせれば話は変わります</b>。" },
+    { q: "有限体上の任意の関数は、+ と × だけで書ける？",
+      a: "書ける（ラグランジュ補間）。ただし素直にやると次数＝コストが跳ね上がる",
+      d: ["書けない。比較を含む関数は原理的に不可能",
+          "p が素数のときだけ書ける", "入力が 1 変数のときだけ書ける"],
+      why: "だから回路設計は「書けるか」ではなく「安く書けるか」を考える仕事になります。" },
+    { q: "乗算ゲート 1 個は、制約 何本に対応する？",
+      a: "1 本（次数 2）。加算・減算はゲートを消費しないので無料",
+      d: ["2 本", "0 本（乗算は制約にならない）", "入力信号の数だけ"],
+      why: "R1CS が「次数 2 の制約の集まり」と呼ばれるのはこれが理由です。" },
+    { q: "証明系（Groth16 など）が保証してくれるのは？",
+      a: "「制約を満たす witness を知っている」ことだけ。制約が仕様と合っているかは保証しない",
+      d: ["回路の仕様が正しいことも保証する",
+          "witness が唯一に定まることを保証する",
+          "回路が最小サイズであることを保証する"],
+      why: "だから健全な証明系 × アンダー制約な回路 = 偽の主張に対する正しい証明、が成立します。" },
+    { q: "witness とは何か？",
+      a: "回路の全信号に値を入れた割当",
+      d: ["公開入力だけを並べた組", "証明そのもの（数百バイトのデータ）", "満たすべき制約の集合"],
+      why: "prover が「これで全制約を 0 にできる」と主張して差し出すものです。" },
+    { q: "granted をビット制約で縛るのはなぜ？",
+      a: "出力の値域を、他の制約に頼らず回路自身が保証しておくため",
+      d: ["縛らないと granted = 6 のような値も許されてしまうから",
+          "縛らないと完全性（正当な資格が通ること）が壊れるから",
+          "証明のサイズが小さくなるから"],
+      why: "この回路に限れば AND 制約と 3 フラグのビット制約が granted を 0/1 に押し込むので、" +
+           "<b>granted = 6 は実際には作れません</b>。それでも書くのは、依存先の制約が 1 本消えたり、" +
+           "フラグを他の回路と共有した瞬間にその前提が崩れるからです。" }
+  ];
+
+  var deck = [];
+  function genTheory() {
+    if (!deck.length) deck = shuffle(THEORY.slice());
+    var t = deck.pop();
+    var ch = shuffle([{ t: t.a, ok: true }].concat(t.d.map(function (x) { return { t: x, ok: false }; })));
+    return { cat: "theory", q: t.q, body: "", choices: ch, why: t.why };
+  }
+
+  var CATS = [
+    { key: "witness", name: "witness 検問", desc: "提出された割当が全制約を 0 にするか", gen: genWitness },
+    { key: "audit",   name: "回路監査",     desc: "制約の抜けを見つけ、健全かを判定する", gen: genAudit },
+    { key: "access",  name: "アクセス判定", desc: "資格が許可リストを満たしているか",     gen: genAccess },
+    { key: "calc",    name: "式の計算",     desc: "制約に値を代入した結果を求める",       gen: genCalc },
+    { key: "theory",  name: "原理",         desc: "なぜその設計なのかを問う 4 択",        gen: genTheory }
+  ];
+  var CAT_BY_KEY = {};
+  CATS.forEach(function (c) { CAT_BY_KEY[c.key] = c; });
+
+  // ---------------- DOM ----------------
+  var elStart = document.getElementById("quiz-start");
+  var elPlay = document.getElementById("quiz-play");
+  var elResult = document.getElementById("quiz-result");
+  var elModes = document.getElementById("mode-grid");
+  var elBest = document.getElementById("quiz-best");
+  var elProg = document.getElementById("qprog");
+  var elCat = document.getElementById("qcat");
+  var elLives = document.getElementById("lives");
+  var elQ = document.getElementById("qtext");
+  var elBody = document.getElementById("qbody");
+  var elChoices = document.getElementById("choices");
+  var elFb = document.getElementById("fb");
+  var elNext = document.getElementById("btn-next");
+
+  var state = null;
+
+  function readBest() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { return null; }
+  }
+  function writeBest(v) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) { /* 保存できなくても続行 */ }
+  }
+  function showBest() {
+    var b = readBest();
+    elBest.textContent = b
+      ? "自己ベスト: " + b.correct + " / " + TOTAL + "（ランク " + b.rank + "）  通算 " + b.runs + " 回"
+      : "まだ記録なし。";
+  }
+
+  function pane(which) {
+    elStart.hidden = which !== "start";
+    elPlay.hidden = which !== "play";
+    elResult.hidden = which !== "result";
+  }
+
+  CATS.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "mode";
+    b.innerHTML = '<span class="m-name">' + c.name + '</span><span class="m-desc">' + c.desc + "</span>";
+    b.addEventListener("click", function () { start(c.key); });
+    elModes.appendChild(b);
+  });
+  (function () {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "mode primary";
+    b.innerHTML = '<span class="m-name">ランダム検問</span><span class="m-desc">全 5 分野から 10 問。まずはこれ</span>';
+    b.addEventListener("click", function () { start("mixed"); });
+    elModes.insertBefore(b, elModes.firstChild);
+  })();
+
+  function start(mode) {
+    state = { mode: mode, i: 0, lives: MAX_LIVES, correct: 0, stats: {}, answered: false, cur: null };
+    CATS.forEach(function (c) { state.stats[c.key] = { ok: 0, n: 0 }; });
+    pane("play");
+    nextQuestion();
+  }
+
+  function nextQuestion() {
+    state.i++;
+    state.answered = false;
+    var cat = state.mode === "mixed" ? pick(CATS) : CAT_BY_KEY[state.mode];
+    var q = cat.gen();
+    state.cur = q;
+
+    elProg.textContent = state.i + " / " + TOTAL;
+    elCat.textContent = CAT_BY_KEY[q.cat].name;
+    renderLives();
+
+    elQ.innerHTML = q.q;
+    elBody.innerHTML = q.body;
+    elFb.hidden = true;
+    elNext.hidden = true;
+
+    elChoices.className = "choices" + (q.choices.length === 2 ? " two" : "");
+    elChoices.textContent = "";
+    q.choices.forEach(function (c) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice";
+      b.textContent = c.t;
+      b.addEventListener("click", function () { answer(c, b); });
+      elChoices.appendChild(b);
+    });
+  }
+
+  function renderLives() {
+    var s = "";
+    for (var i = 0; i < MAX_LIVES; i++) {
+      s += i < state.lives ? "◆" : '<span class="gone">◇</span>';
+    }
+    elLives.innerHTML = s;
+    elLives.setAttribute("aria-label", "残りライフ " + Math.max(0, state.lives) + " / " + MAX_LIVES);
+  }
+
+  function answer(choice, btn) {
+    if (state.answered) return;
+    state.answered = true;
+    var q = state.cur;
+
+    Array.prototype.forEach.call(elChoices.children, function (b) {
+      b.disabled = true;
+      b.classList.add("dim");
+    });
+    var buttons = Array.prototype.slice.call(elChoices.children);
+    q.choices.forEach(function (c, idx) {
+      if (c.ok) { buttons[idx].classList.add("is-correct"); buttons[idx].classList.remove("dim"); }
+    });
+    if (!choice.ok) { btn.classList.add("is-wrong"); btn.classList.remove("dim"); }
+
+    state.stats[q.cat].n++;
+    if (choice.ok) { state.correct++; state.stats[q.cat].ok++; }
+    else { state.lives--; }
+    renderLives();
+
+    elFb.className = "fb " + (choice.ok ? "ok" : "bad");
+    elFb.innerHTML = '<span class="fb-head">' + (choice.ok ? "正しい判定" : "誤判定") + "</span>" + q.why;
+    elFb.hidden = false;
+
+    elNext.hidden = false;
+    elNext.textContent = (state.lives <= 0 || state.i >= TOTAL) ? "結果を見る" : "次の検問へ";
+  }
+
+  elNext.addEventListener("click", function () {
+    if (state.lives <= 0 || state.i >= TOTAL) finish();
+    else nextQuestion();
+  });
+  document.getElementById("btn-quit").addEventListener("click", function () { pane("start"); showBest(); });
+  document.getElementById("btn-again").addEventListener("click", function () { start(state.mode); });
+  document.getElementById("btn-modes").addEventListener("click", function () { pane("start"); showBest(); });
+
+  function finish() {
+    // ランクは正解数だけで決める（ライフ切れでも、そこまでの正解は評価する）
+    var busted = state.lives <= 0;
+    var rank = state.correct === TOTAL ? "S"
+      : state.correct >= 8 ? "A"
+      : state.correct >= 6 ? "B" : "F";
+
+    var elRank = document.getElementById("rank");
+    elRank.textContent = rank;
+    elRank.className = "rank " + rank.toLowerCase();
+
+    var titles = {
+      S: "全問正解 — 監査官として文句なし",
+      A: "ほぼ正確 — 実務なら合格ライン",
+      B: "判定は甘い — 落とした分野を潰そう",
+      F: "取りこぼしが多い — 読み直しどころ"
+    };
+    document.getElementById("rank-title").textContent =
+      busted ? "検問失敗 — 不正な証明を 3 回通してしまった" : titles[rank];
+    document.getElementById("rank-sub").textContent =
+      "正解 " + state.correct + " / " + (busted ? state.i + " 問時点で終了" : TOTAL) +
+      "　残りライフ " + Math.max(0, state.lives);
+
+    var host = document.getElementById("cat-stats");
+    host.textContent = "";
+    CATS.forEach(function (c) {
+      var s = state.stats[c.key];
+      if (!s.n) return;
+      var d = document.createElement("div");
+      d.className = "cstat";
+      var cls = s.ok === s.n ? " full" : (s.ok * 2 < s.n ? " weak" : "");
+      d.innerHTML = '<span class="cn">' + c.name + '</span><span class="cv' + cls + '">' +
+                    s.ok + " / " + s.n + "</span>";
+      host.appendChild(d);
+    });
+
+    var best = readBest();
+    var runs = (best && best.runs ? best.runs : 0) + 1;
+    if (!best || state.correct > best.correct) writeBest({ correct: state.correct, rank: rank, runs: runs });
+    else writeBest({ correct: best.correct, rank: best.rank, runs: runs });
+
+    pane("result");
+  }
+
+  showBest();
+})();
+</script>
+
+</body>
+</html>
