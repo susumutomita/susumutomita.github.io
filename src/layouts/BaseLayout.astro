@@ -1,6 +1,7 @@
 ---
-import { SITE, LINKS, BULL } from "../lib/constants";
+import { SITE } from "../lib/constants";
 import { OG_LOCALE } from "../lib/i18n";
+import { bullGraph } from "../lib/seo";
 import Header from "../components/global/Header.astro";
 import Footer from "../components/global/Footer.astro";
 
@@ -42,30 +43,10 @@ if (alternates && !canonicalPath.endsWith("/")) canonicalPath += "/";
 const canonicalURL = new URL(canonicalPath, SITE.url);
 const ogImageURL = new URL(ogImage, SITE.url);
 
-const defaultSchema = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: SITE.name,
-  url: SITE.url,
-  sameAs: [LINKS.linkedin, LINKS.github],
-  image: ogImageURL.href,
-  jobTitle: "Founder & Software Engineer",
-  worksFor: {
-    "@type": "Organization",
-    name: BULL.name,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Japan",
-      addressCountry: "JP",
-    },
-  },
-  nationality: {
-    "@type": "Country",
-    name: "Japan",
-  },
-};
-
-const schema = jsonLd ?? defaultSchema;
+// Shared Organization + Person graph (src/lib/seo.ts) so the identity data —
+// alternateName, worksFor, sameAs, knowsAbout — stays consistent on every page
+// instead of drifting between a layout-local copy and the BULL pages (#366).
+const schema = jsonLd ?? bullGraph(lang);
 // Escape characters that are unsafe in inline JSON-in-HTML (OWASP): "<" (so a
 // value containing "</script>" can't terminate the script early), plus ">", "&",
 // and the U+2028/U+2029 line separators. set:html bypasses HTML escaping.
