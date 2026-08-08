@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>秘密を分けて、集めずに計算する — Week 2 予習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 2（MPC 秘密計算）の予習ノート。Shamir の秘密分散を数式の導出から追い、なぜ加算は無料で乗算に通信が要るのかを理解する。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="秘密を分けて、集めずに計算する — Week 2 予習ノート">
+<meta property="og:description" content="Shamir の秘密分散を、飛躍なしの導出と手で触れるラボで理解する。">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧩</text></svg>">
+<style>
+  @font-face {
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { display: block; max-width: 100%; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  table { border-collapse: collapse; }
+  [hidden] { display: none !important; }
+
+  :root {
+    color-scheme: light dark;
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+
+    --sans: "AXIS Std", "Helvetica Neue", Helvetica, Arial,
+            "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+            "Noto Sans JP", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+            "Cascadia Mono", Consolas, monospace;
+
+    --fs-label: 0.6875rem; --fs-xs: 0.8125rem; --fs-sm: 0.875rem;
+    --fs-lg: 1.25rem; --fs-xl: 1.6875rem; --fs-2xl: clamp(2rem, 5.5vw, 2.9rem);
+    --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+      --line: #3A4449; --line-strong: #4E5B61;
+      --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+      --accent: #99DBFF; --accent-soft: #24333C;
+      --pass: #B5BD68; --pass-soft: #2B3122;
+      --fail: #CC6666; --fail-soft: #3A2626;
+      --free: #F0C674; --free-soft: #3A3122;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+    --line: #3A4449; --line-strong: #4E5B61;
+    --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+    --accent: #99DBFF; --accent-soft: #24333C;
+    --pass: #B5BD68; --pass-soft: #2B3122;
+    --fail: #CC6666; --fail-soft: #3A2626;
+    --free: #F0C674; --free-soft: #3A3122;
+  }
+  :root[data-theme="light"] {
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+  }
+
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); line-height: 1.85; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .eyebrow { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.35; margin: 0; font-weight: 700; }
+  h1 { font-size: var(--fs-2xl); letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+  h3 { font-size: var(--fs-lg); }
+  h4 { font-size: 1rem; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: 0.925em; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .sitebar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
+             background: color-mix(in srgb, var(--ground) 80%, transparent); backdrop-filter: blur(12px); }
+  .sitebar-inner { height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .sitebar-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); text-decoration: none; }
+  .sitebar-links { display: flex; align-items: center; gap: 0.35rem; }
+  .sitebar-links a { font-size: var(--fs-xs); color: var(--muted); text-decoration: none; padding: 0.35rem 0.6rem; border-radius: var(--r-md); }
+  .sitebar-links a:hover { color: var(--ink); background: color-mix(in srgb, var(--line) 60%, transparent); }
+
+  .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .masthead-inner { display: flex; flex-direction: column; gap: 1rem; padding: clamp(2.5rem, 7vw, 4rem) 0 clamp(2rem, 5vw, 2.5rem); }
+  .masthead h1 span { color: var(--accent); }
+  .lead { color: var(--ink-2); max-width: 62ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; padding: 0.25rem 0.55rem;
+         border: 1px solid var(--line-strong); border-radius: var(--r-sm); color: var(--ink-2); }
+
+  .band { padding: clamp(2.25rem, 6vw, 3.5rem) 0; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; max-width: 64ch; }
+  .band-head p { color: var(--ink-2); }
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .stack-sm { display: flex; flex-direction: column; gap: 0.9rem; }
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose strong { color: var(--ink); font-weight: 700; }
+  .split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 860px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 1px;
+           background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .steps > li { counter-increment: step; background: var(--panel); padding: 1.25rem 1.4rem 1.35rem;
+                display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem; align-items: start; }
+  .steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); font-size: var(--fs-xs);
+                        font-weight: 700; color: var(--accent); letter-spacing: 0.06em; padding-top: 0.35rem; }
+  .steps h4 { grid-column: 2; }
+  .steps .body { grid-column: 2; display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.35rem; }
+  .steps p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .steps .why { font-size: var(--fs-sm); color: var(--ink-2); border-left: 2px solid var(--line-strong); padding-left: 0.85rem; }
+  .steps .why b { color: var(--ink); }
+
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-md);
+             background: var(--panel); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; max-width: 68ch; }
+  .callout .eyebrow { color: var(--accent); }
+  .callout p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .callout p.strong-line { color: var(--ink); font-weight: 700; }
+  .callout.amber { border-left-color: var(--free); }
+  .callout.amber .eyebrow { color: var(--free); }
+
+  pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md);
+        padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.75; color: var(--ink); }
+  pre .c { color: var(--muted); }
+  pre .k { color: var(--accent); }
+  .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); line-height: 2; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 0.5rem 0.85rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data th { color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: var(--fs-label); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+
+  /* ---- lab ---- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+               padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .card-head h3 { font-size: var(--fs-sm); }
+  .card-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .lab { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 940px) { .lab { grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); } }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+                 font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); }
+  .field-label .hint { color: var(--muted); font-size: var(--fs-label); }
+  .segments { display: flex; flex-wrap: wrap; gap: 3px; }
+  .segments button { flex: 1 0 2rem; font-family: var(--mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+                     padding: 0.35rem 0; background: var(--panel-2); color: var(--ink-2);
+                     border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer; }
+  .segments button:hover { border-color: var(--line-strong); }
+  .segments button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  :root[data-theme="light"] .segments button[aria-pressed="true"] { color: #fff; }
+  :root[data-theme="dark"] .segments button[aria-pressed="true"] { color: #0B0E15; }
+  @media (prefers-color-scheme: light) { .segments button[aria-pressed="true"] { color: #fff; } }
+  @media (prefers-color-scheme: dark) { .segments button[aria-pressed="true"] { color: #0B0E15; } }
+
+  .shares { display: flex; flex-direction: column; gap: 0.4rem; }
+  .share { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;
+           padding: 0.5rem 0.7rem; border: 1px solid var(--line); border-radius: var(--r-md);
+           background: var(--panel-2); font-family: var(--mono); font-size: var(--fs-xs); }
+  .share.on { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); background: var(--accent-soft); }
+  .share .who { color: var(--ink-2); }
+  .share .val { font-weight: 700; color: var(--ink); }
+  .share .tog { font-size: var(--fs-label); color: var(--muted); cursor: pointer; user-select: none;
+                border: 1px solid var(--line-strong); background: transparent; border-radius: 999px; padding: 0.15rem 0.55rem; }
+  .share.on .tog { color: var(--accent); border-color: var(--accent); }
+
+  .verdict { padding: 1.1rem; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.6rem; }
+  .banner { font-weight: 700; font-size: 1rem; padding: 0.7rem 0.9rem; border-radius: var(--r-md); border-left: 4px solid; }
+  .banner.ok { background: var(--pass-soft); color: var(--pass); border-color: var(--pass); }
+  .banner.bad { background: var(--free-soft); color: var(--free); border-color: var(--free); }
+  .candidates { display: flex; flex-wrap: wrap; gap: 0.3rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .cand { padding: 0.15rem 0.5rem; border-radius: var(--r-sm); border: 1px solid var(--line); color: var(--ink-2); background: var(--panel-2); }
+  .cand.hit { border-color: var(--pass); color: var(--pass); background: var(--pass-soft); font-weight: 700; }
+
+  .work { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .work pre { background: var(--panel-2); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
+  footer a { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a class="sitebar-name" href="/">Susumu Tomita</a>
+    <nav class="sitebar-links">
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/">ノート一覧</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week1/index.html">Week 1</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 2 予習ノート</p>
+    <h1>秘密を<span>分けて</span>、<span>集めずに</span>計算する</h1>
+    <p class="lead">
+      Week 2 のテーマは MPC（秘密計算）です。公式の課題はまだ公開されていないので、
+      <strong>何が出ても土台になる部分</strong>だけを、講義前に固めます。
+    </p>
+    <p class="lead">
+      扱うのは 3 つ ——
+      <strong>秘密分散</strong>（値を意味のない断片に割る）、
+      <strong>なぜ加算は無料で乗算に通信が要るのか</strong>、
+      <strong>Beaver 三つ組</strong>（その通信を前処理に追い出す技法）。
+    </p>
+    <div class="meta-row">
+      <span class="tag">読了 15 分</span>
+      <span class="tag">対話ラボあり</span>
+      <span class="tag">Week 1 の知識を使う</span>
+      <span class="tag">外部通信なし</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================ 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>解きたいのは「持ち寄りたいが、見せたくない」</h2>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          3 人が自分の年収を持っています。<strong>平均だけ知りたい。でも自分の額は誰にも見せたくない。</strong>
+        </p>
+        <p>
+          素朴な手はいくつかありますが、どれも壊れます。
+        </p>
+        <p>
+          <strong>案 1: 信頼できる人に集める。</strong>その人は全員の額を知ります。
+          信頼の一点集中が残るだけで、問題は消えていません。
+        </p>
+        <p>
+          <strong>案 2: 順番に足していく。</strong>最初の人が自分の額を言って次に回す——
+          最初の人の額が 2 人目に丸見えです。
+        </p>
+        <p>
+          欲しいのは「<strong>誰も他人の値を知らないまま、全員が結果だけを得る</strong>」仕組み。
+          これが MPC（Multi-Party Computation、秘密計算）です。
+        </p>
+      </div>
+
+      <div class="callout">
+        <p class="eyebrow">Week 1 とのつながり</p>
+        <p class="strong-line">
+          MPC も ZK も、計算を<b>算術回路</b>に翻訳してから暗号をかけます。
+        </p>
+        <p>
+          違うのは組み方です。ZK は<b>検証の形</b>——prover が答えを主張し、回路は嘘を禁じるだけ。
+          MPC は<b>計算の形</b>——主張してくれる人がいないので、値そのものを計算します。
+        </p>
+        <p>
+          そして Week 1 で見た「<b>コストは乗算の数で決まる</b>」が、MPC でもそのまま成り立ちます。
+          <strong>ただし理由はまったく別</strong>で、そこが今週の山場です。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">中核</p>
+      <h2>Shamir の秘密分散 — 1 行ずつ追う</h2>
+      <p>アイデアは中学校で習った 1 つの事実だけです。そこから積み上げます。</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>出発点は「2 点で直線が 1 本に決まる」</h4>
+        <div class="body">
+          <p>
+            平面に点が 2 つあれば、その両方を通る直線はただ 1 本です。
+            逆に<strong>点が 1 つだけなら、そこを通る直線は無数にあります</strong>。
+          </p>
+          <p class="why">
+            <b>この非対称がすべてです。</b> 2 つ集めれば決まる。1 つでは何も決まらない。
+            <b>「決まらない」を「分からない」に使う</b>のが秘密分散の発想です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>秘密を「直線の切片」に隠す</h4>
+        <div class="body">
+          <p>
+            秘密の値を <code>s</code> とします。乱数 <code>a</code> を 1 つ用意して、次の直線を作ります。
+          </p>
+          <p class="subst">f(x) = s + a·x</p>
+          <p>
+            ここで <code>x = 0</code> を入れると <code>f(0) = s + a·0 = s</code>。
+            <strong>秘密は「x = 0 のときの値」として埋め込まれています。</strong>
+          </p>
+          <p class="why">
+            <b>なぜ x = 0 に置くのか:</b> 配るのは <code>x = 1, 2, 3, …</code> の値だけにするためです。
+            <b>0 番の値だけは誰にも渡さない</b>。だから直線が復元できて初めて秘密にたどり着きます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>各人に「直線上の 1 点」を配る</h4>
+        <div class="body">
+          <p>
+            参加者 1 には <code>f(1)</code>、参加者 2 には <code>f(2)</code>、参加者 3 には <code>f(3)</code> を渡す。
+            この値を<strong>シェア</strong>と呼びます。
+          </p>
+          <p>
+            計算はすべて有限体 F_p の上で行います（Week 1 と同じ世界です）。
+            以下では見やすさのため <code>p = 11</code> を使います。
+          </p>
+          <p class="why">
+            <b>なぜ有限体なのか:</b> 実数のままだと、シェアの大きさから秘密の大きさが推測できてしまいます
+            （切片が大きければ値も大きい、など）。mod p で巻いてしまえば<b>大小の手がかりが消えます</b>。
+            Week 1 で見た「順序が存在しない」性質が、ここでは<b>利点として</b>効いています。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>実際に数字で作ってみる</h4>
+        <div class="body">
+          <p>秘密 <code>s = 3</code>、乱数 <code>a = 5</code>、<code>p = 11</code> とします。</p>
+          <p class="subst">
+            f(x) = 3 + 5x　（mod 11）<br><br>
+            f(1) = 3 + 5 = 8<br>
+            f(2) = 3 + 10 = 13 = 11 + 2 → <b>2</b><br>
+            f(3) = 3 + 15 = 18 = 11 + 7 → <b>7</b>
+          </p>
+          <p>
+            配るのは <code>8</code>, <code>2</code>, <code>7</code> の 3 つ。
+            <strong>どれも秘密の 3 とは似ても似つかない数字</strong>です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>2 人集まれば復元できる</h4>
+        <div class="body">
+          <p>参加者 1（x=1, y=8）と参加者 2（x=2, y=2）が集まったとします。</p>
+          <p class="subst">
+            傾き a = (y₂ − y₁) ÷ (x₂ − x₁) = (2 − 8) ÷ (2 − 1) = −6 ÷ 1 = −6 = <b>5</b>　（mod 11）<br><br>
+            切片 s = y₁ − a·x₁ = 8 − 5·1 = <b>3</b> ✓
+          </p>
+          <p class="why">
+            <b>−6 がなぜ 5 なのか:</b> mod 11 の世界では <code>−6 + 11 = 5</code>。
+            Week 1 でやった「引き算は逆元を足すこと」がここでも効いています。
+            <b>割り算も同じで、÷1 は 1 の逆数 1 を掛けること</b>。
+            もし分母が 1 でなければ、逆数を求めてから掛けます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>1 人では、秘密は何でもありうる</h4>
+        <div class="body">
+          <p>
+            参加者 1 だけが <code>y = 8</code> を持っているとします。この人にとって、
+            <strong>秘密 s は 0 から 10 のどれでもありえます</strong>。
+          </p>
+          <p class="subst">
+            s = 0 なら a = 8（0 + 8·1 = 8 ✓）<br>
+            s = 1 なら a = 7（1 + 7·1 = 8 ✓）<br>
+            s = 2 なら a = 6（2 + 6·1 = 8 ✓）<br>
+            …… 11 通りすべてに、辻褄の合う a が 1 つずつ存在する
+          </p>
+          <p class="why">
+            <b>これが「情報がゼロ」の正確な意味です。</b>
+            シェアを見る前の推測（11 通りが等確率）と、見た後の推測がまったく同じ。
+            <b>1 ビットも減っていない</b>。「解読が難しい」ではなく「<b>原理的に不可能</b>」です。
+            下のラボで実際に 11 通り全部を並べて確認できます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>閾値は次数で決まる</h4>
+        <div class="body">
+          <p>
+            直線（次数 1）なら 2 点で決まりました。放物線（次数 2）なら 3 点必要です。
+            一般に<strong>次数 t の多項式は t+1 点で決まる</strong>。
+          </p>
+          <p class="subst">
+            f(x) = s + a₁x + a₂x² + … + a_t x^t　→　復元に必要な人数は <b>t + 1</b>
+          </p>
+          <p class="why">
+            <b>設計の自由度がここにあります。</b> 「5 人中 3 人集まれば復元できる」なら次数 2 を使う。
+            <b>t 人以下では、さっきと同じ理屈で情報がゼロ</b>のままです。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 3 : LAB -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ</p>
+      <h2>配って、集めて、確かめる</h2>
+      <p>
+        秘密と乱数を選ぶとシェアが計算されます。<strong>誰のシェアを集めるかを切り替えて</strong>、
+        何人分あれば秘密が決まるのかを自分で確かめてください。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>分ける側の設定</h3><span class="eyebrow">p = 11</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>秘密 s</span><span class="hint">隠したい値</span></div>
+            <div class="segments" id="seg-s" role="group" aria-label="秘密の値"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>乱数 a</span><span class="hint">毎回変える</span></div>
+            <div class="segments" id="seg-a" role="group" aria-label="乱数"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>配ったシェア</span><span class="hint">押すと集める / 外す</span></div>
+            <div class="shares" id="shares"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="verdict-note">—</p>
+          <div>
+            <p class="eyebrow" style="margin-bottom:0.35rem;">集めたシェアと辻褄が合う秘密</p>
+            <div class="candidates" id="candidates"></div>
+          </div>
+        </div>
+        <div class="work">
+          <p class="eyebrow">計算の中身</p>
+          <pre id="work">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 4 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">性質</p>
+      <h2>なぜ加算は無料なのか</h2>
+      <p>ここから MPC の本題です。まず「タダでできること」から。</p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          2 つの秘密 <code>s</code> と <code>s'</code> を、それぞれ別の直線に隠したとします。
+        </p>
+        <p class="subst">
+          f(x) = s + a·x　　g(x) = s' + b·x
+        </p>
+        <p>
+          参加者 <code>i</code> は <code>f(i)</code> と <code>g(i)</code> を持っています。
+          <strong>この 2 つを手元で足してみます。</strong>
+        </p>
+        <p class="subst">
+          f(i) + g(i)<br>
+          = (s + a·i) + (s' + b·i)<br>
+          = (s + s') + (a + b)·i
+        </p>
+        <p>
+          いま出てきた式を <code>h(x) = (s+s') + (a+b)·x</code> と置くと、
+          これはちょうど <code>h(i)</code> です。
+        </p>
+        <p>
+          つまり<strong>各自が手元で足しただけで、「s + s' を秘密とする直線」のシェアになっている</strong>。
+          誰とも通信していません。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">確かめる</p>
+          <p class="strong-line">s = 3（f = 3 + 5x）と s' = 4（g = 4 + 2x）、p = 11</p>
+          <p class="subst" style="color:var(--ink);">
+            参加者 1: f(1)=8, g(1)=6　→ 8 + 6 = 14 = <b>3</b><br>
+            参加者 2: f(2)=2, g(2)=8　→ 2 + 8 = 10 = <b>10</b><br><br>
+            この 2 点 (1,3), (2,10) から復元すると……<br>
+            傾き = (10−3) ÷ (2−1) = 7<br>
+            切片 = 3 − 7·1 = −4 = <b>7</b><br><br>
+            そして s + s' = 3 + 4 = <b>7</b> ✓
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">定数倍も同じ理由でタダ</p>
+          <p>
+            <code>c·f(i) = c·s + c·a·i</code> なので、<b>秘密を c 倍した直線のシェア</b>になります。
+            引き算も定数倍（−1 倍）と加算の組み合わせなので無料です。
+          </p>
+          <p class="strong-line">
+            <b>線形なことは、全部ローカルで完結する。</b>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">壁</p>
+      <h2>なぜ乗算だけ高いのか</h2>
+      <p>同じことを掛け算でやると、途中で破綻します。どこで破綻するのかを式で見ます。</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>掛けてみると、答え自体は合っている</h4>
+        <div class="body">
+          <p>参加者 <code>i</code> が手元で <code>f(i) · g(i)</code> を計算します。</p>
+          <p class="subst">
+            f(i)·g(i) = (s + a·i)(s' + b·i)<br>
+            = s·s' + (s·b + s'·a)·i + (a·b)·i²
+          </p>
+          <p>
+            これを <code>h(x) = s·s' + (sb + s'a)·x + (ab)·x²</code> と置けば、
+            確かに <code>h(i)</code> です。<b>そして h(0) = s·s'</b> —— 欲しかった積が切片に入っています。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>しかし、次数が 1 から 2 に上がっている</h4>
+        <div class="body">
+          <p>
+            <code>h(x)</code> には <code>x²</code> の項があります。<strong>直線ではなく放物線</strong>です。
+          </p>
+          <p class="why">
+            <b>何が困るのか:</b> 次数 1 なら 2 人で復元できました。次数 2 は <b>3 人</b>必要です。
+            掛け算するたびに必要人数が増えていく。
+            <b>2 回掛ければ次数 4、3 回で次数 8</b> —— すぐに参加者の人数を超え、<b>誰も復元できなくなります</b>。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>もう 1 つの問題 — 乱数が足りない</h4>
+        <div class="body">
+          <p>
+            <code>h(x)</code> の係数を見ると、<code>x</code> の係数は <code>s·b + s'·a</code>、
+            <code>x²</code> の係数は <code>a·b</code> です。
+          </p>
+          <p class="why">
+            <b>元の乱数 a, b から作られていて、独立ではありません。</b>
+            本来なら 2 つの係数はそれぞれ独立な乱数であってほしいのに、
+            <code>a·b</code> は <code>a</code> と <code>b</code> に縛られている。
+            <b>ここから情報が漏れる余地が生まれます。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>だから「次数を戻す」作業が要る</h4>
+        <div class="body">
+          <p>
+            次数 2 になった多項式を、<strong>秘密は同じまま次数 1 に作り直す</strong>必要があります
+            （degree reduction）。そして<b>この作業は 1 人ではできません</b>——
+            自分のシェアしか持っていないからです。
+          </p>
+          <p class="why">
+            <b>これが通信の正体です。</b> 加算は各自の手元で閉じるのに、乗算は参加者どうしのやりとりが要る。
+            <b>MPC のコストが乗算の数で決まるのは、この 1 点に尽きます。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout amber">
+      <p class="eyebrow">Week 1 と同じ結論、まったく違う理由</p>
+      <p class="strong-line">
+        ZK でも MPC でも「コストは乗算の数で決まる」。でも理由は別物です。
+      </p>
+      <p>
+        <b>ZK（R1CS 系）:</b> 乗算ゲート 1 個が制約 1 本になるから。加算は式の中に畳み込めて行を消費しない。
+      </p>
+      <p>
+        <b>MPC:</b> 加算は手元で閉じるが、乗算は次数が倍になって<b>通信が発生する</b>から。
+      </p>
+      <p>
+        <strong>同じ「回路」を使い、同じ指標でコストを測るのに、痛みの中身が違う。</strong>
+        Week 1 のノートで「3 方式は真ん中の回路を共有する」と書いたことの、具体的な現れ方がこれです。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">技法</p>
+      <h2>Beaver 三つ組 — 重い部分を前もって済ませる</h2>
+      <p>
+        乗算の通信は消せません。ですが<strong>「いつやるか」はずらせます</strong>。
+        Week 6 の <code>co-snark-prove</code> で実装するのがこれです。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>前処理で、掛け算済みの乱数を用意しておく</h4>
+        <div class="body">
+          <p>
+            まだ何を計算するか決まっていない暇な時間に、次を満たす 3 つの乱数を作ります。
+          </p>
+          <p class="subst">a, b はランダム　　c = a · b</p>
+          <p>
+            そして <code>a</code>, <code>b</code>, <code>c</code> を<strong>それぞれ秘密分散して配ります</strong>。
+            <b>値そのものは誰も知りません</b>。知っているのは「c = a·b という関係があること」だけ。
+          </p>
+          <p class="why">
+            <b>ここがポイント:</b> 掛け算という重い作業を、<b>入力が来る前に</b>済ませてしまう。
+            この 3 つ組を <b>Beaver 三つ組</b> と呼びます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>本番では、隠したまま 2 つの値を公開する</h4>
+        <div class="body">
+          <p>
+            秘密 <code>x</code> と <code>y</code> の積を計算したくなりました。まず次の 2 つを計算して<strong>公開</strong>します。
+          </p>
+          <p class="subst">d = x − a　　e = y − b</p>
+          <p>
+            引き算はさっき見たとおり無料なので、シェアのまま計算できます。
+          </p>
+          <p class="why">
+            <b>公開して大丈夫なのか:</b> 大丈夫です。<code>a</code> は誰も知らない乱数なので、
+            <code>d = x − a</code> は<b>ランダムな値にしか見えません</b>。
+            Week 1 の言葉で言えば、乱数で撹乱されている状態。<b>x は漏れません。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>すると積が、足し算だけで書ける</h4>
+        <div class="body">
+          <p>
+            <code>d = x − a</code> を移項すると <code>x = d + a</code>、同様に <code>y = e + b</code>。
+            これを掛けて展開します。
+          </p>
+          <p class="subst">
+            x · y = (d + a)(e + b)<br>
+            = d·e + d·b + a·e + a·b<br>
+            = d·e + d·b + a·e + <b>c</b>　　<span style="color:var(--muted)">（a·b = c だった）</span>
+          </p>
+          <p>
+            右辺を見てください。<code>d</code> と <code>e</code> は<strong>公開済みの普通の数</strong>。
+            <code>a</code>, <code>b</code>, <code>c</code> は<strong>シェアとして持っている</strong>。
+          </p>
+          <p class="why">
+            <b>つまり右辺は「公開された定数」×「シェア」の足し算だけ</b>です。
+            <code>d·b</code> は b のシェアを d 倍するだけ、<code>a·e</code> は a のシェアを e 倍するだけ。
+            <b>定数倍と加算は無料</b>でした。
+            <b>秘密どうしの掛け算が、1 つも残っていません。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>結果として何が起きたか</h4>
+        <div class="body">
+          <p>
+            乗算 1 回に必要だった「次数を戻す通信」が、<strong>d と e を公開する 1 往復</strong>に置き換わりました。
+            重い前処理は、入力が来る前に終わっています。
+          </p>
+          <p class="why">
+            <b>これが MPC の実装で最初に出てくる工夫です。</b>
+            前処理と本番を分ける設計はこの分野の定石で、
+            <b>Week 6 の <code>co-snark-prove</code> は、まさにこの Beaver 乗算を実装する課題</b>です。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 7 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">講義前に</p>
+      <h2>持っておくと効く問い</h2>
+    </div>
+    <div class="prose">
+      <p>
+        <strong>① 「t 人以下では情報がゼロ」は、なぜ「難しい」ではなく「不可能」なのか。</strong>
+        ラボで 11 通り全部に辻褄の合う乱数が存在することを見れば、計算量の話ではないと分かります。
+      </p>
+      <p>
+        <strong>② 加算が無料なのは、秘密分散が線形だから。ではなぜ線形だと無料になるのか。</strong>
+        <code>f(i) + g(i) = (f+g)(i)</code> という 1 行がすべてでした。
+      </p>
+      <p>
+        <strong>③ 乗算で壊れるのは「次数」と「乱数の独立性」の 2 つ。</strong>
+        どちらか片方だけ直しても足りない、という理解が要ります。
+      </p>
+      <p>
+        <strong>④ Beaver は乗算を消したのではなく、時間をずらしただけ。</strong>
+        前処理でいくつ三つ組を用意するかが、そのまま実行可能な乗算の回数になります。
+      </p>
+      <p>
+        そして Week 1 の問いはここでも生きます ——
+        <strong>「この値を縛っているものは何か」</strong>。
+        MPC では「この値を隠しているのは何か」に姿を変えます。
+        <code>d = x − a</code> が安全なのは <code>a</code> がランダムだからで、
+        <b>a を使い回した瞬間に壊れます</b>。三つ組が使い捨てである理由がそこです。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    講義: <a href="https://github.com/zk-tokyo/advanced-cryptography-2026">zk-tokyo/advanced-cryptography-2026</a>
+    ／ このノート: <a href="https://github.com/susumutomita/advanced-cryptography-note">susumutomita/advanced-cryptography-note</a>
+    ／ 公式の Week 2 教材が公開されたら、内容を突き合わせて更新します。
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var P = 11;
+  var mod = function (n) { return ((n % P) + P) % P; };
+
+  var state = { s: 3, a: 5, taken: [true, false, false] };
+  var XS = [1, 2, 3];
+
+  var segS = document.getElementById("seg-s");
+  var segA = document.getElementById("seg-a");
+  var sharesHost = document.getElementById("shares");
+  var banner = document.getElementById("banner");
+  var note = document.getElementById("verdict-note");
+  var candHost = document.getElementById("candidates");
+  var workEl = document.getElementById("work");
+
+  function seg(host, key) {
+    for (var v = 0; v < P; v++) {
+      (function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = String(v);
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function () { state[key] = v; render(); });
+        host.appendChild(b);
+      })(v);
+    }
+  }
+  seg(segS, "s");
+  seg(segA, "a");
+
+  XS.forEach(function (x, idx) {
+    var row = document.createElement("div");
+    row.className = "share";
+    row.innerHTML = '<span class="who">参加者 ' + x + '</span><span class="val" data-val></span>';
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tog";
+    btn.addEventListener("click", function () {
+      state.taken[idx] = !state.taken[idx];
+      render();
+    });
+    row.appendChild(btn);
+    sharesHost.appendChild(row);
+  });
+
+  function f(x) { return mod(state.s + state.a * x); }
+
+  // 集めた点と辻褄の合う秘密を全部求める（総当たり: s と a を全通り試す）
+  function consistentSecrets() {
+    var pts = [];
+    XS.forEach(function (x, i) { if (state.taken[i]) pts.push([x, f(x)]); });
+    var out = [];
+    for (var s = 0; s < P; s++) {
+      var ok = false;
+      for (var a = 0; a < P && !ok; a++) {
+        var all = true;
+        for (var k = 0; k < pts.length; k++) {
+          if (mod(s + a * pts[k][0]) !== pts[k][1]) { all = false; break; }
+        }
+        if (all) ok = true;
+      }
+      if (ok) out.push(s);
+    }
+    return { pts: pts, secrets: out };
+  }
+
+  function inv(n) {
+    n = mod(n);
+    for (var i = 1; i < P; i++) if (mod(n * i) === 1) return i;
+    return null;
+  }
+
+  function render() {
+    Array.prototype.forEach.call(segS.children, function (b, v) {
+      b.setAttribute("aria-pressed", v === state.s ? "true" : "false");
+    });
+    Array.prototype.forEach.call(segA.children, function (b, v) {
+      b.setAttribute("aria-pressed", v === state.a ? "true" : "false");
+    });
+
+    Array.prototype.forEach.call(sharesHost.children, function (row, i) {
+      var x = XS[i];
+      row.querySelector("[data-val]").textContent = "f(" + x + ") = " + f(x);
+      row.classList.toggle("on", state.taken[i]);
+      row.querySelector(".tog").textContent = state.taken[i] ? "集めた" : "集める";
+    });
+
+    var r = consistentSecrets();
+    var n = r.pts.length;
+
+    candHost.textContent = "";
+    for (var v = 0; v < P; v++) {
+      var c = document.createElement("span");
+      c.className = "cand" + (r.secrets.indexOf(v) >= 0 ? " hit" : "");
+      c.textContent = String(v);
+      candHost.appendChild(c);
+    }
+
+    if (n === 0) {
+      banner.className = "banner bad";
+      banner.textContent = "何も集めていない — 秘密は 11 通りすべてありうる";
+      note.textContent = "シェアを 1 つも見ていないので、当然どれも否定できません。";
+    } else if (n === 1) {
+      banner.className = "banner bad";
+      banner.textContent = "1 人分では決まらない — 秘密は 11 通りすべてありうる";
+      note.textContent = "候補が 1 つも減っていないことに注目してください。「絞り込めた」のではなく、まったく減っていません。これが情報ゼロという意味です。";
+    } else {
+      banner.className = "banner ok";
+      banner.textContent = "復元できた — 秘密は " + r.secrets[0] + " のただ 1 つ";
+      note.textContent = n + " 人分そろったので、直線が 1 本に決まりました。";
+    }
+
+    // 計算の中身
+    var lines = [];
+    lines.push("f(x) = " + state.s + " + " + state.a + "x   (mod 11)");
+    lines.push("");
+    XS.forEach(function (x) {
+      lines.push("f(" + x + ") = " + state.s + " + " + state.a + "·" + x +
+                 " = " + (state.s + state.a * x) + " → " + f(x));
+    });
+    if (n >= 2) {
+      var p1 = r.pts[0], p2 = r.pts[1];
+      var dy = mod(p2[1] - p1[1]), dx = mod(p2[0] - p1[0]);
+      var iv = inv(dx);
+      var slope = mod(dy * iv);
+      var sec = mod(p1[1] - slope * p1[0]);
+      lines.push("");
+      lines.push("集めた点: (" + p1[0] + ", " + p1[1] + ") と (" + p2[0] + ", " + p2[1] + ")");
+      lines.push("傾き = (" + p2[1] + " − " + p1[1] + ") ÷ (" + p2[0] + " − " + p1[0] + ")");
+      lines.push("     = " + dy + " ÷ " + dx + " = " + dy + " × " + iv + " = " + slope);
+      lines.push("切片 = " + p1[1] + " − " + slope + "·" + p1[0] + " = " + sec);
+      lines.push("→ 秘密は " + sec + (sec === state.s ? "  ✓ 一致" : ""));
+    } else if (n === 1) {
+      var q = r.pts[0];
+      lines.push("");
+      lines.push("集めた点: (" + q[0] + ", " + q[1] + ") の 1 つだけ");
+      lines.push("この点を通る直線を、秘密ごとに書き出すと:");
+      for (var s2 = 0; s2 < P; s2++) {
+        var a2 = mod((q[1] - s2) * inv(q[0]));
+        lines.push("  秘密 " + (s2 < 10 ? " " : "") + s2 + " → a = " + a2 +
+                   "  （" + s2 + " + " + a2 + "·" + q[0] + " = " + q[1] + "）");
+      }
+      lines.push("11 通りすべてに、辻褄の合う a が存在する");
+    }
+    workEl.textContent = lines.join("\n");
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
