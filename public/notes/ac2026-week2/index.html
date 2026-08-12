@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>秘密を分けて、集めずに計算する — Week 2 予習ノート</title>
-<meta name="description" content="Advanced Cryptography Program 2026 Week 2（MPC 秘密計算）の予習ノート。Shamir の秘密分散を数式の導出から追い、なぜ加算は無料で乗算に通信が要るのかを理解する。">
+<title>秘密を分けて、集めずに計算する — Week 2 自習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 2(MPC 秘密計算)の自習ノート。秘密分散・Beaver 三つ組・紛失通信(OT)・GMW の AND を、実際に壊した採点結果と手で触れるラボで理解する。">
 <meta name="color-scheme" content="light dark">
-<meta property="og:title" content="秘密を分けて、集めずに計算する — Week 2 予習ノート">
-<meta property="og:description" content="Shamir の秘密分散を、飛躍なしの導出と手で触れるラボで理解する。">
+<meta property="og:title" content="秘密を分けて、集めずに計算する — Week 2 自習ノート">
+<meta property="og:description" content="秘密分散から OT・GMW まで、わざと壊した実測とラボと検問クイズで理解する。">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧩</text></svg>">
 <style>
@@ -193,6 +193,138 @@
   .work { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
   .work pre { background: var(--panel-2); }
 
+  /* ---------- table of contents ---------- */
+  .toc {
+    list-style: none; margin: 0; padding: 0; counter-reset: toc;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .toc li { counter-increment: toc; background: var(--panel); }
+  .toc a {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: baseline;
+    padding: 0.7rem 1rem; text-decoration: none; color: var(--ink-2);
+    font-size: var(--fs-sm); line-height: 1.5;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--ink); }
+
+  /* ---------- quiz ---------- */
+  .quiz-pane { padding: 1.25rem 1.35rem 1.35rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .quiz-hero { display: flex; flex-direction: column; gap: 0.35rem; }
+
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem; }
+  .mode {
+    text-align: left; cursor: pointer; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 0.8rem 0.95rem; display: flex; flex-direction: column; gap: 0.2rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .m-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .mode .m-desc { font-size: var(--fs-label); color: var(--muted); line-height: 1.6; }
+  .mode.primary { background: var(--accent); border-color: var(--accent); }
+  .mode.primary .m-name { color: #fff; }
+  .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+  :root[data-theme="dark"] .mode.primary .m-name { color: #0B0E15; }
+  :root[data-theme="dark"] .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  @media (prefers-color-scheme: dark) {
+    .mode.primary .m-name { color: #0B0E15; }
+    .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  }
+  :root[data-theme="light"] .mode.primary .m-name { color: #fff; }
+  :root[data-theme="light"] .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+
+  .quiz-best { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); margin: 0; }
+
+  .quiz-bar {
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
+  }
+  .quiz-bar .qcat {
+    padding: 0.1rem 0.5rem; border: 1px solid var(--line-strong);
+    border-radius: 999px; color: var(--ink-2); font-size: var(--fs-label); letter-spacing: 0.06em;
+  }
+  .quiz-bar .lives { margin-left: auto; letter-spacing: 0.2em; color: var(--fail); font-size: 0.95rem; }
+  .quiz-bar .lives .gone { color: var(--line-strong); }
+
+  .qmain { display: flex; flex-direction: column; gap: 0.9rem; }
+  .qtext { font-weight: 700; font-size: 1.0625rem; line-height: 1.7; }
+  .qbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .qbody table.data td, .qbody table.data th { padding: 0.35rem 0.7rem; }
+  .qbody .clist { display: flex; flex-direction: column; gap: 2px; }
+  .qbody .cline {
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+    padding: 0.3rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2);
+    border-left: 3px solid var(--line-strong); overflow-x: auto; white-space: nowrap;
+  }
+  .qbody .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); }
+
+  .choices { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .choices.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    text-align: left; cursor: pointer; font-size: var(--fs-sm); line-height: 1.6;
+    padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:disabled { cursor: default; }
+  .choice.is-correct { border-color: var(--pass); background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  .choice.is-wrong   { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); }
+  .choice.dim { opacity: 0.5; }
+
+  .fb { border-radius: var(--r-md); padding: 0.85rem 1rem; border-left: 4px solid; font-size: var(--fs-sm); line-height: 1.75; }
+  .fb.ok  { background: var(--pass-soft); border-color: var(--pass); }
+  .fb.bad { background: var(--fail-soft); border-color: var(--fail); }
+  .fb .fb-head { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+  .fb.ok  .fb-head { color: var(--pass); }
+  .fb.bad .fb-head { color: var(--fail); }
+  .fb code { color: var(--ink); }
+
+  .quiz-foot { display: flex; gap: 0.6rem; align-items: center; justify-content: flex-end; }
+  .btn-main {
+    cursor: pointer; font-size: var(--fs-sm); font-weight: 700; padding: 0.55rem 1.2rem;
+    border-radius: var(--r-md); border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  :root[data-theme="dark"] .btn-main { color: #0B0E15; }
+  @media (prefers-color-scheme: dark) { .btn-main { color: #0B0E15; } }
+  :root[data-theme="light"] .btn-main { color: #fff; }
+  .btn-ghost {
+    cursor: pointer; font-size: var(--fs-sm); padding: 0.55rem 1rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--ink-2); border-color: var(--ink-2); }
+
+  .rank-box { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .rank {
+    font-family: var(--mono); font-size: 3.5rem; font-weight: 700; line-height: 1;
+    width: 5rem; height: 5rem; display: grid; place-items: center;
+    border-radius: var(--r-lg); border: 2px solid currentColor; flex: none;
+  }
+  .rank.s { color: var(--accent); }
+  .rank.a { color: var(--pass); }
+  .rank.b { color: var(--free); }
+  .rank.f { color: var(--fail); }
+  .rank-meta { display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank-title { font-weight: 700; font-size: var(--fs-lg); }
+  .rank-sub { font-size: var(--fs-sm); color: var(--ink-2); }
+
+  .cat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+  .cstat {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+    padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .cstat .cn { font-size: var(--fs-label); color: var(--muted); }
+  .cstat .cv { font-family: var(--mono); font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cstat .cv.full { color: var(--pass); }
+  .cstat .cv.weak { color: var(--fail); }
+
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
@@ -204,6 +336,7 @@
   <div class="wrap sitebar-inner">
     <a class="sitebar-name" href="/">Susumu Tomita</a>
     <nav class="sitebar-links">
+      <a href="/blog/mpc-what-you-open/">解説記事</a>
       <a href="https://susumutomita.github.io/advanced-cryptography-note/">ノート一覧</a>
       <a href="https://susumutomita.github.io/advanced-cryptography-note/week1/index.html">Week 1</a>
     </nav>
@@ -212,21 +345,22 @@
 
 <header class="masthead">
   <div class="wrap masthead-inner">
-    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 2 予習ノート</p>
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 2 自習ノート</p>
     <h1>秘密を<span>分けて</span>、<span>集めずに</span>計算する</h1>
     <p class="lead">
-      Week 2 のテーマは MPC（秘密計算）です。公式の課題はまだ公開されていないので、
-      <strong>何が出ても土台になる部分</strong>だけを、講義前に固めます。
+      Week 2 のテーマは MPC（秘密計算）です。課題 <code>toy-mpc</code> を実際に解き、
+      <strong>わざと壊した版を採点器に通した実測</strong>も含めて、このノートにまとめ直しました。
     </p>
     <p class="lead">
-      扱うのは 3 つ ——
-      <strong>秘密分散</strong>（値を意味のない断片に割る）、
-      <strong>なぜ加算は無料で乗算に通信が要るのか</strong>、
-      <strong>Beaver 三つ組</strong>（その通信を前処理に追い出す技法）。
+      前半は<strong>数の世界</strong> —— 秘密分散、なぜ加算は無料で乗算に通信が要るのか、
+      <strong>Beaver 三つ組</strong>。
+      後半は<strong>ビットの世界</strong> —— XOR シェア、<strong>紛失通信（OT）</strong>、
+      そして OT を 2 回使って AND を作る <strong>GMW</strong>。
     </p>
     <div class="meta-row">
-      <span class="tag">読了 15 分</span>
-      <span class="tag">対話ラボあり</span>
+      <span class="tag">読了 30 分</span>
+      <span class="tag">対話ラボ 2 つ</span>
+      <span class="tag">検問クイズ</span>
       <span class="tag">Week 1 の知識を使う</span>
       <span class="tag">外部通信なし</span>
     </div>
@@ -276,7 +410,17 @@
           そして Week 1 で見た「<b>コストは乗算の数で決まる</b>」が、MPC でもそのまま成り立ちます。
           <strong>ただし理由はまったく別</strong>で、そこが今週の山場です。
         </p>
+        <p>
+          公式課題は <code>toy-mpc</code>。前半（Part A）が数の乗算を Beaver 三つ組で、
+          後半（Part B）がビットの AND を紛失通信（OT）で解きます。
+          <b>このノートの構成はその対比に合わせてあります。</b>
+        </p>
       </div>
+    </div>
+
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の地図</p>
+      <ol class="toc" id="toc"></ol>
     </div>
   </div>
 </section>
@@ -457,6 +601,70 @@
           <pre id="work">—</pre>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 3.5 : additive sharing -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">課題で使った形</p>
+      <h2>加法的秘密分散 — 足して戻る、いちばん単純な分け方</h2>
+      <p>
+        Shamir は「n 人中 t+1 人で復元」という閾値が選べる高機能版です。
+        課題 <code>toy-mpc</code> が使うのは、もっと単純な<strong>加法的秘密分散</strong>——
+        <strong>全員そろわないと戻らない</strong>代わりに、作り方が足し算だけで済みます。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          秘密 <code>s</code> を n 人に分けるには、<strong>乱数を n−1 個</strong>引いて、
+          それをそのまま最初の n−1 人のシェアにします。最後の 1 人だけが帳尻を合わせます。
+        </p>
+        <p class="subst">
+          share₁ = r₁, …, shareₙ₋₁ = rₙ₋₁<br>
+          shareₙ = s − (r₁ + … + rₙ₋₁)　(mod p)
+        </p>
+        <p>
+          復元は全シェアの合計。<code>p = 67</code> で <code>s = 42</code> を乱数
+          <code>[5, 11]</code> で分けると、シェアは <code>[5, 11, 26]</code>
+          （<code>42 − 16 = 26</code>）。足せば <code>42</code> に戻ります。
+        </p>
+        <p>
+          「n−1 人では情報ゼロ」の理屈は Shamir とまったく同じです。
+          手元のシェアがどんな値でも、<strong>どんな秘密とも辻褄の合う「残り 1 枚」が必ず存在する</strong>ので、
+          候補は 1 つも減りません。
+        </p>
+      </div>
+
+      <div class="callout amber">
+        <p class="eyebrow">実測 — 正規化を忘れると採点器に落とされる</p>
+        <p class="strong-line">
+          シェアは 0..p−1 に丸めた「体の元」でなければいけません。
+        </p>
+        <p>
+          <code>share(-3, [70, -2], 67)</code> の正解は <code>[3, 65, 63]</code>。
+          mod を取らない実装はこう落ちます。
+        </p>
+        <pre>AssertionError:
+Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
+        <p>
+          値としては同じ直線上にあっても、<b>表現がそろっていないと他の関数と噛み合いません</b>。
+          Week 1 で「体の元として正規化する」と言っていたことが、ここで初めて実務の制約になります。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">どちらを使うか</p>
+      <p class="strong-line">閾値が要るなら Shamir、全員参加でよいなら加法的。</p>
+      <p>
+        これから見る Beaver 乗算はどちらの上でも同じ形で動きます。課題が加法的を選んだのは、
+        <b>MPC の本質（何を公開してよいか）に集中するため</b>に、復元の仕組みを最小にしたからです。
+      </p>
     </div>
   </div>
 </section>
@@ -701,11 +909,417 @@
   </div>
 </section>
 
-<!-- ============================================ 7 -->
+<!-- ============================================ 6.5 : breaking beaver -->
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
-      <p class="eyebrow">講義前に</p>
+      <p class="eyebrow">壊してみる</p>
+      <h2>採点器が守らせる、Beaver の 3 つの掟</h2>
+      <p>
+        課題の採点器は「積が合っているか」だけを見ていません。
+        <strong>わざと壊した実装を 3 通り作って通した結果</strong>がこれです。
+        どれも「何を買っている制約なのか」が失敗の形に出ます。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>掟 1 — 公開項 d·e を足すのは、代表 1 人だけ</h4>
+        <div class="body">
+          <p>
+            <code>x·y = c + d·b + e·a + d·e</code> のうち、<code>c</code>, <code>b</code>, <code>a</code> は
+            シェアとして分散されています。でも <code>d·e</code> は<strong>公開値どうしの積、ただの数</strong>です。
+            全員が自分のシェアに足すと、復元時に人数分カウントされます。
+          </p>
+          <pre><span class="c"># d·e を全 party に足した壊れ版（3 party, p = 67）</span>
+AssertionError: 57 != 41   <span class="c"># (n−1)·d·e = 2·d·e だけ余る</span></pre>
+          <p class="why">
+            <b>シェアと公開値は「足し方」が違う。</b>シェアは全員が成分ごとに、
+            公開値は代表 1 人（party 0）だけが足す。この区別が曖昧なままだと、
+            復元して初めて壊れていたと分かります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>掟 2 — 開いてよいのは d と e の 2 回だけ</h4>
+        <div class="body">
+          <p>
+            いちばん面白い壊れ方です。<code>d = x − a</code> を「x を開いて、a を開いて、引く」と実装しても、
+            <strong>積の値のテストは全部通ります</strong>。落ちるのはこれだけ。
+          </p>
+          <pre>test_fixed_share_vector ................. ok
+test_products_for_two_and_three_parties . ok
+test_opens_exactly_the_two_masked_differences ... <b>FAIL</b>
+AssertionError: 4 != 2   <span class="c"># 開示回数が 2 回ではない</span></pre>
+          <p class="why">
+            <b>「答えが正しい」と「開きすぎていない」は別の性質。</b>採点器は reconstruct の呼び出しを数えて、
+            <b>マスク済みの d, e 以外を開いたら落とします</b>。MPC の正しさは出力だけでは測れない——
+            <b>実行中に何を公開したか</b>まで含めてプロトコルです。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>掟 3 — 三つ組は 1 乗算 1 回限り</h4>
+        <div class="body">
+          <p>
+            同じ <code>a</code> で 2 つの秘密を隠すと、攻撃者は<strong>ネットワーク上の公開値だけ</strong>から
+            差を復元できます。実測（p = 67, x₁ = 12, x₂ = 55, 同じ a = 29）:
+          </p>
+          <pre>公開値: d₁ = 50, d₂ = 26
+攻撃者: d₁ − d₂ = 24 (mod 67)
+真の値: x₁ − x₂ = 12 − 55 = −43 = <b>24</b> (mod 67)  ← 一致</pre>
+          <p class="why">
+            <b>d = x − a が安全なのは、a がワンタイムパッドだから。</b>2 回使えば
+            <code>d₁ − d₂ = x₁ − x₂</code> で a が消え、秘密どうしの関係が丸見えになります。
+            前処理で三つ組を「乗算の回数分」用意する理由がこれです。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 8 : boolean mpc -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ビットの世界へ</p>
+      <h2>XOR シェアと、AND という壁</h2>
+      <p>
+        ここまでは数（有限体の元）の話でした。課題の Part B は<strong>ビット</strong>を扱います。
+        構図は驚くほど同じです。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          ビット <code>x</code> の XOR シェアは <code>x = x₀ ⊕ x₁</code> となる 2 ビットの組。
+          乱数 <code>m</code> を引いて <code>(m, x ⊕ m)</code> と分ければ、
+          <strong>片方だけ見ても x は 50:50 のまま</strong>です。
+        </p>
+        <p>
+          XOR は手元で完結します。<code>(x₀ ⊕ y₀, x₁ ⊕ y₁)</code> を作れば
+          <code>x ⊕ y</code> のシェアになる——加法的シェアの「加算は無料」と同じ理屈です
+          （XOR は mod 2 の加算そのものです）。
+        </p>
+        <p>
+          壁は AND です。展開してみると:
+        </p>
+        <p class="subst">
+          x·y = (x₀ ⊕ x₁)(y₀ ⊕ y₁)<br>
+          = x₀y₀ ⊕ <b>x₀y₁</b> ⊕ <b>x₁y₀</b> ⊕ x₁y₁
+        </p>
+        <p>
+          <code>x₀y₀</code> は P0 が、<code>x₁y₁</code> は P1 が手元で計算できます。
+          でも<strong>クロス項 x₀y₁ と x₁y₀ は、どちらの手元にも材料がそろっていません</strong>。
+          乗算で次数が上がったのと同じ場所に、同じ形の壁が現れます。
+        </p>
+      </div>
+
+      <div class="callout amber">
+        <p class="eyebrow">実測 — クロス項をサボると、そこだけ落ちる</p>
+        <p class="strong-line">
+          「各自が自分のシェアだけ AND する」壊れ版は、混合シェアの組合せだけ失敗します。
+        </p>
+        <pre>gmw_and (x_shares=(0, 0), ...) ... ok
+gmw_and (x_shares=(0, 1), y_shares=(1, 0)) <b>FAIL</b>
+gmw_and (x_shares=(1, 0), y_shares=(0, 1)) <b>FAIL</b>
+gmw_and (x_shares=(1, 1), y_shares=(1, 0)) <b>FAIL</b>
+AssertionError: 0 != 1</pre>
+        <p>
+          <b>失敗の分布が原因を指しています。</b>両方のシェアが同じ側に寄っている組は
+          クロス項が 0 なので偶然通る。<b>1 が割れて入った組だけ</b>、
+          x₀y₁ / x₁y₀ の欠落が答えに出ます。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 9 : OT -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">道具</p>
+      <h2>紛失通信（OT）— 選んだことを知られずに、1 つだけ受け取る</h2>
+      <p>
+        クロス項 <code>x₀y₁</code> を計算するには「P1 の y₁ に応じて、P0 の持つ 2 つの値のどちらかを渡す」
+        必要があります。ただし <strong>P0 に y₁ を知られてはいけないし、P1 に両方渡してもいけない</strong>。
+        この綱渡りを実現するのが 1-out-of-2 OT です。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>約束は 2 つ — sender は選択を知らない、receiver は片方しか読めない</h4>
+        <div class="body">
+          <p>
+            sender は 2 通のメッセージ <code>m₀</code>, <code>m₁</code> を差し出す。
+            receiver は選択ビット <code>choice</code> で 1 通だけ受け取る。
+          </p>
+          <p class="why">
+            <b>普通の通信では両立しません。</b>どちらが欲しいか言えば sender に選択が漏れ、
+            両方もらえば receiver が読みすぎる。暗号で「開けられない封筒」を作って初めて両立します。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>トイ構成 — Diffie–Hellman の応用（p = 23, g = 2, 位数 q = 11）</h4>
+        <div class="body">
+          <p>
+            sender は秘密 <code>a</code> から <code>A = g^a</code> を公開。
+            receiver は秘密 <code>b</code> を引いて、<strong>request B の作り方を choice で変えます</strong>。
+          </p>
+          <p class="subst">
+            choice = 0 → B = g^b<br>
+            choice = 1 → B = A·g^b
+          </p>
+          <p>
+            sender は 2 つの鍵を <code>K₀ = B^a</code>, <code>K₁ = (B/A)^a</code> と導出して
+            それぞれのメッセージを暗号化。receiver の鍵は常に <code>A^b = g^{ab}</code> です。
+          </p>
+          <p class="why">
+            <b>choice = 0 なら K₀ = (g^b)^a = g^{ab} が一致し、choice = 1 なら K₁ = (A·g^b/A)^a = g^{ab} が一致する。</b>
+            選んだ側の封筒だけが開き、もう一方の鍵を得るには離散対数を解く必要があります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>b は 0 を含めて選ぶ — 1 点欠けるだけで選択が漏れる</h4>
+        <div class="body">
+          <p>
+            課題の仕様に「receiver secret b は <strong>0..q−1</strong> から選ぶ」とあります。
+            0 を除いて 1..q−1 にすると何が起きるか、request の分布を全部数えました。
+          </p>
+          <div class="table-scroll"><table class="data">
+            <tr><th>b の範囲</th><th>choice = 0 の request 集合</th><th>choice = 1 の request 集合</th></tr>
+            <tr><td>0..10（正）</td><td>部分群の 11 要素すべて</td><td>部分群の 11 要素すべて（同一）</td></tr>
+            <tr class="here"><td>1..10（誤）</td><td>1 が出ない</td><td>8 (= A) が出ない</td></tr>
+          </table></div>
+          <p class="why">
+            <b>request = 8 を見たら choice = 0 と確定、request = 1 なら choice = 1 と確定。</b>
+            「一様分布が choice によらず同じ」という性質は、範囲が 1 点欠けるだけで壊れます。
+            仕様の端の値には、たいてい理由があります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>実測 — choice を無視した request は、選んだ側の半分だけ壊す</h4>
+        <div class="body">
+          <p>
+            request を常に <code>B = g^b</code> にした壊れ版では、choice = 0 の復号は全部成功し、
+            choice = 1 だけがゴミを返します。
+          </p>
+          <pre>choice=0 ... ok（全部成功）
+choice=1: AssertionError: b'\xc2\x97\xc1W\xb7' != b'right'</pre>
+          <p class="why">
+            <b>B に A を織り込むのは receiver の仕事</b>で、それをして初めて sender 側の
+            K₁ = (B/A)^a と鍵が揃う。「どちらの封筒が開くか」は request の作り方が決めています。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 10 : GMW -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">組み立て</p>
+      <h2>GMW の AND — OT を 2 回で、クロス項を運ぶ</h2>
+      <p>
+        道具がそろいました。クロス項 1 つにつき OT を 1 回。対称なので 2 回で AND が完成します。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>セッション 01 — P0 が sender、P1 が y₁ で選ぶ</h4>
+        <div class="body">
+          <p>
+            P0 は乱数マスク <code>r₀₁</code> を引き、2 通のメッセージを用意します。
+          </p>
+          <p class="subst">
+            m₀ = r₀₁　　m₁ = r₀₁ ⊕ x₀
+          </p>
+          <p>
+            P1 が <code>y₁</code> を choice にして OT すると、受け取る値は
+            <code>t₀₁ = r₀₁ ⊕ x₀·y₁</code>（y₁ = 0 なら m₀、1 なら m₁——ちょうどこの式になります）。
+          </p>
+          <p class="why">
+            <b>クロス項 x₀y₁ が「r₀₁ で焼き付けられた形」で P1 に渡りました。</b>
+            P1 が見るのはマスク済みの 1 ビットだけなので x₀ は漏れない。
+            P0 は OT の約束で y₁ を知らない。<b>誰も何も知らないまま、項だけが移動しています。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>セッション 10 — 役割を入れ替えてもう 1 回</h4>
+        <div class="body">
+          <p class="subst">
+            P1 が sender: m₀ = r₁₀, m₁ = r₁₀ ⊕ x₁　　P0 が y₀ で選ぶ → t₁₀ = r₁₀ ⊕ x₁·y₀
+          </p>
+          <p class="why">
+            <b>採点器は OT の実行回数も数えています</b>（2 回でなければ落ちる）。
+            クロス項は 2 つ、OT も 2 つ。1 回で済ませる近道はここにはありません。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>出力 — 手持ちの材料を全部 XOR するだけ</h4>
+        <div class="body">
+          <p class="subst">
+            z₀ = x₀y₀ ⊕ r₀₁ ⊕ t₁₀　　（P0 の手元にある材料だけ）<br>
+            z₁ = x₁y₁ ⊕ r₁₀ ⊕ t₀₁　　（P1 の手元にある材料だけ）
+          </p>
+          <p>
+            XOR すると、マスクがペアで消えます。
+          </p>
+          <p class="subst">
+            z₀ ⊕ z₁ = x₀y₀ ⊕ x₁y₁ ⊕ <s>r₀₁</s> ⊕ (<s>r₀₁</s> ⊕ x₀y₁) ⊕ <s>r₁₀</s> ⊕ (<s>r₁₀</s> ⊕ x₁y₀)<br>
+            = x₀y₀ ⊕ x₀y₁ ⊕ x₁y₀ ⊕ x₁y₁ = <b>x·y</b> ✓
+          </p>
+          <p class="why">
+            <b>Beaver の d·e と同じく、マスクは「入れた人が自分の側で打ち消す」設計です。</b>
+            r₀₁ は P0 が入れて P0 の z₀ で消える。打ち消しの場所を間違えると、
+            復元して初めて壊れていたと分かる——数の世界とまったく同じ教訓です。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 11 : GMW LAB -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ</p>
+      <h2>GMW の AND を、1 ステップずつ回す</h2>
+      <p>
+        4 つのシェアビットと 2 つのマスクを選ぶと、OT 2 回込みの実行トレースが出ます。
+        <strong>「P0 から見えた値」「P1 から見えた値」</strong>に注目してください——
+        マスクのおかげで、どちらも相手のシェアを 1 ビットも学べていません。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>入力（シェアとマスク）</h3><span class="eyebrow">OT: p = 23, g = 2</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>x のシェア (x₀, x₁)</span><span class="hint">x = x₀ ⊕ x₁</span></div>
+            <div style="display:flex; gap:0.75rem;">
+              <div class="segments" id="seg-x0" role="group" aria-label="x0" style="flex:1;"></div>
+              <div class="segments" id="seg-x1" role="group" aria-label="x1" style="flex:1;"></div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>y のシェア (y₀, y₁)</span><span class="hint">y = y₀ ⊕ y₁</span></div>
+            <div style="display:flex; gap:0.75rem;">
+              <div class="segments" id="seg-y0" role="group" aria-label="y0" style="flex:1;"></div>
+              <div class="segments" id="seg-y1" role="group" aria-label="y1" style="flex:1;"></div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>マスク (r₀₁, r₁₀)</span><span class="hint">毎回変える乱数のつもりで</span></div>
+            <div style="display:flex; gap:0.75rem;">
+              <div class="segments" id="seg-r01" role="group" aria-label="r01" style="flex:1;"></div>
+              <div class="segments" id="seg-r10" role="group" aria-label="r10" style="flex:1;"></div>
+            </div>
+          </div>
+          <p class="caption">
+            OT の secret は課題のテストと同じ固定値（セッション 01: a=3, b=4 ／ セッション 10: a=5, b=6）。
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="gmw-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="gmw-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">実行トレース（OT の中身込み）</p>
+          <pre id="gmw-trace">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 12 : QUIZ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">検問クイズ</p>
+      <h2>開示検問 — あなたが MPC の監査官になる</h2>
+      <p>
+        読んだだけでは定着しない。ここでは<strong>あなたが監査官の席に座り</strong>、
+        シェアの計算・公開してよい値・OT の振る舞いを審査する。問題は毎回その場で生成され、
+        判定は上のラボと同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <!-- ---------- start ---------- -->
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <!-- ---------- play ---------- -->
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <!-- ---------- result ---------- -->
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 13 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">持ち帰り</p>
       <h2>持っておくと効く問い</h2>
     </div>
     <div class="prose">
@@ -726,11 +1340,23 @@
         前処理でいくつ三つ組を用意するかが、そのまま実行可能な乗算の回数になります。
       </p>
       <p>
+        <strong>⑤ 「答えが正しい」と「開きすぎていない」は別の性質。</strong>
+        x を直接開く Beaver 実装は、積のテストに全部通って、開示回数の監査だけで落ちました。
+        MPC のレビューで見るべきは出力ではなく、<b>実行中に何が公開されたか</b>です。
+      </p>
+      <p>
+        <strong>⑥ 数の乗算とビットの AND は、同じ場所に同じ壁がある。</strong>
+        線形（加算・XOR）はタダ、非線形（乗算・AND）だけが通信を要求する。
+        数の世界は Beaver、ビットの世界は OT——道具は違っても、
+        「クロス項を、マスクして運ぶ」という解き方は同じでした。
+      </p>
+      <p>
         そして Week 1 の問いはここでも生きます ——
         <strong>「この値を縛っているものは何か」</strong>。
         MPC では「この値を隠しているのは何か」に姿を変えます。
-        <code>d = x − a</code> が安全なのは <code>a</code> がランダムだからで、
-        <b>a を使い回した瞬間に壊れます</b>。三つ組が使い捨てである理由がそこです。
+        <code>d = x − a</code> が安全なのは <code>a</code> がランダムだから。
+        OT の request が安全なのは <code>b</code> が 0 込みの一様乱数だから。
+        <b>隠している乱数の条件が 1 つ欠けた瞬間に、どちらも壊れます。</b>
       </p>
     </div>
   </div>
@@ -738,9 +1364,10 @@
 
 <footer>
   <div class="wrap">
-    講義: <a href="https://github.com/zk-tokyo/advanced-cryptography-2026">zk-tokyo/advanced-cryptography-2026</a>
-    ／ このノート: <a href="https://github.com/susumutomita/advanced-cryptography-note">susumutomita/advanced-cryptography-note</a>
-    ／ 公式の Week 2 教材が公開されたら、内容を突き合わせて更新します。
+    zk-tokyo Advanced Cryptography Program 2026 · Week 2 <code>toy-mpc</code> の自習ノート。
+    「実測」とある出力は、公式課題の公開テストにわざと壊した実装を通した実際の結果です。
+    ラボとクイズの数値はすべてこのページ内で計算しています（外部通信なし）。
+    ／ <a href="https://github.com/susumutomita/advanced-cryptography-note">susumutomita/advanced-cryptography-note</a>
   </div>
 </footer>
 
@@ -894,6 +1521,604 @@
   }
 
   render();
+})();
+
+// ---- GMW ラボ（OT のトイ群ごと実行する） ----
+(function () {
+  "use strict";
+  var OTP = 23, OTQ = 11, OTG = 2;
+
+  function powmod(base, exp, m) {
+    var r = 1;
+    base = ((base % m) + m) % m;
+    while (exp > 0) {
+      if (exp & 1) r = (r * base) % m;
+      base = (base * base) % m;
+      exp >>= 1;
+    }
+    return r;
+  }
+  function ginv(x) { return powmod(x, OTP - 2, OTP); }
+  function fmod(n, p) { return ((n % p) + p) % p; }
+
+  // トイのパッド: 共有値 shared と枝番 branch から決定的に 1 ビット作る。
+  // 実物は SHA-256 だが、ここでの主役は「鍵が一致する枝だけ開く」群の性質の方。
+  function pad(shared, branch) {
+    return ((shared >> 2) ^ shared ^ (branch * 3)) & 1;
+  }
+
+  function otRequest(A, choice, b) {
+    var B = powmod(OTG, b, OTP);
+    return choice === 1 ? (A * B) % OTP : B;
+  }
+
+  // 1 ビットの 1-out-of-2 OT を、公開値・鍵・封筒まで全部返す
+  function otTransferBit(m0, m1, choice, a, b) {
+    var A = powmod(OTG, a, OTP);
+    var B = otRequest(A, choice, b);
+    var K0 = powmod(B, a, OTP);
+    var K1 = powmod((B * ginv(A)) % OTP, a, OTP);
+    var Kr = powmod(A, b, OTP);
+    var c0 = m0 ^ pad(K0, 0);
+    var c1 = m1 ^ pad(K1, 1);
+    var t = (choice === 1 ? c1 : c0) ^ pad(Kr, choice);
+    return { A: A, B: B, K0: K0, K1: K1, Kr: Kr, c0: c0, c1: c1, t: t };
+  }
+
+  function gmwTrace(x0, x1, y0, y1, r01, r10) {
+    var s01 = otTransferBit(r01, r01 ^ x0, y1, 3, 4);
+    var s10 = otTransferBit(r10, r10 ^ x1, y0, 5, 6);
+    var z0 = (x0 & y0) ^ r01 ^ s10.t;
+    var z1 = (x1 & y1) ^ r10 ^ s01.t;
+    return {
+      s01: s01, s10: s10, z0: z0, z1: z1,
+      x: x0 ^ x1, y: y0 ^ y1, and: (x0 ^ x1) & (y0 ^ y1)
+    };
+  }
+
+  // 加法的シェアの計算器（クイズと共用）
+  function shareLast(s, rands, p) {
+    var sum = 0;
+    for (var i = 0; i < rands.length; i++) sum += rands[i];
+    return fmod(s - sum, p);
+  }
+  function reconstruct(shares, p) {
+    var sum = 0;
+    for (var i = 0; i < shares.length; i++) sum += shares[i];
+    return fmod(sum, p);
+  }
+
+  // 検問クイズから同じ計算器を使えるように公開する
+  window.__mpc = {
+    OTP: OTP, OTQ: OTQ, OTG: OTG,
+    powmod: powmod, fmod: fmod,
+    otRequest: otRequest, otTransferBit: otTransferBit, gmwTrace: gmwTrace,
+    shareLast: shareLast, reconstruct: reconstruct
+  };
+
+  var banner = document.getElementById("gmw-banner");
+  if (!banner) return;
+  var note = document.getElementById("gmw-note");
+  var traceEl = document.getElementById("gmw-trace");
+
+  var st = { x0: 1, x1: 0, y0: 0, y1: 1, r01: 1, r10: 0 };
+  var segs = {};
+
+  function bitseg(id, key) {
+    var host = document.getElementById(id);
+    segs[key] = host;
+    [0, 1].forEach(function (v) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = key.replace("r01", "r₀₁").replace("r10", "r₁₀") + " = " + v;
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () { st[key] = v; render(); });
+      host.appendChild(b);
+    });
+  }
+  ["x0", "x1", "y0", "y1", "r01", "r10"].forEach(function (k) {
+    bitseg("seg-" + k, k);
+  });
+
+  function render() {
+    Object.keys(segs).forEach(function (k) {
+      Array.prototype.forEach.call(segs[k].children, function (b, v) {
+        b.setAttribute("aria-pressed", v === st[k] ? "true" : "false");
+      });
+    });
+
+    var r = gmwTrace(st.x0, st.x1, st.y0, st.y1, st.r01, st.r10);
+    var okAll = (r.z0 ^ r.z1) === r.and;
+
+    banner.className = "banner " + (okAll ? "ok" : "bad");
+    banner.textContent = "z₀ ⊕ z₁ = " + r.z0 + " ⊕ " + r.z1 + " = " + (r.z0 ^ r.z1) +
+      " ／ 正解 x·y = " + r.x + "·" + r.y + " = " + r.and + (okAll ? "  ✓" : "  ✗");
+    note.textContent = "x = " + st.x0 + "⊕" + st.x1 + " = " + r.x +
+      ", y = " + st.y0 + "⊕" + st.y1 + " = " + r.y +
+      "。出力もシェアのままなので、z₀ と z₁ を突き合わせるまで誰も答えを知りません。";
+
+    var L = [];
+    L.push("セッション 01 — P0 が sender (a=3) / P1 が receiver (b=4)");
+    L.push("  P0 の 2 通:  m₀ = r₀₁ = " + st.r01 + ",  m₁ = r₀₁⊕x₀ = " + (st.r01 ^ st.x0));
+    L.push("  A = 2^3 mod 23 = " + r.s01.A +
+           "   request: choice = y₁ = " + st.y1 + " → B = " + r.s01.B);
+    L.push("  鍵: K₀ = B^a = " + r.s01.K0 + ",  K₁ = (B/A)^a = " + r.s01.K1 +
+           ",  P1 の鍵 A^b = " + r.s01.Kr +
+           "  （一致するのは K" + st.y1 + " だけ）");
+    L.push("  P1 が開けた封筒: t₀₁ = " + r.s01.t + "   (= r₀₁ ⊕ x₀·y₁)");
+    L.push("");
+    L.push("セッション 10 — P1 が sender (a=5) / P0 が receiver (b=6)");
+    L.push("  P1 の 2 通:  m₀ = r₁₀ = " + st.r10 + ",  m₁ = r₁₀⊕x₁ = " + (st.r10 ^ st.x1));
+    L.push("  A = 2^5 mod 23 = " + r.s10.A +
+           "   request: choice = y₀ = " + st.y0 + " → B = " + r.s10.B);
+    L.push("  P0 が開けた封筒: t₁₀ = " + r.s10.t + "   (= r₁₀ ⊕ x₁·y₀)");
+    L.push("");
+    L.push("出力（各自、手元の材料を XOR するだけ）");
+    L.push("  z₀ = x₀y₀ ⊕ r₀₁ ⊕ t₁₀ = " + (st.x0 & st.y0) + "⊕" + st.r01 + "⊕" + r.s10.t + " = " + r.z0);
+    L.push("  z₁ = x₁y₁ ⊕ r₁₀ ⊕ t₀₁ = " + (st.x1 & st.y1) + "⊕" + st.r10 + "⊕" + r.s01.t + " = " + r.z1);
+    L.push("");
+    L.push("それぞれから見えたもの");
+    L.push("  P0: request B = " + r.s01.B + " …… y₁ が 0 でも 1 でも同じ分布。選択は読めない");
+    L.push("  P0: t₁₀ = " + r.s10.t + " …… x₁·y₀ は r₁₀ で焼き付けられていて、x₁ は読めない");
+    L.push("  P1: t₀₁ = " + r.s01.t + " …… 同じく、x₀ は r₀₁ の下に隠れたまま");
+    traceEl.textContent = L.join("\n");
+  }
+
+  render();
+})();
+
+// ---- 目次を h2 から自動生成（章を足しても手で直さなくてよいように） ----
+(function () {
+  "use strict";
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var heads = document.querySelectorAll(".band-head h2");
+  Array.prototype.forEach.call(heads, function (h, i) {
+    if (h.closest("#toc")) return;
+    var section = h.closest(".band");
+    if (!section) return;
+    if (i === 0) return;                 // 「出発点」自身は目次に載せない
+    if (!section.id) section.id = "sec-" + i;
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + section.id;
+    a.textContent = h.textContent.trim();
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+})();
+
+// ---- 開示検問（あなたが MPC の監査官になる出題モード） ----
+(function () {
+  "use strict";
+  var M = window.__mpc;
+  if (!M || !document.getElementById("quiz")) return;
+
+  var TOTAL = 10, MAX_LIVES = 3, STORE_KEY = "ac26-w2-checkpoint-best";
+  var P = 11;
+
+  function ri(n) { return Math.floor(Math.random() * n); }
+  function pick(a) { return a[ri(a.length)]; }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = ri(i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  // 正解 1 つ + 重複しないダミーで 4 択を作る
+  function numChoices(correct, makers) {
+    var seen = {}, out = [{ t: String(correct), ok: true }];
+    seen[String(correct)] = true;
+    var k = 0;
+    while (out.length < 4) {
+      var v = k < makers.length ? makers[k]() : M.fmod(correct + out.length + ri(7), P);
+      k++;
+      var key = String(v);
+      if (!seen[key]) { seen[key] = true; out.push({ t: key, ok: false }); }
+    }
+    return shuffle(out);
+  }
+
+  // ---------------- シェア計算 ----------------
+  function genShare() {
+    if (ri(2) === 0) {
+      var s = ri(P), r1 = ri(P), r2 = ri(P);
+      var last = M.shareLast(s, [r1, r2], P);
+      return {
+        cat: "share",
+        q: "秘密 s = " + s + " を p = 11 で 3 人に分ける。乱数が [" + r1 + ", " + r2 + "] のとき、3 人目のシェアは？",
+        body: '<p class="subst">share = [' + r1 + ", " + r2 + ", ? ]　（合計が s に戻るように）</p>",
+        choices: numChoices(last, [
+          function () { return M.fmod(s + r1 + r2, P); },
+          function () { return M.fmod(r1 + r2 - s, P); },
+          function () { return M.fmod(s - r1 + r2, P); }
+        ]),
+        why: "最後の 1 人が帳尻を合わせます。s − (r₁ + r₂) = " + s + " − " + (r1 + r2) +
+             " ≡ " + last + " (mod 11)。全員の合計が s に戻ることを確かめてください。"
+      };
+    }
+    var a1 = ri(P), a2 = ri(P), a3 = ri(P);
+    var sec = M.reconstruct([a1, a2, a3], P);
+    return {
+      cat: "share",
+      q: "シェア [" + a1 + ", " + a2 + ", " + a3 + "]（p = 11）を全員分集めた。秘密は？",
+      body: "",
+      choices: numChoices(sec, [
+        function () { return M.fmod(a1 + a2 - a3, P); },
+        function () { return M.fmod(a1 + a2 + a3 + 1, P); },
+        function () { return M.fmod(a1 - a2 + a3, P); }
+      ]),
+      why: "復元は合計だけ。" + a1 + " + " + a2 + " + " + a3 + " = " + (a1 + a2 + a3) +
+           " ≡ " + sec + " (mod 11)。"
+    };
+  }
+
+  // ---------------- Beaver 検算 ----------------
+  function genBeaver() {
+    var x = ri(P), y = ri(P), a = ri(P), b = ri(P);
+    var d = M.fmod(x - a, P), e = M.fmod(y - b, P);
+    var correct = "d = " + d + ", e = " + e;
+    var seen = {}, out = [{ t: correct, ok: true }];
+    seen[correct] = true;
+    [["d = " + M.fmod(x + a, P) + ", e = " + M.fmod(y + b, P)],
+     ["d = " + M.fmod(a - x, P) + ", e = " + M.fmod(b - y, P)],
+     ["d = " + M.fmod(x * a, P) + ", e = " + M.fmod(y * b, P)]].forEach(function (c) {
+      if (!seen[c[0]] && out.length < 4) { seen[c[0]] = true; out.push({ t: c[0], ok: false }); }
+    });
+    while (out.length < 4) {
+      var t = "d = " + ri(P) + ", e = " + ri(P);
+      if (!seen[t]) { seen[t] = true; out.push({ t: t, ok: false }); }
+    }
+    return {
+      cat: "beaver",
+      q: "Beaver 乗算（p = 11）。x = " + x + ", y = " + y + "、三つ組の a = " + a + ", b = " + b +
+         "。ネットワークに公開される 2 つの値は？",
+      body: '<p class="subst">公開してよいのはマスク済みの差分だけ</p>',
+      choices: shuffle(out),
+      why: "d = x − a = " + x + " − " + a + " ≡ " + d + "、e = y − b = " + y + " − " + b +
+           " ≡ " + e + " (mod 11)。a, b は誰も知らない乱数なので、d, e はランダムにしか見えません。"
+    };
+  }
+
+  // ---------------- 開示監査 ----------------
+  var AUDIT_CHOICES = [
+    "合格 — 開示はマスク済みの値だけで、掟も守っている",
+    "不合格 — 秘密が直接開示されている",
+    "不合格 — 同じ a の使い回しで x₁ − x₂ が漏れる",
+    "不合格 — 公開値 d·e を全員が足していて、復元がずれる"
+  ];
+  var AUDIT_CASES = [
+    { lines: ["reconstruct([x − a]) → d を公開", "reconstruct([y − b]) → e を公開", "d·e は party 0 だけが加算"],
+      ans: 0,
+      why: "開示は d, e の 2 回だけ、d·e の足し先も正しい。教科書どおりの Beaver です。" },
+    { lines: ["reconstruct([x]) → x を公開", "reconstruct([a]) → a を公開", "手元で d = x − a を計算"],
+      ans: 1,
+      why: "答えの積は正しく出ます。でも秘密 x がそのまま開示されている。課題の採点器はこれを「開示回数 4 ≠ 2」で落としました。" },
+    { lines: ["乗算 1: d₁ = x₁ − a を公開", "乗算 2: d₂ = x₂ − a を公開（同じ三つ組を再利用）"],
+      ans: 2,
+      why: "d₁ − d₂ = x₁ − x₂ で a が消えます。実測では公開値だけから x₁ − x₂ = 24 が復元できました。三つ組は 1 乗算 1 回限り。" },
+    { lines: ["乗算 1: d₁ = x₁ − a を公開", "乗算 2: d₂ = x₂ − a′ を公開（新しい三つ組）"],
+      ans: 0,
+      why: "三つ組を乗算ごとに替えているので、d₁ − d₂ = (x₁ − x₂) − (a − a′) となり、乱数の差に隠れて何も漏れません。" },
+    { lines: ["d = x − a, e = y − b を公開", "全 party が自分のシェアに d·e を加算"],
+      ans: 3,
+      why: "d·e はシェアではなく公開スカラー。n 人全員が足すと復元が (n−1)·d·e ずれます（実測: 57 ≠ 41）。代表 1 人だけが足します。" }
+  ];
+  function genAudit() {
+    var c = pick(AUDIT_CASES);
+    var body = '<div class="clist">' + c.lines.map(function (l) {
+      return '<div class="cline">' + l + "</div>";
+    }).join("") + "</div>";
+    return {
+      cat: "audit",
+      q: "監査対象のプロトコル実行ログ。あなたの判定は？",
+      body: body,
+      choices: shuffle(AUDIT_CHOICES.map(function (t, i) {
+        return { t: t, ok: i === c.ans };
+      })),
+      why: c.why
+    };
+  }
+
+  // ---------------- OT 検問 ----------------
+  function genOT() {
+    var a = pick([3, 5, 7, 9]), b = ri(M.OTQ), choice = ri(2);
+    var A = M.powmod(M.OTG, a, M.OTP);
+    var B = M.otRequest(A, choice, b);
+    var other = M.otRequest(A, 1 - choice, b);
+    return {
+      cat: "ot",
+      q: "トイ OT（p = 23, g = 2）。sender secret a = " + a + " で A = " + A +
+         "。receiver が choice = " + choice + ", b = " + b + " で作る request B は？",
+      body: '<p class="subst">choice = 0 → B = g^b　／　choice = 1 → B = A·g^b</p>',
+      choices: numChoices(B, [
+        function () { return other; },
+        function () { return M.powmod(M.OTG, M.fmod(a + b, M.OTQ), M.OTP); },
+        function () { return M.powmod(A, b, M.OTP); }
+      ]),
+      why: "g^b = 2^" + b + " mod 23 = " + M.powmod(M.OTG, b, M.OTP) +
+           (choice === 1 ? "。choice = 1 なので A を掛けて B = " + A + "·" +
+             M.powmod(M.OTG, b, M.OTP) + " mod 23 = " + B :
+             "。choice = 0 なので B = g^b = " + B) +
+           "。A の織り込みの有無が、どちらの封筒が開くかを決めます。"
+    };
+  }
+
+  // ---------------- GMW 検算 ----------------
+  function genGMW() {
+    var x0 = ri(2), x1 = ri(2), y0 = ri(2), y1 = ri(2), r01 = ri(2), r10 = ri(2);
+    var r = M.gmwTrace(x0, x1, y0, y1, r01, r10);
+    var correct = "(z₀, z₁) = (" + r.z0 + ", " + r.z1 + ")";
+    var out = [];
+    [[0, 0], [0, 1], [1, 0], [1, 1]].forEach(function (p2) {
+      out.push({
+        t: "(z₀, z₁) = (" + p2[0] + ", " + p2[1] + ")",
+        ok: p2[0] === r.z0 && p2[1] === r.z1
+      });
+    });
+    return {
+      cat: "gmw",
+      q: "GMW の AND。x シェア (" + x0 + ", " + x1 + ")、y シェア (" + y0 + ", " + y1 +
+         ")、マスク (r₀₁, r₁₀) = (" + r01 + ", " + r10 + ") のとき、出力シェアは？",
+      body: '<p class="subst">t₀₁ = r₀₁ ⊕ x₀·y₁　　t₁₀ = r₁₀ ⊕ x₁·y₀<br>' +
+            "z₀ = x₀y₀ ⊕ r₀₁ ⊕ t₁₀　　z₁ = x₁y₁ ⊕ r₁₀ ⊕ t₀₁</p>",
+      choices: shuffle(out),
+      why: "t₀₁ = " + r01 + "⊕" + (x0 & y1) + " = " + r.s01.t +
+           "、t₁₀ = " + r10 + "⊕" + (x1 & y0) + " = " + r.s10.t +
+           "。z₀ = " + (x0 & y0) + "⊕" + r01 + "⊕" + r.s10.t + " = " + r.z0 +
+           "、z₁ = " + (x1 & y1) + "⊕" + r10 + "⊕" + r.s01.t + " = " + r.z1 +
+           "。検算: z₀⊕z₁ = " + (r.z0 ^ r.z1) + " = x·y = " + r.and + " ✓"
+    };
+  }
+
+  // ---------------- 原理 ----------------
+  var THEORY = [
+    { q: "d = x − a を公開してよい理由は？",
+      a: "誰も知らない乱数 a がワンタイムパッドとして x を撹乱しているから",
+      d: ["x が有限体の元なので大小が分からないから",
+          "d は毎回同じ値になるので情報がないから",
+          "復元には全員のシェアが必要だから"] },
+    { q: "Beaver の三つ組を 2 回使ってはいけない理由は？",
+      a: "公開値の差 d₁ − d₂ から a が消えて、x₁ − x₂ が漏れるから",
+      d: ["三つ組の在庫が減って効率が落ちるから",
+          "2 回目は c = a·b の関係が成り立たなくなるから",
+          "次数が 2 に上がって復元できなくなるから"] },
+    { q: "OT の receiver secret b を「0 を含む」0..q−1 から選ぶ理由は？",
+      a: "request の分布が choice によらず同一の一様分布になり、選択が漏れないから",
+      d: ["b = 0 だと復号の計算が速くなるから",
+          "0 を除くと鍵がそもそも一致しなくなるから",
+          "q − 1 通りでは組合せの数が足りないから"] },
+    { q: "加算や XOR が通信なしでできる理由は？",
+      a: "シェアリングが線形で、各自の成分ごとの演算がそのまま和のシェアになるから",
+      d: ["加算は乗算より計算量が小さいから",
+          "有限体では加算が可換だから",
+          "シェアの値が小さいうちは安全だから"] },
+    { q: "GMW の AND で OT が 2 回必要な理由は？",
+      a: "クロス項 x₀y₁ と x₁y₀ が 2 つあり、それぞれ相手の選択で決まる値を運ぶ必要があるから",
+      d: ["1 回目が失敗したときに再送するため",
+          "z₀ と z₁ を別々の鍵で暗号化するため",
+          "sender と receiver の負荷を公平にするため"] },
+    { q: "「積の値は全部正しいのに採点器に落ちる」Beaver 実装がある。何を破っている？",
+      a: "開示回数 — マスク済みの d, e 以外（x や a そのもの）を開いている",
+      d: ["d·e の足し先が party 0 になっていない",
+          "シェアの正規化（0..p−1）を忘れている",
+          "三つ組を使い切ったあと補充していない"] },
+    { q: "OT が sender に保証することは？",
+      a: "receiver がどちらのメッセージを選んだか分からないこと",
+      d: ["メッセージが途中で改竄されないこと",
+          "receiver が両方のメッセージを読めること",
+          "毎回同じ鍵で暗号化できること"] },
+    { q: "加法的秘密分散で n−1 人が結託しても秘密が安全な理由は？",
+      a: "どんな秘密とも辻褄の合う「残り 1 シェア」が必ず存在し、候補が 1 つも減らないから",
+      d: ["残りの 1 シェアが別途暗号化されているから",
+          "n−1 人では総当たりの計算力が足りないから",
+          "シェアを配った順番が秘密だから"] }
+  ];
+  var theoryDeck = [];
+  function genTheory() {
+    if (theoryDeck.length === 0) theoryDeck = shuffle(THEORY.slice());
+    var t = theoryDeck.pop();
+    return {
+      cat: "theory",
+      q: t.q,
+      body: "",
+      choices: shuffle([{ t: t.a, ok: true }].concat(t.d.map(function (x) {
+        return { t: x, ok: false };
+      }))),
+      why: t.a + "。本文の該当セクションに、壊したときの実測があります。"
+    };
+  }
+
+  var CATS = [
+    { key: "share",  name: "シェア計算",  desc: "分けて、集めて、正規化する", gen: genShare },
+    { key: "beaver", name: "Beaver 検算", desc: "何を公開して積を作るか",     gen: genBeaver },
+    { key: "audit",  name: "開示監査",    desc: "この実行ログ、通してよいか", gen: genAudit },
+    { key: "ot",     name: "OT 検問",     desc: "request と鍵をトイ群で計算", gen: genOT },
+    { key: "gmw",    name: "GMW 検算",    desc: "AND の出力シェアを追う",     gen: genGMW },
+    { key: "theory", name: "原理",        desc: "なぜその形なのかを言葉で",   gen: genTheory }
+  ];
+
+  // ---------------- フロー ----------------
+  var els = {};
+  ["quiz-start", "quiz-play", "quiz-result", "mode-grid", "quiz-best",
+   "qprog", "qcat", "lives", "qtext", "qbody", "choices", "fb",
+   "btn-quit", "btn-next", "rank", "rank-title", "rank-sub", "cat-stats",
+   "btn-again", "btn-modes"].forEach(function (id) {
+    els[id] = document.getElementById(id);
+  });
+
+  var state = null;
+
+  function pane(which) {
+    els["quiz-start"].hidden = which !== "start";
+    els["quiz-play"].hidden = which !== "play";
+    els["quiz-result"].hidden = which !== "result";
+  }
+
+  function readBest() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); }
+    catch (e) { return null; }
+  }
+  function writeBest(best) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(best)); } catch (e) {}
+  }
+  function showBest() {
+    var b = readBest();
+    els["quiz-best"].textContent = b
+      ? "自己ベスト: " + b.correct + " / " + TOTAL + "（ランク " + b.rank + "・挑戦 " + b.runs + " 回）"
+      : "まだ記録なし — 最初の検問から始めてください。";
+  }
+
+  function renderLives() {
+    var s = "";
+    for (var i = 0; i < MAX_LIVES; i++) {
+      s += i < state.lives ? "◆" : '<span class="gone">◇</span>';
+    }
+    els["lives"].innerHTML = s;
+    els["lives"].setAttribute("aria-label", "残りライフ " + state.lives + " / " + MAX_LIVES);
+  }
+
+  function start(mode) {
+    state = { mode: mode, i: 0, lives: MAX_LIVES, correct: 0, stats: {}, answered: false, cur: null };
+    pane("play");
+    nextQuestion();
+  }
+
+  function nextQuestion() {
+    state.i++;
+    state.answered = false;
+    var cat = state.mode === "mixed" ? pick(CATS) : CATS.filter(function (c) {
+      return c.key === state.mode;
+    })[0];
+    state.cur = cat.gen();
+    els["qprog"].textContent = state.i + " / " + TOTAL;
+    els["qcat"].textContent = cat.name;
+    renderLives();
+    els["qtext"].textContent = state.cur.q;
+    els["qbody"].innerHTML = state.cur.body || "";
+    els["fb"].hidden = true;
+    els["btn-next"].hidden = true;
+
+    els["choices"].textContent = "";
+    var short = state.cur.choices.every(function (c) { return c.t.length <= 20; });
+    els["choices"].className = "choices" + (short ? " two" : "");
+    state.cur.choices.forEach(function (c) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice";
+      b.textContent = c.t;
+      b.addEventListener("click", function () { answer(c, b); });
+      els["choices"].appendChild(b);
+    });
+  }
+
+  function answer(choice, btn) {
+    if (state.answered) return;
+    state.answered = true;
+    var cat = state.cur.cat;
+    if (!state.stats[cat]) state.stats[cat] = { ok: 0, n: 0 };
+    state.stats[cat].n++;
+
+    Array.prototype.forEach.call(els["choices"].children, function (b, i) {
+      b.disabled = true;
+      var c = state.cur.choices[i];
+      if (c.ok) b.classList.add("is-correct");
+      else if (b === btn) b.classList.add("is-wrong");
+      else b.classList.add("dim");
+    });
+
+    if (choice.ok) {
+      state.correct++;
+      state.stats[cat].ok++;
+      els["fb"].className = "fb ok";
+      els["fb"].innerHTML = '<span class="fb-head">正しい判定</span>' + state.cur.why;
+    } else {
+      state.lives--;
+      renderLives();
+      els["fb"].className = "fb bad";
+      els["fb"].innerHTML = '<span class="fb-head">誤判定</span>' + state.cur.why;
+    }
+    els["fb"].hidden = false;
+
+    if (state.lives === 0 || state.i === TOTAL) {
+      els["btn-next"].textContent = "結果を見る";
+    } else {
+      els["btn-next"].textContent = "次の検問へ";
+    }
+    els["btn-next"].hidden = false;
+  }
+
+  function finish() {
+    pane("result");
+    var busted = state.lives === 0;
+    // ライフ切れでも、そこまでの正解は評価する
+    var rank = state.correct === TOTAL ? "S" : state.correct >= 8 ? "A" :
+               state.correct >= 6 ? "B" : "F";
+    var titles = {
+      S: "完璧な監査 — 1 件も見逃していない",
+      A: "信頼できる監査官 — 惜しいのはあと少し",
+      B: "見習い監査官 — 弱い分野を訓練モードで",
+      F: "要再訓練 — 本文の実測をもう一度"
+    };
+    els["rank"].textContent = rank;
+    els["rank"].className = "rank " + rank.toLowerCase();
+    els["rank-title"].textContent = busted
+      ? "検問失敗 — 不正なプロトコルを 3 回通してしまった"
+      : titles[rank];
+    els["rank-sub"].textContent = "正解 " + state.correct + " / " + TOTAL +
+      (busted ? "（ライフ切れ）" : "");
+
+    els["cat-stats"].textContent = "";
+    Object.keys(state.stats).forEach(function (key) {
+      var meta = CATS.filter(function (c) { return c.key === key; })[0];
+      var st2 = state.stats[key];
+      var div = document.createElement("div");
+      div.className = "cstat";
+      div.innerHTML = '<span class="cn">' + (meta ? meta.name : key) + "</span>" +
+        '<span class="cv ' + (st2.ok === st2.n ? "full" : "weak") + '">' +
+        st2.ok + " / " + st2.n + "</span>";
+      els["cat-stats"].appendChild(div);
+    });
+
+    var best = readBest() || { correct: -1, rank: "F", runs: 0 };
+    best.runs++;
+    if (state.correct > best.correct) { best.correct = state.correct; best.rank = rank; }
+    writeBest(best);
+  }
+
+  els["btn-next"].addEventListener("click", function () {
+    if (state.lives === 0 || state.i === TOTAL) finish();
+    else nextQuestion();
+  });
+  els["btn-quit"].addEventListener("click", function () {
+    pane("start");
+    showBest();
+  });
+  els["btn-again"].addEventListener("click", function () { start(state.mode); });
+  els["btn-modes"].addEventListener("click", function () {
+    pane("start");
+    showBest();
+  });
+
+  // モード選択ボタン
+  var mixed = document.createElement("button");
+  mixed.type = "button";
+  mixed.className = "mode primary";
+  mixed.innerHTML = '<span class="m-name">ランダム検問</span>' +
+    '<span class="m-desc">全分野から 10 問。まずはこれで実力を測る</span>';
+  mixed.addEventListener("click", function () { start("mixed"); });
+  els["mode-grid"].appendChild(mixed);
+  CATS.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "mode";
+    b.innerHTML = '<span class="m-name">' + c.name + "</span>" +
+      '<span class="m-desc">' + c.desc + "</span>";
+    b.addEventListener("click", function () { start(c.key); });
+    els["mode-grid"].appendChild(b);
+  });
+
+  showBest();
 })();
 </script>
 </body>
