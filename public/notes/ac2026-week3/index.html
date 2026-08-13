@@ -1,0 +1,1985 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知っていることだけを、渡す — Week 3 自習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 3 の自習ノート。有限体から楕円曲線を積み上げ、シグマプロトコルと Fiat-Shamir で Schnorr 署名まで。simulator と nonce 再利用を実際に走らせて、完全性・知識健全性・ゼロ知識の違いを確かめる。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="知っていることだけを、渡す — Week 3 自習ノート">
+<meta property="og:description" content="楕円曲線と Schnorr。simulator が作った偽の会話が受理され、nonce の使い回しで本物の秘密鍵が出る。">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔑</text></svg>">
+<style>
+  @font-face {
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { display: block; max-width: 100%; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  table { border-collapse: collapse; }
+  [hidden] { display: none !important; }
+
+  :root {
+    color-scheme: light dark;
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+
+    --sans: "AXIS Std", "Helvetica Neue", Helvetica, Arial,
+            "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+            "Noto Sans JP", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+            "Cascadia Mono", Consolas, monospace;
+
+    --fs-label: 0.6875rem; --fs-xs: 0.8125rem; --fs-sm: 0.875rem;
+    --fs-lg: 1.25rem; --fs-xl: 1.6875rem; --fs-2xl: clamp(2rem, 5.5vw, 2.9rem);
+    --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+      --line: #3A4449; --line-strong: #4E5B61;
+      --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+      --accent: #99DBFF; --accent-soft: #24333C;
+      --pass: #B5BD68; --pass-soft: #2B3122;
+      --fail: #CC6666; --fail-soft: #3A2626;
+      --free: #F0C674; --free-soft: #3A3122;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+    --line: #3A4449; --line-strong: #4E5B61;
+    --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+    --accent: #99DBFF; --accent-soft: #24333C;
+    --pass: #B5BD68; --pass-soft: #2B3122;
+    --fail: #CC6666; --fail-soft: #3A2626;
+    --free: #F0C674; --free-soft: #3A3122;
+  }
+  :root[data-theme="light"] {
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+  }
+
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); line-height: 1.85; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .eyebrow { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.35; margin: 0; font-weight: 700; }
+  h1 { font-size: var(--fs-2xl); letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+  h3 { font-size: var(--fs-lg); }
+  h4 { font-size: 1rem; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: 0.925em; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .sitebar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
+             background: color-mix(in srgb, var(--ground) 80%, transparent); backdrop-filter: blur(12px); }
+  .sitebar-inner { height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .sitebar-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); text-decoration: none; }
+  .sitebar-links { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+  .sitebar-links a { font-size: var(--fs-xs); color: var(--muted); text-decoration: none; padding: 0.35rem 0.6rem; border-radius: var(--r-md); }
+  .sitebar-links a:hover { color: var(--ink); background: color-mix(in srgb, var(--line) 60%, transparent); }
+
+  .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .masthead-inner { display: flex; flex-direction: column; gap: 1rem; padding: clamp(2.5rem, 7vw, 4rem) 0 clamp(2rem, 5vw, 2.5rem); }
+  .masthead h1 span { color: var(--accent); }
+  .lead { color: var(--ink-2); max-width: 62ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; padding: 0.25rem 0.55rem;
+         border: 1px solid var(--line-strong); border-radius: var(--r-sm); color: var(--ink-2); }
+
+  .band { padding: clamp(2.25rem, 6vw, 3.5rem) 0; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; max-width: 64ch; }
+  .band-head p { color: var(--ink-2); }
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .stack-sm { display: flex; flex-direction: column; gap: 0.9rem; }
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose strong { color: var(--ink); font-weight: 700; }
+  .split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 860px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 1px;
+           background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .steps > li { counter-increment: step; background: var(--panel); padding: 1.25rem 1.4rem 1.35rem;
+                display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem; align-items: start; }
+  .steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); font-size: var(--fs-xs);
+                        font-weight: 700; color: var(--accent); letter-spacing: 0.06em; padding-top: 0.35rem; }
+  .steps h4 { grid-column: 2; }
+  .steps .body { grid-column: 2; display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.35rem; }
+  .steps p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .steps .why { font-size: var(--fs-sm); color: var(--ink-2); border-left: 2px solid var(--line-strong); padding-left: 0.85rem; }
+  .steps .why b { color: var(--ink); }
+
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-md);
+             background: var(--panel); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; max-width: 68ch; }
+  .callout .eyebrow { color: var(--accent); }
+  .callout p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .callout p.strong-line { color: var(--ink); font-weight: 700; }
+  .callout.amber { border-left-color: var(--free); }
+  .callout.amber .eyebrow { color: var(--free); }
+  .callout.red { border-left-color: var(--fail); }
+  .callout.red .eyebrow { color: var(--fail); }
+
+  pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md);
+        padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.75; color: var(--ink); }
+  pre .c { color: var(--muted); }
+  pre b { color: var(--fail); }
+  .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); line-height: 2; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 0.5rem 0.85rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data th { color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: var(--fs-label); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+
+  /* ---------- pipeline ---------- */
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md);
+              background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-box.on .s { color: var(--accent); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
+  .pipe-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .pipe-tool { flex: 1 1 8rem; border: 1px dashed var(--line-strong); border-radius: var(--r-md);
+               background: var(--panel-2); padding: 0.5rem 0.6rem; text-align: center; font-size: var(--fs-xs); color: var(--ink-2); }
+  .pipe-tool.on { border-style: solid; border-color: var(--pass); color: var(--pass); background: var(--pass-soft); font-weight: 700; }
+
+  /* ---------- table of contents ---------- */
+  .toc {
+    list-style: none; margin: 0; padding: 0; counter-reset: toc;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .toc li { counter-increment: toc; background: var(--panel); }
+  .toc a {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: baseline;
+    padding: 0.7rem 1rem; text-decoration: none; color: var(--ink-2);
+    font-size: var(--fs-sm); line-height: 1.5;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--ink); }
+
+  /* ---------- lab ---------- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+               padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .card-head h3 { font-size: var(--fs-sm); }
+  .card-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .lab { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 940px) { .lab { grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); } }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+                 font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); }
+  .field-label .hint { color: var(--muted); font-size: var(--fs-label); }
+  .segments { display: flex; flex-wrap: wrap; gap: 3px; }
+  .segments button { flex: 1 0 2.4rem; font-family: var(--mono); font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
+                     padding: 0.35rem 0.2rem; background: var(--panel-2); color: var(--ink-2);
+                     border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer; }
+  .segments button:hover { border-color: var(--line-strong); }
+  .segments button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  :root[data-theme="light"] .segments button[aria-pressed="true"] { color: #fff; }
+  :root[data-theme="dark"] .segments button[aria-pressed="true"] { color: #0B0E15; }
+  @media (prefers-color-scheme: light) { .segments button[aria-pressed="true"] { color: #fff; } }
+  @media (prefers-color-scheme: dark) { .segments button[aria-pressed="true"] { color: #0B0E15; } }
+
+  .verdict { padding: 1.1rem; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.6rem; }
+  .banner { font-weight: 700; font-size: 1rem; padding: 0.7rem 0.9rem; border-radius: var(--r-md); border-left: 4px solid; }
+  .banner.ok { background: var(--pass-soft); color: var(--pass); border-color: var(--pass); }
+  .banner.bad { background: var(--fail-soft); color: var(--fail); border-color: var(--fail); }
+  .banner.warn { background: var(--free-soft); color: var(--free); border-color: var(--free); }
+  .work { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .work pre { background: var(--panel-2); }
+
+  /* ---------- quiz ---------- */
+  .quiz-pane { padding: 1.25rem 1.35rem 1.35rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .quiz-hero { display: flex; flex-direction: column; gap: 0.35rem; }
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem; }
+  .mode {
+    text-align: left; cursor: pointer; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 0.8rem 0.95rem; display: flex; flex-direction: column; gap: 0.2rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .m-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .mode .m-desc { font-size: var(--fs-label); color: var(--muted); line-height: 1.6; }
+  .mode.primary { background: var(--accent); border-color: var(--accent); }
+  .mode.primary .m-name { color: #fff; }
+  .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+  :root[data-theme="dark"] .mode.primary .m-name { color: #0B0E15; }
+  :root[data-theme="dark"] .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  @media (prefers-color-scheme: dark) {
+    .mode.primary .m-name { color: #0B0E15; }
+    .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  }
+  :root[data-theme="light"] .mode.primary .m-name { color: #fff; }
+  :root[data-theme="light"] .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+
+  .quiz-best { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); margin: 0; }
+  .quiz-bar {
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
+  }
+  .quiz-bar .qcat {
+    padding: 0.1rem 0.5rem; border: 1px solid var(--line-strong);
+    border-radius: 999px; color: var(--ink-2); font-size: var(--fs-label); letter-spacing: 0.06em;
+  }
+  .quiz-bar .lives { margin-left: auto; letter-spacing: 0.2em; color: var(--fail); font-size: 0.95rem; }
+  .quiz-bar .lives .gone { color: var(--line-strong); }
+
+  .qmain { display: flex; flex-direction: column; gap: 0.9rem; }
+  .qtext { font-weight: 700; font-size: 1.0625rem; line-height: 1.7; }
+  .qbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .qbody .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); }
+  .qbody .clist { display: flex; flex-direction: column; gap: 2px; }
+  .qbody .cline {
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+    padding: 0.3rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2);
+    border-left: 3px solid var(--line-strong); overflow-x: auto; white-space: nowrap;
+  }
+
+  .choices { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .choices.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    text-align: left; cursor: pointer; font-size: var(--fs-sm); line-height: 1.6;
+    padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:disabled { cursor: default; }
+  .choice.is-correct { border-color: var(--pass); background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  .choice.is-wrong   { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); }
+  .choice.dim { opacity: 0.5; }
+
+  .fb { border-radius: var(--r-md); padding: 0.85rem 1rem; border-left: 4px solid; font-size: var(--fs-sm); line-height: 1.75; }
+  .fb.ok  { background: var(--pass-soft); border-color: var(--pass); }
+  .fb.bad { background: var(--fail-soft); border-color: var(--fail); }
+  .fb .fb-head { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+  .fb.ok  .fb-head { color: var(--pass); }
+  .fb.bad .fb-head { color: var(--fail); }
+  .fb code { color: var(--ink); }
+
+  .quiz-foot { display: flex; gap: 0.6rem; align-items: center; justify-content: flex-end; }
+  .btn-main {
+    cursor: pointer; font-size: var(--fs-sm); font-weight: 700; padding: 0.55rem 1.2rem;
+    border-radius: var(--r-md); border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  :root[data-theme="dark"] .btn-main { color: #0B0E15; }
+  @media (prefers-color-scheme: dark) { .btn-main { color: #0B0E15; } }
+  :root[data-theme="light"] .btn-main { color: #fff; }
+  .btn-ghost {
+    cursor: pointer; font-size: var(--fs-sm); padding: 0.55rem 1rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--ink-2); border-color: var(--ink-2); }
+
+  .rank-box { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .rank {
+    font-family: var(--mono); font-size: 3.5rem; font-weight: 700; line-height: 1;
+    width: 5rem; height: 5rem; display: grid; place-items: center;
+    border-radius: var(--r-lg); border: 2px solid currentColor; flex: none;
+  }
+  .rank.s { color: var(--accent); }
+  .rank.a { color: var(--pass); }
+  .rank.b { color: var(--free); }
+  .rank.f { color: var(--fail); }
+  .rank-meta { display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank-title { font-weight: 700; font-size: var(--fs-lg); }
+  .rank-sub { font-size: var(--fs-sm); color: var(--ink-2); }
+  .cat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+  .cstat {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+    padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .cstat .cn { font-size: var(--fs-label); color: var(--muted); }
+  .cstat .cv { font-family: var(--mono); font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cstat .cv.full { color: var(--pass); }
+  .cstat .cv.weak { color: var(--fail); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
+  footer a { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a class="sitebar-name" href="/">Susumu Tomita</a>
+    <nav class="sitebar-links">
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/">ノート一覧</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week0/index.html">土台編</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week2/index.html">Week 2</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 3 自習ノート</p>
+    <h1><span>知っている</span>ことだけを、<span>渡す</span></h1>
+    <p class="lead">
+      Week 3 は、有限体の逆元から始めて楕円曲線の群を作り、その上に
+      <strong>シグマプロトコル</strong>と <strong>Fiat–Shamir 変換</strong>を積んで
+      Schnorr 署名まで一気に登ります。課題 <code>schnorr-from-scratch</code> は、
+      その全段を自分で書く構成でした。
+    </p>
+    <p class="lead">
+      このノートの山場は 2 つの実測です。<strong>秘密鍵を一度も使わずに作った会話が検証に通る</strong>こと。
+      そして <strong>nonce を 1 回使い回しただけで、本物の secp256k1 の秘密鍵が復元できる</strong>こと。
+      この 2 つが、ゼロ知識と知識健全性の正体です。
+    </p>
+    <div class="meta-row">
+      <span class="tag">読了 35 分</span>
+      <span class="tag">対話ラボ 2 つ</span>
+      <span class="tag">検問クイズ</span>
+      <span class="tag">前提は土台編</span>
+      <span class="tag">外部通信なし</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================ 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>今週は、資料が 2 つの顔を持っている</h2>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          Week 3 の週 README が言うテーマは<strong>楕円曲線と Schnorr</strong>で、課題も
+          <code>schnorr-from-scratch</code> です。ところが配られた講義スライドの表題は
+          <strong>「zkSNARK part 1」</strong>で、中身は有限体・多項式・commitment・arithmetization。
+          一見すると別の話に見えます。
+        </p>
+        <p>
+          別の話ではありません。<strong>同じ 1 枚の絵の、違う場所を指しているだけ</strong>です。
+          スライドは zkSNARK 全体のパイプラインを見せ、課題はそのうち
+          「楕円曲線とコミット」の柱を、実際に手で組ませています。
+        </p>
+        <p>
+          だからこのノートも 2 段構えにします。前半は<strong>課題の道（有限体 → 楕円曲線 →
+          Schnorr）</strong>を、実際に壊した採点結果つきで登ります。後半は<strong>スライドの道
+          （多項式 → commitment → arithmetization）</strong>を地図として置きます。
+          後半は Week 4 以降で手を動かす場所です。
+        </p>
+      </div>
+
+      <div class="callout">
+        <p class="eyebrow">前提について</p>
+        <p class="strong-line">
+          今週から、土台の数学がそのまま実装に出てきます。
+        </p>
+        <p>
+          mod 演算・群・体・逆元・離散対数に不安があれば、先に
+          <a href="https://susumutomita.github.io/advanced-cryptography-note/week0/index.html">土台編（有限体と楕円曲線）</a>
+          を読んでください。<b>Week 1 の回路も Week 2 のシェアも、この土台の上に乗っています。</b>
+        </p>
+        <p>
+          特に今週は <b>「割り算＝逆元の掛け算」</b>が楕円曲線の傾きの計算で、
+          <b>「0 に逆元はない」</b>が垂直な接線の場合分けで、それぞれ実装として現れます。
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の地図</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">全体像</p>
+      <h2>zkSNARK は、計算を 4 回翻訳して短い証明にする</h2>
+      <p>
+        スライドが最初に出す 1 枚がこれです。左から右へ、証明したい計算がだんだん形を変えていきます。
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="pipe">
+          <div class="pipe-box"><span class="t">計算</span><span class="s">program</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-box"><span class="t">制約</span><span class="s">arithmetization</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-box"><span class="t">多項式</span><span class="s">polynomials</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-box"><span class="t">コミット</span><span class="s">commitment</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-box on"><span class="t">短い証明</span><span class="s">proof</span></div>
+        </div>
+        <div class="pipe-tools">
+          <div class="pipe-tool on">有限体</div>
+          <div class="pipe-tool">フーリエ変換</div>
+          <div class="pipe-tool on">楕円曲線・ハッシュ</div>
+        </div>
+        <p class="caption">
+          下段は、上段を支える道具。<strong>色が付いているのが今週やる場所</strong>です
+          （有限体と楕円曲線、そして一番右の「短い証明」を対話から作る部分）。
+          多項式とフーリエ変換は Week 4 以降の担当になります。
+        </p>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          証明したいのは「ある秘密を知っている」という主張です。スライドの例で言えば、
+          公開値 <code>y = 15</code> に対して <code>w³ + w + 5 = y</code> を満たす
+          秘密の <code>w</code> を知っている、という主張（答えは <code>w = 2</code>）。
+        </p>
+        <p class="subst">
+          statement（公開）: ∃w. w³ + w + 5 = 15<br>
+          witness（秘密）: w = 2
+        </p>
+        <p>
+          この「条件」の部分を、公開入力 <code>y</code> と秘密候補 <code>w</code> を受け取って
+          合否を返す関係 <code>R(y, w)</code> と書くと、zkSNARK が扱うのは
+          <strong>「R(y, w) = 1 となる w が存在する」という形の主張</strong>だけになります。
+          Week 1 の回路は、まさにこの R を書く言語でした。
+        </p>
+      </div>
+
+      <div class="callout">
+        <p class="eyebrow">zkSNARK の頭文字は、そのまま性質の一覧</p>
+        <p><b>zk</b>（Zero-Knowledge）: proof から witness 由来の情報が漏れない。</p>
+        <p><b>S</b>（Succinct）: proof が短く、検証が速い。</p>
+        <p><b>N</b>（Non-interactive）: 1 通で完結する。何往復もしない。</p>
+        <p><b>ARK</b>（ARgument of Knowledge）: 有効な proof を作れる prover は、対応する witness を
+        本当に知っている（知識健全性）。正しい witness を持つ prover の proof は必ず通る（完全性）。</p>
+        <p class="strong-line">
+          今週の Schnorr は、この 4 つを最小構成で全部持っている「いちばん小さい実例」です。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 3 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">積み上げ 1 段目</p>
+      <h2>有限体の逆元 — ここが崩れると上は全部崩れる</h2>
+      <p>
+        課題は Part 1 から Part 3 まで一本につながっていて、
+        <strong>下の Part が間違っていると上の Part は動きません</strong>。
+        その一番下が、逆元です。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          有限体で割り算をするとは、<strong>逆元を掛けること</strong>でした。
+          <code>a⁻¹</code> は <code>a·a⁻¹ ≡ 1 (mod p)</code> を満たす値です。
+        </p>
+        <p>
+          求め方は<strong>拡張ユークリッドの互除法</strong>。<code>ax + bp = 1</code> を
+          満たす整数 <code>x, b</code> を見つける操作で、両辺を mod p で見ると
+          <code>bp ≡ 0</code> なので <code>ax ≡ 1</code>。つまり <strong>x が a の逆元</strong>です。
+        </p>
+        <p class="subst">
+          F₁₃ で 5⁻¹ を求める<br>
+          13 = 2·5 + 3　　5 = 1·3 + 2　　3 = 1·2 + 1<br>
+          ↓ 1 まで下りたら、逆に書き戻す<br>
+          1 = 3 − 1·2 = 2·13 − 5·5<br>
+          mod 13 で見ると −5·5 ≡ 1、よって 5⁻¹ = −5 = <b>8</b><br>
+          検算: 5·8 = 40 = 39 + 1 ≡ 1 (mod 13) ✓
+        </p>
+      </div>
+
+      <div class="callout amber">
+        <p class="eyebrow">実測 — 正規化を忘れると、ここで止まる</p>
+        <p class="strong-line">
+          拡張ユークリッドが返す x は、<b>負の数のことがあります</b>。
+        </p>
+        <p>
+          上の例でも、素直に出てくるのは <code>8</code> ではなく <code>−5</code> でした。
+          そのまま返す実装を採点器に通すと、こうなります。
+        </p>
+        <pre>FAIL: test_inv_small (a=10, p=17)
+FAIL: test_inv_small (a=2, p=1009)
+FAIL: test_inv_small (a=966, p=1009)
+AssertionError: False is not true :
+  逆元は 0..p-1 に正規化して返してください</pre>
+        <p>
+          <b>値としては正しいのに、表現がそろっていないと落ちる。</b>
+          Week 2 の share でもまったく同じ理由で落ちました
+          （<code>[70, -2, -71]</code> vs 正解 <code>[3, 65, 63]</code>）。
+          <b>「体の元は 0..p−1 の代表で持つ」は、週をまたいで効いてくる約束事</b>です。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">0 だけは逆元を持たない — これが後で効く</p>
+      <p>
+        <code>0</code> に何を掛けても 1 にはならないので、0 の逆元は存在しません。課題では
+        <code>field_inv(0, p)</code> で <code>ValueError</code> を投げることが要求されます。
+      </p>
+      <p class="strong-line">
+        この「0 で割れない」が、楕円曲線の場合分けにそのまま姿を変えて現れます。
+      </p>
+      <p>
+        2 倍算の傾きは <code>λ = (3x² + a) / 2y</code>。<b>y = 0 の点では分母が 0</b> になり、
+        傾きが計算できません。幾何的には接線が垂直になる場所で、そのときの
+        <code>2P</code> は無限遠点 <code>O</code> と定めます。
+        <b>「割れないから例外」ではなく、「割れない場所には別の答えがある」</b>という形になっています。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 4 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">積み上げ 2 段目</p>
+      <h2>楕円曲線 — 点の足し算で、もう一つの群を作る</h2>
+      <p>
+        有限体は「+ と ×」の世界でした。その上に、まったく別の演算を持つ群をもう 1 つ作ります。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>3 点で交わる、という事実だけが元手</h4>
+        <div class="body">
+          <p>
+            曲線 <code>y² = x³ + ax + b</code> は 3 次式なので、直線と最大 3 点で交わります。
+            そこで <strong>2 点 P, Q を通る直線が曲線と交わる 3 点目を R′ とし、その x 軸反転を
+            P + Q と定めます</strong>。
+          </p>
+          <p class="why">
+            <b>なぜ反転するのか:</b> 素直に「3 点目」を和にすると、単位元と逆元がうまく定義できません。
+            反転を入れると、<b>一直線上の 3 点の和が O（無限遠点）</b>という美しい規則になり、
+            O が単位元、x 軸対称の点どうしが逆元、という群の形が完成します。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>幾何を、有限体の式に落とす</h4>
+        <div class="body">
+          <p>直線の傾き λ を求め、交点の座標を解くと、次の式になります。</p>
+          <p class="subst">
+            弦（P ≠ Q）: λ = (y_Q − y_P) / (x_Q − x_P)<br>
+            接線（P = Q）: λ = (3x_P² + a) / (2y_P)<br><br>
+            x_R = λ² − x_P − x_Q<br>
+            y_R = λ(x_P − x_R) − y_P
+          </p>
+          <p class="why">
+            <b>「/」は全部、前段の field_inv です。</b>実数の幾何の絵はあくまで直感で、
+            計算は最初から最後まで F_p の中で行います。
+            <b>絵に描ける曲線と、実際に計算している集合は別物</b>だと割り切るのが早道でした。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>手で 1 回やっておく — F₁₁ 上で 2P</h4>
+        <div class="body">
+          <p>曲線 <code>y² = x³ + x + 6</code> over F₁₁、点 <code>P = (2, 7)</code> の 2 倍。</p>
+          <p class="subst">
+            λ = (3·2² + 1) / (2·7) = 13 / 14 ≡ 2 / 3 (mod 11)<br>
+            3⁻¹ = 4（3·4 = 12 ≡ 1）なので λ = 2·4 = <b>8</b><br><br>
+            x_R = 8² − 2 − 2 = 60 ≡ <b>5</b>　（60 = 55 + 5）<br>
+            y_R = 8·(2 − 5) − 7 = −31 ≡ <b>2</b>　（−31 + 33 = 2）<br><br>
+            2P = (5, 2)　検算: 2² = 4、5³ + 5 + 6 = 136 ≡ 4 (mod 11) ✓
+          </p>
+          <p class="why">
+            <b>検算の癖をつけると、デバッグが一瞬で終わります。</b>
+            課題には <code>is_on_curve</code> が用意されていて、
+            <b>計算結果が曲線に乗っていなければ、公式のどこかが間違っている</b>と即座に分かります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>符号を 1 つ間違えると、点は曲線から落ちる</h4>
+        <div class="body">
+          <p>
+            <code>y_R = λ(x_P − x_R) − y_P</code> の引き算の向きを逆にした実装を、
+            採点器に通した結果です。
+          </p>
+          <pre>FAIL: test_doubling
+AssertionError: 2G = (818, <b>622</b>) が曲線上にありません。
+  y_R = lam * (x_P - x_R) - y_P の符号や mod の取り忘れを確認してください
+
+FAIL: test_scalar_mul_is_homomorphic (k1=3, k2=5)
+AssertionError: Tuples differ: (951, 492) != (755, 55)</pre>
+          <p class="why">
+            正解は <code>(818, 800)</code>。<b>x 座標は合っていて、y だけがずれます</b>
+            （<code>800 + 622 = 1422</code>、<code>1009</code> を引くと <code>413</code>…と、
+            単純な符号反転にもなっていない）。
+            <b>「曲線上にあるか」というたった 1 つの検査が、この種のミスを全部捕まえます。</b>
+            準同型性 <code>(k₁+k₂)G = k₁G + k₂G</code> のテストも同時に落ちるのは、
+            群の構造そのものが壊れているからです。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>double-and-add — 倍々で登る</h4>
+        <div class="body">
+          <p>
+            <code>kP</code> を定義どおり k 回足すと、k に比例した時間がかかります。
+            k を 2 進展開して、<strong>倍にしながら必要なビットのところだけ足す</strong>と
+            <code>log₂k</code> に比例します。
+          </p>
+          <p class="subst">
+            13P（13 = 1101₂）: P →2P →4P →8P と 3 回倍にして、8P + 4P + P で 2 回足す = <b>5 回</b><br>
+            定義どおりなら 12 回
+          </p>
+          <p class="why">
+            <b>実測（secp256k1、この課題の実装）:</b>
+          </p>
+          <pre>k = 13                     ec_add   6 回 /  0.2 ms
+k = 123                    ec_add  12 回 /  0.4 ms
+k ≈ 2^64                   ec_add 100 回 /  3.1 ms
+k ≈ 2^256                  ec_add 446 回 / 12.9 ms
+
+素朴な加算の実測速度: 約 1,231,505 回/秒
+→ nG（n ≈ 2^256）を素朴に足すと <b>約 3.0×10^63 年</b>
+   double-and-add なら 512 回未満で終わる</pre>
+          <p class="why">
+            課題のテストには <code>nG = O</code>（n は位数、約 2²⁵⁶）を確かめるケースがあるので、
+            <b>素朴な実装だとテストが永遠に返ってきません</b>。
+            「落ちる」のではなく「終わらない」という失敗の仕方をするのが、この間違いの特徴です。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">土台の要</p>
+      <h2>離散対数 — 速い向きと、難しい向き</h2>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          double-and-add のおかげで <code>x</code> から <code>xP</code> は一瞬で計算できます。
+          では逆に、<code>P</code> と <code>xP</code> から <code>x</code> を求めるには?
+        </p>
+        <p>
+          <strong>効率の良い方法が知られていません。</strong>これが楕円曲線上の離散対数問題で、
+          暗号の一方向性はここから来ています。
+        </p>
+        <p>
+          見方は<strong>ハッシュとまったく同じ</strong>です。<code>m → Hash(m)</code> は速く、
+          <code>Hash(m) → m</code> は難しい。楕円曲線では、入力がスカラー <code>x</code>、
+          出力が点 <code>xP</code> という構造でこれを作ります。
+        </p>
+        <p>
+          資料では乗法記法（<code>g, gˣ</code>）と加法記法（<code>P, xP</code>）が混ざりますが、
+          <strong>同じことの書き方違い</strong>です。スライドの Schnorr は乗法記法、
+          課題の実装は楕円曲線なので加法記法でした。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="table-scroll"><table class="data">
+          <tr><th>問題</th><th>乗法記法</th><th>加法記法</th></tr>
+          <tr><td>離散対数</td><td>g, gᵃ から a</td><td>P, aP から a</td></tr>
+          <tr><td>計算 Diffie–Hellman</td><td>gᵃ, gᵇ から gᵃᵇ</td><td>aP, bP から abP</td></tr>
+          <tr><td>判定 Diffie–Hellman</td><td>T = gᵃᵇ か判定</td><td>T = abP か判定</td></tr>
+        </table></div>
+        <div class="callout">
+          <p class="eyebrow">なぜ「難しさ」に頼れるのか</p>
+          <p>
+            小さい群なら総当たりで解けます。位数 967 の曲線なら、最悪 967 回試せば当たります。
+            実用の曲線 secp256k1 は位数が約 2²⁵⁶ で、
+            <b>総当たりの手数が宇宙の年齢を桁で超える</b>から安全とみなせる、という話です。
+          </p>
+          <p class="strong-line">
+            「解けない」ではなく「割に合わない」。暗号の安全性は、たいていこの形をしています。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">積み上げ 3 段目</p>
+      <h2>シグマプロトコル — 3 手で「知っている」を渡す</h2>
+      <p>
+        公開鍵 <code>P = xG</code> について「x を知っている」ことを、x を見せずに納得させます。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>3 手のやりとり</h4>
+        <div class="body">
+          <p class="subst">
+            証明者　　　　　　　　　　　　　　検証者<br>
+            r をランダムに選ぶ<br>
+            R = rG　　　　── R ──▶<br>
+            　　　　　　　　◀── e ──　　e をランダムに選ぶ<br>
+            s = r + e·x　　── s ──▶　　sG = R + eP を確認
+          </p>
+          <p class="why">
+            <b>完全性は 1 行で確かめられます。</b>
+            <code>sG = (r + e·x)G = rG + e·(xG) = R + eP</code>。
+            正直に計算した s なら、検証式は必ず成り立ちます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>r は「使い捨ての目隠し」</h4>
+        <div class="body">
+          <p>
+            検証者が受け取る <code>s = r + e·x</code> には秘密 x が入っていますが、
+            <strong>ランダムな r が足されている</strong>ので、s 単体からは何も分かりません。
+          </p>
+          <p class="why">
+            <b>Week 2 とまったく同じ構図です。</b>Beaver 乗算で公開した
+            <code>d = x − a</code> が安全だったのは、a が誰も知らない乱数だったから。
+            ここでも <b>r がワンタイムパッドの役</b>をしています。
+            <b>そして Week 2 と同じく、使い回した瞬間に壊れます</b>（後述）。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>2 つの法を取り違える — 最初の関門</h4>
+        <div class="body">
+          <p>
+            座標の計算は <code>mod p</code>、スカラー（指数）の計算は <code>mod n</code>（G の位数）。
+            <strong>1 つのコードに 2 つの法が同居します</strong>。
+          </p>
+          <p>
+            <code>s = r + e·x</code> の mod を <code>p</code> にした実装の採点結果です。
+          </p>
+          <pre>FAIL: test_honest_transcript_accepts (r=456, e=77)
+FAIL: test_honest_transcript_accepts (r=966, e=966)
+FAIL: test_honest_transcript_accepts (r=500, e=123)
+FAIL: test_nonce_reuse_leaks_secret
+AssertionError: 786 != 123</pre>
+          <p class="why">
+            面白いのは、<b>4 つのうち (r=1, e=0) のケースだけが通る</b>ことです。
+            e = 0 なら s = r = 1 で、どちらの法で丸めても 1 のまま。
+            <b>法を間違えていても、値が法より小さければ表面化しません。</b>
+            そして最後の 1 行——<b>nonce 再利用の「攻撃」までもが失敗しています</b>。
+            攻撃の式 <code>x = (s₁−s₂)(e₁−e₂)⁻¹</code> も mod n の世界の話なので、
+            土台がずれると攻撃側も成立しなくなる。
+            <b>正しい代数の上でしか、正しい壊し方もできない。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 7 : LAB 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 1</p>
+      <h2>Schnorr を回す — 正直な証明者と、simulator</h2>
+      <p>
+        課題と同じトイ曲線（<code>y² = x³ + 11</code> over F₁₀₀₉、位数 967、G = (1, 298)）で
+        3 手を実際に走らせます。<strong>モードを切り替えると、秘密鍵を使わずに同じ形の会話を作ります</strong>。
+        どちらも検証に通ることを確かめてください。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>設定</h3><span class="eyebrow">x = 123 / P = (376,128)</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>モード</span><span class="hint">誰が何を知っているか</span></div>
+            <div class="segments" id="seg-mode" role="group" aria-label="モード"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>ノンス r</span><span class="hint">証明者が選ぶ（正直モード）</span></div>
+            <div class="segments" id="seg-r" role="group" aria-label="ノンス"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>チャレンジ e</span><span class="hint">検証者が選ぶ</span></div>
+            <div class="segments" id="seg-e" role="group" aria-label="チャレンジ"></div>
+          </div>
+          <p class="caption" id="mode-note">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="sig-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="sig-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">やりとりと検証の中身</p>
+          <pre id="sig-trace">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 8 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">3 つの性質</p>
+      <h2>受理された、では何も言えない — 完全性・健全性・ゼロ知識</h2>
+      <p>
+        ラボで見たとおり、<strong>秘密を知らなくても受理される会話は作れます</strong>。
+        では何が「知っている」の証明になっているのか。3 つの性質を分けて考えます。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">完全性 — completeness</p>
+          <p class="strong-line">正しい witness を持つ証明者は、必ず受理される。</p>
+          <p>
+            <code>sG = R + eP</code> が代数的に恒等式になることで保証されます。
+            <b>これが崩れると、正直な人が弾かれる</b>（使いものにならない）。
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">知識健全性 — knowledge soundness</p>
+          <p class="strong-line">受理される proof を作れる者は、本当に witness を知っている。</p>
+          <p>
+            証明の道具が<b>抽出器（extractor）</b>です。
+            証明者を巻き戻して<b>同じ R のまま別のチャレンジ</b> e′ を投げ、
+            2 つの応答 c, c′ を得られたなら、そこから x を計算して取り出せる——
+            <b>取り出せた以上、x は最初から証明者の中にあった</b>、という論法です。
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">ゼロ知識 — zero-knowledge</p>
+          <p class="strong-line">記録を見ても、公開情報から説明できる範囲しか分からない。</p>
+          <p>
+            道具は <b>simulator</b>。<b>秘密を持たない</b> simulator が、本物と見分けのつかない
+            会話を作れるなら、その会話に秘密由来の情報は入っていない、と言えます。
+            <b>ラボの simulator モードがまさにこれ</b>です。
+          </p>
+        </div>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout amber">
+          <p class="eyebrow">実測 — simulator の会話は本当に受理される</p>
+          <p>
+            秘密 x を一度も使わず、<b>順番を逆にして</b>作った会話です
+            （先に e, s をランダムに選び、<code>R := sG − eP</code> と逆算する）。
+          </p>
+          <pre>x を使わずに作った会話:
+  (R, e, s) = ((146, 214), 190, 284)
+検証者はこれを受理するか: <b>True</b></pre>
+          <p>
+            <b>つまり「受理された会話が 1 本ある」ことは、何の証明にもなっていません。</b>
+            本物と偽物の違いは中身ではなく<b>順番</b>だけ——
+            本物は R を先に出し、<b>そのあとで</b>チャレンジを受け取る。
+            simulator はチャレンジを知ってから R を作る。
+          </p>
+          <p class="strong-line">
+            「証明者が先にコミットする」という順番が、健全性の全部を担いでいます。
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">抽出器と攻撃は、同じ 1 本の式</p>
+          <p>
+            同じ r（同じ R）で 2 つのチャレンジに答えると:
+          </p>
+          <p class="subst">
+            s₁ = r + e₁·x　　s₂ = r + e₂·x<br>
+            s₁ − s₂ = (e₁ − e₂)·x　　← r が消える<br>
+            x = (s₁ − s₂)·(e₁ − e₂)⁻¹ (mod n)
+          </p>
+          <p class="strong-line">
+            これが抽出器の中身であり、そのまま nonce 再利用攻撃の中身でもあります。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 9 : LAB 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 2</p>
+      <h2>nonce を使い回すと、公開情報だけで鍵が出る</h2>
+      <p>
+        攻撃者が持っているのは<strong>公開鍵と 2 本の署名だけ</strong>という設定です。
+        r を共通にしたまま 2 つのチャレンジを選んで、秘密鍵が復元される瞬間を見てください。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>攻撃者が観測する 2 本</h3><span class="eyebrow">同じ r</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>共通のノンス r</span><span class="hint">証明者のミス</span></div>
+            <div class="segments" id="seg-r2" role="group" aria-label="共通ノンス"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>チャレンジ e₁</span><span class="hint">1 本目</span></div>
+            <div class="segments" id="seg-e1" role="group" aria-label="チャレンジ1"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>チャレンジ e₂</span><span class="hint">2 本目</span></div>
+            <div class="segments" id="seg-e2" role="group" aria-label="チャレンジ2"></div>
+          </div>
+          <p class="caption">
+            秘密鍵 x = 123 は攻撃者に見えていません。使うのは R, e, s の公開値だけです。
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="atk-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="atk-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">攻撃者の計算</p>
+          <pre id="atk-trace">—</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout red">
+      <p class="eyebrow">実測 — 本物の secp256k1 でも同じことが起きる</p>
+      <p>
+        トイ曲線だからではありません。課題の実装で、Bitcoin と同じ曲線・256 ビットの秘密鍵に対して
+        同じ攻撃を走らせた結果です。
+      </p>
+      <pre>署名1: R.x = 0xb44cf0c87f8f960c...  s1 = 0x28807ada8ee210bd...
+署名2: R.x = 0xb44cf0c87f8f960c...  s2 = 0x24da65e7523016c0...
+R が一致している: True   <span class="c">← 公開情報だけで再利用が見抜ける</span>
+
+復元した x = 0x1b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
+本物の  x = 0x1b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
+一致: <b>True</b></pre>
+      <p class="strong-line">
+        署名を 2 本公開しただけで、秘密鍵が完全に失われます。
+      </p>
+      <p>
+        実際に、PlayStation 3 の ECDSA 署名鍵や、初期の Bitcoin ウォレットの一部が、
+        この形（乱数生成の不備で nonce が重複）で鍵を失っています。
+        <b>「乱数を毎回変える」は運用上の注意ではなく、安全性の前提そのもの</b>です。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 10 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">仕上げ</p>
+      <h2>Fiat–Shamir 変換 — 検証者を、ハッシュで置き換える</h2>
+      <p>
+        ここまでは対話でした。最後の 1 手で、対話を消して署名にします。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          検証者の仕事は<strong>ランダムなチャレンジ e を選ぶことだけ</strong>でした。
+          ならば、<strong>ここまでの会話のハッシュで e を作ってしまえばよい</strong>。
+        </p>
+        <p class="subst">
+          e := H(ctx, G, P, R)
+        </p>
+        <p>
+          R は公開されるので、検証者も同じ e を自分で計算できます。往復が消え、
+          <strong>proof は 1 通（R, s）で完結</strong>します。
+        </p>
+        <p>
+          さらにハッシュの入力に<strong>メッセージ m を混ぜる</strong>と、
+          <code>e = H(ctx, G, P, R, m)</code> となり、
+          <strong>(R, s) はそのまま m への署名</strong>になります。これが Schnorr 署名で、
+          Bitcoin の BIP-340 や Ed25519 がこの系統です。
+        </p>
+        <p>
+          課題では <code>challenge_hash(R, pubkey, message, n)</code> が与えられ、
+          <strong>署名側と検証側の両方が、同じ引数で e を計算し直す</strong>作りになっていました。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout amber">
+          <p class="eyebrow">実測 — ハッシュの引数の順番を入れ替えただけ</p>
+          <p>
+            <code>challenge_hash(R, pubkey, ...)</code> を
+            <code>challenge_hash(pubkey, R, ...)</code> と取り違えた実装です。
+          </p>
+          <pre>FAIL: test_sign_vector
+AssertionError: 7765...5734 != 9434...3357 :
+  s = nonce + e*x mod n のはずです。e は
+  challenge_hash(R, pubkey, message, curve.n) で計算します。
+  引数の順番(R が先、pubkey が後)も確認してください
+
+FAIL: test_roundtrip</pre>
+          <p>
+            <b>面白いのは、これが「動く」ことです。</b>署名側と検証側が同じ順番で間違えていれば、
+            自分の署名は自分で検証できてしまう（roundtrip が落ちたのは、
+            テストが用意した正しい公開鍵と噛み合わなかったため）。
+            <b>ハッシュへの入力の並びは、相互運用の仕様そのもの</b>で、
+            自己検証だけでは正しさを確認できません。
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">ctx に何を入れるか</p>
+          <p>
+            プロトコル名・曲線の種類・証明したい statement といった文脈情報を入れます。
+          </p>
+          <p class="strong-line">
+            同じ形の署名が、別の文脈で使い回されるのを防ぐためです。
+          </p>
+          <p>
+            <b>「何をハッシュに入れ忘れたか」が、そのまま脆弱性になります。</b>
+            メッセージを入れ忘れれば署名は付け替え放題、
+            公開鍵を入れ忘れれば別人の鍵で通る余地が生まれます。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 11 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">地図</p>
+      <h2>スライドの後半 — ここから先が zkSNARK の本体</h2>
+      <p>
+        課題で登ったのはパイプラインの右端（proof を短くする部分）でした。
+        残りの箱は Week 4 以降で手を動かします。今週は<strong>地図として置いておく</strong>だけにします。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>多項式 — 係数表現と評価表現</h4>
+        <div class="body">
+          <p>
+            <code>f(X) = 3X² + 2X + 5</code> は、係数の並び <code>(5, 2, 3)</code> としても、
+            いくつかの点での値の並び <code>(f(x₀), f(x₁), f(x₂))</code> としても持てます。
+            <strong>次数 d の多項式は、異なる d+1 点での値が決まれば一意に決まる</strong>ので、
+            この 2 つは同じ情報です。
+          </p>
+          <p class="why">
+            <b>なぜ多項式にするのか:</b> 制約が何万本あっても、まとめて 1 本の多項式の等式にできるから。
+            そして<b>ランダムな 1 点で値を比べるだけで、全体が一致しているかをほぼ確実に判定できる</b>。
+            検証が「短く」なる仕掛けの中心がこれです。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>フーリエ変換 — 2 つの表現を行き来する</h4>
+        <div class="body">
+          <p>
+            評価する点を <strong>1 の n 乗根の冪</strong> <code>{1, ω, ω², …}</code> に揃えておくと、
+            係数表現と評価表現の変換が規則的になります。これが有限体上のフーリエ変換で、
+            素朴には O(n²)、FFT なら O(n log n)。
+          </p>
+          <p class="why">
+            <b>Week 3 の土台がここにも効きます。</b>逆変換に出てくる <code>1/n</code> は
+            <b>n の逆元</b>、ω は<b>位数 n の元</b>——どちらも土台編の言葉そのままです。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>Commitment — 先に短く固定して、あとで開く</h4>
+        <div class="body">
+          <p>
+            大きな対象（多項式や実行トレース）を短い値 <code>c</code> に固定して先に渡し、
+            後から中身を見せて開く。封をした封筒と同じで、性質は 2 つ。
+          </p>
+          <p class="subst">
+            binding: 開けるのは最初に入れたものだけ<br>
+            hiding: 開くまで、相手が持っているのは c だけ
+          </p>
+          <p class="why">
+            ハッシュなら <code>c = Hash(r, m)</code>（乱数 r を混ぜないと、候補が少ないとき総当たりで中身が割れる）。
+            <b>Week 1 のノートで出てきた「箱」が、ここで正式な道具として戻ってきます。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>KZG — 多項式を 1 点に固定し、1 点だけ開く</h4>
+        <div class="body">
+          <p>
+            秘密のスカラー τ に対する <code>SRS = (P, τP, τ²P, …, τᵈP; Q, τQ)</code> を公開しておくと、
+            係数を掛けて足すだけで <code>C = f(τ)P</code> が作れます（τ を誰も知らないまま）。
+          </p>
+          <p class="subst">
+            f(z) = y を示す　→　q(X) = (f(X) − y)/(X − z) を作り、π = q(τ)P を出す<br>
+            検証: e(C − yP, Q) = e(π, τQ − zQ)
+          </p>
+          <p class="why">
+            <b>割り切れることが、f(z) = y と同値。</b>そして「積の関係」を点だけで確かめるために
+            <b>ペアリング</b>が要ります。<code>aP</code> と <code>bP</code> から足し算で作れるのは
+            <code>(a+b)P</code> まで——<b>積 abP には手が届かない</b>ので、
+            スカラーを指数へ移せる双線形写像を持ち込む、という筋道です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>Arithmetization — 計算を制約の形に書き直す</h4>
+        <div class="body">
+          <p>
+            <strong>Week 1 でやったことが、ここに戻ってきます。</strong>
+            制約は「0 になる式」に揃え、掛け算 1 個ずつに分解する（R1CS）。
+          </p>
+          <p class="subst">
+            w³ + w + 5 = y を分解する<br>
+            t₁ ← w·w　　t₂ ← t₁·w　　y ← t₂ + w + 5<br>
+            ↓　制約として読む<br>
+            t₁ − w² = 0　　t₂ − t₁w = 0　　t₂ + w + 5 − y = 0
+          </p>
+          <p class="why">
+            R1CS は <code>(Az) ∘ (Bz) = Cz</code> の形にまとまります。
+            並べ方は他にもあって、<b>AIR</b> は実行トレースの表を「隣り合う行の規則」で縛る方式
+            （行が増えても制約の記述量は変わらない）。
+            <b>見た目は違っても、どれも計算の正しさを有限体上の制約として扱っている</b>点は同じです。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout">
+      <p class="eyebrow">一文でまとめると</p>
+      <p class="strong-line">
+        zkSNARK は、公開 statement に対して秘密 witness が存在することを、
+        計算を制約と多項式へ翻訳し、commitment で短く固定して、
+        短い proof として検証できるようにする仕組み。
+      </p>
+      <p>
+        今週作った Schnorr は、この文の「短い proof」と「対話を消す」部分を、
+        いちばん小さい形で全部持っている実例でした。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 12 : QUIZ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">検問クイズ</p>
+      <h2>鍵検問 — あなたが検証者になる</h2>
+      <p>
+        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
+        有限体の計算・曲線上の点・トランスクリプトの受理を審査する。問題は毎回その場で生成され、
+        判定は上のラボと同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 13 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">持ち帰り</p>
+      <h2>持っておくと効く問い</h2>
+    </div>
+    <div class="prose">
+      <p>
+        <strong>① 「受理された」は、それ単体では何の証拠でもない。</strong>
+        simulator が秘密なしで受理される会話を作れました。効いているのは中身ではなく、
+        <b>証明者が先にコミットし、チャレンジを後から受け取る</b>という順番です。
+      </p>
+      <p>
+        <strong>② 抽出器と攻撃は、同じ 1 本の式。</strong>
+        <code>x = (s₁−s₂)(e₁−e₂)⁻¹</code> は、
+        「知っていることの証明」でもあり「nonce 再利用で鍵が漏れる理由」でもあります。
+        <b>安全性の根拠と攻撃手順が表裏一体</b>なのは、この分野でよく出てくる形です。
+      </p>
+      <p>
+        <strong>③ 乱数の条件が 1 つ欠けると壊れる。</strong>
+        Week 2 の Beaver triple は<b>使い回した瞬間</b>に、Week 2 の OT は
+        <b>範囲から 0 を除いた瞬間</b>に、Week 3 の nonce は<b>再利用した瞬間</b>に壊れました。
+        3 週連続で同じ教訓です。
+      </p>
+      <p>
+        <strong>④ 2 つの法を混ぜない。</strong>
+        座標は mod p、スカラーは mod n。取り違えても<b>小さい値のケースだけは通ってしまう</b>ので、
+        テストが弱いと気づけません。
+      </p>
+      <p>
+        <strong>⑤ 検算できる不変量を 1 つ持つ。</strong>
+        楕円曲線なら <code>is_on_curve</code>。
+        <b>「結果が必ず満たすはずの性質」を 1 つ決めておくと、デバッグが探索から確認に変わります。</b>
+      </p>
+      <p>
+        そして Week 1 からの問いは、今週こう言い換わります ——
+        <strong>「この値を隠しているのは何で、その条件は何本あるか」</strong>。
+        r がランダムであること、毎回違うこと、ハッシュに正しい文脈が入っていること。
+        <b>1 本でも欠ければ、静かに壊れます。</b>
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    zk-tokyo Advanced Cryptography Program 2026 · Week 3 <code>schnorr-from-scratch</code> と
+    講義スライド「zkSNARK part 1」の自習ノート。
+    「実測」とある出力は、公式課題の公開テストにわざと壊した実装を通した実際の結果です。
+    ラボとクイズの計算はすべてこのページ内で行っています（外部通信なし）。
+    ／ <a href="https://github.com/susumutomita/advanced-cryptography-note">susumutomita/advanced-cryptography-note</a>
+  </div>
+</footer>
+
+<script>
+// ---- 楕円曲線の計算器（課題のトイ曲線をそのまま JS に移したもの） ----
+(function () {
+  "use strict";
+
+  // y^2 = x^3 + 11 over F_1009、G = (1, 298)、位数 n = 967
+  var TOY = { p: 1009, a: 0, b: 11, G: [1, 298], n: 967 };
+
+  function mod(v, m) { return ((v % m) + m) % m; }
+
+  // 拡張ユークリッドで逆元（土台編と同じ手順）
+  function inv(a, m) {
+    a = mod(a, m);
+    if (a === 0) throw new Error("0 に逆元はありません");
+    var oldR = a, r = m, oldS = 1, s = 0, q, t;
+    while (r !== 0) {
+      q = Math.floor(oldR / r);
+      t = oldR - q * r; oldR = r; r = t;
+      t = oldS - q * s; oldS = s; s = t;
+    }
+    return mod(oldS, m);
+  }
+
+  function ecAdd(P, Q, C) {
+    if (P === null) return Q;
+    if (Q === null) return P;
+    var p = C.p;
+    var xP = mod(P[0], p), yP = mod(P[1], p);
+    var xQ = mod(Q[0], p), yQ = mod(Q[1], p);
+    if (xP === xQ && mod(yP + yQ, p) === 0) return null;
+    var lam;
+    if (xP === xQ && yP === yQ) {
+      lam = mod(mod(3 * xP * xP + C.a, p) * inv(mod(2 * yP, p), p), p);
+    } else {
+      lam = mod(mod(yQ - yP, p) * inv(mod(xQ - xP, p), p), p);
+    }
+    var xR = mod(lam * lam - xP - xQ, p);
+    var yR = mod(lam * (xP - xR) - yP, p);
+    return [xR, yR];
+  }
+
+  function ecMul(k, P, C) {
+    k = mod(k, C.n);
+    var result = null, addend = P;
+    while (k > 0) {
+      if (k % 2 === 1) result = ecAdd(result, addend, C);
+      k = Math.floor(k / 2);
+      if (k > 0) addend = ecAdd(addend, addend, C);
+    }
+    return result;
+  }
+
+  function pt(P) { return P === null ? "O（無限遠点）" : "(" + P[0] + ", " + P[1] + ")"; }
+  function eq(P, Q) {
+    if (P === null || Q === null) return P === Q;
+    return P[0] === Q[0] && P[1] === Q[1];
+  }
+
+  var SECRET = 123;                        // 秘密鍵 x
+  var PUB = ecMul(SECRET, TOY.G, TOY);     // 公開鍵 P = xG = (376, 128)
+
+  // 正直な証明者の 3 手
+  function honest(r, e) {
+    var R = ecMul(r, TOY.G, TOY);
+    var s = mod(r + e * SECRET, TOY.n);
+    return { R: R, e: e, s: s };
+  }
+
+  // simulator: 秘密を使わず、順番を逆にして作る（R := sG - eP）
+  function simulate(e, s) {
+    var negE = mod(-e, TOY.n);
+    var R = ecAdd(ecMul(s, TOY.G, TOY), ecMul(negE, PUB, TOY), TOY);
+    return { R: R, e: e, s: s };
+  }
+
+  function verify(tr) {
+    var left = ecMul(tr.s, TOY.G, TOY);
+    var right = ecAdd(tr.R, ecMul(tr.e, PUB, TOY), TOY);
+    return { ok: eq(left, right), left: left, right: right };
+  }
+
+  // nonce 再利用からの鍵復元
+  function recover(s1, s2, e1, e2) {
+    if (mod(e1 - e2, TOY.n) === 0) return null;
+    return mod(mod(s1 - s2, TOY.n) * inv(mod(e1 - e2, TOY.n), TOY.n), TOY.n);
+  }
+
+  // クイズから同じ計算器を使うために公開する
+  window.__schnorr = {
+    TOY: TOY, SECRET: SECRET, PUB: PUB,
+    mod: mod, inv: inv, ecAdd: ecAdd, ecMul: ecMul, pt: pt, eq: eq,
+    honest: honest, simulate: simulate, verify: verify, recover: recover
+  };
+
+  // ---------------- ラボ 1: Schnorr を回す ----------------
+  var banner = document.getElementById("sig-banner");
+  if (banner) {
+    var note = document.getElementById("sig-note");
+    var trace = document.getElementById("sig-trace");
+    var modeNote = document.getElementById("mode-note");
+    var R_CHOICES = [1, 77, 456, 500, 900, 966];
+    var E_CHOICES = [0, 1, 77, 90, 190, 500, 966];
+    var st = { mode: "honest", r: 456, e: 77 };
+    var hosts = {};
+
+    function seg(id, key, values, label) {
+      var host = document.getElementById(id);
+      hosts[key] = host;
+      values.forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = label ? label(v) : String(v);
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function () { st[key] = v; render1(); });
+        host.appendChild(b);
+      });
+    }
+    seg("seg-mode", "mode", ["honest", "sim"], function (v) {
+      return v === "honest" ? "正直な証明者" : "simulator";
+    });
+    seg("seg-r", "r", R_CHOICES);
+    seg("seg-e", "e", E_CHOICES);
+
+    function render1() {
+      Object.keys(hosts).forEach(function (k) {
+        var vals = k === "mode" ? ["honest", "sim"] : (k === "r" ? R_CHOICES : E_CHOICES);
+        Array.prototype.forEach.call(hosts[k].children, function (b, i) {
+          b.setAttribute("aria-pressed", vals[i] === st[k] ? "true" : "false");
+        });
+      });
+      hosts.r.parentElement.parentElement.style.opacity = st.mode === "sim" ? "0.45" : "1";
+
+      var tr, L = [];
+      if (st.mode === "honest") {
+        tr = honest(st.r, st.e);
+        modeNote.textContent = "正直モード: 秘密鍵 x = 123 を使い、R を先に出してから e を受け取ります。";
+        L.push("【1】証明者: ノンス r = " + st.r + " を選ぶ");
+        L.push("      R = rG = " + st.r + "·(1, 298) = " + pt(tr.R));
+        L.push("");
+        L.push("【2】検証者: チャレンジ e = " + st.e + " を送る（R を見たあとで選ぶ）");
+        L.push("");
+        L.push("【3】証明者: s = r + e·x mod n");
+        L.push("      = " + st.r + " + " + st.e + "·123 mod 967");
+        L.push("      = " + (st.r + st.e * 123) + " mod 967 = " + tr.s);
+      } else {
+        tr = simulate(st.e, mod(st.r * 7 + 13, TOY.n));
+        modeNote.textContent = "simulator: 秘密鍵 x を一切使いません。先に e と s を決め、あとから R を逆算します。";
+        L.push("【1】先に e と s を選ぶ（秘密 x は使わない）");
+        L.push("      e = " + tr.e + ",  s = " + tr.s);
+        L.push("");
+        L.push("【2】検証式が成り立つように R を逆算する");
+        L.push("      R := sG − eP = " + pt(ecMul(tr.s, TOY.G, TOY)) +
+               " + " + pt(ecMul(mod(-tr.e, TOY.n), PUB, TOY)));
+        L.push("      R = " + pt(tr.R));
+        L.push("");
+        L.push("【3】この (R, e, s) を、本物の記録として差し出す");
+      }
+
+      var v = verify(tr);
+      L.push("");
+      L.push("── 検証者の確認 sG = R + eP ──");
+      L.push("  左辺 sG      = " + pt(v.left));
+      L.push("  右辺 R + eP  = " + pt(v.right));
+      L.push("  判定: " + (v.ok ? "受理" : "拒否"));
+
+      banner.className = "banner " + (v.ok ? (st.mode === "sim" ? "warn" : "ok") : "bad");
+      banner.textContent = v.ok
+        ? (st.mode === "sim"
+            ? "受理された — ただし、秘密鍵は一度も使われていない"
+            : "受理された — 正直な証明者は必ず通る（完全性）")
+        : "拒否された";
+      note.textContent = st.mode === "sim"
+        ? "検証者にはこの記録と本物の区別がつきません。だから「受理された記録がある」ことは、秘密を知っている証拠になりません。違いは順番だけです。"
+        : "s には秘密 x が入っていますが、毎回変わる r に隠れています。検証者が見るのは (R, e, s) の 3 つだけです。";
+      trace.textContent = L.join("\n");
+    }
+    render1();
+  }
+
+  // ---------------- ラボ 2: nonce 再利用 ----------------
+  var atkBanner = document.getElementById("atk-banner");
+  if (atkBanner) {
+    var atkNote = document.getElementById("atk-note");
+    var atkTrace = document.getElementById("atk-trace");
+    var R2 = [1, 77, 456, 500, 900];
+    var E12 = [0, 1, 77, 90, 190, 500];
+    var st2 = { r: 456, e1: 77, e2: 90 };
+    var hosts2 = {};
+
+    function seg2(id, key, values) {
+      var host = document.getElementById(id);
+      hosts2[key] = host;
+      values.forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = String(v);
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function () { st2[key] = v; render2(); });
+        host.appendChild(b);
+      });
+    }
+    seg2("seg-r2", "r", R2);
+    seg2("seg-e1", "e1", E12);
+    seg2("seg-e2", "e2", E12);
+
+    function render2() {
+      Object.keys(hosts2).forEach(function (k) {
+        var vals = k === "r" ? R2 : E12;
+        Array.prototype.forEach.call(hosts2[k].children, function (b, i) {
+          b.setAttribute("aria-pressed", vals[i] === st2[k] ? "true" : "false");
+        });
+      });
+
+      var t1 = honest(st2.r, st2.e1);
+      var t2 = honest(st2.r, st2.e2);
+      var rec = recover(t1.s, t2.s, st2.e1, st2.e2);
+
+      var L = [];
+      L.push("攻撃者が観測できるもの（すべて公開値）");
+      L.push("  署名1: R = " + pt(t1.R) + ",  e₁ = " + st2.e1 + ",  s₁ = " + t1.s);
+      L.push("  署名2: R = " + pt(t2.R) + ",  e₂ = " + st2.e2 + ",  s₂ = " + t2.s);
+      L.push("  R が一致: " + (eq(t1.R, t2.R) ? "はい ← nonce 再利用の合図" : "いいえ"));
+      L.push("");
+      if (rec === null) {
+        L.push("e₁ = e₂ なので差が 0。逆元が存在せず、攻撃は成立しない。");
+        L.push("（同じチャレンジに 2 回答えても、新しい情報は出てこない）");
+      } else {
+        L.push("s₁ − s₂ = (r + e₁x) − (r + e₂x) = (e₁ − e₂)x   ← r が消える");
+        L.push("  s₁ − s₂ = " + t1.s + " − " + t2.s + " ≡ " + mod(t1.s - t2.s, TOY.n) + " (mod 967)");
+        L.push("  e₁ − e₂ = " + st2.e1 + " − " + st2.e2 + " ≡ " + mod(st2.e1 - st2.e2, TOY.n) + " (mod 967)");
+        L.push("  (e₁ − e₂)⁻¹ = " + inv(mod(st2.e1 - st2.e2, TOY.n), TOY.n) + "   ← 拡張ユークリッド");
+        L.push("");
+        L.push("x = (s₁ − s₂)·(e₁ − e₂)⁻¹ mod n = " + rec);
+        L.push("本物の秘密鍵                     = " + SECRET);
+      }
+      atkTrace.textContent = L.join("\n");
+
+      if (rec === null) {
+        atkBanner.className = "banner ok";
+        atkBanner.textContent = "攻撃は失敗 — e₁ = e₂ では差が取れない";
+        atkNote.textContent = "同じチャレンジに 2 回答えるのは、1 回答えるのと同じ情報しか渡していません。異なる 2 つのチャレンジに答えたときだけ、秘密が漏れます。";
+      } else if (rec === SECRET) {
+        atkBanner.className = "banner bad";
+        atkBanner.textContent = "秘密鍵を復元した — x = " + rec;
+        atkNote.textContent = "攻撃者が使ったのは公開値だけです。同じ式が、知識健全性の抽出器そのものでもあります。「x を取り出せる」ことが証明の根拠であり、同時に nonce 再利用が致命的である理由です。";
+      } else {
+        atkBanner.className = "banner warn";
+        atkBanner.textContent = "復元値 " + rec + " — 秘密鍵と一致しない";
+        atkNote.textContent = "計算のどこかで前提が崩れています。";
+      }
+    }
+    render2();
+  }
+})();
+
+// ---- 目次を h2 から自動生成 ----
+(function () {
+  "use strict";
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var heads = document.querySelectorAll(".band-head h2");
+  Array.prototype.forEach.call(heads, function (h, i) {
+    if (h.closest("#toc")) return;
+    var section = h.closest(".band");
+    if (!section) return;
+    if (i === 0) return;
+    if (!section.id) section.id = "sec-" + i;
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + section.id;
+    a.textContent = h.textContent.trim();
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+})();
+
+// ---- 鍵検問（あなたが検証者になる出題モード） ----
+(function () {
+  "use strict";
+  var S = window.__schnorr;
+  if (!S || !document.getElementById("quiz")) return;
+
+  var TOTAL = 10, MAX_LIVES = 3, STORE_KEY = "ac26-w3-checkpoint-best";
+  var N = S.TOY.n;
+
+  function ri(n) { return Math.floor(Math.random() * n); }
+  function pick(a) { return a[ri(a.length)]; }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = ri(i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function choicesFrom(correct, wrongs) {
+    var seen = {}, out = [{ t: String(correct), ok: true }];
+    seen[String(correct)] = true;
+    for (var i = 0; i < wrongs.length && out.length < 4; i++) {
+      var k = String(wrongs[i]);
+      if (!seen[k]) { seen[k] = true; out.push({ t: k, ok: false }); }
+    }
+    var guard = 0;
+    while (out.length < 4 && guard++ < 50) {
+      var v = String(ri(100));
+      if (!seen[v]) { seen[v] = true; out.push({ t: v, ok: false }); }
+    }
+    return shuffle(out);
+  }
+
+  // ---- 有限体: 逆元 ----
+  function genInverse() {
+    var p = pick([11, 13, 17, 23]);
+    var a = 1 + ri(p - 1);
+    var correct = S.inv(a, p);
+    return {
+      cat: "field",
+      q: "F_" + p + " で " + a + " の逆元は？（a·a⁻¹ ≡ 1 mod " + p + "）",
+      body: '<p class="subst">拡張ユークリッド: ' + a + "x + " + p + "y = 1 の x を 0.." + (p - 1) + " に正規化する</p>",
+      choices: choicesFrom(correct, [
+        S.mod(-correct, p), S.mod(correct + 1, p), S.mod(p - a, p), S.mod(a, p)
+      ]),
+      why: a + " × " + correct + " = " + (a * correct) + " = " +
+           Math.floor(a * correct / p) + "×" + p + " + 1 ≡ 1 (mod " + p + ")。"
+    };
+  }
+
+  // ---- 楕円曲線: 点の計算 ----
+  function genPoint() {
+    var k = 2 + ri(12);
+    var correct = S.ecMul(k, S.TOY.G, S.TOY);
+    var wrongs = [
+      S.ecMul(k + 1, S.TOY.G, S.TOY),
+      S.ecMul(k - 1, S.TOY.G, S.TOY),
+      S.ecMul(k + 2, S.TOY.G, S.TOY)
+    ].map(S.pt);
+    return {
+      cat: "ec",
+      q: k + "·G はどれ？（y² = x³ + 11 over F₁₀₀₉、G = (1, 298)）",
+      body: '<p class="subst">double-and-add: ' + k + " = " + k.toString(2) + "₂ なので、倍にしながら必要なビットだけ足す</p>",
+      choices: choicesFrom(S.pt(correct), wrongs),
+      why: "double-and-add で " + k + "·G = " + S.pt(correct) +
+           "。結果は必ず曲線上に乗ります（乗らなければ公式のどこかが誤り）。"
+    };
+  }
+
+  // ---- Schnorr: レスポンスの計算（mod n の罠つき） ----
+  function genResponse() {
+    var r = pick([1, 77, 456, 500, 900]);
+    var e = pick([1, 77, 90, 190, 500]);
+    var x = S.SECRET;
+    var correct = S.mod(r + e * x, N);
+    return {
+      cat: "sigma",
+      q: "r = " + r + ", e = " + e + ", 秘密鍵 x = " + x + " のとき、レスポンス s は？",
+      body: '<p class="subst">s = r + e·x (mod n)　　n = 967（G の位数）, p = 1009（座標の素数）</p>',
+      choices: choicesFrom(correct, [
+        S.mod(r + e * x, 1009),          // mod p にする典型ミス
+        r + e * x,                        // mod を取らない
+        S.mod(r + e + x, N)               // 掛け忘れ
+      ]),
+      why: "r + e·x = " + (r + e * x) + "、これを mod 967 で丸めて " + correct +
+           "。mod 1009（座標の素数）で取ると " + S.mod(r + e * x, 1009) +
+           " になり、検証式が成り立ちません。"
+    };
+  }
+
+  // ---- 検証: このトランスクリプトは受理されるか ----
+  var VERDICT_CHOICES = ["受理される", "拒否される"];
+  function genVerify() {
+    var r = pick([1, 77, 456, 500, 900]);
+    var e = pick([1, 77, 90, 190]);
+    var kind = ri(3);
+    var tr, why;
+    if (kind === 0) {
+      tr = S.honest(r, e);
+      why = "正直に計算された記録なので、完全性により必ず受理されます。";
+    } else if (kind === 1) {
+      tr = S.honest(r, e);
+      tr = { R: tr.R, e: tr.e, s: S.mod(tr.s + 1, N) };
+      why = "s を 1 つずらすと sG が R + eP からずれるので拒否されます。";
+    } else {
+      tr = S.simulate(e, S.mod(r * 7 + 13, N));
+      why = "simulator が秘密なしで作った記録ですが、検証式は成り立つので受理されます。" +
+            "「受理された」こと自体は、秘密を知っている証拠になりません。";
+    }
+    var v = S.verify(tr);
+    return {
+      cat: "verify",
+      q: "この記録を、検証者は受理するか？",
+      body: '<div class="clist">' +
+            '<div class="cline">R = ' + S.pt(tr.R) + "</div>" +
+            '<div class="cline">e = ' + tr.e + "</div>" +
+            '<div class="cline">s = ' + tr.s + "</div>" +
+            "</div>" +
+            '<p class="subst">検証式: sG = R + eP　（P = (376, 128)）</p>',
+      choices: shuffle(VERDICT_CHOICES.map(function (t, i) {
+        return { t: t, ok: (i === 0) === v.ok };
+      })),
+      why: why + "（左辺 " + S.pt(v.left) + " / 右辺 " + S.pt(v.right) + "）"
+    };
+  }
+
+  // ---- 攻撃: nonce 再利用から鍵を復元 ----
+  function genAttack() {
+    var r = pick([1, 77, 456, 500, 900]);
+    var e1 = pick([1, 77, 190, 500]);
+    var e2 = pick([90, 200, 333, 800]);
+    var s1 = S.honest(r, e1).s, s2 = S.honest(r, e2).s;
+    var correct = S.recover(s1, s2, e1, e2);
+    return {
+      cat: "attack",
+      q: "同じ R の署名を 2 本観測した。復元される秘密鍵は？",
+      body: '<div class="clist">' +
+            '<div class="cline">署名1: e₁ = ' + e1 + ",  s₁ = " + s1 + "</div>" +
+            '<div class="cline">署名2: e₂ = ' + e2 + ",  s₂ = " + s2 + "</div>" +
+            "</div>" +
+            '<p class="subst">x = (s₁ − s₂)·(e₁ − e₂)⁻¹ (mod 967)</p>',
+      choices: choicesFrom(correct, [
+        S.mod(s1 - s2, N),
+        S.mod((s1 - s2) * S.inv(S.mod(e1 - e2, N), N), 1009),
+        S.mod(correct + 1, N)
+      ]),
+      why: "s₁ − s₂ ≡ " + S.mod(s1 - s2, N) + "、(e₁ − e₂)⁻¹ = " +
+           S.inv(S.mod(e1 - e2, N), N) + " なので x = " + correct +
+           "。公開値だけで求まっている点に注意してください。"
+    };
+  }
+
+  // ---- 原理 ----
+  var THEORY = [
+    { q: "simulator が受理される会話を作れる、という事実が意味することは？",
+      a: "会話の記録には、公開情報から説明できる以上の情報が入っていない（ゼロ知識）",
+      d: ["プロトコルに脆弱性があり、偽の証明が通ってしまう",
+          "検証者の計算が間違っている",
+          "秘密鍵の長さが足りていない"] },
+    { q: "シグマプロトコルで健全性を担っているのは何か？",
+      a: "証明者が先に R をコミットし、チャレンジをその後で受け取るという順番",
+      d: ["ハッシュ関数の衝突困難性",
+          "r が十分に大きな乱数であること",
+          "検証者が秘密鍵を知っていること"] },
+    { q: "nonce を使い回すと秘密鍵が漏れるのはなぜか？",
+      a: "2 つの応答の差で r が消え、x = (s₁−s₂)(e₁−e₂)⁻¹ が公開値だけで解けるから",
+      d: ["同じ R が 2 回現れると、離散対数が解きやすくなるから",
+          "ハッシュの衝突が起きるから",
+          "署名が長くなって情報が増えるから"] },
+    { q: "Fiat–Shamir 変換で置き換えられるのは、誰の何か？",
+      a: "検証者が選んでいたランダムなチャレンジを、会話のハッシュで作る",
+      d: ["証明者のノンス r を、メッセージのハッシュで作る",
+          "公開鍵を、ハッシュ値で置き換える",
+          "検証式そのものを、ハッシュの比較に置き換える"] },
+    { q: "楕円曲線の点の計算で「割り算」が出てきたとき、実際に行うのは？",
+      a: "有限体の逆元を掛ける（拡張ユークリッドなどで求める）",
+      d: ["浮動小数点で割ってから丸める",
+          "分母が 1 になるまで両辺を掛ける",
+          "整数の商を取り、余りは捨てる"] },
+    { q: "double-and-add が必要な理由は？",
+      a: "定義どおり k 回足すと k に比例した時間がかかり、256 ビットのスカラーでは終わらないから",
+      d: ["k 回足すと途中で曲線から外れてしまうから",
+          "加法公式が 2 倍算にしか使えないから",
+          "無限遠点を経由しないと群にならないから"] },
+    { q: "座標の計算は mod p、スカラーの計算は mod n。取り違えるとどうなるか？",
+      a: "値が法より小さいケースだけは偶然通り、それ以外で検証が失敗する",
+      d: ["必ず即座に例外が出るのですぐ気づける",
+          "計算結果は同じなので実害はない",
+          "曲線上の点でなくなるので is_on_curve で必ず捕まる"] },
+    { q: "抽出器（extractor）は何のための道具か？",
+      a: "「受理される証明を作れる者は本当に witness を知っている」ことを示すため",
+      d: ["証明者から秘密鍵を安全に預かるため",
+          "検証者の計算を高速化するため",
+          "proof のサイズを小さくするため"] },
+    { q: "0 に逆元がないことが、楕円曲線ではどう現れるか？",
+      a: "y = 0 の点では 2 倍算の分母が 0 になり、その場合 2P は無限遠点と定める",
+      d: ["x = 0 の点は曲線上に存在できない",
+          "位数が偶数になり、群にならなくなる",
+          "スカラー倍が定義できなくなる"] }
+  ];
+  var deck = [];
+  function genTheory() {
+    if (deck.length === 0) deck = shuffle(THEORY.slice());
+    var t = deck.pop();
+    return {
+      cat: "theory",
+      q: t.q,
+      body: "",
+      choices: shuffle([{ t: t.a, ok: true }].concat(t.d.map(function (x) {
+        return { t: x, ok: false };
+      }))),
+      why: t.a + "。本文の該当セクションに、壊したときの実測があります。"
+    };
+  }
+
+  var CATS = [
+    { key: "field",  name: "有限体",     desc: "逆元を求める",             gen: genInverse },
+    { key: "ec",     name: "楕円曲線",   desc: "点のスカラー倍",           gen: genPoint },
+    { key: "sigma",  name: "レスポンス", desc: "s の計算と 2 つの法",      gen: genResponse },
+    { key: "verify", name: "受理判定",   desc: "この記録を通してよいか",   gen: genVerify },
+    { key: "attack", name: "鍵復元",     desc: "nonce 再利用を突く",       gen: genAttack },
+    { key: "theory", name: "原理",       desc: "なぜその形なのか",         gen: genTheory }
+  ];
+
+  var els = {};
+  ["quiz-start", "quiz-play", "quiz-result", "mode-grid", "quiz-best",
+   "qprog", "qcat", "lives", "qtext", "qbody", "choices", "fb",
+   "btn-quit", "btn-next", "rank", "rank-title", "rank-sub", "cat-stats",
+   "btn-again", "btn-modes"].forEach(function (id) {
+    els[id] = document.getElementById(id);
+  });
+
+  var state = null;
+
+  function pane(which) {
+    els["quiz-start"].hidden = which !== "start";
+    els["quiz-play"].hidden = which !== "play";
+    els["quiz-result"].hidden = which !== "result";
+  }
+  function readBest() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); }
+    catch (e) { return null; }
+  }
+  function writeBest(b) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(b)); } catch (e) {}
+  }
+  function showBest() {
+    var b = readBest();
+    els["quiz-best"].textContent = b
+      ? "自己ベスト: " + b.correct + " / " + TOTAL + "（ランク " + b.rank + "・挑戦 " + b.runs + " 回）"
+      : "まだ記録なし — 最初の検問から始めてください。";
+  }
+  function renderLives() {
+    var s = "";
+    for (var i = 0; i < MAX_LIVES; i++) {
+      s += i < state.lives ? "◆" : '<span class="gone">◇</span>';
+    }
+    els["lives"].innerHTML = s;
+    els["lives"].setAttribute("aria-label", "残りライフ " + state.lives + " / " + MAX_LIVES);
+  }
+  function start(mode) {
+    state = { mode: mode, i: 0, lives: MAX_LIVES, correct: 0, stats: {}, answered: false, cur: null };
+    pane("play");
+    nextQuestion();
+  }
+  function nextQuestion() {
+    state.i++;
+    state.answered = false;
+    var cat = state.mode === "mixed" ? pick(CATS) : CATS.filter(function (c) {
+      return c.key === state.mode;
+    })[0];
+    state.cur = cat.gen();
+    els["qprog"].textContent = state.i + " / " + TOTAL;
+    els["qcat"].textContent = cat.name;
+    renderLives();
+    els["qtext"].textContent = state.cur.q;
+    els["qbody"].innerHTML = state.cur.body || "";
+    els["fb"].hidden = true;
+    els["btn-next"].hidden = true;
+    els["choices"].textContent = "";
+    var short = state.cur.choices.every(function (c) { return c.t.length <= 20; });
+    els["choices"].className = "choices" + (short ? " two" : "");
+    state.cur.choices.forEach(function (c) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice";
+      b.textContent = c.t;
+      b.addEventListener("click", function () { answer(c, b); });
+      els["choices"].appendChild(b);
+    });
+  }
+  function answer(choice, btn) {
+    if (state.answered) return;
+    state.answered = true;
+    var cat = state.cur.cat;
+    if (!state.stats[cat]) state.stats[cat] = { ok: 0, n: 0 };
+    state.stats[cat].n++;
+    Array.prototype.forEach.call(els["choices"].children, function (b, i) {
+      b.disabled = true;
+      var c = state.cur.choices[i];
+      if (c.ok) b.classList.add("is-correct");
+      else if (b === btn) b.classList.add("is-wrong");
+      else b.classList.add("dim");
+    });
+    if (choice.ok) {
+      state.correct++;
+      state.stats[cat].ok++;
+      els["fb"].className = "fb ok";
+      els["fb"].innerHTML = '<span class="fb-head">正しい判定</span>' + state.cur.why;
+    } else {
+      state.lives--;
+      renderLives();
+      els["fb"].className = "fb bad";
+      els["fb"].innerHTML = '<span class="fb-head">誤判定</span>' + state.cur.why;
+    }
+    els["fb"].hidden = false;
+    els["btn-next"].textContent =
+      (state.lives === 0 || state.i === TOTAL) ? "結果を見る" : "次の検問へ";
+    els["btn-next"].hidden = false;
+  }
+  function finish() {
+    pane("result");
+    var busted = state.lives === 0;
+    var rank = state.correct === TOTAL ? "S" : state.correct >= 8 ? "A" :
+               state.correct >= 6 ? "B" : "F";
+    var titles = {
+      S: "完璧な検証 — 1 本も見逃していない",
+      A: "信頼できる検証者 — 惜しいのはあと少し",
+      B: "見習い検証者 — 弱い分野を訓練モードで",
+      F: "要再訓練 — 本文の実測をもう一度"
+    };
+    els["rank"].textContent = rank;
+    els["rank"].className = "rank " + rank.toLowerCase();
+    els["rank-title"].textContent = busted
+      ? "検問失敗 — 誤った判定を 3 回してしまった"
+      : titles[rank];
+    els["rank-sub"].textContent = "正解 " + state.correct + " / " + TOTAL +
+      (busted ? "（ライフ切れ）" : "");
+    els["cat-stats"].textContent = "";
+    Object.keys(state.stats).forEach(function (key) {
+      var meta = CATS.filter(function (c) { return c.key === key; })[0];
+      var st3 = state.stats[key];
+      var div = document.createElement("div");
+      div.className = "cstat";
+      div.innerHTML = '<span class="cn">' + (meta ? meta.name : key) + "</span>" +
+        '<span class="cv ' + (st3.ok === st3.n ? "full" : "weak") + '">' +
+        st3.ok + " / " + st3.n + "</span>";
+      els["cat-stats"].appendChild(div);
+    });
+    var best = readBest() || { correct: -1, rank: "F", runs: 0 };
+    best.runs++;
+    if (state.correct > best.correct) { best.correct = state.correct; best.rank = rank; }
+    writeBest(best);
+  }
+
+  els["btn-next"].addEventListener("click", function () {
+    if (state.lives === 0 || state.i === TOTAL) finish();
+    else nextQuestion();
+  });
+  els["btn-quit"].addEventListener("click", function () { pane("start"); showBest(); });
+  els["btn-again"].addEventListener("click", function () { start(state.mode); });
+  els["btn-modes"].addEventListener("click", function () { pane("start"); showBest(); });
+
+  var mixed = document.createElement("button");
+  mixed.type = "button";
+  mixed.className = "mode primary";
+  mixed.innerHTML = '<span class="m-name">ランダム検問</span>' +
+    '<span class="m-desc">全分野から 10 問。まずはこれで実力を測る</span>';
+  mixed.addEventListener("click", function () { start("mixed"); });
+  els["mode-grid"].appendChild(mixed);
+  CATS.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "mode";
+    b.innerHTML = '<span class="m-name">' + c.name + "</span>" +
+      '<span class="m-desc">' + c.desc + "</span>";
+    b.addEventListener("click", function () { start(c.key); });
+    els["mode-grid"].appendChild(b);
+  });
+
+  showBest();
+})();
+</script>
+</body>
+</html>
