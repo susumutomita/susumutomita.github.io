@@ -1,0 +1,3048 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>有限体と楕円曲線 — Week 0 自習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 0（土台編）の自習ノート。mod 演算・群環体・逆元・離散対数問題を、零因子を目で見る有限体の電卓と、点をすべて並べる楕円曲線ラボで理解する。Week 1 以降の前提はここに全部ある。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="有限体と楕円曲線 — Week 0 自習ノート">
+<meta property="og:description" content="なぜ法は素数なのか、なぜ割り算は逆元なのか、なぜ片方向だけ難しいのか。Week 1〜3 の前提を、手で触れるラボと検問クイズで固める。">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+<style>
+  @font-face {
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { display: block; max-width: 100%; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  table { border-collapse: collapse; }
+  [hidden] { display: none !important; }
+
+  :root {
+    color-scheme: light dark;
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+
+    --sans: "AXIS Std", "Helvetica Neue", Helvetica, Arial,
+            "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+            "Noto Sans JP", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+            "Cascadia Mono", Consolas, monospace;
+
+    --fs-label: 0.6875rem; --fs-xs: 0.8125rem; --fs-sm: 0.875rem;
+    --fs-lg: 1.25rem; --fs-xl: 1.6875rem; --fs-2xl: clamp(2rem, 5.5vw, 2.9rem);
+    --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+      --line: #3A4449; --line-strong: #4E5B61;
+      --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+      --accent: #99DBFF; --accent-soft: #24333C;
+      --pass: #B5BD68; --pass-soft: #2B3122;
+      --fail: #CC6666; --fail-soft: #3A2626;
+      --free: #F0C674; --free-soft: #3A3122;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+    --line: #3A4449; --line-strong: #4E5B61;
+    --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+    --accent: #99DBFF; --accent-soft: #24333C;
+    --pass: #B5BD68; --pass-soft: #2B3122;
+    --fail: #CC6666; --fail-soft: #3A2626;
+    --free: #F0C674; --free-soft: #3A3122;
+  }
+  :root[data-theme="light"] {
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+  }
+
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); line-height: 1.85; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .eyebrow { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.35; margin: 0; font-weight: 700; }
+  h1 { font-size: var(--fs-2xl); letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+  h3 { font-size: var(--fs-lg); }
+  h4 { font-size: 1rem; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: 0.925em; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .sitebar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
+             background: color-mix(in srgb, var(--ground) 80%, transparent); backdrop-filter: blur(12px); }
+  .sitebar-inner { height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .sitebar-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); text-decoration: none; }
+  .sitebar-links { display: flex; align-items: center; gap: 0.35rem; }
+  .sitebar-links a { font-size: var(--fs-xs); color: var(--muted); text-decoration: none; padding: 0.35rem 0.6rem; border-radius: var(--r-md); }
+  .sitebar-links a:hover { color: var(--ink); background: color-mix(in srgb, var(--line) 60%, transparent); }
+
+  .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .masthead-inner { display: flex; flex-direction: column; gap: 1rem; padding: clamp(2.5rem, 7vw, 4rem) 0 clamp(2rem, 5vw, 2.5rem); }
+  .masthead h1 span { color: var(--accent); }
+  .lead { color: var(--ink-2); max-width: 62ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; padding: 0.25rem 0.55rem;
+         border: 1px solid var(--line-strong); border-radius: var(--r-sm); color: var(--ink-2); }
+
+  .band { padding: clamp(2.25rem, 6vw, 3.5rem) 0; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; max-width: 64ch; }
+  .band-head p { color: var(--ink-2); }
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .stack-sm { display: flex; flex-direction: column; gap: 0.9rem; }
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose strong { color: var(--ink); font-weight: 700; }
+  .split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 860px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 1px;
+           background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .steps > li { counter-increment: step; background: var(--panel); padding: 1.25rem 1.4rem 1.35rem;
+                display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem; align-items: start; }
+  .steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); font-size: var(--fs-xs);
+                        font-weight: 700; color: var(--accent); letter-spacing: 0.06em; padding-top: 0.35rem; }
+  .steps h4 { grid-column: 2; }
+  .steps .body { grid-column: 2; display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.35rem; }
+  .steps p { font-size: var(--fs-sm); color: var(--ink-2); }
+  /* .why は steps の中でも外（prose / callout）でも同じ見た目にする */
+  .why { font-size: var(--fs-sm); color: var(--ink-2); border-left: 2px solid var(--line-strong); padding-left: 0.85rem; }
+  .why b { color: var(--ink); }
+
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-md);
+             background: var(--panel); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; max-width: 68ch; }
+  .callout .eyebrow { color: var(--accent); }
+  .callout p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .callout p.strong-line { color: var(--ink); font-weight: 700; }
+  .callout.amber { border-left-color: var(--free); }
+  .callout.amber .eyebrow { color: var(--free); }
+  .callout.wide { max-width: none; }
+
+  pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md);
+        padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.75; color: var(--ink); }
+  pre .c { color: var(--muted); }
+  pre .k { color: var(--accent); }
+  .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); line-height: 2; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 0.5rem 0.85rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data th { color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: var(--fs-label); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+
+  /* ---- lab ---- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+               padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .card-head h3 { font-size: var(--fs-sm); }
+  .card-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .lab { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 940px) { .lab { grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); } }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+                 font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); }
+  .field-label .hint { color: var(--muted); font-size: var(--fs-label); }
+  .segments { display: flex; flex-wrap: wrap; gap: 3px; }
+  .segments button { flex: 1 0 2rem; font-family: var(--mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+                     padding: 0.35rem 0; background: var(--panel-2); color: var(--ink-2);
+                     border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer; }
+  .segments button:hover { border-color: var(--line-strong); }
+  .segments button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  :root[data-theme="light"] .segments button[aria-pressed="true"] { color: #fff; }
+  :root[data-theme="dark"] .segments button[aria-pressed="true"] { color: #0B0E15; }
+  @media (prefers-color-scheme: light) { .segments button[aria-pressed="true"] { color: #fff; } }
+  @media (prefers-color-scheme: dark) { .segments button[aria-pressed="true"] { color: #0B0E15; } }
+  .segments.narrow button { flex: 0 0 auto; padding: 0.35rem 0.55rem; }
+
+  .verdict { padding: 1.1rem; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.6rem; }
+  .banner { font-weight: 700; font-size: 1rem; padding: 0.7rem 0.9rem; border-radius: var(--r-md); border-left: 4px solid; }
+  .banner.ok { background: var(--pass-soft); color: var(--pass); border-color: var(--pass); }
+  .banner.bad { background: var(--free-soft); color: var(--free); border-color: var(--free); }
+  .candidates { display: flex; flex-wrap: wrap; gap: 0.3rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .cand { padding: 0.15rem 0.5rem; border-radius: var(--r-sm); border: 1px solid var(--line); color: var(--ink-2); background: var(--panel-2); }
+  .cand.hit { border-color: var(--pass); color: var(--pass); background: var(--pass-soft); font-weight: 700; }
+  .cand.bad { border-color: var(--fail); color: var(--fail); background: var(--fail-soft); font-weight: 700; }
+  .cand.mark { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+
+  .work { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .work pre { background: var(--panel-2); }
+
+  /* ---- 乗法表（零因子を目で見る） ---- */
+  .mul-wrap { overflow-x: auto; }
+  table.mul { border-collapse: collapse; font-family: var(--mono); font-size: var(--fs-xs);
+              font-variant-numeric: tabular-nums; margin: 0; }
+  table.mul th, table.mul td { border: 1px solid var(--line); padding: 0.3rem 0.45rem; text-align: center;
+                               min-width: 1.9rem; color: var(--ink-2); }
+  table.mul th { color: var(--muted); background: var(--panel-2); font-weight: 400; }
+  table.mul th.corner { color: var(--accent); font-weight: 700; }
+  table.mul td.zero { background: var(--fail-soft); color: var(--fail); font-weight: 700; }
+  table.mul td.one { background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  table.mul td.trivial { color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: var(--fs-label); color: var(--muted); }
+  .legend span.sw { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 2px; margin-right: 0.3rem;
+                    border: 1px solid var(--line-strong); vertical-align: -1px; }
+  .legend .sw.z { background: var(--fail-soft); border-color: var(--fail); }
+  .legend .sw.o { background: var(--pass-soft); border-color: var(--pass); }
+
+  .method-grid { display: grid; gap: 0.6rem; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 720px) { .method-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .method { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+            padding: 0.7rem 0.85rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .method .mname { font-size: var(--fs-label); color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .method .mval { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+  .method .mval.bad { color: var(--fail); }
+  .method .mops { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .method pre { background: var(--panel); font-size: var(--fs-label); padding: 0.55rem 0.65rem; line-height: 1.6; }
+
+  /* ---- 楕円曲線の散布図 ---- */
+  .ec-plot { width: 100%; height: auto; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r-md); }
+  .ec-plot .grid { stroke: var(--line); stroke-width: 0.5; }
+  .ec-plot .axis { stroke: var(--line-strong); stroke-width: 1; }
+  .ec-plot .sym { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.8; }
+  .ec-plot .pt { fill: var(--ink-2); }
+  .ec-plot .pt.on { fill: var(--accent); }
+  .ec-plot .pt.gen { fill: var(--free); }
+  .ec-plot .trail { stroke: var(--accent); stroke-width: 1.2; fill: none; opacity: 0.75; }
+  .ec-plot .lbl { fill: var(--muted); font-family: var(--mono); font-size: 7px; }
+  .ec-plot .num { fill: var(--accent); font-family: var(--mono); font-size: 7px; font-weight: 700; }
+
+  /* ---------- table of contents ---------- */
+  .toc {
+    list-style: none; margin: 0; padding: 0; counter-reset: toc;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .toc li { counter-increment: toc; background: var(--panel); }
+  .toc a {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: baseline;
+    padding: 0.7rem 1rem; text-decoration: none; color: var(--ink-2);
+    font-size: var(--fs-sm); line-height: 1.5;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--ink); }
+
+  /* ---------- quiz ---------- */
+  .quiz-pane { padding: 1.25rem 1.35rem 1.35rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .quiz-hero { display: flex; flex-direction: column; gap: 0.35rem; }
+
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem; }
+  .mode {
+    text-align: left; cursor: pointer; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 0.8rem 0.95rem; display: flex; flex-direction: column; gap: 0.2rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .m-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .mode .m-desc { font-size: var(--fs-label); color: var(--muted); line-height: 1.6; }
+  .mode.primary { background: var(--accent); border-color: var(--accent); }
+  .mode.primary .m-name { color: #fff; }
+  .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+  :root[data-theme="dark"] .mode.primary .m-name { color: #0B0E15; }
+  :root[data-theme="dark"] .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  @media (prefers-color-scheme: dark) {
+    .mode.primary .m-name { color: #0B0E15; }
+    .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  }
+  :root[data-theme="light"] .mode.primary .m-name { color: #fff; }
+  :root[data-theme="light"] .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+
+  .quiz-best { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); margin: 0; }
+
+  .quiz-bar {
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
+  }
+  .quiz-bar .qcat {
+    padding: 0.1rem 0.5rem; border: 1px solid var(--line-strong);
+    border-radius: 999px; color: var(--ink-2); font-size: var(--fs-label); letter-spacing: 0.06em;
+  }
+  .quiz-bar .lives { margin-left: auto; letter-spacing: 0.2em; color: var(--fail); font-size: 0.95rem; }
+  .quiz-bar .lives .gone { color: var(--line-strong); }
+
+  .qmain { display: flex; flex-direction: column; gap: 0.9rem; }
+  .qtext { font-weight: 700; font-size: 1.0625rem; line-height: 1.7; }
+  .qbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .qbody table.data td, .qbody table.data th { padding: 0.35rem 0.7rem; }
+  .qbody .clist { display: flex; flex-direction: column; gap: 2px; }
+  .qbody .cline {
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+    padding: 0.3rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2);
+    border-left: 3px solid var(--line-strong); overflow-x: auto; white-space: nowrap;
+  }
+  .qbody .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); }
+
+  .choices { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .choices.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    text-align: left; cursor: pointer; font-size: var(--fs-sm); line-height: 1.6;
+    padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:disabled { cursor: default; }
+  .choice.is-correct { border-color: var(--pass); background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  .choice.is-wrong   { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); }
+  .choice.dim { opacity: 0.5; }
+
+  .fb { border-radius: var(--r-md); padding: 0.85rem 1rem; border-left: 4px solid; font-size: var(--fs-sm); line-height: 1.75; }
+  .fb.ok  { background: var(--pass-soft); border-color: var(--pass); }
+  .fb.bad { background: var(--fail-soft); border-color: var(--fail); }
+  .fb .fb-head { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+  .fb.ok  .fb-head { color: var(--pass); }
+  .fb.bad .fb-head { color: var(--fail); }
+  .fb code { color: var(--ink); }
+
+  .quiz-foot { display: flex; gap: 0.6rem; align-items: center; justify-content: flex-end; }
+  .btn-main {
+    cursor: pointer; font-size: var(--fs-sm); font-weight: 700; padding: 0.55rem 1.2rem;
+    border-radius: var(--r-md); border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  :root[data-theme="dark"] .btn-main { color: #0B0E15; }
+  @media (prefers-color-scheme: dark) { .btn-main { color: #0B0E15; } }
+  :root[data-theme="light"] .btn-main { color: #fff; }
+  .btn-ghost {
+    cursor: pointer; font-size: var(--fs-sm); padding: 0.55rem 1rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--ink-2); border-color: var(--ink-2); }
+
+  .rank-box { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .rank {
+    font-family: var(--mono); font-size: 3.5rem; font-weight: 700; line-height: 1;
+    width: 5rem; height: 5rem; display: grid; place-items: center;
+    border-radius: var(--r-lg); border: 2px solid currentColor; flex: none;
+  }
+  .rank.s { color: var(--accent); }
+  .rank.a { color: var(--pass); }
+  .rank.b { color: var(--free); }
+  .rank.f { color: var(--fail); }
+  .rank-meta { display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank-title { font-weight: 700; font-size: var(--fs-lg); }
+  .rank-sub { font-size: var(--fs-sm); color: var(--ink-2); }
+
+  .cat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+  .cstat {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+    padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .cstat .cn { font-size: var(--fs-label); color: var(--muted); }
+  .cstat .cv { font-family: var(--mono); font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cstat .cv.full { color: var(--pass); }
+  .cstat .cv.weak { color: var(--fail); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
+  footer a { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a class="sitebar-name" href="/">Susumu Tomita</a>
+    <nav class="sitebar-links">
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/">ノート一覧</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week1/index.html">Week 1</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 0 自習ノート</p>
+    <h1>有限体と<span>楕円曲線</span></h1>
+    <p class="lead">
+      Week 0 は土台編です。扱うのは <strong>mod 演算・群環体・逆元・離散対数問題</strong>——
+      どれも「暗号の前に済ませておく数学」に見えて、実際には
+      <strong>Week 1 以降でつまずく場所そのもの</strong>です。
+    </p>
+    <p class="lead">
+      Week 1 の算術回路は F_p 上に組み、Week 2 の秘密分散も Beaver 三つ組も F_p 上で動き、
+      Week 3 は楕円曲線という<strong>もう一つの群</strong>の上に Schnorr を建てます。
+      <strong>前提はここに全部あります。</strong>単独で読めるように書いたので、
+      他の週で「これは何だったか」と思ったらここに戻ってきてください。
+    </p>
+    <div class="meta-row">
+      <span class="tag">読了 35 分</span>
+      <span class="tag">対話ラボ 2 つ</span>
+      <span class="tag">検問クイズ 6 分野</span>
+      <span class="tag">Week 1〜3 の前提</span>
+      <span class="tag">外部通信なし</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================ 1 : 出発点 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>なぜ「普通の整数」では暗号にならないのか</h2>
+      <p>
+        有限体の定義から始めると、いちばん大事なことが抜け落ちます。
+        先に<strong>「整数のままだと何が壊れるのか」</strong>を見ます。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          秘密の値 <code>x</code> を、素朴に整数のまま計算に使うとします。3 つのことが同時に困ります。
+        </p>
+        <p>
+          <strong>① 大きさが秘密を漏らす。</strong>
+          <code>x + 100</code> という値を見せられたら、それが 3 桁なら x も 3 桁だと分かります。
+          暗号で欲しいのは「見ても何も分からない値」なのに、
+          <b>整数には大小という手がかりが最初から付いています</b>。
+        </p>
+        <p>
+          <strong>② 割り算で分数が出る。</strong>
+          <code>7 ÷ 2</code> は整数の世界から出てしまいます。かといって有理数まで広げると、
+          今度は分母がどこまでも育ちます。<b>「その値」に固定できない</b>のは、
+          あとで見る「回路の値」としては致命的です。
+        </p>
+        <p>
+          <strong>③ どこまでも大きくなる。</strong>
+          掛け算を繰り返せば桁は際限なく増えます。暗号は
+          <strong>256 ビットなら 256 ビット</strong>という固定長で扱いたいのに、整数は収まりません。
+        </p>
+        <p>
+          つまり欲しいのは、<strong>四則が全部できて、有限で、大小の手がかりがない世界</strong>。
+          この 3 つを同時に満たすものが<strong>有限体</strong>です。以降の全部はこの一言の展開です。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">この 3 つが、そのまま設計になっている</p>
+          <div class="table-scroll">
+            <table class="data">
+              <thead><tr><th>整数だと困ること</th><th>有限体での答え</th></tr></thead>
+              <tbody>
+                <tr><td>大小が秘密を漏らす</td><td>順序が<b>存在しない</b>（⑤）</td></tr>
+                <tr><td>割り算で外へ出る</td><td>逆元の掛け算で<b>中に閉じる</b>（④）</td></tr>
+                <tr><td>桁が育つ</td><td>p で巻いて<b>固定長</b>（②）</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            右の列がこのノートの目次とほぼ一致します。
+            <b>有限体の性質は「便利な数学」ではなく、暗号の要求から逆算された形</b>だと思って読んでください。
+          </p>
+        </div>
+        <div class="callout amber">
+          <p class="eyebrow">先に言っておくこと</p>
+          <p class="strong-line">
+            土台編で覚えるのは、最後に 3 つだけです。
+          </p>
+          <p>
+            <b>「順序がない」「割り算は逆元の掛け算」「一方向だけ難しい」。</b>
+            この 3 つが、Week 1 の回路制約・Week 2 のシェアの安全性・Week 3 の署名の安全性に、
+            それぞれ 1 対 1 で対応します。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の地図</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 2 : mod -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">道具</p>
+      <h2>mod 演算 — 時計の世界に数を閉じ込める</h2>
+      <p>
+        「桁が育つ」を殺す道具が mod です。時計の比喩から入って、
+        <strong>最後は「正規化を忘れて課題に落ちる」という実務の話</strong>まで一気に降ります。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>時計は 12 で巻いている</h4>
+        <div class="body">
+          <p>
+            10 時の 5 時間後は 15 時ですが、時計の文字盤では 3 時です。
+            <strong>12 を超えたら 12 を引く</strong>——これが mod 12 の世界です。
+            数直線ではなく<b>円周</b>の上で計算していることになります。
+          </p>
+          <p class="why">
+            <b>なぜこれが暗号に効くのか:</b> 何回足しても何回掛けても、
+            結果は必ず 0..11 の 12 個のどれかです。<b>値が絶対に外へ出ない</b>。
+            これが「固定長で扱える」の正体です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>合同 ≡ は「等しい」ではなく「巻いたら同じ」</h4>
+        <div class="body">
+          <p>
+            <code>a ≡ b (mod p)</code> は「<code>a − b</code> が p の倍数」という意味です。
+            <code>15 ≡ 3 (mod 12)</code> は、15 と 3 が等しいのではなく、
+            <strong>12 で巻いた世界では同じ場所に来る</strong>ということ。
+          </p>
+          <p class="subst">
+            15 ≡ 3 ≡ −9 ≡ 27　(mod 12)
+          </p>
+          <p class="why">
+            <b>ここが分岐点です。</b> ≡ で結ばれた数は無限にあります。
+            その無限の仲間から<b>代表を 1 つ選ぶ</b>のが次のステップで、
+            プログラムが落ちるのはたいていそこです。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>代表元は 0..p−1 に取る（正規化）</h4>
+        <div class="body">
+          <p>
+            <code>15, 3, −9, 27</code> はどれも mod 12 では同じものですが、
+            <strong>体の元として書くときは 0..11 の代表 <code>3</code> に統一します</strong>。
+            この統一を正規化と呼びます。
+          </p>
+          <p class="subst">
+            −3 mod 7 = 4　　<span style="color:var(--muted)">（−3 + 7 = 4。「余り」ではなく「巻いた先」で考える）</span><br>
+            30 mod 7 = 2　　17 mod 7 = 3　　0 mod 7 = 0
+          </p>
+          <p class="why">
+            <b>なぜ 0..p−1 なのか:</b> どれを選んでも数学的には同じですが、
+            <b>比較・保存・テストのためには表現が 1 つに決まっていなければ困る</b>から。
+            数学の都合ではなく、実装の都合で決めた約束です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>負の数の扱いが、いちばん事故る</h4>
+        <div class="body">
+          <p>
+            多くの言語の <code>%</code> は<strong>符号を引きずります</strong>。
+            Python の <code>-3 % 7</code> は 4 になりますが、
+            C / Java / JavaScript / Rust の <code>-3 % 7</code> は <code>-3</code> です。
+          </p>
+          <p class="subst">
+            正しい正規化: <code>((n % p) + p) % p</code>
+          </p>
+          <p class="why">
+            <b>このノートの JS もこの 1 行で書いています。</b>
+            「mod を取ったつもり」で負の値が残ると、値としては正しいのに
+            <b>他の関数と噛み合わなくなります</b>。次の実測がまさにそれです。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="split">
+      <div class="callout amber">
+        <p class="eyebrow">実測 1 — Week 2 の秘密分散が落ちる</p>
+        <p class="strong-line">
+          正規化を忘れたシェアは、値が合っていても不合格になります。
+        </p>
+        <p>
+          <code>share(-3, [70, -2], 67)</code> の正解は <code>[3, 65, 63]</code>。
+          mod を取らない実装はこう落ちます。
+        </p>
+        <pre>AssertionError:
+Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
+        <p>
+          <code>70 ≡ 3</code>、<code>−2 ≡ 65</code>、<code>−71 ≡ 63 (mod 67)</code> なので、
+          <b>数学的にはどちらも同じ秘密を表しています</b>。それでも落ちる。
+          <b>「同じ」であることと「同じ表現である」ことは別</b>だからです。
+        </p>
+      </div>
+
+      <div class="callout amber">
+        <p class="eyebrow">実測 2 — Week 3 の逆元が落ちる</p>
+        <p class="strong-line">
+          拡張ユークリッドの戻り値は、負のことがあります。
+        </p>
+        <p>
+          <code>schnorr-from-scratch</code> の <code>field_inv</code> は、
+          <code>extended_gcd(a % p, p)</code> が返した <code>x</code> をそのまま返すと落ちます。
+          テストのメッセージがそのまま答えを言っています。
+        </p>
+        <pre>AssertionError:
+逆元は 0..p-1 に正規化して返してください</pre>
+        <p>
+          あとで見るように、<code>5⁻¹ mod 13</code> を拡張ユークリッドで解くと
+          素直に出てくるのは <code>−5</code> です。<b>正しい逆元です。</b>
+          ただし代表元としては <code>8</code> でなければならない。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">つまり</p>
+      <p class="strong-line">
+        Week 1・2・3 の課題で最初にぶつかる壁は、暗号ではなく <code>((n % p) + p) % p</code> です。
+      </p>
+      <p>
+        3 週にわたって同じ形で落ちるので、<b>ここだけは手が覚えるまでやっておく</b>価値があります。
+        このあとのラボとクイズは、全部この正規化の上で動いています。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 3 : 群・環・体 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">階層</p>
+      <h2>群・環・体 — 「何が使えるか」の階層</h2>
+      <p>
+        群・環・体は、暗記する 3 つの定義ではありません。
+        <strong>「その世界で何ができるか」を強い順に並べた階層</strong>です。
+        できることが増えるほど、条件は厳しくなります。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>群 — 演算 1 つ。行けて、戻れる</h4>
+        <div class="body">
+          <p>
+            集合 G と演算 ∗ が<strong>群</strong>であるとは、次の 4 つが成り立つことです。
+          </p>
+          <p class="subst">
+            ① 閉じている: a ∗ b は必ず G の中<br>
+            ② 結合則: (a ∗ b) ∗ c = a ∗ (b ∗ c)<br>
+            ③ 単位元 e がある: a ∗ e = e ∗ a = a<br>
+            ④ 逆元がある: 各 a に a ∗ a⁻¹ = e となる a⁻¹ が存在
+          </p>
+          <p>
+            <code>a ∗ b = b ∗ a</code>（可換）は<strong>別条件</strong>で、
+            満たすものをアーベル群と呼びます。暗号で使う群はたいてい可換です。
+          </p>
+          <p class="why">
+            <b>群の正体は「行って、戻れる」です。</b>
+            単位元があるから「何もしない」が書けて、逆元があるから「元に戻す」が書ける。
+            <b>暗号は「戻せない」を作りたいのに、道具の側は戻せる必要がある</b>——
+            この緊張が離散対数（⑧）で効いてきます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>群の例は、思っているより広い</h4>
+        <div class="body">
+          <div class="table-scroll">
+            <table class="data">
+              <thead><tr><th>集合</th><th>演算</th><th>単位元</th><th>逆元</th></tr></thead>
+              <tbody>
+                <tr><td>整数 Z</td><td>加法 +</td><td>0</td><td>−a</td></tr>
+                <tr><td>F_p（p 個の元）</td><td>加法 +</td><td>0</td><td>p − a</td></tr>
+                <tr class="here"><td>F_p<sup>*</sup>（0 を除いた p−1 個）</td><td>乗法 ×</td><td>1</td><td>a⁻¹</td></tr>
+                <tr class="here"><td>楕円曲線の点 E</td><td>点の加算 +</td><td>無限遠点 O</td><td>x 軸反転 −P</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="why">
+            <b>下の 2 行が今週の主役です。</b>
+            <code>F_p<sup>*</sup></code> の乗法群と、楕円曲線の点の群。
+            <b>この 2 つはまったく違う見た目をしていて、群としては同じ形をしています</b>。
+            だから ⑧ で見るように、離散対数問題も同じ言葉で書けます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>環 — 演算 2 つ。ただし割り算は保証されない</h4>
+        <div class="body">
+          <p>
+            <strong>環</strong>は + と × の両方があり、分配則 <code>a(b+c) = ab + ac</code> が成り立つ世界です。
+            加法については群（0 があり、−a がある）ですが、
+            <strong>乗法の逆元は要求されません</strong>。
+          </p>
+          <p>
+            例: 整数 Z。<code>2 × ? = 1</code> を満たす整数はありません。
+            例: <code>Z/nZ</code>（n で割った余り、n は素数でなくてよい）。
+          </p>
+          <p class="why">
+            <b>環でできることは「+ と × と、その組み合わせ」だけ</b>です。
+            Week 1 の回路が「加算ゲートと乗算ゲートしかない」のは、
+            <b>この定義に演算が 2 つしか無いことの直接の帰結</b>です。
+            比較も分岐も、環の定義のどこにも書いてありません。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>体 — 0 以外のすべてに逆元がある。割り算ができる</h4>
+        <div class="body">
+          <p>
+            <strong>体</strong>は環であって、さらに <strong>0 以外のすべての元に乗法逆元がある</strong>もの。
+            これでようやく四則が揃います。
+          </p>
+          <p class="subst">
+            群 ⊂ 環 ⊂ 体　　（できることが増えるほど、条件は厳しくなる）
+          </p>
+          <p>
+            有理数・実数は無限個の元を持つ体。<strong>有限体</strong>は元の個数が有限な体で、
+            要素数を<strong>位数</strong>と呼びます。
+          </p>
+          <p class="why">
+            <b>位数は必ず素数のべき p<sup>n</sup> です。</b>
+            <code>n = 1</code> なら <code>F_p</code>（このノートの主役）、
+            <code>n ≥ 2</code> なら拡大体 <code>F_{p^n}</code>——
+            既約多項式の根を追加して作る世界で、Week 0 のスライドの後半に出てきます。
+            <b>この講座の課題で使うのはほぼ <code>F_p</code> の方</b>なので、ここでは名前だけ置いておきます。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="stack-sm">
+      <p class="eyebrow">階層の全体像</p>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr><th>構造</th><th>使える演算</th><th>逆元</th><th>例</th><th>このプログラムでの出番</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>群 (Group)</td><td>1 つだけ</td><td>その演算について必ずある</td><td>Z の加法、F_p<sup>*</sup> の乗法、EC の点</td><td>Week 3（EC と Schnorr）</td></tr>
+            <tr><td>環 (Ring)</td><td>+ と ×</td><td>加法のみ保証</td><td>整数 Z、Z/6Z</td><td>「+ と × しかない」の根拠</td></tr>
+            <tr><td>体 (Field)</td><td>+ − × ÷</td><td>0 以外すべてに乗法逆元</td><td>有理数 Q、実数 R</td><td>四則が揃う条件</td></tr>
+            <tr class="here"><td>有限体 F_p</td><td>+ − × ÷</td><td>0 以外すべて</td><td>p が素数のときの Z/pZ</td><td><b>Week 1〜6 のほぼ全部</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        Week 1 のノートで「なぜ + と × だけなのか」と書いた答えが、この表の 2 行目です。
+        環の定義に演算が 2 つしか無いので、回路にも 2 種類のゲートしか無い。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p class="eyebrow">核心</p>
+        <h3>なぜ法は素数でなければならないのか</h3>
+        <p>
+          <code>Z/6Z</code> を見ます。0..5 の 6 個の世界です。ここで <code>2 × 3</code> を計算すると:
+        </p>
+        <p class="subst">
+          2 × 3 = 6 ≡ <b>0</b>　(mod 6)
+        </p>
+        <p>
+          <strong>どちらも 0 でないのに、掛けたら 0 になりました。</strong>
+          こういう元を<strong>零因子</strong>と呼びます。整数の世界では絶対に起きないことです。
+        </p>
+        <p>
+          零因子があると何が壊れるか。<b>約分ができなくなります。</b>
+        </p>
+        <p class="subst">
+          2x ≡ 2y (mod 6) から x ≡ y は言えない<br>
+          <span style="color:var(--muted)">（x = 1, y = 4 なら 2·1 = 2, 2·4 = 8 ≡ 2。x ≠ y なのに一致）</span>
+        </p>
+        <p>
+          そして<strong>逆元も存在しません</strong>。もし <code>2⁻¹</code> があったなら、
+          <code>2 × 3 = 0</code> の両辺に掛けて <code>3 = 0</code> になってしまう。矛盾です。
+        </p>
+        <p>
+          <strong>p が素数なら、零因子は消えます。</strong>
+          <code>a·b ≡ 0 (mod p)</code> は <code>p | a·b</code> のこと。
+          p は素数なので <code>p | a</code> か <code>p | b</code> のどちらかでなければならず、
+          つまり <code>a ≡ 0</code> か <code>b ≡ 0</code>。<b>これが素数の効き目のすべてです。</b>
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">この一点のために素数を使う</p>
+          <p class="strong-line">
+            零因子が消える ⟺ 0 以外すべてに逆元がある ⟺ 体になる
+          </p>
+          <p>
+            この 3 つは同じことの言い換えです。<b>暗号が素数を選ぶ理由は、速いからでも安全そうだからでもなく、
+            体にならないと割り算ができないから</b>。
+          </p>
+          <p>
+            すぐ下のラボで、法を <code>6 → 7 → 9 → 11 → 12 → 13</code> と切り替えてください。
+            <b>合成数を選ぶと乗法表に赤いマス（積が 0）が現れ、素数を選ぶと消えます。</b>
+            見えているのはこの証明そのものです。
+          </p>
+        </div>
+        <div class="callout amber">
+          <p class="eyebrow">Week 1 での現れ方</p>
+          <p class="strong-line">
+            零因子が無いことは、回路の健全性の根拠になっています。
+          </p>
+          <p>
+            <code>(x−2)(x−5)(x−6) = 0</code> という制約は「x は 2 か 5 か 6」を意味します。
+            <b>これが成立するのは、積が 0 なら因子のどれかが 0 だから</b>。
+            零因子のある <code>Z/6Z</code> の上で同じ回路を書いたら、
+            <b>許可リストに無い値でも制約を満たせてしまいます</b>。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 4 : 逆元 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">中核</p>
+      <h2>逆元 — 割り算の正体</h2>
+      <p>
+        有限体に「割り算」という演算はありません。あるのは<strong>逆元の掛け算</strong>だけです。
+        求め方は 3 通りあり、<strong>計算量も使える条件も違います</strong>。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          <code>a</code> の乗法逆元 <code>a⁻¹</code> とは、次を満たす元のことです。
+        </p>
+        <p class="subst">
+          a · a⁻¹ ≡ 1　(mod p)
+        </p>
+        <p>
+          そして割り算はこう定義されます。<strong>定義であって、変形ではありません。</strong>
+        </p>
+        <p class="subst">
+          b ÷ a　:=　b · a⁻¹
+        </p>
+        <p>
+          同じことが加法にもあります。<code>a</code> の加法逆元は <code>p − a</code> で、
+          引き算は <code>b − a := b + (p − a)</code>。
+          <strong>有限体には「引く」も「割る」も無く、あるのは「逆元を足す・掛ける」だけ</strong>です。
+        </p>
+        <p>
+          <strong>0 に逆元はありません。</strong>
+          <code>0 · x = 0</code> がすべての x で成り立つので、1 になりようがない。
+          <b>これは「まだ見つかっていない」ではなく「存在しない」</b>です。
+        </p>
+        <p class="why">
+          <b>⑦ への伏線:</b> この「0 だけは割れない」が、
+          楕円曲線の 2 倍算で <code>y = 0</code> のときに
+          <b>接線が垂直になって無限遠点に飛ぶ</b>という現象に直結します。
+          分母 <code>2y</code> が 0 になる、ただそれだけのことです。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">3 つの求め方と、その計算量</p>
+          <div class="table-scroll">
+            <table class="data">
+              <thead><tr><th>方法</th><th>計算量</th><th>使える条件</th></tr></thead>
+              <tbody>
+                <tr><td>総当たり</td><td>O(p)</td><td>いつでも（実用外）</td></tr>
+                <tr><td>フェルマーの小定理 a<sup>p−2</sup></td><td>O(log p) 回の乗算</td><td><b>p が素数のときだけ</b></td></tr>
+                <tr class="here"><td>拡張ユークリッド</td><td>O(log p)・最速</td><td>gcd(a, p) = 1 なら合成数でも可</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            p が 2²⁵⁶ 級なら総当たりは即座に論外です。
+            <b>実装で選ぶのは下 2 つ</b>で、Week 1 の採点器 <code>solver.py</code> は
+            <code>pow(a, P−2, P)</code>（フェルマー）、
+            Week 3 の課題は <code>extended_gcd</code>（拡張ユークリッド）を使います。
+          </p>
+        </div>
+        <div class="callout amber">
+          <p class="eyebrow">フェルマーが素数を要求する理由</p>
+          <p class="strong-line">
+            a<sup>p−1</sup> ≡ 1 が成り立つのは、p が素数だからです。
+          </p>
+          <p>
+            両辺を a で割れば <code>a<sup>p−2</sup> ≡ a⁻¹</code>。
+            <b>合成数の法に同じ式を当てると、静かに間違った値を返します</b>——
+            例外も出ません。ラボで法 9 を選んで確かめてください。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-sm">
+      <p class="eyebrow">手で追う — F₁₃ で 5⁻¹ を求める</p>
+      <ol class="steps">
+        <li>
+          <h4>まず、割り算を繰り返して 1 まで下りる</h4>
+          <div class="body">
+            <p>13 と 5 に対してユークリッドの互除法を回します。</p>
+            <p class="subst">
+              13 = 2·5 + <b>3</b><br>
+              　5 = 1·3 + <b>2</b><br>
+              　3 = 1·2 + <b>1</b>　← 余りが 1 になったので gcd(13, 5) = 1
+            </p>
+            <p class="why">
+              <b>gcd が 1 であることが、逆元が存在する条件</b>です。
+              もし gcd が 1 でなければ、その時点で「逆元なし」が確定します。
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>今度は下から戻る（後退代入）</h4>
+          <div class="body">
+            <p>余りが 1 になった式から、順に代入して戻します。</p>
+            <p class="subst">
+              1 = 3 − 1·2<br>
+              　= 3 − 1·(5 − 1·3) = 2·3 − 1·5<br>
+              　= 2·(13 − 2·5) − 1·5 = <b>2·13 − 5·5</b>
+            </p>
+            <p class="why">
+              最後の形が <code>ax + by = gcd</code> の形（ここでは <code>13·2 + 5·(−5) = 1</code>）です。
+              <b>この式を mod 13 で見ると 13 の項が消えます。</b>
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>mod を取って、正規化する</h4>
+          <div class="body">
+            <p class="subst">
+              2·13 − 5·5 = 1<br>
+              → −5·5 ≡ 1　(mod 13)<br>
+              → 5⁻¹ ≡ −5 ≡ <b>8</b>　(mod 13)
+            </p>
+            <p>
+              検算: <code>5 · 8 = 40 = 3·13 + 1 ≡ 1 (mod 13)</code> ✓
+            </p>
+            <p class="why">
+              <b>ここが Week 3 の落とし穴でした。</b>
+              素直に出てくるのは <code>−5</code> で、これは正しい逆元です。
+              でも <code>0..p−1</code> の代表に直さないと採点器に落とされる。
+              <b>②の正規化が、そのままここで効いています。</b>
+            </p>
+          </div>
+        </li>
+        <li>
+          <h4>フェルマーでも同じ答えになる</h4>
+          <div class="body">
+            <p class="subst">
+              5<sup>13−2</sup> = 5<sup>11</sup> ≡ <b>8</b>　(mod 13)
+            </p>
+            <p>
+              指数 11 は 2 進で <code>1011</code> なので、繰り返し二乗法で
+              <b>7 回の乗算</b>で終わります（総当たりなら 8 回試す）。
+              p が大きくなるほど差は開き、<code>p ≈ 2²⁵⁶</code> では
+              総当たり 2²⁵⁶ 回に対して、フェルマーは約 500 回です。
+            </p>
+            <p class="why">
+              <b>どちらも同じ 8 に着地します。</b> 当然です——逆元は<b>一意</b>だから。
+              <code>a·x ≡ 1</code> と <code>a·y ≡ 1</code> なら、
+              両辺に掛け合わせて <code>x ≡ y</code> が出ます。
+              <b>「求め方が 3 つある」は「答えが 3 つある」ではありません。</b>
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 5 : LAB A -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ A</p>
+      <h2>法を切り替えて、零因子と逆元を目で見る</h2>
+      <p>
+        法 <code>p</code> を選ぶと、その世界の<strong>乗法表</strong>が描かれます。
+        <strong>積が 0 になったマスは赤</strong>、<strong>積が 1 になったマス（逆元のペア）は緑</strong>。
+        <strong>合成数（6, 9, 12）を選ぶと赤が現れ、素数（7, 11, 13）を選ぶと消えます。</strong>
+        それが「なぜ素数か」の答えそのものです。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>世界の設定</h3><span class="eyebrow" id="fl-badge">p = 7</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>法 p</span><span class="hint">素数と合成数が混ざっている</span></div>
+            <div class="segments" id="fl-p" role="group" aria-label="法 p"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>元 a</span><span class="hint">逆元を 3 通りで求める</span></div>
+            <div class="segments" id="fl-a" role="group" aria-label="元 a"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>各元の逆元</span><span class="hint">赤 = 逆元を持たない</span></div>
+            <div class="candidates" id="fl-inv"></div>
+          </div>
+          <p class="caption" id="fl-invnote">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="fl-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="fl-note">—</p>
+          <div>
+            <p class="eyebrow" style="margin-bottom:0.35rem;">零因子（0 でない 2 つを掛けて 0 になる組）</p>
+            <div class="candidates" id="fl-zd"></div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="stack-sm">
+            <p class="eyebrow">乗法表 — 縦 a × 横 b</p>
+            <div class="mul-wrap" id="fl-mul"></div>
+            <div class="legend">
+              <span><span class="sw z"></span>積が 0（0 を掛けた行と列を除く ＝ 零因子）</span>
+              <span><span class="sw o"></span>積が 1（互いに逆元）</span>
+            </div>
+          </div>
+
+          <div class="stack-sm">
+            <p class="eyebrow">逆元を 3 通りで求める（同じ答えに着地するか）</p>
+            <div class="method-grid" id="fl-methods"></div>
+          </div>
+
+          <div class="stack-sm">
+            <p class="eyebrow">拡張ユークリッドの中身</p>
+            <pre id="fl-work">—</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">見てほしいこと 1</p>
+        <p class="strong-line">合成数の表には、赤いマスが必ず現れる。</p>
+        <p>
+          <code>p = 6</code> なら <code>2·3</code> と <code>3·4</code> が 0。
+          <code>p = 9</code> なら <code>3·3</code>、<code>3·6</code>、<code>6·6</code>。
+          <code>p = 12</code> にいたっては赤だらけです。
+          <b>赤が 1 つでもあれば、その世界では割り算が定義できません。</b>
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">見てほしいこと 2</p>
+        <p class="strong-line">素数の表では、各行にちょうど 1 つだけ緑がある。</p>
+        <p>
+          「各行に 1 つ」＝<b>すべての元にちょうど 1 つの逆元がある</b>。
+          <b>零因子が消えることと、逆元が全員に行き渡ることが、同じ表の裏表</b>として見えます。
+          さらに、素数の行はどれも <code>0..p−1</code> の全部を 1 回ずつ含みます
+          （<code>a</code> 倍は全単射）——これも零因子が無いことの言い換えです。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6 : 順序がない -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">性質</p>
+      <h2>有限体には「大小」がない</h2>
+      <p>
+        整数から持ち込めなかったものがあります。<strong>順序</strong>です。
+        これは実装の都合ではなく、<strong>原理的に存在しない</strong>という話です。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          <code>F_7</code> で「1 &lt; 2」と言えるでしょうか。言えません。証明は 3 行です。
+        </p>
+        <p class="subst">
+          もし 1 &lt; 2 で、順序が加法と両立する（a &lt; b なら a+c &lt; b+c）なら<br>
+          1 &lt; 2 &lt; 3 &lt; 4 &lt; 5 &lt; 6 &lt; 7 = <b>0</b> &lt; 1<br>
+          → 1 &lt; 1。<b>矛盾。</b>
+        </p>
+        <p>
+          時計の上で「3 時は 10 時より小さい」と言えないのと同じです。
+          <strong>巻いてしまう世界に、始点も終点もありません。</strong>
+        </p>
+        <p>
+          注意すべきは、<code>3 &lt; 5</code> という<b>比較を書くこと自体はできる</b>ことです。
+          代表元は 0..p−1 の整数なので、機械的には比較できます。
+          <strong>できないのは「+ と × と噛み合う順序」を持つこと</strong>。
+          <code>3 &lt; 5</code> の両辺に 4 を足せば <code>0 &lt; 2</code>、
+          さらに 4 を足せば <code>4 &lt; 6</code>、もう一度で <code>1 &lt; 3</code>——
+          <b>足すたびに大小がひっくり返るので、比較として使えません。</b>
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout amber">
+          <p class="eyebrow">Week 1 では枷になる</p>
+          <p class="strong-line">
+            回路に <code>x &lt; 8</code> と書けません。
+          </p>
+          <p>
+            算術回路の制約は「式 = 0」の形しか無く、その式は + と × でできています。
+            <b>不等式はそこに存在しない</b>ので、
+            <code>x</code> をビットに分解して 1 本ずつ縛る（range proof）という
+            <b>遠回り</b>をすることになります。
+          </p>
+          <p>
+            <code>proof-of-exploit</code> が許可リストを
+            <code>(x−2)(x−5)(x−6) = 0</code> という<b>積の形</b>で書くのは、
+            「集合に入っている」なら + と × だけで表せるからです。
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">Week 2 では武器になる</p>
+          <p class="strong-line">
+            シェアの大きさから秘密が推測できません。
+          </p>
+          <p>
+            秘密 <code>s</code> を <code>share = r</code> と <code>s − r</code> に分けたとき、
+            片方が <code>65</code> だったとして、<b>それは「大きい秘密」を意味しません</b>。
+            <code>r</code> は一様乱数で、<code>s − r</code> も一様分布。
+            <b>大小に情報が乗らないので、大小からは何も漏れません。</b>
+          </p>
+          <p>
+            もし整数のまま分けていたら、<code>share = 1000000</code> を見た人は
+            「秘密もそのくらいの桁だな」と推測できてしまいます。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout wide">
+      <p class="eyebrow">同じ性質が、片方では枷、片方では武器</p>
+      <p class="strong-line">
+        順序が無いことは、有限体の欠点でも利点でもなく、ただの性質です。
+      </p>
+      <p>
+        <b>Week 1（ZK）は「表現したいのに書けない」側に立つので枷</b>になり、
+        <b>Week 2（MPC）は「漏らしたくないのに漏れない」側に立つので武器</b>になります。
+        <b>どちらを向いているかで呼び方が変わるだけ</b>——
+        暗号の道具はだいたいこの形をしていて、
+        「制約」と「保証」は同じ 1 つの事実の裏表であることが多いです。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 7 : 位数と生成元 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">構造</p>
+      <h2>位数と生成元 — 群は巡回する</h2>
+      <p>
+        群の中で 1 つの元を選び、<strong>それを掛け続けると何が起きるか</strong>。
+        ここで出てくる言葉が、⑧ の離散対数と Week 3 のフーリエ変換の両方で使われます。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>2 種類の「位数」がある</h4>
+        <div class="body">
+          <p>
+            同じ言葉で 2 つのものを指すので、最初に分けておきます。
+          </p>
+          <p class="subst">
+            <b>群の位数</b>: 群に含まれる元の個数<br>
+            <b>元の位数</b>: g<sup>n</sup> = 1 となる最小の正整数 n
+          </p>
+          <p class="why">
+            <b>混同しやすいのは、しばしば一致するから</b>です。
+            <code>F_7<sup>*</sup></code> の群の位数は 6、そして元 3 の位数も 6。
+            <b>一致する元のことを生成元と呼びます。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>生成元は、群を 1 人で埋め尽くす</h4>
+        <div class="body">
+          <p>
+            <code>F_7<sup>*</sup> = {1, 2, 3, 4, 5, 6}</code>（0 を除いた 6 個）で、3 のべきを並べます。
+          </p>
+          <p class="subst">
+            3¹ = <b>3</b>　3² = 9 ≡ <b>2</b>　3³ = 6 ≡ <b>6</b><br>
+            3⁴ = 18 ≡ <b>4</b>　3⁵ = 12 ≡ <b>5</b>　3⁶ = 15 ≡ <b>1</b>
+          </p>
+          <p>
+            出てきたのは <code>3, 2, 6, 4, 5, 1</code>——<strong>6 個すべてが 1 回ずつ</strong>。
+            そして 6 乗で 1 に戻り、そこから同じ列を繰り返します。
+            <b>3 は F₇<sup>*</sup> の生成元</b>であり、この群は<strong>巡回群</strong>です。
+          </p>
+          <p class="why">
+            <b>順番に注目してください。</b> 3, 2, 6, 4, 5, 1 は
+            <b>大小の順ではありません</b>。⑤ で見たとおり、掛け算は順序を壊します。
+            <b>この「バラバラさ」が、⑧ の一方向性の材料になります。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>生成元でない元は、部分群に閉じこもる</h4>
+        <div class="body">
+          <p>同じ <code>F_7<sup>*</sup></code> で、今度は 2 のべきを並べます。</p>
+          <p class="subst">
+            2¹ = <b>2</b>　2² = <b>4</b>　2³ = 8 ≡ <b>1</b>　→ 以降 2, 4, 1 の繰り返し
+          </p>
+          <p>
+            2 の位数は 3。到達できるのは <code>{1, 2, 4}</code> の 3 個だけで、
+            <strong>これは F₇<sup>*</sup> の部分群</strong>です。
+          </p>
+          <p class="why">
+            <b>ラグランジュの定理:</b> 元の位数は必ず群の位数を割り切ります。
+            6 の約数は 1, 2, 3, 6 なので、<code>F_7<sup>*</sup></code> の元の位数は
+            <b>この 4 通りしかありえません</b>（実際: 1 → 1、6 → 2、2 と 4 → 3、3 と 5 → 6）。
+            <b>群の位数が素数なら、単位元以外は全部生成元</b>になります——
+            ⑦ の楕円曲線で、この事実がそのまま出てきます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>「位数 n の 1 の根」は、この言葉の言い直し</h4>
+        <div class="body">
+          <p>
+            Week 3 の講義スライドは、フーリエ変換の評価点として
+            <strong>位数 n の 1 の根</strong> ω を使います。定義はこうです。
+          </p>
+          <p class="subst">
+            ω<sup>n</sup> = 1 かつ ω⁰, ω¹, …, ω<sup>n−1</sup> がすべて異なる
+          </p>
+          <p>
+            これは<strong>「ω の位数がちょうど n」と言っているだけ</strong>です。
+            スライドの例は <code>F₇</code> で <code>ω = 2</code>——
+            上で見た「2 の位数は 3」がそのまま
+            <b>「2 は位数 3 の 1 の根」</b>になります。
+          </p>
+          <p class="subst">
+            H = {1, ω, ω²} = {1, 2, 4} ⊂ F₇<sup>*</sup>
+          </p>
+          <p class="why">
+            <b>同じものに 2 つの名前が付いているだけ</b>です。
+            群の言葉では「位数 3 の元が生成する部分群」、
+            多項式の言葉では「フーリエ変換の評価点の集合」。
+            <b>Week 3 以降で多項式を扱うとき、この節に戻れば下地は済んでいます。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="stack-sm">
+      <p class="eyebrow">F₇<sup>*</sup> の全元の位数（ラボ A の計算器と同じ結果）</p>
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>g</th><th>べき乗の列</th><th>元の位数</th><th>生成元か</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td><td>1</td><td>—</td></tr>
+            <tr><td>2</td><td>2, 4, 1</td><td>3</td><td>—（部分群 {1,2,4}）</td></tr>
+            <tr class="here"><td>3</td><td>3, 2, 6, 4, 5, 1</td><td>6</td><td><b>生成元</b></td></tr>
+            <tr><td>4</td><td>4, 2, 1</td><td>3</td><td>—</td></tr>
+            <tr class="here"><td>5</td><td>5, 4, 6, 2, 3, 1</td><td>6</td><td><b>生成元</b></td></tr>
+            <tr><td>6</td><td>6, 1</td><td>2</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        位数はすべて 6 の約数（1, 2, 3, 6）に収まっています。
+        Week 2 の OT ラボが使うトイ群も同じ構造で、<code>F₂₃<sup>*</sup></code>（位数 22）の
+        <b>位数 11 の部分群</b>を使っていました——「なぜ 11 なのか」の答えがラグランジュの定理です。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 8 : 楕円曲線 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">もう一つの群</p>
+      <h2>楕円曲線 — 点の集合が群になる</h2>
+      <p>
+        ここまでは <code>F_p</code> の中の話でした。楕円曲線は
+        <strong>その体の上に作る、まったく別の群</strong>です。
+        <strong>要素は数ではなく「点」、演算は掛け算ではなく「点の足し算」。</strong>
+        それでも群の定義は同じ 4 つです。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>定義 — 標準形と、滑らかさの条件</h4>
+        <div class="body">
+          <p>
+            体 <code>F_p</code>（p &gt; 3）上の楕円曲線は、次の式を満たす点の集合です。
+          </p>
+          <p class="subst">
+            y² = x³ + a·x + b　　(a, b ∈ F_p)
+          </p>
+          <p>
+            ただし、<strong>次の条件を満たすものだけ</strong>を楕円曲線と呼びます。
+          </p>
+          <p class="subst">
+            4a³ + 27b² ≠ 0　(mod p)
+          </p>
+          <p class="why">
+            <b>これは何の条件か:</b> 右辺 <code>x³ + ax + b</code> が重根を持たない、という条件です。
+            重根があると曲線に<b>尖った点や自分自身と交わる点</b>ができ、
+            そこでは接線が 1 本に決まりません。
+            <b>接線が決まらないと 2 倍算が定義できない</b>ので、群になりません。
+            ラボ B で <code>a = 0, b = 0</code> を選ぶと、この条件で弾かれる様子が見られます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>無限遠点 O を 1 つ足す</h4>
+        <div class="body">
+          <p>
+            方程式を満たす点だけでは群になりません。<strong>単位元がない</strong>からです。
+            そこで仮想的な点 <code>O</code>（無限遠点）を 1 つ追加します。
+          </p>
+          <p class="subst">
+            E = {O} ∪ { (x, y) ∈ F_p × F_p ｜ y² = x³ + ax + b }
+          </p>
+          <p class="why">
+            <b>O は「y 軸方向の無限の彼方」だと思ってください。</b>
+            すべての垂直線が O を通る、と約束します。
+            <b>そう約束すると「垂直線も 3 点で交わる」ことになり</b>、
+            次の加法の定義に例外が要らなくなります。
+            <b>数学が先で記号が後ではなく、都合のいい点を足して形を整えている</b>のが実際です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>なぜ「点の足し算」で群ができるのか</h4>
+        <div class="body">
+          <p>
+            出発点は 1 つの事実です。<strong>3 次曲線と直線は、ちょうど 3 点で交わる</strong>
+            （接する場合は 2 重に数え、垂直線は O を 3 点目に数える）。
+          </p>
+          <p class="subst">
+            2 点 P, Q を決める → 直線が決まる → <b>3 点目 R が自動的に決まる</b>
+          </p>
+          <p>
+            そこで <strong>P + Q := −R</strong>（R を x 軸に関して反転した点）と定めます。
+          </p>
+          <p class="why">
+            <b>なぜわざわざ反転するのか:</b> 反転せずに <code>P + Q := R</code> と決めると、
+            単位元が作れません。
+            <b>「一直線上の 3 点の和は O」</b>と約束すると、
+            <code>P + Q + R = O</code> つまり <code>P + Q = −R</code> となり、
+            <b>O が単位元、x 軸反転が逆元、という群の形にぴたりと収まります</b>。
+            結合則が成り立つことの証明だけは重く（射影幾何やベズーの定理を使う）、
+            ここでは事実として使います。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>群の 4 条件を確認する</h4>
+        <div class="body">
+          <div class="table-scroll">
+            <table class="data">
+              <thead><tr><th>群の条件</th><th>楕円曲線では</th></tr></thead>
+              <tbody>
+                <tr><td>閉じている</td><td>3 点目は必ず曲線上（反転しても曲線上：y² は符号に無関係）</td></tr>
+                <tr><td>結合則</td><td>成り立つ（証明は重い。ラボ B で総当たり検証している）</td></tr>
+                <tr><td>単位元</td><td><code>O</code>。P + O = P</td></tr>
+                <tr><td>逆元</td><td><code>−P = (x, −y)</code>。P + (−P) = O</td></tr>
+                <tr><td>可換</td><td>成り立つ（P と Q を通る直線は順番によらない）</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="why">
+            <b>「y を反転しても曲線上にある」</b>のは、方程式の左辺が <code>y²</code> だからです。
+            <b>だから点は必ず上下 2 個ずつペアで現れます</b>——
+            ラボ B の散布図で、点が中央の線に関して対称に並ぶのはこれが理由です。
+            例外は <code>y = 0</code> の点だけで、そこは自分自身が自分の逆元になります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>加法公式 — 割り算は全部 ④ の逆元</h4>
+        <div class="body">
+          <p>直線の傾き λ を求めて、3 点目を計算します。場合分けは 2 つだけです。</p>
+          <p class="subst">
+            <b>弦（P ≠ Q）:</b>　λ = (y₂ − y₁) / (x₂ − x₁)<br>
+            <b>接線（P = Q）:</b>　λ = (3x₁² + a) / (2y₁)<br><br>
+            x₃ = λ² − x₁ − x₂<br>
+            y₃ = λ(x₁ − x₃) − y₁
+          </p>
+          <p>
+            <strong>この「/」は有限体の割り算</strong>——つまり
+            <code>(x₂ − x₁)⁻¹</code> や <code>(2y₁)⁻¹</code> を掛けることです。
+            <b>④ で作った逆元が、ここで初めて実戦投入されます。</b>
+          </p>
+          <p class="why">
+            <b>y₃ の式に注意:</b> <code>λ(x₁ − x₃) − y₁</code> であって
+            <code>λ(x₃ − x₁) + y₁</code> ではありません。
+            <b>符号の中に「x 軸反転」が畳み込まれています</b>。
+            Week 3 の課題 README も
+            「乗らないときは公式のどこか（特に y_R の符号）が間違っています」と警告しています。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>例外は 2 つだけ。どちらも「割れない」から起きる</h4>
+        <div class="body">
+          <p class="subst">
+            <b>① x₁ = x₂ かつ y₁ = −y₂ の場合:</b> 分母 x₂ − x₁ = 0 → P + (−P) = <b>O</b><br>
+            <b>② P = Q かつ y₁ = 0 の場合:</b> 分母 2y₁ = 0 → 2P = <b>O</b>
+          </p>
+          <p class="why">
+            <b>④ の伏線を回収します。</b>
+            <b>0 に逆元が無い</b>ので、この 2 つは「計算できない」のではなく
+            <b>「結果が O である」と定義する</b>しかありません。
+            幾何で言えばどちらも<b>垂直線</b>——
+            ② は <code>y = 0</code> の点での接線が垂直になる場合です。
+            <b>「0 で割れない」という体の性質が、そのまま群の例外処理になっている。</b>
+          </p>
+          <p>
+            ラボ B で <code>y² = x³ + x</code> over <code>F₁₁</code> を選ぶと、
+            <code>(0, 0)</code> という <code>y = 0</code> の点が現れます。
+            これを生成点にすると <code>2P = O</code>、位数はちょうど 2 です。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="split">
+      <div class="stack-sm">
+        <p class="eyebrow">手で追う — 2P を計算する</p>
+        <div class="callout">
+          <p class="strong-line">y² = x³ + x + 6 over F₁₁、P = (2, 7) の 2 倍</p>
+          <p class="subst" style="color:var(--ink);">
+            まず P が曲線上にあるか:<br>
+            　左辺 7² = 49 ≡ <b>5</b>　　右辺 2³+2+6 = 16 ≡ <b>5</b> ✓<br><br>
+            接線の傾き（分母は 2y = 14）:<br>
+            　λ = (3·2² + 1) / (2·7) = 13 / 14<br>
+            　13 ≡ 2、14 ≡ 3　(mod 11)<br>
+            　3⁻¹ ≡ 4　(3·4 = 12 ≡ 1)<br>
+            　λ = 2 · 4 = <b>8</b><br><br>
+            x₃ = λ² − x₁ − x₂ = 64 − 2 − 2 = 60 ≡ <b>5</b><br>
+            y₃ = λ(x₁ − x₃) − y₁ = 8·(2 − 5) − 7 = −31 ≡ <b>2</b><br><br>
+            → 2P = <b>(5, 2)</b>
+          </p>
+          <p>
+            検算: 左辺 <code>2² = 4</code>、右辺 <code>5³ + 5 + 6 = 136 = 12·11 + 4 ≡ 4</code> ✓
+          </p>
+          <p class="why">
+            <b>途中で 2 回、有限体の作法が出ています。</b>
+            ① <code>13/14</code> を <code>2·3⁻¹</code> に直すところ（先に代表元へ正規化）、
+            ② <code>−31</code> を <code>2</code> に直すところ。
+            <b>どちらか忘れると、曲線に乗らない点が出て 1 ステップで破綻します。</b>
+          </p>
+        </div>
+      </div>
+
+      <div class="stack-sm">
+        <p class="eyebrow">スカラー倍 — double-and-add</p>
+        <div class="callout">
+          <p class="strong-line">13P を、13 回足さずに 5 回で作る</p>
+          <p>
+            <code>13 = 8 + 4 + 1 = 1101₂</code> と分解します。
+          </p>
+          <p class="subst" style="color:var(--ink);">
+            2P = P + P　　　　<span style="color:var(--muted)">（doubling 1）</span><br>
+            4P = 2P + 2P　　<span style="color:var(--muted)">（doubling 2）</span><br>
+            8P = 4P + 4P　　<span style="color:var(--muted)">（doubling 3）</span><br>
+            13P = 8P + 4P + P　<span style="color:var(--muted)">（加算 2 回）</span><br><br>
+            合計 <b>5 回</b>　／　定義どおりなら <b>12 回</b>
+          </p>
+          <p>
+            演算回数は <code>k</code> ではなく <strong>log₂k に比例</strong>します。
+            <code>k ≈ 2²⁵⁶</code> でも約 <b>384 回</b>（doubling 256 + 加算 平均 128）で終わります。
+          </p>
+          <p class="why">
+            <b>Week 3 の課題で必ずここを踏みます。</b>
+            README にこう書かれています——
+            「ec_add を k 回繰り返す実装ではテストが終わりません（テストには k = n ≈ 2²⁵⁶ のケースがあります）」。
+            <b>素朴な実装は落ちるのではなく、返ってこない。</b>
+          </p>
+          <p class="why">
+            <b>そして、これが ⑧ の前半分です。</b>
+            <code>x ↦ xP</code> が速いのは double-and-add があるから。
+            <b>逆に、その逆をたどる同じくらい速い手が見つかっていない</b>——
+            この非対称が次の節の主題です。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 9 : 離散対数 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">一方向性</p>
+      <h2>離散対数問題 — 「戻れない」の正体</h2>
+      <p>
+        群は定義からして「戻れる」世界でした（逆元があるので）。
+        にもかかわらず暗号が成立するのは、<strong>戻れることと、戻る手が速いことが別</strong>だからです。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          問題はこう書けます。乗法群の言い方と、楕円曲線の言い方があります。
+        </p>
+        <p class="subst">
+          <b>乗法記法:</b> g と y = g<sup>x</sup> が与えられたとき、x を求めよ<br>
+          <b>加法記法:</b> P と Q = xP が与えられたとき、x を求めよ（ECDLP）
+        </p>
+        <p>
+          <strong>速い向き</strong>は繰り返し二乗法 / double-and-add で <code>O(log x)</code>。
+          <strong>難しい向き</strong>には、いまのところ多項式時間の手がありません。
+        </p>
+        <p>
+          <strong>ハッシュ関数と同じ非対称</strong>です。ただし決定的な違いが 1 つ。
+          <b>ハッシュは情報を捨てているから戻れない</b>のに対して、
+          <b>離散対数は情報を捨てていません</b>——
+          <code>x</code> は <code>g<sup>x</sup></code> の中に完全に残っていて、
+          原理的には総当たりで必ず見つかります。
+          <strong>戻れないのではなく、間に合わない。</strong>
+        </p>
+        <p>
+          だから離散対数の安全性は「不可能」ではなく<strong>「計算量的に困難」</strong>と言います。
+          Week 2 の秘密分散が「情報理論的に不可能」だったのとは、根拠の強さが違います。
+          <b>量子計算機の話が出るのはこちら側だけ</b>なのも、この違いからです。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">2 つの記法は同じことを言っている</p>
+          <div class="table-scroll">
+            <table class="data">
+              <thead><tr><th>乗法記法 F_p<sup>*</sup></th><th>加法記法 EC</th><th>意味</th></tr></thead>
+              <tbody>
+                <tr><td>g · h</td><td>P + Q</td><td>群演算</td></tr>
+                <tr><td>1</td><td>O</td><td>単位元</td></tr>
+                <tr><td>g⁻¹</td><td>−P</td><td>逆元</td></tr>
+                <tr><td>g<sup>x</sup></td><td>xP</td><td>x 回の群演算</td></tr>
+                <tr class="here"><td>g<sup>x</sup> から x</td><td>xP から x</td><td><b>離散対数問題</b></td></tr>
+                <tr><td>繰り返し二乗法</td><td>double-and-add</td><td>速い向きの手</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="caption">
+            記法が違うだけで、群としては同じ話をしています。
+            <b>EC を使う理由は、同じ安全性を短い鍵で買えるから</b>——
+            <code>F_p<sup>*</sup></code> は 2048 ビット必要なところ、EC なら 256 ビットで済みます
+            （<code>F_p<sup>*</sup></code> には指数計算法という部分的に速い攻撃があり、EC にはそれが効かないため）。
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">DH 三兄弟を 1 行ずつ</p>
+          <p>
+            <b>DLP:</b> <code>(P, xP)</code> から <code>x</code> を求めよ。いちばん強い要求。
+          </p>
+          <p>
+            <b>CDH（計算 Diffie-Hellman）:</b>
+            <code>(P, aP, bP)</code> から <code>abP</code> を作れ。
+            <b>x を知らなくても共有鍵だけ作れれば破れる</b>ので、DLP より弱い要求です。
+          </p>
+          <p>
+            <b>DDH（判定 Diffie-Hellman）:</b>
+            <code>(P, aP, bP, Z)</code> を見て、<code>Z = abP</code> か<b>ランダムか判定</b>せよ。
+            さらに弱い要求——値を作る必要すらありません。
+          </p>
+          <p class="strong-line">
+            DLP が解ければ CDH が解け、CDH が解ければ DDH が解ける。
+          </p>
+          <p>
+            <b>だから安全性の仮定としては逆順に強くなります。</b>
+            「DDH が難しい」は「DLP が難しい」より強い仮定。
+            暗号方式は必要な分だけ強い仮定を置きます——
+            <b>ElGamal の意味論的安全性には DDH が要ります</b>。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout amber wide">
+      <p class="eyebrow">小さい群では、暗号は成立しない</p>
+      <p class="strong-line">
+        次のラボの「離散対数を総当たりで解く」ボタンは、必ず一瞬で当たります。
+      </p>
+      <p>
+        位数 13 の群なら、試行は最悪 13 回。<b>暗号でも何でもありません。</b>
+        実用の曲線 secp256k1 の位数は約 <code>2²⁵⁶ ≈ 1.16 × 10⁷⁷</code>——
+        観測可能な宇宙の原子数（約 10⁸⁰）と同じ桁です。
+        <b>難しさは群の構造ではなく、位数の大きさが担保しています。</b>
+      </p>
+      <p>
+        なお総当たりは最悪 n 回ですが、実際の攻撃は<b>Pollard のロー法</b>などで
+        <code>O(√n)</code> まで落ちます。だから <b>128 ビットの安全性が欲しければ位数は 256 ビット必要</b>——
+        secp256k1 の 256 ビットという数字は、この平方根から逆算されています。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 10 : LAB B -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ B</p>
+      <h2>楕円曲線の点をすべて並べて、巡回させる</h2>
+      <p>
+        小さい曲線なら、点は全部数え上げられます。既定は
+        <code>y² = x³ + x + 6</code> over <code>F₁₁</code>。
+        <strong>生成点 P を選ぶと 1P, 2P, 3P … を辿って O に戻る</strong>ところまで見え、
+        <strong>離散対数を総当たりで解く</strong>ボタンで「小さい群では解けてしまう」ことが確かめられます。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>曲線の設定</h3><span class="eyebrow" id="ec-badge">—</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>法 p</span><span class="hint">体の大きさ</span></div>
+            <div class="segments" id="ec-p" role="group" aria-label="法 p"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>係数 a</span><span class="hint">y² = x³ + ax + b</span></div>
+            <div class="segments" id="ec-a" role="group" aria-label="係数 a"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>係数 b</span><span class="hint">a = b = 0 は特異になる</span></div>
+            <div class="segments" id="ec-b" role="group" aria-label="係数 b"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>生成点 P</span><span class="hint">押すと倍々に辿る</span></div>
+            <div class="segments narrow" id="ec-gen" role="group" aria-label="生成点"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>目標の点 Q</span><span class="hint">Q = kP の k を当てさせる</span></div>
+            <div class="segments narrow" id="ec-target" role="group" aria-label="目標の点"></div>
+          </div>
+          <button class="btn-main" id="ec-solve" type="button">離散対数を総当たりで解く</button>
+          <p class="caption" id="ec-dlog">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="ec-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="ec-note">—</p>
+        </div>
+        <div class="card-body">
+          <div class="stack-sm">
+            <p class="eyebrow">曲線上の全点（横 = x、縦 = y、破線 = 対称軸 y = p/2）</p>
+            <div id="ec-plot"></div>
+            <p class="caption">
+              「x 軸に関して対称」は、mod の世界では <code>y</code> と <code>p − y</code> のペアという意味になります。
+              図では中央の破線に関して対称に見えます。<b>y = 0 の点だけが相方を持たず、線の下端に単独で並びます</b>。
+            </p>
+          </div>
+          <div class="stack-sm">
+            <p class="eyebrow">P の倍々（O に戻るまで）</p>
+            <div class="candidates" id="ec-seq"></div>
+          </div>
+          <div class="stack-sm">
+            <p class="eyebrow">計算の中身</p>
+            <pre id="ec-work">—</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">試してほしい設定 1 — 位数が素数の曲線</p>
+        <p class="strong-line">y² = x³ + x + 6 over F₁₁ は、13 個の点を持つ。</p>
+        <p>
+          13 は素数なので、<b>ラグランジュの定理から、O 以外のどの点も位数 13 の生成元</b>です。
+          どの点を選んでも 13 個全部を巡ります。
+          <b>実用の曲線が「位数が素数（またはほぼ素数）」であることを要求するのは、
+          部分群に閉じこもる点を作らないため</b>です。
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">試してほしい設定 2 — y = 0 の点がある曲線</p>
+        <p class="strong-line">a = 1, b = 0 にすると y² = x³ + x、点は 12 個になる。</p>
+        <p>
+          この曲線には <code>(0, 0)</code> があります。<b>選んで倍々を見てください</b>——
+          <code>2P = O</code> で終わり、位数は 2。
+          ⑦ で予告した「分母 <code>2y</code> が 0 になるので O」が、実際に起きています。
+          <b>位数 12 の群には位数 1, 2, 3, 4, 6, 12 の点が混在します</b>（12 の約数）。
+        </p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">試してほしい設定 3 — 特異曲線</p>
+        <p class="strong-line">a = 0, b = 0 は弾かれる。</p>
+        <p>
+          <code>4·0³ + 27·0² = 0</code> なので滑らかさの条件を満たしません。
+          <code>y² = x³</code> は原点に尖点（カスプ）を持ち、そこで接線が決まらない。
+          <b>「群にならない」ことをラボが拒否として見せます。</b>
+          <code>p = 11</code> では <code>(a,b) = (2,3)</code> も特異です
+          （<code>4·8 + 27·9 = 275 = 25·11 ≡ 0</code>）。
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">試してほしい設定 4 — 総当たりの試行回数</p>
+        <p class="strong-line">最悪でも位数と同じ回数で必ず当たる。</p>
+        <p>
+          <code>p = 17</code> の曲線でも試行は数十回です。
+          <b>secp256k1 なら 2²⁵⁶ 通り。</b>
+          1 秒に 10¹² 回試せる機械を 10 億台並べても、宇宙の年齢では終わりません。
+          <b>アルゴリズムは同じ、桁だけが違う。</b>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 11 : QUIZ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">検問クイズ</p>
+      <h2>土台検問 — 手が動くかどうかを試す</h2>
+      <p>
+        読んだだけでは定着しません。ここでは<strong>正規化・逆元・体の判定・群の性質・楕円曲線の加算</strong>を
+        その場で出題します。問題は毎回生成され、<strong>判定は上の 2 つのラボと同じ計算器</strong>が行います。
+        <strong>3 回間違えたら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <!-- ---------- start ---------- -->
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <!-- ---------- play ---------- -->
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <!-- ---------- result ---------- -->
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 12 : 全体像 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">接続</p>
+      <h2>この土台が、どの週で効くのか</h2>
+      <p>
+        Week 0 が「数学の準備」に見えて実は伏線だった、という構造になっています。
+        <strong>どこで回収されるか</strong>を先に並べておきます。
+      </p>
+    </div>
+
+    <div class="stack-sm">
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr><th>週</th><th>テーマ</th><th>Week 0 のどこが効くか</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Week 1</td><td>算術回路・ZK（<code>proof-of-exploit</code>）</td><td>回路の値が住む場所が <b>F_p</b>。ゲートが + と × だけなのは<b>環の定義</b>。<code>(x−2)(x−5)(x−6)=0</code> が効くのは<b>零因子が無い</b>から。不等式が書けないのは<b>順序が無い</b>から</td></tr>
+            <tr><td>Week 2</td><td>MPC・秘密計算（<code>toy-mpc</code>）</td><td>シェアも Beaver 三つ組も <b>F_p</b> の元。<b>正規化</b>を忘れると採点器に落ちる。シェアの大小から何も漏れないのは<b>順序が無い</b>から。OT のトイ群は <code>F₂₃<sup>*</sup></code> の<b>位数 11 の部分群</b></td></tr>
+            <tr class="here"><td>Week 3</td><td>楕円曲線と Schnorr（<code>schnorr-from-scratch</code>）</td><td><b>このノートの後半そのもの</b>。Part 1 = 逆元（拡張ユークリッド + 正規化）、Part 2 = 点の加算と double-and-add、Part 3 = <b>離散対数</b>の困難性の上に建つ署名。講義の方は多項式とフーリエ変換で、<b>位数 n の 1 の根</b>を使う</td></tr>
+            <tr><td>Week 4 以降</td><td>多項式・コミットメント・KZG</td><td>多項式の係数も評価値も <b>F_p</b> の元。評価点は<b>1 の根の巡回群</b>。KZG のコミットメントは<b>楕円曲線の点</b>で、その安全性は<b>離散対数</b>（と、その強化版）に乗る</td></tr>
+            <tr><td>Week 5</td><td>TFHE（<code>tfhe-toy-python</code>）</td><td>格子ベースなので土台は少し違うが、<b>剰余環の上で乱数に埋めて隠す</b>という発想は Week 2 と同じ形</td></tr>
+            <tr><td>Week 6</td><td>co-SNARK / zkVM</td><td>Beaver 乗算（<b>F_p</b>）と回路（<b>F_p</b>）の合流点。ここまで来ても、値の住む場所は変わらない</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        Week 5 だけ土台が少し違いますが、それ以外は<b>全部この 1 ページの上に建っています</b>。
+      </p>
+    </div>
+
+    <div class="prose">
+      <p class="eyebrow">持ち帰る 3 つ</p>
+      <p>
+        <strong>① 順序がない。</strong>
+        だから大小比較は書けず（Week 1 の枷）、大小から秘密は漏れない（Week 2 の武器）。
+        <b>同じ 1 つの性質が、立つ位置で意味を変えます。</b>
+      </p>
+      <p>
+        <strong>② 割り算は逆元の掛け算。</strong>
+        <code>a⁻¹</code> は拡張ユークリッドで求め、<b>必ず 0..p−1 に正規化して返す</b>。
+        そして <code>0</code> に逆元は無く、それが楕円曲線の
+        <b>無限遠点という例外処理の正体</b>でした。
+      </p>
+      <p>
+        <strong>③ 片方向だけ速い。</strong>
+        <code>x ↦ xP</code> は double-and-add で <code>O(log x)</code>、逆は手がない。
+        <b>ただし「不可能」ではなく「間に合わない」</b>——
+        ラボ B で総当たりが一瞬で当たったのは、位数が 13 しかなかったからです。
+        <b>安全性を担保しているのは構造ではなく桁数。</b>
+      </p>
+      <p>
+        そして、この 3 つの手前に <b>0 番目</b>があります。
+        <strong>暗号の道具立ては「数学的に美しいから」ではなく、
+        要求から逆算されて選ばれている</strong>ということ。
+        <b>素数を選ぶのは零因子を消すため。有限にするのは固定長で扱うため。
+        群を使うのは戻れる必要があるため。</b>
+        <b>「なぜこの形なのか」を毎回聞く癖</b>が、この先いちばん効きます。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="wrap">
+    zk-tokyo Advanced Cryptography Program 2026 · Week 0（事前学習スライド「有限体と楕円曲線」）の自習ノート。
+    「実測」とある出力は、公式課題の公開テストに壊した実装を通した実際の結果です。
+    ラボとクイズの数値はすべてこのページ内で計算しています（外部通信なし）。
+    ／ <a href="https://github.com/susumutomita/advanced-cryptography-note">susumutomita/advanced-cryptography-note</a>
+  </div>
+</footer>
+
+<script>
+// ---- ラボ A: 有限体の電卓（零因子と逆元を目で見る） ----
+(function () {
+  "use strict";
+
+  // 正規化。JS の % は符号を引きずるので、これを通さないと負が残る
+  function fmod(n, p) { return ((n % p) + p) % p; }
+
+  function isPrime(n) {
+    if (n < 2) return false;
+    for (var d = 2; d * d <= n; d++) if (n % d === 0) return false;
+    return true;
+  }
+
+  // (a) 総当たり: 1..p-1 を順に試す。試した回数がそのまま計算量 O(p)
+  function invBrute(a, p) {
+    var x = fmod(a, p), ops = 0;
+    for (var i = 1; i < p; i++) {
+      ops++;
+      if (fmod(x * i, p) === 1) return { value: i, ops: ops, ok: true };
+    }
+    return { value: null, ops: ops, ok: false };
+  }
+
+  // 繰り返し二乗法。二乗と乗算の回数を数える
+  function powmodCount(base, e, p) {
+    var r = 1, b = fmod(base, p), ops = 0;
+    while (e > 0) {
+      if (e % 2 === 1) { r = fmod(r * b, p); ops++; }
+      b = fmod(b * b, p); ops++;
+      e = Math.floor(e / 2);
+    }
+    return { value: r, ops: ops };
+  }
+
+  // (b) フェルマーの小定理: a^(p-2)。p が素数のときだけ正しい
+  function invFermat(a, p) {
+    var r = powmodCount(a, p - 2, p);
+    return {
+      value: r.value, ops: r.ops,
+      ok: fmod(fmod(a, p) * r.value, p) === 1,
+      usable: isPrime(p)
+    };
+  }
+
+  // (c) 拡張ユークリッド: ax + bp = gcd。余りを取る各行を残す
+  function invEgcd(a, p) {
+    var r0 = p, r1 = fmod(a, p);
+    var s0 = 0, s1 = 1;              // r_i = s_i·a + t_i·p の s 成分だけ追えば足りる
+    var rows = [], ops = 0;
+    while (r1 !== 0) {
+      var q = Math.floor(r0 / r1);
+      var r2 = r0 - q * r1;
+      var s2 = s0 - q * s1;
+      rows.push({ r0: r0, q: q, r1: r1, r2: r2, s: s2 });
+      r0 = r1; r1 = r2; s0 = s1; s1 = s2; ops++;
+    }
+    if (r0 !== 1) return { value: null, gcd: r0, rows: rows, ops: ops, ok: false, raw: null };
+    return { value: fmod(s0, p), gcd: 1, rows: rows, ops: ops, ok: true, raw: s0 };
+  }
+
+  function inv(a, p) { return invEgcd(a, p).value; }
+
+  function mulTable(p) {
+    var t = [];
+    for (var x = 0; x < p; x++) {
+      var row = [];
+      for (var y = 0; y < p; y++) row.push(fmod(x * y, p));
+      t.push(row);
+    }
+    return t;
+  }
+
+  // 0 でない 2 つを掛けて 0 になる組（= 零因子）
+  function zeroDivisors(p) {
+    var out = [];
+    for (var x = 1; x < p; x++)
+      for (var y = x; y < p; y++)
+        if (fmod(x * y, p) === 0) out.push([x, y]);
+    return out;
+  }
+
+  function noInverse(p) {
+    var out = [];
+    for (var a = 0; a < p; a++) if (inv(a, p) === null) out.push(a);
+    return out;
+  }
+
+  // g^n = 1 となる最小の n（乗法群での元の位数）
+  function mulOrder(g, p) {
+    if (inv(g, p) === null) return null;
+    var v = fmod(g, p), k = 1;
+    while (v !== 1) { v = fmod(v * g, p); k++; if (k > p + 1) return null; }
+    return k;
+  }
+
+  function powList(g, p) {
+    var out = [], v = fmod(g, p), guard = 0;
+    do { out.push(v); v = fmod(v * g, p); guard++; } while (v !== fmod(g, p) && guard < p + 2);
+    return out;
+  }
+
+  function generators(p) {
+    if (!isPrime(p)) return [];
+    var out = [];
+    for (var g = 1; g < p; g++) if (mulOrder(g, p) === p - 1) out.push(g);
+    return out;
+  }
+
+  // 検問クイズから同じ計算器を使えるように公開する（DOM が無くても公開する）
+  window.__fieldlab = {
+    fmod: fmod, isPrime: isPrime,
+    inv: inv, invBrute: invBrute, invFermat: invFermat, invEgcd: invEgcd,
+    powmodCount: powmodCount,
+    mulTable: mulTable, zeroDivisors: zeroDivisors, noInverse: noInverse,
+    mulOrder: mulOrder, powList: powList, generators: generators
+  };
+
+  var segP = document.getElementById("fl-p");
+  if (!segP) return;
+
+  var MODS = [6, 7, 9, 11, 12, 13];
+  var st = { p: 7, a: 5 };
+
+  var segA = document.getElementById("fl-a");
+  var badge = document.getElementById("fl-badge");
+  var banner = document.getElementById("fl-banner");
+  var note = document.getElementById("fl-note");
+  var zdHost = document.getElementById("fl-zd");
+  var invHost = document.getElementById("fl-inv");
+  var invNote = document.getElementById("fl-invnote");
+  var mulHost = document.getElementById("fl-mul");
+  var methHost = document.getElementById("fl-methods");
+  var workEl = document.getElementById("fl-work");
+
+  MODS.forEach(function (v) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = String(v);
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", function () {
+      st.p = v;
+      if (st.a >= v) st.a = v - 1;
+      render();
+    });
+    segP.appendChild(b);
+  });
+
+  function buildA() {
+    segA.textContent = "";
+    for (var v = 0; v < st.p; v++) {
+      (function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = String(v);
+        b.setAttribute("aria-pressed", v === st.a ? "true" : "false");
+        b.addEventListener("click", function () { st.a = v; render(); });
+        segA.appendChild(b);
+      })(v);
+    }
+  }
+
+  function renderTable() {
+    var t = mulTable(st.p);
+    var h = ['<table class="mul"><thead><tr><th class="corner">×</th>'];
+    for (var y = 0; y < st.p; y++) h.push("<th>" + y + "</th>");
+    h.push("</tr></thead><tbody>");
+    for (var x = 0; x < st.p; x++) {
+      h.push("<tr><th>" + x + "</th>");
+      for (var y2 = 0; y2 < st.p; y2++) {
+        var v = t[x][y2], cls = "";
+        if (x === 0 || y2 === 0) cls = "trivial";
+        else if (v === 0) cls = "zero";
+        else if (v === 1) cls = "one";
+        h.push('<td class="' + cls + '">' + v + "</td>");
+      }
+      h.push("</tr>");
+    }
+    h.push("</tbody></table>");
+    mulHost.innerHTML = h.join("");
+  }
+
+  function renderInvList() {
+    var none = [];
+    var h = [];
+    for (var a = 0; a < st.p; a++) {
+      var v = inv(a, st.p);
+      if (v === null) { none.push(a); h.push('<span class="cand bad">' + a + "⁻¹ = なし</span>"); }
+      else h.push('<span class="cand' + (a === st.a ? " mark" : "") + '">' + a + "⁻¹ = " + v + "</span>");
+    }
+    invHost.innerHTML = h.join("");
+    if (none.length === 1) {
+      invNote.textContent = "逆元を持たないのは 0 だけ。残り " + (st.p - 1) +
+        " 個すべてに逆元がある ＝ 体である。";
+    } else {
+      invNote.textContent = "逆元を持たない元が " + none.length + " 個ある: " + none.join(", ") +
+        "。0 以外にも割れない元がある ＝ 体ではない（gcd(a, " + st.p + ") ≠ 1 の元）。";
+    }
+  }
+
+  function renderMethods() {
+    var a = st.a, p = st.p;
+    var br = invBrute(a, p), fe = invFermat(a, p), eg = invEgcd(a, p);
+    var truth = eg.value;
+
+    function box(name, sub, value, ops, bad) {
+      return '<div class="method">' +
+        '<span class="mname">' + name + "</span>" +
+        '<span class="mval' + (bad ? " bad" : "") + '">' + value + "</span>" +
+        '<span class="mops">' + sub + "</span>" +
+        '<span class="mops">' + ops + "</span>" +
+        "</div>";
+    }
+
+    var h = [];
+    h.push(box("総当たり", "1..p−1 を順に試す",
+      br.ok ? String(br.value) : "なし",
+      "乗算 " + br.ops + " 回" + (br.ok ? "" : "（全部外れた）"), !br.ok));
+
+    if (fe.usable) {
+      h.push(box("フェルマー", "a^(p−2) mod p",
+        String(fe.value),
+        "乗算 " + fe.ops + " 回" + (fe.ok ? "" : " ／ 検算に失敗"), !fe.ok));
+    } else {
+      h.push(box("フェルマー", "p が素数でないので使えない",
+        String(fe.value) + (fe.ok ? "" : " ✗"),
+        "乗算 " + fe.ops + " 回 ／ a·この値 = " + fmod(a * fe.value, p) +
+        (fe.ok ? "（たまたま一致）" : " ≠ 1"), !fe.ok));
+    }
+
+    h.push(box("拡張ユークリッド", "ax + bp = gcd",
+      eg.ok ? String(eg.value) : "なし（gcd = " + eg.gcd + "）",
+      "除算 " + eg.ops + " 回", !eg.ok));
+
+    methHost.innerHTML = h.join("");
+    return { br: br, fe: fe, eg: eg, truth: truth };
+  }
+
+  function renderWork(m) {
+    var a = st.a, p = st.p, eg = m.eg;
+    var L = [];
+    L.push("gcd(" + p + ", " + a + ") を求めながら、逆元の係数を追う");
+    if (eg.rows.length === 0) {
+      L.push("  a ≡ 0 なので割る相手がいない。0 に逆元は無い。");
+    } else {
+      eg.rows.forEach(function (r) {
+        L.push("  " + r.r0 + " = " + r.q + "·" + r.r1 + " + " + r.r2);
+      });
+      L.push("");
+      L.push("  gcd = " + eg.gcd + (eg.gcd === 1 ? "  → 逆元が存在する" : "  → 1 でないので逆元は無い"));
+    }
+    if (eg.ok) {
+      L.push("  係数をたどると  " + a + "·(" + eg.raw + ") ≡ 1 (mod " + p + ")");
+      L.push(eg.raw < 0 || eg.raw >= p
+        ? "  そのままだと " + eg.raw + " ——正しい逆元だが代表元ではない。0..p−1 に正規化して  " +
+          a + "⁻¹ = " + eg.value
+        : "  " + eg.raw + " はすでに 0..p−1 の中にあるので、そのまま  " + a + "⁻¹ = " + eg.value);
+      L.push("  検算: " + a + " · " + eg.value + " = " + (a * eg.value) +
+        " ≡ " + fmod(a * eg.value, p) + " (mod " + p + ")  ✓");
+    }
+    L.push("");
+    L.push("3 つの方法の答え合わせ");
+    L.push("  総当たり        : " + (m.br.ok ? m.br.value : "なし") + "   （乗算 " + m.br.ops + " 回）");
+    L.push("  フェルマー      : " + m.fe.value + "   （乗算 " + m.fe.ops + " 回）" +
+      (m.fe.usable ? "" : "  ← p が合成数なので、この値は逆元ではない"));
+    L.push("  拡張ユークリッド: " + (eg.ok ? eg.value : "なし") + "   （除算 " + eg.ops + " 回）");
+    if (eg.ok && m.fe.usable) {
+      L.push("");
+      L.push("  逆元は一意なので、3 つとも同じ値に着地する。");
+      L.push("  違うのは道のりの長さだけ（p が大きいほど総当たりだけが取り残される）。");
+    }
+    workEl.textContent = L.join("\n");
+  }
+
+  function render() {
+    Array.prototype.forEach.call(segP.children, function (b, i) {
+      b.setAttribute("aria-pressed", MODS[i] === st.p ? "true" : "false");
+    });
+    buildA();
+    badge.textContent = "p = " + st.p;
+
+    var prime = isPrime(st.p);
+    var zd = zeroDivisors(st.p);
+    banner.className = "banner " + (prime ? "ok" : "bad");
+    banner.textContent = prime
+      ? "F" + st.p + " は体 — 0 以外の " + (st.p - 1) + " 個すべてに逆元があり、零因子は 0 組"
+      : "Z/" + st.p + "Z は体ではない — 零因子が " + zd.length + " 組ある";
+    note.textContent = prime
+      ? "素数なので a·b ≡ 0 なら a ≡ 0 か b ≡ 0。乗法表に赤いマスは 1 つも出ない。"
+      : st.p + " = " + (function () {
+          for (var d = 2; d * d <= st.p; d++) if (st.p % d === 0) return d + " × " + (st.p / d);
+          return String(st.p);
+        })() + " と分解できるので、0 でない 2 つを掛けて 0 にできてしまう。割り算が定義できない。";
+
+    zdHost.innerHTML = zd.length
+      ? zd.map(function (z) {
+          return '<span class="cand bad">' + z[0] + " × " + z[1] + " = 0</span>";
+        }).join("")
+      : '<span class="cand hit">なし — これが体である条件</span>';
+
+    renderTable();
+    renderInvList();
+    renderWork(renderMethods());
+  }
+
+  render();
+})();
+
+// ---- ラボ B: 楕円曲線の点をすべて並べる ----
+(function () {
+  "use strict";
+
+  function fmod(n, p) { return ((n % p) + p) % p; }
+
+  function inv(a, p) {
+    var r0 = p, r1 = fmod(a, p), s0 = 0, s1 = 1;
+    while (r1 !== 0) {
+      var q = Math.floor(r0 / r1), r2 = r0 - q * r1, s2 = s0 - q * s1;
+      r0 = r1; r1 = r2; s0 = s1; s1 = s2;
+    }
+    return r0 === 1 ? fmod(s0, p) : null;
+  }
+
+  // 4a³ + 27b² ≠ 0。重根があると接線が決まらず、群にならない
+  function isSmooth(a, b, p) { return fmod(4 * a * a * a + 27 * b * b, p) !== 0; }
+
+  function onCurve(P, a, b, p) {
+    if (P === null) return true;
+    return fmod(P[1] * P[1], p) === fmod(P[0] * P[0] * P[0] + a * P[0] + b, p);
+  }
+
+  function same(A, B) {
+    if (A === null || B === null) return A === B;
+    return A[0] === B[0] && A[1] === B[1];
+  }
+
+  function fmt(P) { return P === null ? "O" : "(" + P[0] + ", " + P[1] + ")"; }
+
+  // 曲線上の全点。先頭が無限遠点 O（= null）
+  function points(a, b, p) {
+    var out = [null];
+    for (var x = 0; x < p; x++) {
+      var r = fmod(x * x * x + a * x + b, p);
+      for (var y = 0; y < p; y++) if (fmod(y * y, p) === r) out.push([x, y]);
+    }
+    return out;
+  }
+
+  // 加算。途中式も返す（クイズの解説で使う）
+  function addTrace(P, Q, a, p) {
+    if (P === null) return { R: Q, kind: "unit", why: "P = O なので P + Q = Q" };
+    if (Q === null) return { R: P, kind: "unit", why: "Q = O なので P + Q = P" };
+    if (P[0] === Q[0] && fmod(P[1] + Q[1], p) === 0) {
+      return {
+        R: null, kind: "vertical",
+        why: same(P, Q)
+          ? "P = Q かつ y = 0。接線の分母 2y = 0 で、0 に逆元は無い → 2P = O"
+          : "Q = −P。2 点を通る直線が垂直になる → P + Q = O"
+      };
+    }
+    var num, den, kind;
+    if (same(P, Q)) {
+      num = fmod(3 * P[0] * P[0] + a, p); den = fmod(2 * P[1], p); kind = "double";
+    } else {
+      num = fmod(Q[1] - P[1], p); den = fmod(Q[0] - P[0], p); kind = "chord";
+    }
+    var di = inv(den, p);
+    var lam = fmod(num * di, p);
+    var x3 = fmod(lam * lam - P[0] - Q[0], p);
+    var y3 = fmod(lam * (P[0] - x3) - P[1], p);
+    return {
+      R: [x3, y3], kind: kind, lam: lam, num: num, den: den, dinv: di,
+      why: (kind === "double" ? "λ = (3x² + a)/(2y) = " : "λ = (y₂ − y₁)/(x₂ − x₁) = ") +
+        num + " · " + den + "⁻¹ = " + num + " · " + di + " = " + lam +
+        " ／ x₃ = λ² − x₁ − x₂ = " + x3 + " ／ y₃ = λ(x₁ − x₃) − y₁ = " + y3
+    };
+  }
+
+  function ecAdd(P, Q, a, p) { return addTrace(P, Q, a, p).R; }
+
+  // double-and-add。k 回ではなく log₂k 回で済む
+  function ecMul(k, P, a, p) {
+    var R = null, N = P;
+    while (k > 0) {
+      if (k % 2 === 1) R = ecAdd(R, N, a, p);
+      N = ecAdd(N, N, a, p);
+      k = Math.floor(k / 2);
+    }
+    return R;
+  }
+
+  function multiples(P, a, p) {
+    var out = [], R = null, guard = 4 * p + 16;
+    for (var k = 1; k <= guard; k++) {
+      R = ecAdd(R, P, a, p);
+      out.push(R);
+      if (R === null) break;
+    }
+    return out;
+  }
+
+  function order(P, a, p) {
+    if (P === null) return 1;
+    return multiples(P, a, p).length;
+  }
+
+  // 離散対数を総当たりで解く。試行回数をそのまま返す
+  function dlogBrute(P, Q, a, p) {
+    var R = null, tries = 0, guard = 8 * p + 32;
+    for (var k = 1; k <= guard; k++) {
+      R = ecAdd(R, P, a, p);
+      tries++;
+      if (same(R, Q)) return { k: k, tries: tries, found: true };
+      if (R === null) break;
+    }
+    return { k: null, tries: tries, found: false };
+  }
+
+  window.__eclab = {
+    fmod: fmod, inv: inv, isSmooth: isSmooth, onCurve: onCurve, same: same, fmt: fmt,
+    points: points, ecAdd: ecAdd, addTrace: addTrace, ecMul: ecMul,
+    multiples: multiples, order: order, dlogBrute: dlogBrute
+  };
+
+  var segP = document.getElementById("ec-p");
+  if (!segP) return;
+
+  var PS = [7, 11, 13, 17], AS = [0, 1, 2, 3], BS = [0, 1, 3, 6];
+  // 既定は本文で手計算した曲線と点（P = (2,7)、2P = (5,2)）
+  var st = { p: 11, a: 1, b: 6, gen: [2, 7], target: null };
+
+  var segA = document.getElementById("ec-a");
+  var segB = document.getElementById("ec-b");
+  var segGen = document.getElementById("ec-gen");
+  var segTgt = document.getElementById("ec-target");
+  var badge = document.getElementById("ec-badge");
+  var banner = document.getElementById("ec-banner");
+  var note = document.getElementById("ec-note");
+  var plotHost = document.getElementById("ec-plot");
+  var seqHost = document.getElementById("ec-seq");
+  var workEl = document.getElementById("ec-work");
+  var dlogEl = document.getElementById("ec-dlog");
+  var solveBtn = document.getElementById("ec-solve");
+
+  function seg(host, values, key) {
+    values.forEach(function (v) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = String(v);
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () {
+        st[key] = v; st.gen = null; st.target = null; dlogEl.textContent = "—";
+        render();
+      });
+      host.appendChild(b);
+    });
+  }
+  seg(segP, PS, "p");
+  seg(segA, AS, "a");
+  seg(segB, BS, "b");
+
+  function pressed(host, values, cur) {
+    Array.prototype.forEach.call(host.children, function (b, i) {
+      b.setAttribute("aria-pressed", values[i] === cur ? "true" : "false");
+    });
+  }
+
+  function svgPlot(pts, seq, P) {
+    var p = st.p;
+    var W = 320, H = 320, padL = 22, padR = 8, padT = 8, padB = 20;
+    var iw = W - padL - padR, ih = H - padT - padB;
+    var stepx = iw / (p - 1), stepy = ih / (p - 1);
+    function sx(x) { return padL + x * stepx; }
+    function sy(y) { return padT + ih - y * stepy; }
+
+    var s = ['<svg class="ec-plot" viewBox="0 0 ' + W + " " + H +
+             '" role="img" aria-label="曲線上の点の散布図">'];
+    for (var i = 0; i < p; i++) {
+      s.push('<line class="grid" x1="' + sx(i) + '" y1="' + padT + '" x2="' + sx(i) + '" y2="' + (padT + ih) + '"/>');
+      s.push('<line class="grid" x1="' + padL + '" y1="' + sy(i) + '" x2="' + (padL + iw) + '" y2="' + sy(i) + '"/>');
+    }
+    s.push('<line class="axis" x1="' + padL + '" y1="' + sy(0) + '" x2="' + (padL + iw) + '" y2="' + sy(0) + '"/>');
+    s.push('<line class="axis" x1="' + sx(0) + '" y1="' + padT + '" x2="' + sx(0) + '" y2="' + (padT + ih) + '"/>');
+    s.push('<line class="sym" x1="' + padL + '" y1="' + sy(p / 2) + '" x2="' + (padL + iw) + '" y2="' + sy(p / 2) + '"/>');
+
+    for (var t = 0; t < p; t++) {
+      s.push('<text class="lbl" x="' + sx(t) + '" y="' + (H - 6) + '" text-anchor="middle">' + t + "</text>");
+      s.push('<text class="lbl" x="' + (padL - 5) + '" y="' + (sy(t) + 2.5) + '" text-anchor="end">' + t + "</text>");
+    }
+
+    // P の倍々を線でつなぐ（歩いた順番が見える）
+    var fin = seq.filter(function (q) { return q !== null; });
+    if (fin.length > 1) {
+      s.push('<polyline class="trail" points="' + fin.map(function (q) {
+        return sx(q[0]) + "," + sy(q[1]);
+      }).join(" ") + '"/>');
+    }
+
+    var inSeq = {};
+    seq.forEach(function (q, i) { if (q) inSeq[q[0] + "," + q[1]] = i + 1; });
+
+    pts.forEach(function (q) {
+      if (q === null) return;
+      var key = q[0] + "," + q[1];
+      var cls = "pt";
+      if (P && q[0] === P[0] && q[1] === P[1]) cls = "pt gen";
+      else if (inSeq[key]) cls = "pt on";
+      s.push('<circle class="' + cls + '" cx="' + sx(q[0]) + '" cy="' + sy(q[1]) + '" r="3.4"/>');
+      if (inSeq[key]) {
+        s.push('<text class="num" x="' + (sx(q[0]) + 4.5) + '" y="' + (sy(q[1]) - 4) + '">' + inSeq[key] + "</text>");
+      }
+    });
+    s.push("</svg>");
+    return s.join("");
+  }
+
+  function render() {
+    pressed(segP, PS, st.p);
+    pressed(segA, AS, st.a);
+    pressed(segB, BS, st.b);
+
+    var a = st.a, b = st.b, p = st.p;
+    badge.textContent = "y² = x³ + " + a + "x + " + b + " / F" + p;
+
+    var disc = fmod(4 * a * a * a + 27 * b * b, p);
+    if (disc === 0) {
+      banner.className = "banner bad";
+      banner.textContent = "特異曲線 — 4a³ + 27b² = " + (4 * a * a * a + 27 * b * b) +
+        " ≡ 0 (mod " + p + ")。群になりません";
+      note.textContent = "右辺 x³ + " + a + "x + " + b +
+        " が重根を持つので、その点で接線が 1 本に決まりません。2 倍算が定義できない ＝ 群の条件を満たさない。";
+      plotHost.innerHTML = "";
+      seqHost.innerHTML = '<span class="cand bad">この (a, b, p) は楕円曲線ではない</span>';
+      segGen.textContent = ""; segTgt.textContent = "";
+      workEl.textContent = "判別式 4a³ + 27b² = 4·" + (a * a * a) + " + 27·" + (b * b) +
+        " = " + (4 * a * a * a + 27 * b * b) + " ≡ 0 (mod " + p + ")\n" +
+        "→ 滑らかさの条件を満たさないので、この式は楕円曲線を定めない。";
+      dlogEl.textContent = "—";
+      return;
+    }
+
+    var pts = points(a, b, p);
+    var fin = pts.filter(function (q) { return q !== null; });
+    if (!st.gen || !onCurve(st.gen, a, b, p)) st.gen = fin.length ? fin[0] : null;
+
+    var seq = st.gen ? multiples(st.gen, a, p) : [];
+    var ord = seq.length;
+
+    // 生成点の選択肢
+    segGen.textContent = "";
+    fin.forEach(function (q) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = fmt(q);
+      btn.setAttribute("aria-pressed", same(q, st.gen) ? "true" : "false");
+      btn.addEventListener("click", function () {
+        st.gen = q; st.target = null; dlogEl.textContent = "—"; render();
+      });
+      segGen.appendChild(btn);
+    });
+
+    // 目標の点は ⟨P⟩ の中から選ぶ（必ず解ける）
+    var subgroup = seq.slice();
+    if (!st.target || !subgroup.some(function (q) { return same(q, st.target); })) {
+      st.target = subgroup.length > 2 ? subgroup[Math.min(2, subgroup.length - 2)] : subgroup[0];
+    }
+    segTgt.textContent = "";
+    subgroup.forEach(function (q) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = q === null ? "O（無限遠点）" : fmt(q);
+      btn.setAttribute("aria-pressed", same(q, st.target) ? "true" : "false");
+      btn.addEventListener("click", function () {
+        st.target = q; dlogEl.textContent = "—"; render();
+      });
+      segTgt.appendChild(btn);
+    });
+
+    var n = pts.length;
+    var lo = (p + 1 - 2 * Math.sqrt(p)), hi = (p + 1 + 2 * Math.sqrt(p));
+    banner.className = "banner ok";
+    banner.textContent = "#E = " + n + " 点（O を含む）／ P = " + fmt(st.gen) + " の位数は " + ord;
+    note.textContent = "位数 " + ord + " は #E = " + n + " の約数です（ラグランジュの定理）。" +
+      (n === ord ? " P は E 全体の生成元 ——この 1 点で全部を巡ります。"
+                 : " P が生成するのは " + ord + " 個の部分群で、E 全体ではありません。");
+
+    plotHost.innerHTML = svgPlot(pts, seq, st.gen);
+
+    seqHost.innerHTML = seq.map(function (q, i) {
+      var cls = q === null ? "cand hit" : (same(q, st.target) ? "cand mark" : "cand");
+      return '<span class="' + cls + '">' + (i + 1) + "P = " + fmt(q) + "</span>";
+    }).join("");
+
+    var L = [];
+    L.push("曲線: y² = x³ + " + a + "x + " + b + "  over F" + p);
+    L.push("判別式 4a³ + 27b² = 4·" + (a * a * a) + " + 27·" + (b * b) + " = " +
+      (4 * a * a * a + 27 * b * b) + " ≡ " + disc + " (mod " + p + ")  ≠ 0 → 滑らか");
+    L.push("点の個数 #E = " + n + "  （無限遠点 O を含む。有限の点は " + fin.length + " 個）");
+    L.push("Hasse の定理: |#E − (p+1)| ≤ 2√p  →  " + n + " は [" +
+      lo.toFixed(1) + ", " + hi.toFixed(1) + "] の中  ✓");
+    L.push("");
+    if (st.gen) {
+      var tr = addTrace(st.gen, st.gen, a, p);
+      L.push("生成点 P = " + fmt(st.gen) + "   位数 " + ord);
+      L.push("  P は曲線上か: " + fmod(st.gen[1] * st.gen[1], p) + " = " +
+        fmod(st.gen[0] * st.gen[0] * st.gen[0] + a * st.gen[0] + b, p) + "  ✓");
+      L.push("");
+      L.push("2P の計算（接線）");
+      if (tr.kind === "vertical") {
+        L.push("  y = 0 なので分母 2y = 0。0 に逆元は無い。");
+        L.push("  → 接線が垂直になり、2P = O。P の位数は 2。");
+      } else {
+        var rawNum = 3 * st.gen[0] * st.gen[0] + a, rawDen = 2 * st.gen[1];
+        L.push("  λ = (3x² + a) / (2y) = " + rawNum + " / " + rawDen +
+          "   → 先に代表元へ: " + tr.num + " / " + tr.den + " = " + tr.num + " · " + tr.den + "⁻¹");
+        L.push("      " + tr.den + "⁻¹ = " + tr.dinv + "  （" + tr.den + "·" + tr.dinv +
+          " = " + (tr.den * tr.dinv) + " ≡ 1）");
+        L.push("      λ = " + tr.num + " · " + tr.dinv + " = " + tr.lam);
+        L.push("  x₃ = λ² − 2x = " + (tr.lam * tr.lam) + " − " + (2 * st.gen[0]) +
+          " ≡ " + tr.R[0]);
+        L.push("  y₃ = λ(x − x₃) − y = " + tr.lam + "·(" + st.gen[0] + " − " + tr.R[0] +
+          ") − " + st.gen[1] + " ≡ " + tr.R[1]);
+        L.push("  → 2P = " + fmt(tr.R) + "   曲線上か: " +
+          fmod(tr.R[1] * tr.R[1], p) + " = " +
+          fmod(tr.R[0] * tr.R[0] * tr.R[0] + a * tr.R[0] + b, p) + "  ✓");
+      }
+      L.push("");
+      L.push("倍々の列（O に戻るまで）");
+      seq.forEach(function (q, i) {
+        L.push("  " + String(i + 1) + "P = " + fmt(q) + (q === null ? "   ← 一周した" : ""));
+      });
+      L.push("");
+      var bits = ord.toString(2).length;
+      L.push("double-and-add なら " + ord + "P を作るのに約 " + (bits + Math.max(0, bits - 1)) +
+        " 回（定義どおりなら " + (ord - 1) + " 回）。");
+      L.push("演算回数は k ではなく log₂k に比例する —— secp256k1 の k ≈ 2²⁵⁶ でも約 384 回。");
+    }
+    workEl.textContent = L.join("\n");
+  }
+
+  solveBtn.addEventListener("click", function () {
+    if (!st.gen) return;
+    var r = dlogBrute(st.gen, st.target, st.a, st.p);
+    if (!r.found) { dlogEl.textContent = "⟨P⟩ の中に見つかりませんでした。"; return; }
+    var ord = order(st.gen, st.a, st.p);
+    dlogEl.textContent = "k = " + r.k + " で当たりました（試行 " + r.tries + " 回、最悪でも " + ord +
+      " 回）。位数 " + ord + " の群では総当たりが一瞬で終わります。secp256k1 の位数は約 2²⁵⁶ ——" +
+      " 同じアルゴリズムで、桁だけが違います。";
+  });
+
+  render();
+})();
+
+// ---- 目次を h2 から自動生成（章を足しても手で直さなくてよいように） ----
+(function () {
+  "use strict";
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var heads = document.querySelectorAll(".band-head h2");
+  Array.prototype.forEach.call(heads, function (h, i) {
+    if (h.closest("#toc")) return;
+    var section = h.closest(".band");
+    if (!section) return;
+    if (i === 0) return;                 // 「出発点」自身は目次に載せない
+    if (!section.id) section.id = "sec-" + i;
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + section.id;
+    a.textContent = h.textContent.trim();
+    li.appendChild(a);
+    toc.appendChild(li);
+  });
+})();
+
+// ---- 土台検問（ラボと同じ計算器で採点する出題モード） ----
+(function () {
+  "use strict";
+  var F = window.__fieldlab, E = window.__eclab;
+  if (!F || !E || !document.getElementById("quiz")) return;
+
+  var TOTAL = 10, MAX_LIVES = 3, STORE_KEY = "ac26-w0-checkpoint-best";
+  var PRIMES = [7, 11, 13];
+  var COMPOSITES = [6, 9, 12];
+  var MODS = [6, 7, 9, 11, 12, 13];
+  // 滑らかで点が 8 個以上ある曲線だけを使う（選択肢が作れなくなるのを防ぐ）
+  var CURVES = [[1, 6, 11], [1, 0, 11], [0, 1, 7], [1, 1, 11], [3, 1, 13], [2, 1, 17]];
+
+  function ri(n) { return Math.floor(Math.random() * n); }
+  function pick(a) { return a[ri(a.length)]; }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = ri(i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // 正解 1 つ + 重複しないダミーで 4 択を作る。埋め合わせは順に舐めるので必ず終わる
+  function numChoices(correct, makers, p) {
+    var seen = {}, out = [{ t: String(correct), ok: true }];
+    seen[String(correct)] = true;
+    for (var k = 0; k < makers.length && out.length < 4; k++) {
+      var v = makers[k]();
+      if (v === null || v === undefined) continue;
+      var key = String(v);
+      if (!seen[key]) { seen[key] = true; out.push({ t: key, ok: false }); }
+    }
+    for (var d = 1; out.length < 4 && d <= p + 4; d++) {
+      var w = String(F.fmod(Number(correct) + d, p));
+      if (!seen[w]) { seen[w] = true; out.push({ t: w, ok: false }); }
+    }
+    return shuffle(out);
+  }
+
+  // 文字列の選択肢を、正解 1 つ + 候補プールから 4 つ作る
+  function textChoices(correct, pool) {
+    var seen = {}, out = [{ t: correct, ok: true }];
+    seen[correct] = true;
+    var p2 = shuffle(pool.slice());
+    for (var i = 0; i < p2.length && out.length < 4; i++) {
+      if (!seen[p2[i]]) { seen[p2[i]] = true; out.push({ t: p2[i], ok: false }); }
+    }
+    return shuffle(out);
+  }
+
+  // ---------------- ① mod 計算（正規化） ----------------
+  function genMod() {
+    var p = pick(MODS);
+    var plus = ri(2) === 0;
+    var a = ri(4 * p) - 2 * p;
+    var b = ri(4 * p) - 2 * p;
+    var raw = plus ? a + b : a * b;
+    var correct = F.fmod(raw, p);
+    var jsmod = raw % p;                       // 言語の % が返す値。負のことがある
+    var sign = plus ? " + " : " × ";
+    return {
+      cat: "mod",
+      q: "F" + p + " で計算する。(" + a + ")" + sign + "(" + b + ") mod " + p + " は？",
+      body: '<p class="subst">代表元は 0 … ' + (p - 1) + ' に正規化する<br>' +
+            "((n % p) + p) % p</p>",
+      choices: numChoices(correct, [
+        function () { return jsmod !== correct ? jsmod : null; },
+        function () { return F.fmod(plus ? a - b : Math.abs(a) * Math.abs(b), p); },
+        function () { return F.fmod(raw + 1, p); }
+      ], p),
+      why: "素の値は " + a + sign + b + " = " + raw + "。" +
+        (raw < 0
+          ? "負なので p を足して戻します。" + raw + " + " + (Math.ceil(-raw / p) * p) + " = " + correct
+          : raw + " = " + Math.floor(raw / p) + "·" + p + " + " + correct) +
+        " → " + correct + "。多くの言語の % は " + jsmod +
+        " を返すので、((n % p) + p) % p を通す必要があります。"
+    };
+  }
+
+  // ---------------- ② 逆元 ----------------
+  function genInv() {
+    if (ri(3) < 2) {
+      var p = pick(PRIMES);
+      var a = 1 + ri(p - 1);
+      var correct = F.inv(a, p);
+      var eg = F.invEgcd(a, p);
+      return {
+        cat: "inv",
+        q: "F" + p + " で " + a + "⁻¹ は？（a·a⁻¹ ≡ 1 となる元）",
+        body: '<p class="subst">a · a⁻¹ ≡ 1 (mod ' + p + ")</p>",
+        choices: numChoices(correct, [
+          function () { return F.fmod(p - a, p); },        // 加法逆元との取り違え
+          function () { return F.fmod(a * a, p); },
+          function () { return F.fmod(a + 1, p); }
+        ], p),
+        why: a + " · " + correct + " = " + (a * correct) + " = " +
+          Math.floor(a * correct / p) + "·" + p + " + 1 ≡ 1 (mod " + p + ") ✓。" +
+          "拡張ユークリッドなら除算 " + eg.ops + " 回で係数 " + eg.raw +
+          " が出て、0..p−1 に正規化して " + correct + "。" +
+          "なお加法逆元は " + F.fmod(p - a, p) + " で、別物です。"
+      };
+    }
+    var n = pick(COMPOSITES);
+    var a = ri(n);
+    var v = F.inv(a, n);
+    var correct = v === null ? "逆元は存在しない" : String(v);
+    var pool = ["逆元は存在しない"];
+    for (var x = 0; x < n; x++) pool.push(String(x));
+    var g = (function () {
+      var t = Math.abs(a), u = n;
+      while (u) { var w = t % u; t = u; u = w; }
+      return t;
+    })();
+    return {
+      cat: "inv",
+      q: "法 " + n + "（合成数）で " + a + " の逆元は？",
+      body: '<p class="subst">a·x ≡ 1 (mod ' + n + ") を満たす x があるか</p>",
+      choices: textChoices(correct, pool),
+      why: v === null
+        ? "gcd(" + a + ", " + n + ") = " + g + " ≠ 1 なので、" + a +
+          "·x はどれも 1 になりません。逆元が存在するのは gcd = 1 のときだけです。"
+        : "gcd(" + a + ", " + n + ") = 1 なので逆元があります。" + a + " · " + v +
+          " = " + (a * v) + " ≡ 1 (mod " + n + ")。" +
+          "法が合成数でも、gcd = 1 の元なら拡張ユークリッドで求まります（フェルマーは使えません）。"
+    };
+  }
+
+  // ---------------- ③ 体の判定 ----------------
+  function genFieldQ() {
+    var n = pick(MODS);
+    var prime = F.isPrime(n);
+    var zd = F.zeroDivisors(n);
+    var okText = "体である — 0 以外のすべてに逆元があり、零因子は 1 組もない";
+    var correct;
+    if (prime) correct = okText;
+    else {
+      var z = pick(zd);
+      correct = "体でない — " + z[0] + " × " + z[1] + " ≡ 0 (mod " + n + ")";
+    }
+    var pool = [];
+    if (!prime) pool.push(okText);
+    for (var x = 2; x < n; x++)
+      for (var y = x; y < n; y++)
+        if (F.fmod(x * y, n) !== 0) pool.push("体でない — " + x + " × " + y + " ≡ 0 (mod " + n + ")");
+    return {
+      cat: "field",
+      q: "法 " + n + " の世界（Z/" + n + "Z）は体か。正しい判定はどれ？",
+      body: '<p class="subst">体 ⟺ 0 以外のすべてに乗法逆元がある ⟺ 零因子が無い</p>',
+      choices: textChoices(correct, pool),
+      why: prime
+        ? n + " は素数なので a·b ≡ 0 なら a ≡ 0 か b ≡ 0。零因子は 1 組もなく、" +
+          "0 以外の " + (n - 1) + " 個すべてに逆元があります（ラボ A の乗法表に赤いマスが出ません）。"
+        : n + " は合成数なので零因子があります（" + zd.length + " 組: " +
+          zd.slice(0, 4).map(function (z2) { return z2[0] + "×" + z2[1]; }).join(", ") +
+          (zd.length > 4 ? " …" : "") + "）。0 でない 2 つを掛けて 0 になると約分ができず、逆元も存在しません。"
+    };
+  }
+
+  // ---------------- ④ 群の性質 ----------------
+  function genGroup() {
+    var kind = ri(3);
+    var p = pick(PRIMES);
+    if (kind === 0) {
+      var g = 1 + ri(p - 1);
+      var ord = F.mulOrder(g, p);
+      var lst = F.powList(g, p);
+      // 位数になりうるのは p−1 の約数だけ。ダミーもそこから採る
+      var divs = [];
+      for (var d2 = 1; d2 <= p - 1; d2++) if ((p - 1) % d2 === 0) divs.push(d2);
+      var outOrd = [{ t: String(ord), ok: true }];
+      shuffle(divs.filter(function (d3) { return d3 !== ord; }))
+        .slice(0, 3).forEach(function (d3) { outOrd.push({ t: String(d3), ok: false }); });
+      return {
+        cat: "group",
+        q: "F" + p + "* で、元 " + g + " の位数は？（g^n ≡ 1 となる最小の n）",
+        body: '<p class="subst">群の位数は ' + (p - 1) + "（0 を除いた元の数）<br>" +
+              "ラグランジュの定理より、元の位数は " + (p - 1) + " の約数</p>",
+        choices: shuffle(outOrd),
+        why: g + " のべきは " + lst.join(", ") + " で " + ord +
+          " 個の巡回。位数は " + ord + " です。ラグランジュの定理どおり " +
+          ord + " は群の位数 " + (p - 1) + " を割り切ります" +
+          (ord === p - 1 ? "。しかも一致するので " + g + " は生成元です。" : "（生成元ではありません）。")
+      };
+    }
+    if (kind === 1) {
+      var gens = F.generators(p);
+      var non = [];
+      for (var x = 1; x < p; x++) if (gens.indexOf(x) < 0) non.push(x);
+      var right = pick(gens);
+      var out = [{ t: String(right), ok: true }];
+      shuffle(non).slice(0, 3).forEach(function (v) { out.push({ t: String(v), ok: false }); });
+      return {
+        cat: "group",
+        q: "F" + p + "* の生成元はどれ？（1 つだけべきが全 " + (p - 1) + " 元を巡る）",
+        body: '<p class="subst">生成元 ⟺ 元の位数が群の位数 ' + (p - 1) + " に等しい</p>",
+        choices: shuffle(out),
+        why: right + " のべきは " + F.powList(right, p).join(", ") + " で " +
+          (p - 1) + " 個すべてを 1 回ずつ巡ります。ほかの候補の位数は " +
+          out.filter(function (c) { return !c.ok; })
+             .map(function (c) { return c.t + "→" + F.mulOrder(Number(c.t), p); }).join(", ") +
+          " で、途中で部分群に閉じこもります。"
+      };
+    }
+    var a = 2 + ri(p - 2);
+    var addInv = F.fmod(p - a, p);
+    var mulInv = F.inv(a, p);
+    return {
+      cat: "group",
+      q: "F" + p + " で " + a + " の<b>加法</b>逆元は？（足して単位元 0 になる元）",
+      body: '<p class="subst">加法の単位元は 0、乗法の単位元は 1。ここで訊いているのは加法の方</p>',
+      choices: numChoices(addInv, [
+        function () { return mulInv !== addInv ? mulInv : null; },   // 乗法逆元との取り違え
+        function () { return F.fmod(a, p); },
+        function () { return F.fmod(p - a - 1, p); }
+      ], p),
+      why: a + " + " + addInv + " = " + p + " ≡ 0 (mod " + p + ") ✓。" +
+        "引き算 b − a は b + (p − a) と定義されます。" +
+        "ちなみに乗法逆元は " + mulInv + " で（" + a + "·" + mulInv + " ≡ 1）、別物です。"
+    };
+  }
+
+  // ---------------- ⑤ 楕円曲線 ----------------
+  function genEC() {
+    var c = pick(CURVES), a = c[0], b = c[1], p = c[2];
+    var pts = E.points(a, b, p);
+    var fin = pts.filter(function (q) { return q !== null; });
+    var mode = ri(3);
+    var P = pick(fin), Q, label;
+    if (mode === 0) { Q = P; label = "2P"; }
+    else if (mode === 1) { Q = [P[0], E.fmod(-P[1], p)]; label = "P + Q"; }
+    else { Q = pick(fin); label = "P + Q"; }
+    var tr = E.addTrace(P, Q, a, p);
+    var correct = E.fmt(tr.R) === "O" ? "O（無限遠点）" : E.fmt(tr.R);
+    var pool = ["O（無限遠点）"];
+    fin.forEach(function (q) { pool.push(E.fmt(q)); });
+    return {
+      cat: "ec",
+      q: "y² = x³ + " + a + "x + " + b + " over F" + p + " で、P = " + E.fmt(P) +
+         (mode === 0 ? " の 2 倍 2P は？" : "、Q = " + E.fmt(Q) + " のとき P + Q は？"),
+      body: '<p class="subst">' +
+            (mode === 0 ? "接線: λ = (3x² + a) / (2y)" : "弦: λ = (y₂ − y₁) / (x₂ − x₁)") +
+            "<br>x₃ = λ² − x₁ − x₂　　y₃ = λ(x₁ − x₃) − y₁</p>",
+      choices: textChoices(correct, pool),
+      why: (tr.kind === "vertical"
+        ? tr.why + "。図で言えば垂直線で、3 点目が無限遠にある状態です。"
+        : tr.why + "。割り算はすべて逆元の掛け算で、" + tr.den + "⁻¹ = " + tr.dinv +
+          " を使っています。結果 " + E.fmt(tr.R) + " は曲線上: " +
+          E.fmod(tr.R[1] * tr.R[1], p) + " = " +
+          E.fmod(tr.R[0] * tr.R[0] * tr.R[0] + a * tr.R[0] + b, p) + " ✓") +
+        "（" + label + "）"
+    };
+  }
+
+  // ---------------- ⑥ 原理 ----------------
+  var THEORY = [
+    { q: "暗号で法に素数を使うのはなぜ？",
+      a: "零因子が消えて、0 以外のすべてに逆元ができる（＝体になる）から",
+      d: ["素数の方が mod の計算が速いから",
+          "素数だと値が偏らずランダムに見えるから",
+          "素数でないと 0..p−1 に正規化できないから"] },
+    { q: "有限体に「大小比較」が存在しないのはなぜ？",
+      a: "+ と両立する順序が原理的に作れないから（1 を足し続けると 0 に戻ってしまう）",
+      d: ["代表元が 0..p−1 の整数なので比較の必要がないから",
+          "比較は乗算より計算量が大きく実装されていないから",
+          "負の数を表現できないから"] },
+    { q: "離散対数問題で「難しい」のはどちらの向き？",
+      a: "(P, xP) から x を求める向き",
+      d: ["x から xP を求める向き",
+          "どちらも同じくらい難しい",
+          "P から −P を求める向き"] },
+    { q: "拡張ユークリッドで逆元を求めたのに、採点器に落とされた。いちばんありそうな原因は？",
+      a: "返り値が負のままで、0..p−1 に正規化していない",
+      d: ["gcd が 1 でない場合の分岐を書いていない",
+          "フェルマーの小定理を使っていない",
+          "p が素数でない曲線を使っている"] },
+    { q: "フェルマーの小定理 a^(p−2) を逆元に使えないのはどんなとき？",
+      a: "法が素数でないとき（例外も出さずに、逆元でない値を返す）",
+      d: ["a が p より大きいとき",
+          "a が偶数のとき",
+          "p が 2²⁵⁶ より大きいとき"] },
+    { q: "楕円曲線に無限遠点 O を追加するのはなぜ？",
+      a: "群の単位元が必要で、垂直線の 3 点目としても辻褄が合うから",
+      d: ["曲線が閉じた形に見えるようにするため",
+          "x = 0 のときの計算を避けるため",
+          "点の個数を素数にそろえるため"] },
+    { q: "y = 0 の点 P について 2P = O になるのはなぜ？",
+      a: "接線の傾きの分母 2y が 0 になり、0 には逆元が無いから",
+      d: ["y = 0 の点は曲線上にないから",
+          "x 軸上の点は逆元を持たないから",
+          "判別式が 0 になるから"] },
+    { q: "スカラー倍を double-and-add で書く理由は？",
+      a: "演算回数が k ではなく log₂k に比例し、k ≈ 2²⁵⁶ でも終わるから",
+      d: ["メモリ使用量が減るから",
+          "定義どおりの実装だと結果がずれるから",
+          "無限遠点を経由しないで済むから"] },
+    { q: "実用の楕円曲線が「位数が素数（またはほぼ素数）」を要求するのはなぜ？",
+      a: "小さな部分群に閉じこもる点が生まれないようにするため",
+      d: ["素数位数だと点の加算が速くなるから",
+          "素数位数でないと無限遠点が定義できないから",
+          "素数位数だと座標が 0..p−1 に収まるから"] },
+    { q: "4a³ + 27b² ≠ 0 という条件は何を保証している？",
+      a: "右辺が重根を持たないこと。つまり、どの点でも接線が 1 本に決まること",
+      d: ["点の個数が p + 1 に近くなること",
+          "係数が 0..p−1 に正規化されていること",
+          "曲線が原点を通らないこと"] },
+    { q: "Week 1 の回路で (x−2)(x−5)(x−6) = 0 が「x は 2 か 5 か 6」を意味するのはなぜ？",
+      a: "有限体には零因子が無く、積が 0 なら因子のどれかが 0 だから",
+      d: ["制約が 3 本あるので 3 通りに絞られるから",
+          "回路が値の大小を比較しているから",
+          "x が 0..7 の範囲に制限されているから"] },
+    { q: "秘密分散のシェアを見ても秘密の大きさが推測できないのはなぜ？",
+      a: "有限体には順序が無く、シェアが 0..p−1 の一様分布になるから",
+      d: ["シェアがハッシュ化されているから",
+          "シェアが暗号化されて配られるから",
+          "シェアの桁数が秘密より必ず多いから"] }
+  ];
+  var theoryDeck = [];
+  function genTheory() {
+    if (theoryDeck.length === 0) theoryDeck = shuffle(THEORY.slice());
+    var t = theoryDeck.pop();
+    return {
+      cat: "theory",
+      q: t.q,
+      body: "",
+      choices: shuffle([{ t: t.a, ok: true }].concat(t.d.map(function (x) {
+        return { t: x, ok: false };
+      }))),
+      why: t.a + "。本文の該当セクションに、そうでない場合に何が壊れるかを書いています。"
+    };
+  }
+
+  var CATS = [
+    { key: "mod",    name: "mod 計算",  desc: "負や p 以上を正規化する",     gen: genMod },
+    { key: "inv",    name: "逆元",      desc: "求める／無いことを見抜く",   gen: genInv },
+    { key: "field",  name: "体の判定",  desc: "零因子があるかどうか",       gen: genFieldQ },
+    { key: "group",  name: "群の性質",  desc: "位数・生成元・単位元・逆元", gen: genGroup },
+    { key: "ec",     name: "楕円曲線",  desc: "小さい曲線で 2P と P+Q",     gen: genEC },
+    { key: "theory", name: "原理",      desc: "なぜその形なのかを言葉で",   gen: genTheory }
+  ];
+
+  // ---------------- フロー ----------------
+  var els = {};
+  ["quiz-start", "quiz-play", "quiz-result", "mode-grid", "quiz-best",
+   "qprog", "qcat", "lives", "qtext", "qbody", "choices", "fb",
+   "btn-quit", "btn-next", "rank", "rank-title", "rank-sub", "cat-stats",
+   "btn-again", "btn-modes"].forEach(function (id) {
+    els[id] = document.getElementById(id);
+  });
+
+  var state = null;
+
+  function pane(which) {
+    els["quiz-start"].hidden = which !== "start";
+    els["quiz-play"].hidden = which !== "play";
+    els["quiz-result"].hidden = which !== "result";
+  }
+
+  function readBest() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); }
+    catch (e) { return null; }
+  }
+  function writeBest(best) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(best)); } catch (e) {}
+  }
+  function showBest() {
+    var b = readBest();
+    els["quiz-best"].textContent = b
+      ? "自己ベスト: " + b.correct + " / " + TOTAL + "（ランク " + b.rank + "・挑戦 " + b.runs + " 回）"
+      : "まだ記録なし — 最初の検問から始めてください。";
+  }
+
+  function renderLives() {
+    var s = "";
+    for (var i = 0; i < MAX_LIVES; i++) {
+      s += i < state.lives ? "◆" : '<span class="gone">◇</span>';
+    }
+    els["lives"].innerHTML = s;
+    els["lives"].setAttribute("aria-label", "残りライフ " + state.lives + " / " + MAX_LIVES);
+  }
+
+  function start(mode) {
+    state = { mode: mode, i: 0, lives: MAX_LIVES, correct: 0, stats: {}, answered: false, cur: null };
+    pane("play");
+    nextQuestion();
+  }
+
+  function nextQuestion() {
+    state.i++;
+    state.answered = false;
+    var cat = state.mode === "mixed" ? pick(CATS) : CATS.filter(function (c) {
+      return c.key === state.mode;
+    })[0];
+    state.cur = cat.gen();
+    els["qprog"].textContent = state.i + " / " + TOTAL;
+    els["qcat"].textContent = cat.name;
+    renderLives();
+    els["qtext"].innerHTML = state.cur.q;
+    els["qbody"].innerHTML = state.cur.body || "";
+    els["fb"].hidden = true;
+    els["btn-next"].hidden = true;
+
+    els["choices"].textContent = "";
+    var short = state.cur.choices.every(function (c) { return c.t.length <= 20; });
+    els["choices"].className = "choices" + (short ? " two" : "");
+    state.cur.choices.forEach(function (c) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice";
+      b.textContent = c.t;
+      b.addEventListener("click", function () { answer(c, b); });
+      els["choices"].appendChild(b);
+    });
+  }
+
+  function answer(choice, btn) {
+    if (state.answered) return;
+    state.answered = true;
+    var cat = state.cur.cat;
+    if (!state.stats[cat]) state.stats[cat] = { ok: 0, n: 0 };
+    state.stats[cat].n++;
+
+    Array.prototype.forEach.call(els["choices"].children, function (b, i) {
+      b.disabled = true;
+      var c = state.cur.choices[i];
+      if (c.ok) b.classList.add("is-correct");
+      else if (b === btn) b.classList.add("is-wrong");
+      else b.classList.add("dim");
+    });
+
+    if (choice.ok) {
+      state.correct++;
+      state.stats[cat].ok++;
+      els["fb"].className = "fb ok";
+      els["fb"].innerHTML = '<span class="fb-head">正解</span>' + state.cur.why;
+    } else {
+      state.lives--;
+      renderLives();
+      els["fb"].className = "fb bad";
+      els["fb"].innerHTML = '<span class="fb-head">不正解</span>' + state.cur.why;
+    }
+    els["fb"].hidden = false;
+
+    els["btn-next"].textContent = (state.lives === 0 || state.i === TOTAL) ? "結果を見る" : "次の検問へ";
+    els["btn-next"].hidden = false;
+  }
+
+  function finish() {
+    pane("result");
+    var busted = state.lives === 0;
+    var rank = state.correct === TOTAL ? "S" : state.correct >= 8 ? "A" :
+               state.correct >= 6 ? "B" : "F";
+    var titles = {
+      S: "土台は完成 — Week 1 以降で数学に足を取られない",
+      A: "ほぼ通過 — 落とした 1 分野だけ訓練モードで",
+      B: "半分は手が動く — 弱い分野を潰してから次へ",
+      F: "要再訓練 — ラボで手を動かしてから戻る"
+    };
+    els["rank"].textContent = rank;
+    els["rank"].className = "rank " + rank.toLowerCase();
+    els["rank-title"].textContent = busted
+      ? "検問失敗 — 3 回間違えたので打ち切り"
+      : titles[rank];
+    els["rank-sub"].textContent = "正解 " + state.correct + " / " + TOTAL +
+      (busted ? "（ライフ切れ）" : "");
+
+    els["cat-stats"].textContent = "";
+    Object.keys(state.stats).forEach(function (key) {
+      var meta = CATS.filter(function (c) { return c.key === key; })[0];
+      var st2 = state.stats[key];
+      var div = document.createElement("div");
+      div.className = "cstat";
+      div.innerHTML = '<span class="cn">' + (meta ? meta.name : key) + "</span>" +
+        '<span class="cv ' + (st2.ok === st2.n ? "full" : "weak") + '">' +
+        st2.ok + " / " + st2.n + "</span>";
+      els["cat-stats"].appendChild(div);
+    });
+
+    var best = readBest() || { correct: -1, rank: "F", runs: 0 };
+    best.runs++;
+    if (state.correct > best.correct) { best.correct = state.correct; best.rank = rank; }
+    writeBest(best);
+  }
+
+  els["btn-next"].addEventListener("click", function () {
+    if (state.lives === 0 || state.i === TOTAL) finish();
+    else nextQuestion();
+  });
+  els["btn-quit"].addEventListener("click", function () {
+    pane("start");
+    showBest();
+  });
+  els["btn-again"].addEventListener("click", function () { start(state.mode); });
+  els["btn-modes"].addEventListener("click", function () {
+    pane("start");
+    showBest();
+  });
+
+  // モード選択ボタン
+  var mixed = document.createElement("button");
+  mixed.type = "button";
+  mixed.className = "mode primary";
+  mixed.innerHTML = '<span class="m-name">ランダム検問</span>' +
+    '<span class="m-desc">全分野から 10 問。まずはこれで実力を測る</span>';
+  mixed.addEventListener("click", function () { start("mixed"); });
+  els["mode-grid"].appendChild(mixed);
+  CATS.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "mode";
+    b.innerHTML = '<span class="m-name">' + c.name + "</span>" +
+      '<span class="m-desc">' + c.desc + "</span>";
+    b.addEventListener("click", function () { start(c.key); });
+    els["mode-grid"].appendChild(b);
+  });
+
+  showBest();
+})();
+</script>
+</body>
+</html>
