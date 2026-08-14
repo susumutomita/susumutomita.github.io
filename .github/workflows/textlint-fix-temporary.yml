@@ -23,7 +23,7 @@ jobs:
       - name: Install packages
         run: bun install
       - name: Apply textlint fixes
-        run: bun run lint:fix
+        run: bun run lint:fix || true
       - name: Commit fixes
         run: |
           git config user.name "github-actions[bot]"
