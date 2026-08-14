@@ -1,0 +1,35 @@
+name: textlint-fix-temporary
+
+on:
+  push:
+    branches:
+      - agent/x-for-you-algorithm-blog
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: agent/x-for-you-algorithm-blog
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install packages
+        run: bun install
+      - name: Apply textlint fixes
+        run: bun run lint:fix
+      - name: Commit fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/blog/x-for-you-algorithm.md
+          if ! git diff --cached --quiet; then
+            git commit -m "textlintの自動修正を適用"
+            git push
+          fi
