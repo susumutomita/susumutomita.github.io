@@ -5,7 +5,7 @@ pubDate: 2026-08-14
 category: "ai,recommendation-system,system-design"
 ---
 
-2026 年 8 月 13 日、X は [`xai-org/x-algorithm`](https://github.com/xai-org/x-algorithm) を大幅に更新しました。
+2026 年 8 月 13 日、X は[`xai-org/x-algorithm`](https://github.com/xai-org/x-algorithm)を大幅に更新しました。
 
 以前から X の推薦コードは公開されていましたが、今回の公開はかなり踏み込んでいます。候補を集める処理だけではなく、For You タイムラインで各投稿への反応を予測する Phoenix、学習処理、Rust 製の推論エンジン、反応確率を最終スコアへ変換する重み、同じ話題ばかりになるのを防ぐ DPP、投稿を表示してよいか判断する Visibility Filtering まで含まれています。
 
@@ -17,7 +17,7 @@ Phoenix の README には、今回公開したものを次のように説明し�
 
 ただし、これで X の本番環境を完全に再現できるわけではありません。実データ、学習済みチェックポイント、本番規模の分散学習、一部のルールやプロンプトは公開されていません。設定値も Feature Switch や A/B テストでユーザーごとに変わる可能性があります。
 
-この記事では、公開直後のコミット [`a389166f6cf5da70a286b568c87695d4dcdce3a1`](https://github.com/xai-org/x-algorithm/tree/a389166f6cf5da70a286b568c87695d4dcdce3a1) を固定して読みます。
+この記事では、公開直後のコミット[`a389166f6cf5da70a286b568c87695d4dcdce3a1`](https://github.com/xai-org/x-algorithm/tree/a389166f6cf5da70a286b568c87695d4dcdce3a1)を固定して読みます。
 
 私が一番面白いと思ったのは、特定のモデルや重みではありません。X が推薦という難しい問題を、次のように分解していることです。
 
@@ -29,7 +29,7 @@ Exploitation    ≠ Exploration
 Ranking         ≠ Safety
 ```
 
-一つの巨大な AI にすべてを任せるのではなく、性質の違う問題を別の段階で解いています。この分離が分かると、なぜ For You がこれほど複雑な構成になっているのかが見えてきます。
+1つの巨大な AI にすべてを任せるのではなく、性質の違う問題を別の段階で解いています。この分離が分かると、なぜ For You がこれほど複雑な構成になっているのかが見えてきます。
 
 ## そもそも、SNS の「おすすめ」は何が難しいのか
 
@@ -43,17 +43,17 @@ Ranking         ≠ Safety
 点数の高い順に表示する
 ```
 
-小さなサービスなら、これでも動くかもしれません。しかし X 規模では、少なくとも五つの問題が起きます。
+小さなサービスなら、これでも動くかもしれません。しかし X 規模では、少なくとも5つの問題が起きます。
 
-一つ目は、**候補が多すぎる**ことです。世界中の投稿を、ユーザーが画面を開くたびに重い Transformer で採点することはできません。
+1つ目は、**候補が多すぎる**ことです。世界中の投稿を、ユーザーが画面を開くたびに重い Transformer で採点することはできません。
 
-二つ目は、**「良い投稿」の定義が一つではない**ことです。いいねしたい投稿、返信したい投稿、誰かへ送りたい投稿、長く読みたい投稿は同じとは限りません。逆に、興味なし、ミュート、ブロック、通報もあります。
+2つ目は、**「良い投稿」の定義が一つではない**ことです。いいねしたい投稿、返信したい投稿、誰かへ送りたい投稿、長く読みたい投稿は同じとは限りません。逆に、興味なし、ミュート、ブロック、通報もあります。
 
-三つ目は、**各投稿を独立に採点するだけでは、タイムライン全体が悪くなる**ことです。上位十件が同じ著者、同じニュース、同じ動画になる可能性があります。
+3つ目は、**各投稿を独立に採点するだけでは、タイムライン全体が悪くなる**ことです。上位十件が同じ著者、同じニュース、同じ動画になる可能性があります。
 
-四つ目は、**過去の実績だけを信じると、新しい投稿者が永遠に育たない**ことです。表示されない投稿には反応データが集まらず、データがないからさらに表示されないという循環が起きます。
+4つ目は、**過去の実績だけを信じると、新しい投稿者が永遠に育たない**ことです。表示されない投稿には反応データが集まらず、データがないからさらに表示されないという循環が起きます。
 
-五つ目は、**面白い投稿と、表示してよい投稿は別問題**であることです。高い反応が予測されても、ブロックした相手、スパム、法的制限のある投稿などは表示すべきではありません。
+5つ目は、**面白い投稿と、表示してよい投稿は別問題**であることです。高い反応が予測されても、ブロックした相手、スパム、法的制限のある投稿などは表示すべきではありません。
 
 X の For You は、これらを一本のスコアだけで解こうとしていません。
 
@@ -90,7 +90,7 @@ Ranking
 
 X も同じ構成です。
 
-[`phoenix_candidate_pipeline.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/candidate_pipeline/phoenix_candidate_pipeline.rs) では、候補の取得元が配列として並んでいます。
+[`phoenix_candidate_pipeline.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/candidate_pipeline/phoenix_candidate_pipeline.rs)では、候補の取得元が配列として並んでいます。
 
 ```rust
 let sources: Vec<Box<dyn Source<ScoredPostsQuery, PostCandidate>>> = vec![
@@ -104,7 +104,7 @@ let sources: Vec<Box<dyn Source<ScoredPostsQuery, PostCandidate>>> = vec![
 ];
 ```
 
-一つの検索手法だけを使わず、複数の経路から投稿を集めています。
+1つの検索手法だけを使わず、複数の経路から投稿を集めています。
 
 ### Thunder — For You でもフォロー関係を捨てない
 
@@ -129,7 +129,7 @@ X は TikTok のような内容中心の発見だけには寄せず、ソーシ�
 
 フォロー外から候補を探す中心が Phoenix Retrieval です。
 
-Phoenix Retrieval は **Two-Tower** と呼ばれる構成です。ユーザーと投稿を別々のモデルでベクトルへ変換し、内積が大きい投稿を探します。
+Phoenix Retrieval は**Two-Tower**と呼ばれる構成です。ユーザーと投稿を別々のモデルでベクトルへ変換し、内積が大きい投稿を探します。
 
 ```text
 ユーザー側                           投稿側
@@ -167,7 +167,7 @@ param!(
 
 #### ユーザー ID を丸暗記しない
 
-Phoenix の README には、production retrieval について `use_user_embedding=False` と書かれています。
+Phoenix の README には、production retrieval について`use_user_embedding=False`と書かれています。
 
 これは「ユーザー ID だけを見て、この人はこれが好きだと丸暗記する埋め込み」を中心にしないという意味です。最近の行動履歴と、国や言語などの粗いプロフィールからユーザー表現を作ります。
 
@@ -188,7 +188,7 @@ Phoenix の README には、production retrieval について `use_user_embeddin
 
 ID だけを見るモデルには、新着投稿が「何についての投稿か」が分かりません。これは item cold-start と呼ばれる問題です。
 
-Phoenix は投稿に **Semantic ID** を持たせます。本番向け設定では、256 種類のコードを 6 段使います。
+Phoenix は投稿に**Semantic ID**を持たせます。本番向け設定では、256 種類のコードを 6 段使います。
 
 ```text
 Semantic IDs: 6 × 256
@@ -216,7 +216,7 @@ X は新着性が重要なサービスです。投稿直後から内容を使っ
 
 Phoenix Retrieval が意味的な近さを扱えるなら、別の候補源は不要にも見えます。しかし、文章が似ていることと、同じ人々が好むことは一致しません。
 
-例えば、次の二つは文章上かなり近いでしょう。
+例えば、次の2つは文章上かなり近いでしょう。
 
 ```text
 A: Rust はメモリ安全性が高い
@@ -239,7 +239,7 @@ SimClusters
 似た人々・似たコミュニティが反応した投稿を探す
 ```
 
-二つは競合ではなく補完関係です。複数経路を持つことで、一つのモデルが見落とした候補を別の経路が拾えます。
+2つは競合ではなく補完関係です。複数経路を持つことで、一つのモデルが見落とした候補を別の経路が拾えます。
 
 推薦用語では、この段階で重視するのは precision より recall です。完璧な順位を付ける必要はなく、後段で高く評価される可能性がある投稿を取りこぼさないことが重要です。
 
@@ -249,7 +249,7 @@ SimClusters
 
 まず hydration と呼ばれる処理で、投稿本文、著者、フォロー関係、メディア情報、反応件数、Semantic ID などを取得します。その後、Ranking 前のフィルターを通します。
 
-[`phoenix_candidate_pipeline.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/candidate_pipeline/phoenix_candidate_pipeline.rs) には、次のようなフィルターがあります。
+[`phoenix_candidate_pipeline.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/candidate_pipeline/phoenix_candidate_pipeline.rs)には、次のようなフィルターがあります。
 
 ```rust
 let filters: Vec<Box<dyn Filter<ScoredPostsQuery, PostCandidate>>> = vec![
@@ -299,13 +299,13 @@ let filters: Vec<Box<dyn Filter<ScoredPostsQuery, PostCandidate>>> = vec![
 - モデルの学習や drift に左右されない
 - 何を理由に落としたか説明しやすい
 
-ML に任せる部分と、決定的なルールで扱う部分を分けているわけです。
+メーリングリストに任せる部分と、決定的なルールで扱う部分を分けているわけです。
 
 ## 3. Phoenix Ranking — 「良い投稿」ではなく、次の行動を予測する
 
 候補が絞られると、Phoenix Ranking が各投稿を評価します。
 
-ここで Phoenix は、単一の `relevance_score` や「良い投稿である確率」を直接出しません。代わりに、ユーザーがその投稿へどんな行動を取るかを複数の head で予測します。
+ここで Phoenix は、単一の`relevance_score`や「良い投稿である確率」を直接出しません。代わりに、ユーザーがその投稿へどんな行動を取るかを複数の head で予測します。
 
 主な出力は次のとおりです。
 
@@ -333,7 +333,7 @@ ML に任せる部分と、決定的なルールで扱う部分を分けてい�
 通報した
 ```
 
-そこで ML には、観測可能な将来行動を予測させます。
+そこでメーリングリストには、観測可能な将来行動を予測させます。
 
 その後、プロダクト側が、
 
@@ -345,13 +345,13 @@ ML に任せる部分と、決定的なルールで扱う部分を分けてい�
 
 を決めます。
 
-これは **Prediction と Decision の分離**です。
+これは**Prediction と Decision の分離**です。
 
 モデルを再学習しなくても、行動の価値を表す重みを変えればプロダクトの目的を調整できます。逆に、同じ行動価値のまま、予測モデルだけを改善することもできます。
 
 ### PhoenixScorer の責務は予測値を載せるだけ
 
-[`phoenix_scorer.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/phoenix_scorer.rs) は、推論サービスを呼び、候補へ各 action score を格納します。
+[`phoenix_scorer.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/phoenix_scorer.rs)は、推論サービスを呼び、候補へ各 action score を格納します。
 
 ```rust
 candidates
@@ -368,7 +368,7 @@ candidates
 
 ## 4. Phoenix は何を入力として見ているのか
 
-[`phoenix_request.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/util/phoenix_request.rs) を見ると、入力はかなり広範です。
+[`phoenix_request.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/util/phoenix_request.rs)を見ると、入力はかなり広範です。
 
 ClientContext には、次のようなフィールドがあります。
 
@@ -407,9 +407,9 @@ UserContext には、年齢帯、性別、推定性別とスコア、地域、�
 
 ## 5. Candidate Isolation — 候補同士を Transformer で見せない
 
-Phoenix Ranking の設計で特に面白いのが **Candidate Isolation** です。
+Phoenix Ranking の設計で特に面白いのが**Candidate Isolation**です。
 
-通常の Transformer へ複数候補を一つの列として入れると、候補 A が候補 B を Attention で見ることができます。すると A のスコアは、同じバッチに B がいるかどうかで変わります。
+通常の Transformer へ複数候補を1つの列として入れると、候補 A が候補 B を Attention で見ることができます。すると A のスコアは、同じバッチに B がいるかどうかで変わります。
 
 Phoenix は、候補同士の Attention を禁止します。
 
@@ -432,7 +432,7 @@ flowchart LR
 
 ### なぜ候補同士を見せないのか
 
-最大の理由は **batch invariance** です。
+最大の理由は**batch invariance**です。
 
 同じユーザー、同じ投稿なら、バッチの組み合わせが変わっても同じ予測値になります。
 
@@ -460,7 +460,7 @@ DPP
 
 ## 6. RankingScorer — 行動確率を X の価値へ変換する
 
-Phoenix が複数の行動確率を出した後、[`ranking_scorer.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/ranking_scorer.rs) が一つのスコアへ変換します。
+Phoenix が複数の行動確率を出した後、[`ranking_scorer.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/ranking_scorer.rs)が1つのスコアへ変換します。
 
 基本式は非常に明快です。
 
@@ -502,7 +502,7 @@ let terms = [
 
 ### 公開されたデフォルト重み
 
-[`param.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/params/param.rs) の先頭には、デフォルト値が 2026 年 8 月 12 日に production config から同期されたと書かれています。
+[`param.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/params/param.rs)の先頭には、デフォルト値が 2026 年 8 月 12 日に production config から同期されたと書かれています。
 
 ```rust
 // mirrored from config feature-switch defaults; last sync 2026-08-12T04:09:22Z
@@ -540,7 +540,7 @@ let terms = [
 
 コード中のコメントにも、重みは行動の価値だけではなく、ネットワーク全体でその行動が起きる確率も考慮していると書かれています。
 
-例えば、次の二つは同じ寄与になります。
+例えば、次の2つは同じ寄与になります。
 
 ```text
 いいね確率 10% × 0.5 = 0.05
@@ -561,11 +561,11 @@ let terms = [
 - 引用は新しい投稿と議論を生みます
 - DM 共有は特定の相手へ届けたい意思です
 - リンクコピー共有は X の外へ持ち出す可能性があります
-- 著者フォローは一回の閲覧を長期関係へ変えます
+- 著者フォローは1回の閲覧を長期関係へ変えます
 
 X は、単にスクロールを止める投稿より、ネットワークを動かす投稿を強く評価しているように見えます。
 
-一方、`DwellWeight` は 0 ですが、連続滞在時間の重みは 0.004 です。「滞在したか」という二値 head より、何秒滞在したかという連続値を使っていると読めます。
+一方、`DwellWeight`は 0 ですが、連続滞在時間の重みは 0.004 です。「滞在したか」という二値 head より、何秒滞在したかという連続値を使っていると読めます。
 
 プロフィールクリックが 0 なのも興味深い点です。Phoenix は予測していても、現在のデフォルトでは価値へ加えていません。予測 head と価値重みを分けているため、モデルを再学習せずに有効化できます。
 
@@ -573,7 +573,7 @@ X は、単にスクロールを止める投稿より、ネットワークを動
 
 X では「外部リンクを貼ると表示されにくい」とよく言われます。
 
-少なくともこの公開デフォルトでは、`OpenLinkWeight` は `+0.2` です。外部リンククリックそのものを負の値にしているわけではありません。
+少なくともこの公開デフォルトでは、`OpenLinkWeight`は`+0.2`です。外部リンククリックそのものを負の値にしているわけではありません。
 
 ただし、ここから「外部リンク付き投稿は必ず有利」とも言えません。
 
@@ -586,7 +586,7 @@ X では「外部リンクを貼ると表示されにくい」とよく言われ
 
 ## 7. スコアを非負へ写し、0 を特別な値として残す
 
-`RankingScorer` は単純に合計した後、`offset_score` を通します。
+`RankingScorer`は単純に合計した後、`offset_score`を通します。
 
 ```rust
 pub(crate) fn offset_score(combined_score: f64, w: &ScoringWeights) -> f64 {
@@ -600,7 +600,7 @@ pub(crate) fn offset_score(combined_score: f64, w: &ScoringWeights) -> f64 {
 }
 ```
 
-`NEGATIVE_SCORES_OFFSET` は 0.001 です。
+`NEGATIVE_SCORES_OFFSET`は 0.001 です。
 
 この変換により、負の合計スコアはおおむね 0 以上 0.001 未満へ入り、非負の合計スコアは 0.001 以上になります。
 
@@ -629,7 +629,7 @@ param!(
 
 ただし、既に返信である投稿を優遇するわけではありません。
 
-[`ranking_scorer.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/ranking_scorer.rs) の条件は次のとおりです。
+[`ranking_scorer.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/ranking_scorer.rs)の条件は次のとおりです。
 
 ```rust
 fn bidirectional_boost_eligible(candidate: &PostCandidate) -> bool {
@@ -653,7 +653,7 @@ fn bidirectional_boost_eligible(candidate: &PostCandidate) -> bool {
 
 これは、X が相互フォロー間の会話を意図的にタイムラインへ戻そうとしていると読めます。
 
-[`BIDIRECTIONAL_BOOST_CHANGE.md`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/docs/BIDIRECTIONAL_BOOST_CHANGE.md) には、2026 年 7 月に 5、10、15、20 を A/B テストし、一度 20 を広く展開した後、フォロー外の話題が見えにくいという反応も踏まえて 15 へ調整した経緯が書かれています。
+[`BIDIRECTIONAL_BOOST_CHANGE.md`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/docs/BIDIRECTIONAL_BOOST_CHANGE.md)には、2026 年 7 月に 5、10、15、20 を A/B テストし、一度 20 を広く展開した後、フォロー外の話題が見えにくいという反応も踏まえて 15 へ調整した経緯が書かれています。
 
 ここから分かるのは、アルゴリズムが単なるモデルではなく、**プロダクト方針を設定値として運用する仕組み**だということです。
 
@@ -678,7 +678,7 @@ decay = 0.5
 floor = 0.25
 ```
 
-同じ著者の出現回数を `k` とすると、倍率は次のようになります。
+同じ著者の出現回数を`k`とすると、倍率は次のようになります。
 
 | 同じ著者の何件目か | k | 倍率 |
 |---|---:|---:|
@@ -750,9 +750,9 @@ X は Cold Start Boost を明示的に持っています。公開デフォルト
 | 対象投稿 | オリジナル投稿 |
 | 投稿年齢 | 実験条件では 24 時間以内 |
 | 持ち上げ先 | おおむね 16 番目のスコア |
-| 元順位の対象範囲 | 非ゼロ候補の上位 85% 内 |
+| 元順位の対象範囲 | 非ゼロ候補の上位 85％ 内 |
 
-[`author_cold_start.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/author_cold_start.rs) では、条件を満たす候補のうち最も高いものを選び、指定位置のスコアまで引き上げます。
+[`author_cold_start.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/home-mixer/scorers/author_cold_start.rs)では、条件を満たす候補のうち最も高いものを選び、指定位置のスコアまで引き上げます。
 
 ```rust
 let best = candidates
@@ -771,7 +771,7 @@ let best = candidates
 
 これは単なる新人優遇ではありません。
 
-推薦システムは、既知の高得点を選ぶ **exploitation** と、未知の候補を試す **exploration** の両方が必要です。
+推薦システムは、既知の高得点を選ぶ**exploitation**と、未知の候補を試す**exploration**の両方が必要です。
 
 未知候補を一度も表示しなければ、その候補が本当に良いか悪いかを学べません。少量の探索枠を設けることで、将来の学習データを作ります。
 
@@ -793,7 +793,7 @@ Author Diversity は同じ著者を抑えます。しかし、別著者が同じ
 
 独立スコアだけなら 1 から 4 が上位を占めるかもしれません。各投稿は良くても、一覧としては単調です。
 
-VMRanker は **Determinantal Point Process、DPP** を使い、スコアと多様性を同時に考えます。
+VMRanker は**Determinantal Point Process、DPP**を使い、スコアと多様性を同時に考えます。
 
 ### DPP の直感
 
@@ -815,7 +815,7 @@ DPP は、選んだベクトル集合が作る「体積」が大きくなるよ�
 
 ### 公開コードの計算
 
-[`vm-ranker/dpp.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/vm-ranker/dpp.rs) は、まず各スコアを最大値で正規化します。
+[`vm-ranker/dpp.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/vm-ranker/dpp.rs)は、まず各スコアを最大値で正規化します。
 
 ```rust
 let q: Vec<f64> = top_indices
@@ -824,7 +824,7 @@ let q: Vec<f64> = top_indices
     .collect();
 ```
 
-次に `theta` から品質の強さを計算します。
+次に`theta`から品質の強さを計算します。
 
 ```rust
 let theta = config.theta.clamp(0.0, 1.0 - EPSILON);
@@ -840,7 +840,7 @@ kernel[i * m + j] = val;
 kernel[j * m + i] = val;
 ```
 
-公開デフォルトでは、Home Mixer から `theta=0.65`、最大 150 件までを DPP 対象として送ります。
+公開デフォルトでは、Home Mixer から`theta=0.65`、最大 150 件までを DPP 対象として送ります。
 
 ```rust
 param!(
@@ -862,7 +862,7 @@ param!(
 
 公開実装で重要なのは、DPP が選んだ投稿へ新しい順位スコアを付けないことです。
 
-[`dpp_model.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/vm-ranker/scoring/dpp_model.rs) では、選ばれた投稿は元のスコアを維持し、選ばれなかった投稿を 0 にします。
+[`dpp_model.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/vm-ranker/scoring/dpp_model.rs)では、選ばれた投稿は元のスコアを維持し、選ばれなかった投稿を 0 にします。
 
 ```rust
 score: if selected_ids.contains(&c.tweet_id) {
@@ -943,7 +943,7 @@ Visibility
 
 ### DROP は即時終了、INTERSTITIAL は保持する
 
-[`visibility-filtering/rules/mod.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/visibility-filtering/rules/mod.rs) では、DROP が出た時点で評価を終了します。INTERSTITIAL は記録し、後続で DROP が出なければ採用します。
+[`visibility-filtering/rules/mod.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/visibility-filtering/rules/mod.rs)では、DROP が出た時点で評価を終了します。INTERSTITIAL は記録し、後続で DROP が出なければ採用します。
 
 ```rust
 match rule.evaluate(context) {
@@ -963,11 +963,11 @@ match rule.evaluate(context) {
 }
 ```
 
-厳しい判定が優先される単純なルールです。どの rule が決めたかも `decided_by` に残ります。
+厳しい判定が優先される単純なルールです。どの rule が決めたかも`decided_by`に残ります。
 
 ### フォロー内とフォロー外で基準が違う
 
-[`registry.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/visibility-filtering/rules/registry.rs) では、Home timeline 共通ルールに加えて、フォロー外推薦用の追加 DROP ルールがあります。
+[`registry.rs`](https://github.com/xai-org/x-algorithm/blob/a389166f6cf5da70a286b568c87695d4dcdce3a1/visibility-filtering/rules/registry.rs)では、Home timeline 共通ルールに加えて、フォロー外推薦用の追加 DROP ルールがあります。
 
 フォロー外では、High Recall Spam、NSFW、Do Not Amplify、悪性 URL、侵害アカウントなどをより厳しく落とします。
 
@@ -1005,13 +1005,13 @@ Phoenix で採点
 
 公開設定では Top-K 候補を余分に残し、後段フィルターで落ちても最終結果を埋められるようにしています。
 
-また、引用元、リポスト元、会話の祖先が DROP された場合に派生投稿も落とす `AncillaryVFFilter` や、同じ会話の複数 branch を畳む `DedupConversationFilter` も後段にあります。
+また、引用元、リポスト元、会話の祖先が DROP された場合に派生投稿も落とす`AncillaryVFFilter`や、同じ会話の複数 branch を畳む`DedupConversationFilter`も後段にあります。
 
 ## 15. 最後に広告や Who to Follow を混ぜる
 
 ここまで説明したものは、主に organic post のランキングです。
 
-最終画面には、広告、Who to Follow、prompt、survey なども入ります。For You の Blending Pipeline は、ランキング済み投稿を一つの source として扱い、他の module と合成します。
+最終画面には、広告、Who to Follow、prompt、survey なども入ります。For You の Blending Pipeline は、ランキング済み投稿を1つの source として扱い、他の module と合成します。
 
 つまり、Phoenix の最終スコアが高い順に、画面の全スロットがそのまま埋まるわけではありません。
 
@@ -1097,7 +1097,7 @@ Rust
 
 ## 19. アルゴリズムの本体はモデルだけではなく設定である
 
-`param.rs` を見ると、大量の Feature Switch があります。
+`param.rs`を見ると、大量の Feature Switch があります。
 
 - candidate source の有効・無効
 - inference cluster
@@ -1114,7 +1114,7 @@ Rust
 
 Phoenix の cluster には kill switch もあり、xDS 経由が失敗した場合の fallback も設定できます。
 
-これは、本番の推薦アルゴリズムが「一つの学習済みモデル」ではないことを示しています。
+これは、本番の推薦アルゴリズムが「1つの学習済みモデル」ではないことを示しています。
 
 ```text
 モデル
@@ -1134,9 +1134,9 @@ fallback
 
 まで含めてアルゴリズムです。
 
-モデルを更新しなくても、相互フォローの boost を 20 から 15 へ変更できます。DPP の `theta` を変えて品質と多様性のバランスを動かせます。特定 source を止めることもできます。
+モデルを更新しなくても、相互フォローの boost を 20 から 15 へ変更できます。DPP の`theta`を変えて品質と多様性のバランスを動かせます。特定 source を止めることもできます。
 
-推薦システムは ML モデルのプロジェクトではなく、継続的に制御する分散システムです。
+推薦システムはメーリングリスト モデルのプロジェクトではなく、継続的に制御する分散システムです。
 
 ## 20. デフォルトでは使われていない実験経路もある
 
@@ -1155,7 +1155,7 @@ fallback
 | ValueModelMode | `weighted` |
 | VMRanker value model | `dpp` |
 
-`RankingScorer` には、weighted sum 以外にも `dwell_regret_sigmoid` と `gated_dwell_regret` があります。
+`RankingScorer`には、weighted sum 以外にも`dwell_regret_sigmoid`と`gated_dwell_regret`があります。
 
 Dwell Regret 系の処理は、滞在時間をそのまま価値とせず、候補群に対する相対的な肯定反応と、興味なし・ブロック・ミュート・通報の予測で変調します。
 
@@ -1171,7 +1171,7 @@ Dwell Regret 系の処理は、滞在時間をそのまま価値とせず、候�
 
 投稿を、単なる長時間閲覧より高く評価しようとする設計です。
 
-ただし現在の公開デフォルトは `weighted` です。コードに存在することと、本番の多数ユーザーへ適用されていることは分けて読む必要があります。
+ただし現在の公開デフォルトは`weighted`です。コードに存在することと、本番の多数ユーザーへ適用されていることは分けて読む必要があります。
 
 ## 21. このコードから読み取れる X の価値観
 
@@ -1237,7 +1237,7 @@ production data と checkpoint がないため、同じコードを動かして�
 
 公開 weight を見て「リンクコピーを増やせばよい」「返信を稼げばよい」と考えると、否定反応、著者多様性、OON 補正、DPP、Visibility Filtering を見落とします。
 
-推薦対象は一つの行動ではなく、複数の将来確率を合わせた結果です。
+推薦対象は1つの行動ではなく、複数の将来確率を合わせた結果です。
 
 ## 23. 推薦システム設計として学べること
 
@@ -1249,7 +1249,7 @@ X 固有の値以上に、一般的なシステム設計として参考になる
 
 ### 予測と価値判断を分ける
 
-ML は観測可能な行動を予測し、product policy は重みで表現します。モデル改善と事業方針変更を独立させられます。
+メーリングリストは観測可能な行動を予測し、product policy は重みで表現します。モデル改善と事業方針変更を独立させられます。
 
 ### 個別スコアと一覧品質を分ける
 
@@ -1295,11 +1295,11 @@ X の For You は、単純な「AI が良い投稿を選ぶ」仕組みではあ
 安全性と法的制約を守る問題
 ```
 
-これらを一つのスコアへ押し込まず、明示的な pipeline としてつないでいます。
+これらを1つのスコアへ押し込まず、明示的な pipeline としてつないでいます。
 
 今回の公開によって、X の推薦を完全再現できるようになったわけではありません。しかし、「なぜこの投稿が出るのか」を考えるための材料は、以前より大幅に増えました。
 
-同時に、推薦システムを作る側にとっては、ML モデルだけでは完成しないことがよく分かる実装です。候補生成、ルール、探索、多様性、障害耐性、実験基盤まで揃って、初めて一つのタイムラインになります。
+同時に、推薦システムを作る側にとっては、メーリングリスト モデルだけでは完成しないことがよく分かる実装です。候補生成、ルール、探索、多様性、障害耐性、実験基盤まで揃って、初めて1つのタイムラインになります。
 
 ## 参考資料
 
