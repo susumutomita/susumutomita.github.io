@@ -4,14 +4,7 @@ import PublishedBooks from "../components/PublishedBooks.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { BULL, LINKS, bullContactFormUrl } from "../lib/constants";
 import { bullPath, portfolioAlternates } from "../lib/i18n";
-import {
-  EVIDENCE,
-  EXPERIENCE_GROUPS,
-  OUTCOMES,
-  PROFILE,
-  SPEAKING_THEMES,
-  contactPaths,
-} from "../lib/profile";
+import { EVIDENCE, EXPERIENCE, PROFILE, contactPaths } from "../lib/profile";
 import { bullGraph, tenkaCloudSchema } from "../lib/seo";
 
 const lang = "en" as const;
@@ -169,15 +162,11 @@ const paths = contactPaths(lang);
     </div>
   </section>
 
-  <!-- 3. Evidence -->
-  <section id="evidence" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Evidence</p>
-    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">Verifiable track record</h2>
-    <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-      Not a self-introduction — each item links to a primary source: the
-      conference platform, the organizer's page, or the published slides.
-    </p>
-    <ul class="grid gap-4 md:grid-cols-2">
+  <!-- 3. Speaking & Writing -->
+  <section id="speaking" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Speaking &amp; Writing</p>
+    <h2 class="font-display text-2xl md:text-3xl font-bold mb-8">Talks &amp; writing</h2>
+    <ul class="grid gap-4 md:grid-cols-2 mb-10">
       {EVIDENCE.map((item) => (
         <li>
           <a
@@ -200,128 +189,60 @@ const paths = contactPaths(lang);
         </li>
       ))}
     </ul>
-  </section>
-
-  <!-- 4. Selected Outcomes -->
-  <section
-    id="outcomes"
-    class="scroll-mt-20 bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border"
-  >
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Selected Outcomes</p>
-      <h2 class="font-display text-2xl md:text-3xl font-bold mb-8">Challenge → Action → Result</h2>
-      <div class="grid gap-6 md:grid-cols-2">
-        {OUTCOMES.map((o) => (
-          <div class="flex h-full flex-col p-6 rounded-lg border border-light-border dark:border-dark-border bg-light-bg dark:bg-dark-bg">
-            <dl class="space-y-3 text-sm">
-              <div>
-                <dt class="font-medium text-light-muted dark:text-dark-muted uppercase text-xs tracking-wide mb-1">Challenge</dt>
-                <dd>{o.challenge[lang]}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-light-muted dark:text-dark-muted uppercase text-xs tracking-wide mb-1">Action</dt>
-                <dd>{o.action[lang]}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-light-muted dark:text-dark-muted uppercase text-xs tracking-wide mb-1">Result</dt>
-                <dd class="font-medium">{o.result[lang]}</dd>
-              </div>
-            </dl>
-            <a
-              href={o.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="mt-auto pt-4 text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
-            >
-              {o.evidenceLabel[lang]} →
-            </a>
-          </div>
-        ))}
-      </div>
+    <div class="flex flex-wrap gap-4 mb-4">
+      <a
+        href={LINKS.speakerdeck}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
+      >
+        Slides on Speaker Deck
+      </a>
+      <a
+        href={LINKS.sessionize}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
+      >
+        Speaker profile on Sessionize
+      </a>
+      <a
+        href={LINKS.zenn}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
+      >
+        Articles on Zenn
+      </a>
     </div>
-  </section>
-
-  <!-- 5. Selected Experience -->
-  <section id="experience" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Selected Experience</p>
-    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">Organizations I have worked with</h2>
-    <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-      Listed by relationship — employment and contract work, not customer
-      endorsements. Details are on the
-      <a href="/about" class="text-accent-500 hover:underline">About</a> and
-      <a href="/resume" class="text-accent-500 hover:underline">Resume</a> pages.
+    <p class="text-sm text-light-muted dark:text-dark-muted">
+      Speaking requests are welcome —
+      <a href="#contact" class="text-accent-500 hover:underline">get in touch</a>.
     </p>
-    <div class="grid gap-6 md:grid-cols-2">
-      {EXPERIENCE_GROUPS.map((group) => (
-        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-          <h3 class="font-display font-semibold text-lg mb-4">{group.label[lang]}</h3>
-          <ul class="space-y-3">
-            {group.organizations.map((org) => (
-              <li class="text-sm">
-                <span class="font-medium">{org.name}</span>
-                <span class="text-light-muted dark:text-dark-muted"> — {org.detail[lang]}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
   </section>
 
-  <!-- 6. Speaking & Writing -->
+  <!-- 4. Experience -->
   <section
-    id="speaking"
+    id="experience"
     class="scroll-mt-20 bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border"
   >
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Speaking &amp; Writing</p>
-      <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">One consistent thread</h2>
-      <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-        Talks and writing revolve around the same themes: cloud infrastructure,
-        IaC, DevOps, security, and organizational improvement.
-      </p>
-      <div class="grid gap-6 md:grid-cols-3 mb-10">
-        {SPEAKING_THEMES.map((t) => (
-          <div class="p-5 rounded-lg border border-light-border dark:border-dark-border bg-light-bg dark:bg-dark-bg">
-            <h3 class="font-display font-semibold mb-3 text-accent-500">{t.theme[lang]}</h3>
-            <ul class="space-y-1 text-sm text-light-muted dark:text-dark-muted">
-              {t.events.map((e) => (
-                <li>{e}</li>
-              ))}
-            </ul>
-          </div>
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Experience</p>
+      <h2 class="font-display text-2xl md:text-3xl font-bold mb-8">Where I've worked</h2>
+      <ul class="max-w-3xl space-y-4">
+        {EXPERIENCE.map((org) => (
+          <li>
+            <span class="font-medium">{org.name}</span>
+            <span class="text-light-muted dark:text-dark-muted"> — {org.detail[lang]}</span>
+          </li>
         ))}
-      </div>
-      <div class="flex flex-wrap gap-4 mb-4">
-        <a
-          href={LINKS.speakerdeck}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          Slides on Speaker Deck
-        </a>
-        <a
-          href={LINKS.sessionize}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          Speaker profile on Sessionize
-        </a>
-        <a
-          href={LINKS.zenn}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          Articles on Zenn
-        </a>
-      </div>
-      <p class="text-sm text-light-muted dark:text-dark-muted">
-        Speaking requests are welcome —
-        <a href="#contact" class="text-accent-500 hover:underline">get in touch</a>.
-      </p>
+      </ul>
+      <a
+        href="/about"
+        class="mt-8 inline-block text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        Full background →
+      </a>
     </div>
   </section>
 
@@ -355,35 +276,13 @@ const paths = contactPaths(lang);
     </div>
   </section>
 
-  <!-- 7. About -->
-  <section
-    id="about"
-    class="scroll-mt-20 bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border"
-  >
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">About</p>
-      <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">From QA to cloud, to building how engineers learn</h2>
-      <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-6">
-        I started in QA on mission-critical systems, moved into cloud
-        architecture and SRE for connected services, and kept crossing team
-        boundaries to fix how organizations deliver software. That thread —
-        quality, infrastructure, and people learning by doing — is what led to
-        founding BULL LLC and building TenkaCloud: education that runs on real
-        AWS, not on slides.
-      </p>
-      <a href="/about" class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors">
-        Full background →
-      </a>
-    </div>
-  </section>
-
-  <!-- 8. Contact -->
+  <!-- 5. Contact -->
   <section id="contact" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Contact</p>
-    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">Pick the route that fits</h2>
+    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">Get in touch</h2>
     <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-      Each route goes to the right form or page. I read every message and reply
-      by email — no newsletters, no automated follow-ups.
+      For TenkaCloud, cloud infrastructure and DevOps work, or speaking and
+      writing requests.
     </p>
     <div class="grid gap-6 md:grid-cols-2">
       {paths.map((p) => (

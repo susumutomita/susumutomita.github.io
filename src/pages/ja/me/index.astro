@@ -4,14 +4,7 @@ import PublishedBooks from "../../../components/PublishedBooks.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { BULL, LINKS, bullContactFormUrl } from "../../../lib/constants";
 import { bullPath, portfolioAlternates, portfolioPath } from "../../../lib/i18n";
-import {
-  EVIDENCE,
-  EXPERIENCE_GROUPS,
-  OUTCOMES,
-  PROFILE,
-  SPEAKING_THEMES,
-  contactPaths,
-} from "../../../lib/profile";
+import { EVIDENCE, EXPERIENCE, PROFILE, contactPaths } from "../../../lib/profile";
 import { bullGraph, tenkaCloudSchema } from "../../../lib/seo";
 
 const lang = "ja" as const;
@@ -168,14 +161,11 @@ const paths = contactPaths(lang);
     </div>
   </section>
 
-  <!-- 3. Evidence -->
-  <section id="evidence" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Evidence</p>
-    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">第三者が確認できる実績</h2>
-    <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-      自己紹介文ではなく、確認できる証拠を集めています。各項目はカンファレンスのセッションページ、主催者の公式ページ、公開済みの講演資料など、一次情報へリンクしています。
-    </p>
-    <ul class="grid gap-4 md:grid-cols-2">
+  <!-- 3. Speaking & Writing -->
+  <section id="speaking" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Speaking &amp; Writing</p>
+    <h2 class="font-display text-2xl md:text-3xl font-bold mb-8">登壇・執筆</h2>
+    <ul class="grid gap-4 md:grid-cols-2 mb-10">
       {EVIDENCE.map((item) => (
         <li>
           <a
@@ -198,125 +188,59 @@ const paths = contactPaths(lang);
         </li>
       ))}
     </ul>
-  </section>
-
-  <!-- 4. Selected Outcomes -->
-  <section
-    id="outcomes"
-    class="scroll-mt-20 bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border"
-  >
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Selected Outcomes</p>
-      <h2 class="font-display text-2xl md:text-3xl font-bold mb-8">課題 → 対応 → 結果</h2>
-      <div class="grid gap-6 md:grid-cols-2">
-        {OUTCOMES.map((o) => (
-          <div class="flex h-full flex-col p-6 rounded-lg border border-light-border dark:border-dark-border bg-light-bg dark:bg-dark-bg">
-            <dl class="space-y-3 text-sm">
-              <div>
-                <dt class="font-medium text-light-muted dark:text-dark-muted uppercase text-xs tracking-wide mb-1">課題</dt>
-                <dd>{o.challenge[lang]}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-light-muted dark:text-dark-muted uppercase text-xs tracking-wide mb-1">対応</dt>
-                <dd>{o.action[lang]}</dd>
-              </div>
-              <div>
-                <dt class="font-medium text-light-muted dark:text-dark-muted uppercase text-xs tracking-wide mb-1">結果</dt>
-                <dd class="font-medium">{o.result[lang]}</dd>
-              </div>
-            </dl>
-            <a
-              href={o.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="mt-auto pt-4 text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
-            >
-              {o.evidenceLabel[lang]} →
-            </a>
-          </div>
-        ))}
-      </div>
+    <div class="flex flex-wrap gap-4 mb-4">
+      <a
+        href={LINKS.speakerdeck}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
+      >
+        Speaker Deck で資料を見る
+      </a>
+      <a
+        href={LINKS.sessionize}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
+      >
+        Sessionize プロフィール
+      </a>
+      <a
+        href={LINKS.zenn}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
+      >
+        Zenn で記事を読む
+      </a>
     </div>
-  </section>
-
-  <!-- 5. Selected Experience -->
-  <section id="experience" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Selected Experience</p>
-    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">関わってきた組織</h2>
-    <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-      顧客推薦ではなく、雇用・業務委託など関係性を明示した一覧です。詳細は
-      <a href={portfolioPath("ja", "/about")} class="text-accent-500 hover:underline">自己紹介</a>と
-      <a href={portfolioPath("ja", "/resume")} class="text-accent-500 hover:underline">経歴</a>のページにあります。
+    <p class="text-sm text-light-muted dark:text-dark-muted">
+      登壇のご依頼は<a href="#contact" class="text-accent-500 hover:underline">お問い合わせ</a>からどうぞ。
     </p>
-    <div class="grid gap-6 md:grid-cols-2">
-      {EXPERIENCE_GROUPS.map((group) => (
-        <div class="p-6 rounded-lg border border-light-border dark:border-dark-border">
-          <h3 class="font-display font-semibold text-lg mb-4">{group.label[lang]}</h3>
-          <ul class="space-y-3">
-            {group.organizations.map((org) => (
-              <li class="text-sm">
-                <span class="font-medium">{org.name}</span>
-                <span class="text-light-muted dark:text-dark-muted"> — {org.detail[lang]}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
   </section>
 
-  <!-- 6. Speaking & Writing -->
+  <!-- 4. Experience -->
   <section
-    id="speaking"
+    id="experience"
     class="scroll-mt-20 bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border"
   >
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Speaking &amp; Writing</p>
-      <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">一貫したテーマ</h2>
-      <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-        登壇も執筆も、クラウド基盤・IaC・DevOps・セキュリティ・組織改善という同じテーマを軸にしています。
-      </p>
-      <div class="grid gap-6 md:grid-cols-3 mb-10">
-        {SPEAKING_THEMES.map((t) => (
-          <div class="p-5 rounded-lg border border-light-border dark:border-dark-border bg-light-bg dark:bg-dark-bg">
-            <h3 class="font-display font-semibold mb-3 text-accent-500">{t.theme[lang]}</h3>
-            <ul class="space-y-1 text-sm text-light-muted dark:text-dark-muted">
-              {t.events.map((e) => (
-                <li>{e}</li>
-              ))}
-            </ul>
-          </div>
+      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Experience</p>
+      <h2 class="font-display text-2xl md:text-3xl font-bold mb-8">経歴</h2>
+      <ul class="max-w-3xl space-y-4">
+        {EXPERIENCE.map((org) => (
+          <li>
+            <span class="font-medium">{org.name}</span>
+            <span class="text-light-muted dark:text-dark-muted"> — {org.detail[lang]}</span>
+          </li>
         ))}
-      </div>
-      <div class="flex flex-wrap gap-4 mb-4">
-        <a
-          href={LINKS.speakerdeck}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          Speaker Deck で資料を見る
-        </a>
-        <a
-          href={LINKS.sessionize}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          Sessionize プロフィール
-        </a>
-        <a
-          href={LINKS.zenn}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center px-5 py-2.5 border border-light-border dark:border-dark-border hover:border-accent-500 dark:hover:border-accent-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          Zenn で記事を読む
-        </a>
-      </div>
-      <p class="text-sm text-light-muted dark:text-dark-muted">
-        登壇のご依頼は<a href="#contact" class="text-accent-500 hover:underline">お問い合わせ</a>からどうぞ。
-      </p>
+      </ul>
+      <a
+        href={portfolioPath("ja", "/about")}
+        class="mt-8 inline-block text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
+      >
+        詳しい経歴を見る →
+      </a>
     </div>
   </section>
 
@@ -350,34 +274,12 @@ const paths = contactPaths(lang);
     </div>
   </section>
 
-  <!-- 7. About -->
-  <section
-    id="about"
-    class="scroll-mt-20 bg-light-surface dark:bg-dark-surface border-y border-light-border dark:border-dark-border"
-  >
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">About</p>
-      <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">QA からクラウドへ、そして学びの仕組みづくりへ</h2>
-      <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-6">
-        ミッションクリティカルなシステムの QA から始まり、コネクテッドサービスのクラウドアーキテクチャと
-        SRE を経て、部門を越えてソフトウェアの届け方を改善してきました。品質、インフラ、そして「手を動かして学ぶ」こと。この一本の軸が、合同会社
-        BULL の設立と、スライドではなく実 AWS で学ぶ TenkaCloud の開発につながっています。
-      </p>
-      <a
-        href={portfolioPath("ja", "/about")}
-        class="text-sm font-medium text-accent-500 hover:text-accent-600 transition-colors"
-      >
-        詳しい経歴を見る →
-      </a>
-    </div>
-  </section>
-
-  <!-- 8. Contact -->
+  <!-- 5. Contact -->
   <section id="contact" class="scroll-mt-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <p class="text-accent-500 font-medium tracking-wide uppercase text-sm mb-3">Contact</p>
-    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">目的に合わせた窓口</h2>
+    <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">お問い合わせ</h2>
     <p class="text-light-muted dark:text-dark-muted max-w-3xl mb-8">
-      それぞれの窓口から適切なフォーム・ページへつながります。いただいた内容はすべて目を通し、メールで返信します。ニュースレターへの自動登録などは行いません。
+      TenkaCloud の導入相談、クラウド基盤・DevOps の支援、登壇・執筆のご依頼はこちらから。
     </p>
     <div class="grid gap-6 md:grid-cols-2">
       {paths.map((p) => (
