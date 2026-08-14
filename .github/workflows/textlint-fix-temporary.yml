@@ -33,3 +33,5 @@ jobs:
             git commit -m "textlintの自動修正を適用"
             git push
           fi
+      - name: Validate textlint
+        run: bun run lint
