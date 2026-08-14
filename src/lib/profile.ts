@@ -130,166 +130,42 @@ export const EVIDENCE: EvidenceItem[] = [
   },
 ];
 
-export interface OutcomeItem {
-  challenge: Localized;
-  action: Localized;
-  result: Localized;
-  evidenceLabel: Localized;
-  href: string;
+export interface ExperienceItem {
+  name: string;
+  detail: Localized;
 }
 
 /**
- * Selected outcomes in challenge → action → result form. Every number links
- * to the public talk or repository that backs it (issue #366: no strong
- * claims without a public source).
+ * Work history as one flat, chronological list; employment details live in
+ * the resume, not on the home page.
  */
-export const OUTCOMES: OutcomeItem[] = [
+export const EXPERIENCE: ExperienceItem[] = [
   {
-    challenge: {
-      en: "Changes to an internal system took up to one month to reach production.",
-      ja: "業務システムの変更が本番へ届くまで最大 1 か月かかっていた。",
-    },
-    action: {
-      en: "Crossed into another department as an internal side job and introduced CI/CD and DevOps practices.",
-      ja: "社内副業として他部門へ越境し、CI/CD と DevOps の実践を導入した。",
-    },
-    result: {
-      en: "Change lead time went from up to a month to ten minutes.",
-      ja: "変更リードタイムを最大 1 か月から 10 分に短縮した。",
-    },
-    evidenceLabel: {
-      en: "DevOpsDays Tokyo 2025 slides",
-      ja: "DevOpsDays Tokyo 2025 講演資料",
-    },
-    href: "https://speakerdeck.com/susumutomita/devopsdaystokyo2025she-nei-fu-ye-teta-bu-men-he-yue-jing-sitejian-etajia-zhi-zai-ding-yi-zui-da-1kayue-noritotaimuwo10fen-niduan-suo-sitadevopsshi-jian",
+    name: "Hitachi, Ltd.",
+    detail: { en: "QA engineer / technical lead (2006–2017)", ja: "QA エンジニア／テクニカルリード（2006–2017）" },
   },
   {
-    challenge: {
-      en: "Connected-car services needed cloud infrastructure that could be developed, operated, and monitored at scale.",
-      ja: "コネクテッドカーサービスには、大規模に開発・運用・監視できるクラウド基盤が必要だった。",
-    },
-    action: {
-      en: "Designed and ran an AWS-native architecture for development, operations, and monitoring.",
-      ja: "AWS のマネージドサービスを軸に、開発・運用・監視の仕組みを設計・運用した。",
-    },
-    result: {
-      en: "Presented the architecture and operational practices at AWS DevDay Tokyo 2019.",
-      ja: "その構成と運用の実践を AWS DevDay Tokyo 2019 で公開した。",
-    },
-    evidenceLabel: {
-      en: "AWS DevDay Tokyo 2019 slides",
-      ja: "AWS DevDay Tokyo 2019 講演資料",
-    },
-    href: "https://speakerdeck.com/susumutomita/aws-native-application-development",
+    name: "Hitachi Vantara (US)",
+    detail: { en: "Software QA specialist (2017–2018)", ja: "ソフトウェア QA スペシャリスト（2017–2018）" },
   },
   {
-    challenge: {
-      en: "An operations team was stuck firefighting, down to “the login screen won’t open” tickets.",
-      ja: "「ログイン画面が開きません」という問い合わせ対応に追われる運用状態だった。",
+    name: "DENSO",
+    detail: {
+      en: "Software architect / cloud lead (2018–2025), agile coach (2026–)",
+      ja: "ソフトウェアアーキテクト／クラウドリード（2018–2025）、アジャイルコーチ（2026–）",
     },
-    action: {
-      en: "Rebuilt the team's way of working with SRE practices.",
-      ja: "SRE の実践を軸に、チームの働き方を作り直した。",
-    },
-    result: {
-      en: "Shared the transformation journey at DevOpsDays Tokyo 2021.",
-      ja: "その改革の軌跡を DevOpsDays Tokyo 2021 で公開した。",
-    },
-    evidenceLabel: {
-      en: "DevOpsDays Tokyo 2021 session",
-      ja: "DevOpsDays Tokyo 2021 セッション",
-    },
-    href: "https://confengine.com/conferences/devopsdays-tokyo-2021/proposal/15172",
   },
   {
-    challenge: {
-      en: "Running realistic cloud competitions and hands-on training takes heavy preparation for every event.",
-      ja: "実践的なクラウド競技・研修は、開催のたびに大きな準備コストがかかる。",
-    },
-    action: {
-      en: "Built TenkaCloud, an open-source multi-tenant platform that deploys competition environments to participants' AWS accounts.",
-      ja: "参加者の AWS アカウントへ競技環境を自動デプロイする、OSS のマルチテナント基盤 TenkaCloud を開発している。",
-    },
-    result: {
-      en: "The platform and its documentation are developed in the open on GitHub.",
-      ja: "基盤とドキュメントを GitHub 上でオープンに開発・公開している。",
-    },
-    evidenceLabel: {
-      en: "TenkaCloud on GitHub",
-      ja: "GitHub の TenkaCloud リポジトリ",
-    },
-    href: BULL.tenkacloud,
-  },
-];
-
-export interface ExperienceGroup {
-  label: Localized;
-  organizations: { name: string; detail: Localized }[];
-}
-
-/**
- * Organizations, with the relationship stated explicitly so logos or names
- * can never read as customer endorsements (issue #366).
- */
-export const EXPERIENCE_GROUPS: ExperienceGroup[] = [
-  {
-    label: { en: "As a full-time employee", ja: "正社員として" },
-    organizations: [
-      {
-        name: "Hitachi, Ltd.",
-        detail: { en: "QA engineer / technical lead (2006–2017)", ja: "QA エンジニア／テクニカルリード（2006–2017）" },
-      },
-      {
-        name: "Hitachi Vantara (US)",
-        detail: { en: "Software QA specialist (2017–2018)", ja: "ソフトウェア QA スペシャリスト（2017–2018）" },
-      },
-      {
-        name: "DENSO",
-        detail: { en: "Software architect / cloud lead (2018–2025)", ja: "ソフトウェアアーキテクト／クラウドリード（2018–2025）" },
-      },
-    ],
+    name: "WHILL",
+    detail: { en: "Cloud application development (2021–2022)", ja: "クラウドアプリケーション開発（2021–2022）" },
   },
   {
-    label: { en: "Under contract / side engagements", ja: "業務委託・複業として" },
-    organizations: [
-      {
-        name: "WHILL",
-        detail: { en: "Cloud application development (2021–2022)", ja: "クラウドアプリケーション開発（2021–2022）" },
-      },
-      {
-        name: "Logomix",
-        detail: { en: "Lab automation / SRE (2025–2026)", ja: "ラボオートメーション／SRE（2025–2026）" },
-      },
-      {
-        name: "MynaWallet",
-        detail: { en: "Web3 infrastructure and security (2025–)", ja: "Web3 インフラ・セキュリティ（2025–）" },
-      },
-      {
-        name: "DENSO",
-        detail: { en: "Agile coach (2026–)", ja: "アジャイルコーチ（2026–）" },
-      },
-    ],
-  },
-];
-
-export interface SpeakingTheme {
-  theme: Localized;
-  events: string[];
-}
-
-/** Consistent themes across talks, rather than a flat list (issue #366). */
-export const SPEAKING_THEMES: SpeakingTheme[] = [
-  {
-    theme: { en: "Cloud infrastructure & IaC", ja: "クラウド基盤・IaC" },
-    events: ["AWS DevDay Tokyo 2019", "HashiTalks: Japan"],
+    name: "Logomix",
+    detail: { en: "Lab automation / SRE (2025–2026)", ja: "ラボオートメーション／SRE（2025–2026）" },
   },
   {
-    theme: { en: "DevOps & organizational change", ja: "DevOps・組織改善" },
-    events: ["DevOpsDays Tokyo 2021 / 2025", "DevOpsDays Taipei", "Scrum Fest Mikawa 2023"],
-  },
-  {
-    theme: { en: "Operations & security", ja: "運用・セキュリティ" },
-    events: ["Cloud Operator Days Tokyo 2022 / 2024"],
+    name: "MynaWallet",
+    detail: { en: "Web3 infrastructure and security (2025–)", ja: "Web3 インフラ・セキュリティ（2025–）" },
   },
 ];
 
