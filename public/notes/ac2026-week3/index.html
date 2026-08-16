@@ -352,7 +352,7 @@
       その全段を自分で書く構成でした。
     </p>
     <p class="lead">
-      このノートの山場は 2 つの実測です。<strong>秘密鍵を一度も使わずに作った会話が検証に通る</strong>こと。
+      このノートで特に確認するのは 2 つです。<strong>秘密鍵を一度も使わずに作った会話が検証に通る</strong>こと。
       そして <strong>nonce を 1 回使い回しただけで、本物の secp256k1 の秘密鍵が復元できる</strong>こと。
       この 2 つが、ゼロ知識と知識健全性の正体です。
     </p>
@@ -383,14 +383,14 @@
           一見すると別の話に見えます。
         </p>
         <p>
-          別の話ではありません。<strong>同じ 1 枚の絵の、違う場所を指しているだけ</strong>です。
-          スライドは zkSNARK 全体のパイプラインを見せ、課題はそのうち
-          「楕円曲線とコミット」の柱を、実際に手で組ませています。
+          別の話ではありません。スライドと課題は、<strong>「秘密を見せずに、計算が正しいと納得させる」</strong>
+          という同じ目的を、別の細かさで扱っています。スライドは計算全体をどう変換するかを説明し、
+          課題はその中の「楕円曲線上で、秘密を知っていることを示す」部分を実装します。
         </p>
         <p>
-          だからこのノートも 2 段構えにします。前半は<strong>課題の道（有限体 → 楕円曲線 →
-          Schnorr）</strong>を、実際に壊した採点結果つきで登ります。後半は<strong>スライドの道
-          （多項式 → commitment → arithmetization）</strong>を地図として置きます。
+          だからこのノートも 2 つの順番で説明します。前半は<strong>課題の計算（有限体 → 楕円曲線 →
+          Schnorr）</strong>を、実際に壊した採点結果とともに説明します。後半は<strong>スライドの計算
+          （多項式 → commitment → arithmetization）</strong>を、今週の課題と接続して説明します。
           後半は Week 4 以降で手を動かす場所です。
         </p>
       </div>
@@ -413,7 +413,7 @@
     </div>
 
     <div>
-      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の地図</p>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
       <ol class="toc" id="toc"></ol>
     </div>
   </div>
@@ -424,9 +424,28 @@
   <div class="wrap stack">
     <div class="band-head">
       <p class="eyebrow">全体像</p>
-      <h2>zkSNARK は、計算を 4 回翻訳して短い証明にする</h2>
+      <h2>「計算が正しい」を、検証できる形へ順番に変える</h2>
       <p>
-        スライドが最初に出す 1 枚がこれです。左から右へ、証明したい計算がだんだん形を変えていきます。
+        「計算を 4 回翻訳する」という言葉だけでは、何のための変換か分かりません。
+        先に、証明者と検証者が困っていることを固定します。
+      </p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">最初の問い</p>
+      <p class="strong-line">
+        秘密 <code>w</code> を見せずに、「公開された計算の答えを、本当に作れる秘密を知っている」とどう確認するか。
+      </p>
+      <p>
+        例として、公開値は <code>y = 15</code>、秘密は <code>w</code>、確認したい条件は
+        <code>w³ + w + 5 = y</code> とします。<code>w = 2</code> なら
+        <code>2³ + 2 + 5 = 15</code> なので条件を満たします。しかし <b>w をそのまま渡すと、秘密を隠せません</b>。
+        検証者が欲しいのは w そのものではなく、w が条件を満たすことを確認できる短いデータです。
+      </p>
+      <p class="subst">
+        公開情報（statement）: y = 15<br>
+        秘密情報（witness）: w = 2<br>
+        証明したい主張: 「この y に対して、条件を満たす w が存在する」
       </p>
     </div>
 
@@ -435,7 +454,7 @@
         <div class="pipe">
           <div class="pipe-box"><span class="t">計算</span><span class="s">program</span></div>
           <span class="pipe-arrow">→</span>
-          <div class="pipe-box"><span class="t">制約</span><span class="s">arithmetization</span></div>
+          <div class="pipe-box"><span class="t">制約</span><span class="s">equations</span></div>
           <span class="pipe-arrow">→</span>
           <div class="pipe-box"><span class="t">多項式</span><span class="s">polynomials</span></div>
           <span class="pipe-arrow">→</span>
@@ -449,41 +468,99 @@
           <div class="pipe-tool on">楕円曲線・ハッシュ</div>
         </div>
         <p class="caption">
-          下段は、上段を支える道具。<strong>色が付いているのが今週やる場所</strong>です
-          （有限体と楕円曲線、そして一番右の「短い証明」を対話から作る部分）。
-          多項式とフーリエ変換は Week 4 以降の担当になります。
+          箱は 5 個ですが、箱と箱の間の矢印が 4 本あります。
+          <strong>「4 回翻訳する」</strong>とは、この 4 本の変換を指します。
+          色が付いた有限体・楕円曲線・右端の対話は今週、
+          多項式とフーリエ変換は後の週で扱います。
         </p>
       </div>
     </div>
 
+    <ol class="steps">
+      <li>
+        <h4>第 1 変換: 計算を、1 行ずつ確認できる制約にする</h4>
+        <div class="body">
+          <p>
+            プログラムは「w を 3 乗して足す」という手順ですが、証明システムはプログラム全体を一度に読むのではなく、
+            <b>各行が正しいか</b>を確認します。そこで中間値を名前付きで保存します。
+          </p>
+          <p class="subst">
+            t₁ = w²　　（w を 2 回掛けた結果）<br>
+            t₂ = t₁·w　（w³ の結果）<br>
+            t₂ + w + 5 − y = 0　（最後の足し算の確認）
+          </p>
+          <p>
+            w = 2, y = 15 を代入すると、<code>t₁ = 4</code>、<code>t₂ = 8</code> で、3 本とも 0 になります。
+            これが Week 1 で見た R1CS の考え方です。<b>計算を細かい式へ分ける理由は、検証者が各式を機械的に確認できるから</b>です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>第 2 変換: たくさんの制約を、多項式の関係にまとめる</h4>
+        <div class="body">
+          <p>
+            制約が 3 本なら 3 本を確認できますが、実際のプログラムでは何百万本にもなります。
+            そこで制約の係数や中間値を多項式として並べ、複数の条件が同時に成立することを
+            <b>多項式の等式</b>として表します。多項式にすれば、ランダムな点で値を比べる検査へ縮められます。
+          </p>
+          <p>
+            この検査は「1 点が合ったから必ず正しい」という意味ではありません。
+            異なる多項式が同じ値になる点は限られるため、ランダムな点を使うと、間違いを見逃す確率を非常に小さくできます。
+            ここで初めて、検証者が全計算をやり直さずに済む理由が生まれます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>第 3 変換: 多項式を、あとから変更できない短い値に固定する</h4>
+        <div class="body">
+          <p>
+            検証者が「この点で評価して」と言ってから、多項式を都合よく選べるなら証明になりません。
+            先に多項式を <code>c</code> という短い commitment にして渡し、あとで必要な値だけを開きます。
+            <b>先に固定する性質が binding、開くまで中身が分からない性質が hiding</b>です。
+          </p>
+          <p class="subst">
+            commit: 多項式と乱数から c を作り、c だけ渡す<br>
+            open: 必要な評価値と、その値が同じ多項式から来たことを示す<br>
+            verify: c と開示値の関係を確認する
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>第 4 変換: 残った確認だけを、短い proof にまとめる</h4>
+        <div class="body">
+          <p>
+            検証者が受け取るのは、w や全係数ではありません。commitment と、少数の評価値・等式だけです。
+            楕円曲線の加法やペアリングを使う方式では、それらの関係を少数の群演算に変えて確認できます。
+            これが「証明は短く、検証は速くなる」の具体的な意味です。
+          </p>
+        </div>
+      </li>
+    </ol>
+
     <div class="split">
       <div class="prose">
         <p>
-          証明したいのは「ある秘密を知っている」という主張です。スライドの例で言えば、
-          公開値 <code>y = 15</code> に対して <code>w³ + w + 5 = y</code> を満たす
-          秘密の <code>w</code> を知っている、という主張（答えは <code>w = 2</code>）。
-        </p>
-        <p class="subst">
-          statement（公開）: ∃w. w³ + w + 5 = 15<br>
-          witness（秘密）: w = 2
+          この順番は、用語を増やすための順番ではありません。<b>秘密を隠したい</b>という最初の条件から出発し、
+          「全計算を見せずに、局所的な式だけを確認する」ために、制約・多項式・commitment が必要になります。
         </p>
         <p>
-          この「条件」の部分を、公開入力 <code>y</code> と秘密候補 <code>w</code> を受け取って
-          合否を返す関係 <code>R(y, w)</code> と書くと、zkSNARK が扱うのは
-          <strong>「R(y, w) = 1 となる w が存在する」という形の主張</strong>だけになります。
-          Week 1 の回路は、まさにこの R を書く言語でした。
+          研究の流れもこの問題意識に沿っています。まず Schnorr のような 3 手の対話で秘密の知識を示し、
+          Fiat–Shamir で検証者のチャレンジをハッシュに置き換えて 1 通にし、
+          さらに任意のプログラムを制約と多項式へ変換して、短い証明を作れるようにしました。
         </p>
       </div>
 
       <div class="callout">
-        <p class="eyebrow">zkSNARK の頭文字は、そのまま性質の一覧</p>
-        <p><b>zk</b>（Zero-Knowledge）: proof から witness 由来の情報が漏れない。</p>
-        <p><b>S</b>（Succinct）: proof が短く、検証が速い。</p>
-        <p><b>N</b>（Non-interactive）: 1 通で完結する。何往復もしない。</p>
-        <p><b>ARK</b>（ARgument of Knowledge）: 有効な proof を作れる prover は、対応する witness を
-        本当に知っている（知識健全性）。正しい witness を持つ prover の proof は必ず通る（完全性）。</p>
-        <p class="strong-line">
-          今週の Schnorr は、この 4 つを最小構成で全部持っている「いちばん小さい実例」です。
+        <p class="eyebrow">今週の位置</p>
+        <p>
+          Week 3 の課題は、上の第 4 変換を理解するための最小例です。
+          有限体と楕円曲線の上で、<code>R = rG</code>、<code>s = r + e·x</code>、
+          <code>sG = R + eP</code> を実際に計算します。
+        </p>
+        <p>
+          つまり、いきなり zkSNARK 全体を作っているのではなく、
+          <b>「秘密を持つ人が、秘密を見せずに式の関係を証明する」最小の対話</b>を先に作っています。
+          次のラボで、その 1 回の会話を数字で追います。
         </p>
       </div>
     </div>
@@ -494,7 +571,7 @@
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
-      <p class="eyebrow">積み上げ 1 段目</p>
+      <p class="eyebrow">前提 1</p>
       <h2>有限体の逆元 — ここが崩れると上は全部崩れる</h2>
       <p>
         課題は Part 1 から Part 3 まで一本につながっていて、
@@ -570,7 +647,7 @@ AssertionError: False is not true :
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
-      <p class="eyebrow">積み上げ 2 段目</p>
+      <p class="eyebrow">前提 2</p>
       <h2>楕円曲線 — 点の足し算で、もう一つの群を作る</h2>
       <p>
         有限体は「+ と ×」の世界でした。その上に、まったく別の演算を持つ群をもう 1 つ作ります。
@@ -640,7 +717,7 @@ AssertionError: False is not true :
               P = (x_P, y_P) での傾き λ = (3x_P² + a) / (2y_P)
             </p>
             <p>
-              実数の絵では「Q を P に近づけると、P と Q を結ぶ弦が接線へ近づく」と考えられます。
+              実数のグラフでは「Q を P に近づけると、P と Q を結ぶ弦が接線へ近づく」と考えられます。
               有限体には「少し近づける」という距離はないので、実装では極限を計算せず、
               <strong>微分で得た最後の代数式を mod p で使う</strong>だけです。
             </p>
@@ -650,9 +727,9 @@ AssertionError: False is not true :
             </p>
           </div>
           <p class="why">
-            <b>「/」は全部、前段の field_inv です。</b>実数の幾何の絵はあくまで直感で、
+            <b>「/」は全部、前段の field_inv です。</b>実数のグラフは計算規則を理解する補助で、
             計算は最初から最後まで F_p の中で行います。
-            <b>絵に描ける曲線と、実際に計算している集合は別物</b>だと割り切るのが早道でした。
+            <b>グラフに描ける曲線と、実際に計算している有限集合は別物</b>だと区別します。
           </p>
         </div>
       </li>
@@ -698,7 +775,7 @@ AssertionError: Tuples differ: (951, 492) != (755, 55)</pre>
         </div>
       </li>
       <li>
-        <h4>double-and-add — 倍々で登る</h4>
+        <h4>double-and-add — 2 進法でスカラー倍を計算する</h4>
         <div class="body">
           <p>
             まず言葉を分けます。<strong>スカラー</strong>は普通の整数 k、<strong>スカラー倍</strong>
@@ -1008,10 +1085,26 @@ k ≈ 2^256                  ec_add 446 回 / 12.9 ms
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
-      <p class="eyebrow">積み上げ 3 段目</p>
+      <p class="eyebrow">前提 3</p>
       <h2>シグマプロトコル — 3 手で「知っている」を渡す</h2>
       <p>
+        ここで、全体像の最後に出てきた「短い proof」を最小の形で作ります。
         公開鍵 <code>P = xG</code> について「x を知っている」ことを、x を見せずに納得させます。
+        まず検証者が何を受け取り、どの式を確認するのかを固定します。
+      </p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">この 3 手が必要になる理由</p>
+      <p>
+        <b>公開鍵だけ</b>を見せても、誰でも同じ <code>P</code> を見ることができます。
+        しかし秘密鍵 <code>x</code> を見せると、秘密を守れません。そこで証明者は、毎回変える乱数
+        <code>r</code> で一度だけ使う点 <code>R = rG</code> を先に送り、検証者のチャレンジを受けてから
+        <code>s = r + e·x</code> を返します。検証者は <code>x</code> を知らなくても
+        <code>sG = R + eP</code> を計算できます。
+      </p>
+      <p class="strong-line">
+        ラボ 1 では、この式を「記号の説明」で終わらせず、r・e・s を実際の数にして両辺が同じ点になることを確認します。
       </p>
     </div>
 
@@ -1034,7 +1127,7 @@ k ≈ 2^256                  ec_add 446 回 / 12.9 ms
         </div>
       </li>
       <li>
-        <h4>r は「使い捨ての目隠し」</h4>
+        <h4>r は毎回変える乱数</h4>
         <div class="body">
           <p>
             検証者が受け取る <code>s = r + e·x</code> には秘密 x が入っていますが、
@@ -1043,13 +1136,13 @@ k ≈ 2^256                  ec_add 446 回 / 12.9 ms
           <p class="why">
             <b>Week 2 とまったく同じ構図です。</b>Beaver 乗算で公開した
             <code>d = x − a</code> が安全だったのは、a が誰も知らない乱数だったから。
-            ここでも <b>r がワンタイムパッドの役</b>をしています。
+            ここでも <b>r が s に含まれる秘密の値を毎回変える役割</b>を持ちます。
             <b>そして Week 2 と同じく、使い回した瞬間に壊れます</b>（後述）。
           </p>
         </div>
       </li>
       <li>
-        <h4>2 つの法を取り違える — 最初の関門</h4>
+        <h4>2 つの法を取り違えない</h4>
         <div class="body">
           <p>
             座標の計算は <code>mod p</code>、スカラー（指数）の計算は <code>mod n</code>（G の位数）。
@@ -1091,6 +1184,36 @@ AssertionError: 786 != 123</pre>
       </p>
     </div>
 
+    <div class="callout">
+      <p class="eyebrow">画面の計算を読む順番</p>
+      <p>
+        このラボでは、楕円曲線の点の計算を <code>mod 1009</code>、係数 r・e・s の計算を
+        <code>mod 967</code> で行います。2 つの法は別の役割です。
+      </p>
+      <pre>公開設定: x = 123,  P = xG = (376,128)
+
+[1] r = 456 を選ぶ
+    R = rG = 456G = (822,106)
+
+[2] 検証者が e = 77 を選ぶ
+
+[3] s = r + e·x = 456 + 77·123 = 9927 ≡ 257 (mod 967)
+
+[4] 検証者の確認
+    sG = 257G = (595,110)
+    R + eP = (822,106) + 77(376,128) = (595,110)</pre>
+      <p>
+        <code>rG</code> や <code>eP</code> は、座標を普通に掛ける計算ではなく、
+        楕円曲線上の点を何度も足す<strong>スカラー倍</strong>です。
+        最後の 2 点が一致するのは、<code>s = r + e·x</code> と <code>P = xG</code> を代入すると
+        <code>sG = (r + e·x)G = rG + e(xG) = R + eP</code> になるからです。
+      </p>
+      <p class="strong-line">
+        正直モードの緑は「正しい秘密を持っていれば必ず通る（完全性）」を示します。
+        simulator モードも後で緑になりますが、それは「受理された 1 本だけでは、秘密を知っているとは言えない」ことを示すためです。
+      </p>
+    </div>
+
     <div class="lab">
       <div class="card">
         <div class="card-head"><h3>設定</h3><span class="eyebrow">x = 123 / P = (376,128)</span></div>
@@ -1129,11 +1252,12 @@ AssertionError: 786 != 123</pre>
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
-      <p class="eyebrow">3 つの性質</p>
-      <h2>受理された、では何も言えない — 完全性・健全性・ゼロ知識</h2>
+      <p class="eyebrow">ラボ 1 の結果を言葉にする</p>
+      <h2>「通った」から何が分かるのか — 完全性・健全性・ゼロ知識</h2>
       <p>
-        ラボで見たとおり、<strong>秘密を知らなくても受理される会話は作れます</strong>。
-        では何が「知っている」の証明になっているのか。3 つの性質を分けて考えます。
+        ラボ 1 では、正直な証明者の会話も simulator の会話も受理されました。
+        ここで「通ったから秘密を知っている」と結論すると、論理が飛びます。
+        何を保証する性質なのかを、完全性・知識健全性・ゼロ知識に分けて確認します。
       </p>
     </div>
 
@@ -1232,8 +1356,10 @@ x  = (10−3)·(2−7)⁻¹ = 7·6⁻¹ = 7·2 ≡ 3</pre>
       <p class="eyebrow">ラボ 2</p>
       <h2>nonce を使い回すと、公開情報だけで鍵が出る</h2>
       <p>
-        攻撃者が持っているのは<strong>公開鍵と 2 本の署名だけ</strong>という設定です。
-        r を共通にしたまま 2 つのチャレンジを選んで、秘密鍵が復元される瞬間を見てください。
+        ラボ 1 で、<code>R</code> はチャレンジを受け取る前に決める必要があると分かりました。
+        ここでは、その <code>R</code>（正確には r）を使い回すと何が起きるかを確かめます。
+        攻撃者が持っているのは<strong>公開鍵と 2 本の署名だけ</strong>です。
+        r を共通にしたまま 2 つのチャレンジを選ぶと、秘密鍵が復元されます。
       </p>
     </div>
 
@@ -1303,7 +1429,9 @@ R が一致している: True   <span class="c">← 公開情報だけで再利�
       <p class="eyebrow">仕上げ</p>
       <h2>Fiat–Shamir 変換 — 検証者を、ハッシュで置き換える</h2>
       <p>
-        ここまでは対話でした。最後の 1 手で、対話を消して署名にします。
+        ラボ 1 とラボ 2 では、検証者がチャレンジ e を返す 3-way の対話を使いました。
+        ここでは「検証者が毎回ランダムに e を選ぶ」という役割だけをハッシュに移し、
+        対話なしで同じ検証式を使えるようにします。
       </p>
     </div>
 
@@ -1392,11 +1520,11 @@ FAIL: test_roundtrip</pre>
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
-      <p class="eyebrow">地図</p>
+      <p class="eyebrow">スライド後半との接続</p>
       <h2>スライドの後半 — ここから先が zkSNARK の本体</h2>
       <p>
-        課題で登ったのはパイプラインの右端（proof を短くする部分）でした。
-        残りの箱は Week 4 以降で手を動かします。今週は<strong>地図として置いておく</strong>だけにします。
+        課題で実装したのは、パイプラインの右端にある「秘密を見せずに関係を検証する」部分です。
+        残りの箱は Week 4 以降で手を動かします。ここでは、課題の計算がどこへ接続するかを説明します。
       </p>
     </div>
 
@@ -1511,7 +1639,7 @@ f(13) = E(−1) − 4·O(−1)  = 15 − 4·15   ≡ 6
         <div class="body">
           <p>
             大きな対象（多項式や実行トレース）を短い値 <code>c</code> に固定して先に渡し、
-            後から中身を見せて開く。封をした封筒と同じで、性質は 2 つ。
+            後から中身と必要な情報を示す。必要な性質は 2 つ。
           </p>
           <p class="subst">
             binding: 開けるのは最初に入れたものだけ<br>
