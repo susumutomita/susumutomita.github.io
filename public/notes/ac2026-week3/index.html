@@ -347,7 +347,15 @@
   .appx > summary:hover { color: var(--accent); }
   .appx .band { padding: 0.5rem 0 1.5rem; }
   .appx .band + .band { border-top: none; }
-  table.hwmap td, table.hwmap th { white-space: normal; }
+  .exs { border: 1px dashed var(--line-strong); border-radius: var(--r-md); padding: 1rem 1.1rem 0.6rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.5rem; }
+  .exs .eyebrow { color: var(--free); }
+  .ex { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); }
+  .ex > summary { cursor: pointer; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); color: var(--ink); line-height: 1.6; }
+  .ex > summary:hover { color: var(--accent); }
+  .ex > pre { border: none; border-top: 1px solid var(--line); border-radius: 0; }
+  table.hwmap td, table.hwmap th, table.gloss td, table.gloss th { white-space: normal; }
+  table.gloss td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  #glossary .note-title { margin-top: 0.5rem; }
   table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -406,7 +414,7 @@
     <div class="split">
       <div class="callout">
         <p class="eyebrow">読み方</p>
-        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。答えは次のカードか、宿題タグの中にあります。</p>
+        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。答えは次のカードか、宿題タグの中にあります。章の終わりの<b>「やってみる」</b>は紙と鉛筆で解いてから答えを開いてください。数はすべて 1 桁〜2 桁です。</p>
         <p class="strong-line">スライドを横に開いて、同じ番号を見比べながら読むのがいちばん速いです。</p>
       </div>
       <div class="callout amber">
@@ -530,6 +538,21 @@ proof       穴から見える姿       正答の列              (R, s)</pre>
         <p class="sl-hw"><b>宿題ではここ</b>: <code>extended_gcd(a, p)</code> は与えられていて (g, x, y) を返す。<code>extended_gcd(5, 13) = (1, −5, 2)</code>。<b>x が負のことがあるので <code>x % p</code> を忘れない</b>（忘れると採点器「0..p−1 に正規化して返してください」）。</p>
       </article>
     </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">余りの世界で計算する（mod 7 / 11 / 13）</h3>
+      <details class="ex"><summary>問 1. mod 7 で、5 + 6、3 · 5、−3 はそれぞれ何か。</summary><pre>5 + 6 = 11 = 7 + 4 → 4
+3 · 5 = 15 = 14 + 1 → 1
+−3 = −7 + 4 → 4      （宿題の field_add(−3, 1, 7) が 5 になるのも同じ理屈）</pre></details>
+      <details class="ex"><summary>問 2. F₇ で 3 の逆元は？（表を見ずに「3 × ? ≡ 1」を 1〜6 で試す）そして 3x = 5 の x は？</summary><pre>3·1=3, 3·2=6, 3·3=9≡2, 3·4=12≡5, 3·5=15≡1 ← 見つかった。3⁻¹ = 5
+3x = 5 の両辺に 5 を掛けて x = 25 ≡ 4。検算 3·4 = 12 ≡ 5 ✓</pre></details>
+      <details class="ex"><summary>問 3. F₁₁ で 4 の逆元は？（同じく試す）</summary><pre>4·3 = 12 = 11 + 1 → 4⁻¹ = 3</pre></details>
+      <details class="ex"><summary>問 4. 互除法で F₁₃ の 3 の逆元を求める。</summary><pre>13 = 4·3 + 1  ← 1 回で余りが 1
+逆にたどる: 1 = 13 − 4·3 → 3·(−4) ≡ 1 (mod 13) → −4 を 0..12 に直して 9
+検算 3·9 = 27 = 26 + 1 ✓     （宿題: extended_gcd(3, 13) は (1, −4, 1)。x % p を忘れると −4 のまま）</pre></details>
+      <details class="ex"><summary>問 5. mod 6 で 2 の逆元が無いのはなぜか。</summary><pre>2 · x はいつも偶数。6 で割った余りは 0, 2, 4 のどれかで、1 にはならない
+→ 法が合成数だと逆元を持てない数が出る。だから法は素数（宿題の p = 1009 は素数）</pre></details>
+    </div>
   </div>
 </section>
 
@@ -559,9 +582,34 @@ proof       穴から見える姿       正答の列              (R, s)</pre>
         <p class="sl-hw"><b>宿題ではここ</b>: この「2 点の傾き」の計算が、そのまま <code>ec_add</code> の λ = (y₂−y₁)/(x₂−x₁)。分母の割り算が <code>field_inv</code>。</p>
       </article>
       <article class="sl">
-        <div class="sl-head"><span class="sn">19〜20/65</span><span class="st">フーリエ変換: 二つの表し方を行き来する</span></div>
-        <p class="sl-claim">評価点を「1 の n 乗根 ω の冪」H = {1, ω, …, ωⁿ⁻¹} にそろえると、係数 ↔ 評価値の行き来が O(n log n)（FFT）でできる。</p>
-        <p class="sl-hw"><b>宿題には出ない</b>。Week 4 の STARK で「行番号 t を ω^t に置く」（F₁₇、ω = 4）として再登場。</p>
+        <div class="sl-head"><span class="sn">19〜20/65 ①</span><span class="st">フーリエ変換 — 困りごと: 係数で持つと掛け算が重い</span></div>
+        <p class="sl-claim">多項式を係数で持つと、掛け算は n 項 × n 項 = n² 回。「点での値」で持てば点ごとに 1 回で n 回。だから係数 ↔ 値を速く行き来したい。その翻訳機がフーリエ変換。</p>
+        <pre>f = 1 + X, g = 1 + X:  係数で掛ける → 1 + 2X + X²（全部の組を掛けて足す）
+                       値で掛ける   → f(2)·g(2) = 3·3 = 9 のように点ごとに 1 回</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19〜20/65 ②</span><span class="st">普通のフーリエ変換 — 和音を、音の高さごとの量に分ける</span></div>
+        <p class="sl-claim">「時間ごとの音圧の列」⇔「ド・ミ・ソがそれぞれどれだけ」。同じ音の 2 通りの表し方で、情報は増えも減りもしない。「値」⇔「係数」と同じ形。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19〜20/65 ③</span><span class="st">有限体版 — 式は同じ、ω が「回る点」から「輪の上の点」に変わるだけ</span></div>
+        <pre>yⱼ = f(ωʲ) = Σ aᵢ ω^{ij}          普通の版: ω = 単位円を n 等分して回る複素数
+                                   有限体版: ω = ωⁿ = 1 になる F_p の元（輪を n 等分する点）
+逆:  aᵢ = (1/n) Σ yⱼ ω^{−ij}      1/n は F_p の中の n の逆元</pre>
+        <p class="sl-claim">「点 ωʲ での値を全部並べる」= 評価表現。ω を取り替えるだけで、式は 1 文字も変わらない。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19〜20/65 ④</span><span class="st">手で 1 回 — F₅、n = 4、ω = 2</span></div>
+        <pre>2⁴ = 16 ≡ 1、冪 1, 2, 4, 3 が全部違う → ω = 2 は位数 4 の 1 の根
+f = 1 + X → 係数 (1, 1, 0, 0)     値: f(1)=2, f(2)=3, f(4)=0, f(3)=4 → y = (2, 3, 0, 4)
+逆: 1/n = 4（4·4 ≡ 1）, ω⁻¹ = 3   a₀ = 4·(2+3+0+4) = 36 ≡ 1 ✓   a₁ = 4·(2·1 + 3·3 + 0·4 + 4·2) = 4·19 ≡ 1 ✓
+値で掛け算: g = 1 + X も値 (2,3,0,4)。点ごとに掛けて (4,4,0,1)。逆変換 → (1,2,1,0) = 1 + 2X + X² ✓</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19〜20/65 ⑤</span><span class="st">なぜ ω の冪の点にそろえるのか — 半分に折れるから速い</span></div>
+        <p class="sl-claim">評価点が ω の冪だと ω^{n/2} = −1 で、点 x と −x が対になる。多項式を偶数次と奇数次に分けて半分ずつ処理でき、半分 → また半分 → … で n·log n。おまけに点集合 H の消滅多項式が Xⁿ − 1 という短い形になる。</p>
+        <p class="sl-hw"><b>Week 4 との接続</b>: FRI の「Q_even(X²) + X·Q_odd(X²)」の分解が FFT の 1 段そのもの。STARK の Z_H = X⁴ − 1 もここから。<b>宿題には出ない</b>。</p>
+        <p class="sl-q">Q. なぜやるのか、を 1 行で。（証明者は表＝値を持ち、検証は多項式＝係数と割り算でやる。その 2 つを 100 万点でも一瞬で行き来するため）</p>
       </article>
     </div>
   </div>
@@ -621,6 +669,21 @@ proof       穴から見える姿       正答の列              (R, s)</pre>
         <p class="sl-hw"><b>宿題ではここ</b>: 公開鍵 P = x·G を公開しても x が漏れない理由。R = r·G を公開しても r が漏れない理由。<b>Week 3 の安全性はここに全部乗っている</b>。</p>
       </article>
     </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">楕円曲線の点を足す（講義と同じ F₁₁ の曲線 y² = x³ + x + 6）</h3>
+      <details class="ex"><summary>問 1. P = (2, 7) は曲線上にあるか。</summary><pre>左辺 y² = 49 = 44 + 5 → 5
+右辺 x³ + x + 6 = 8 + 2 + 6 = 16 → 5     一致 → 曲線上</pre></details>
+      <details class="ex"><summary>問 2. 講義で 2P = (5, 2) だった。P + 2P（3P）を弦の公式で計算せよ。</summary><pre>λ = (2 − 7)/(5 − 2) = (−5)/3 = 6 · 3⁻¹ = 6 · 4 = 24 ≡ 2      （−5 ≡ 6、3⁻¹ = 4）
+x₃ = λ² − x₁ − x₂ = 4 − 2 − 5 = −3 ≡ 8
+y₃ = λ(x₁ − x₃) − y₁ = 2·(2 − 8) − 7 = −19 ≡ 3
+→ 3P = (8, 3)。検算: 9 と 512 + 8 + 6 = 526 ≡ 9 ✓（曲線上）</pre></details>
+      <details class="ex"><summary>問 3. 13P を倍々法で作るとき、2 倍算と足し算はそれぞれ何回か。</summary><pre>13 = 8 + 4 + 1 = (1101)₂
+P → 2P → 4P → 8P で 2 倍算 3 回、8P + 4P + P で足し算 2 回。合計 5 回（素直にやると 12 回）</pre></details>
+      <details class="ex"><summary>問 4. y 座標が 0 の点 P を 2 倍すると何になるか。理由も。</summary><pre>無限遠点 O。接線の傾き λ = (3x² + a)/(2y) の分母 2y が 0 で割れない = 接線が垂直で 3 つ目の交点が無い
+（宿題の ec_add では「x が同じで y が符号違い」の場合分けがこれを拾う。y = 0 なら −y = y なので同じ点で成立）</pre></details>
+      <details class="ex"><summary>問 5. 宿題のトイ曲線で 967·G = O になる。967 は何か。</summary><pre>G の位数。G を 967 回足すと単位元に戻る。だから s = r + e·x は mod 967（G を何回足すかの数だから）</pre></details>
+    </div>
   </div>
 </section>
 
@@ -677,6 +740,15 @@ proof π = q(τ)P。 verifier: e(C − yP, Q) = e(π, τQ − zQ)     ← 「f(�
 例: f = X² + 1, z = 2, y = 5:  q = (X² − 4)/(X − 2) = X + 2, π = τP + 2P。 割り切れるのは f(2) = 5 が本当のときだけ</pre>
         <p class="sl-hw"><b>覚える 1 点</b>: 「割り切れる ⇔ 値が本当」。因数定理（数 II）。下の <a href="#poly">制約 → 多項式</a> でも、Week 4 の STARK/PLONK でも同じ道具。</p>
       </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">封筒（commitment）</h3>
+      <details class="ex"><summary>問 1. c = Hash(m) で、m が「はい」「いいえ」の 2 通りしかないとき、hiding は成り立つか。</summary><pre>成り立たない。verifier は Hash(はい) と Hash(いいえ) を自分で計算して c と見比べれば中身が分かる
+→ 十分長い乱数 r を混ぜて c = Hash(r, m) にする。候補が r の分だけ増えて総当たりできなくなる（隠す手 ①）</pre></details>
+      <details class="ex"><summary>問 2. Schnorr の R = r·G が binding（後から別の r に差し替えられない）なのはなぜか。</summary><pre>r → r·G は決まった計算なので、r を決めれば R は 1 つ。同じ R になる別の r′ を見つけるのは「R から r を求める」= 離散対数と同じ難しさ</pre></details>
+      <details class="ex"><summary>問 3. R を先に渡さず、e を受け取ってから R を作ってよいとしたら何が起きるか。</summary><pre>s を先に適当に選び、R := s·G − e·P と置けば、x を知らなくても s·G = R + e·P が成り立つ（simulator の順番）
+→ 誰でも通る = 健全性が消える。「先に封をする」順番が健全性の全部</pre></details>
     </div>
   </div>
 </section>
@@ -784,6 +856,20 @@ GKR    : 歩 2〜4 を SumCheck に置き換える（封筒なしでも対話な
 Schnorr: 制約が 1 本なので歩 1〜3 が不要。歩 4 の「封筒 → 乱数 → 開示」だけ = 宿題</pre>
       </article>
     </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">制約 → 多項式（小さい数で）</h3>
+      <details class="ex"><summary>問 1. 計算 y = w² + 3 を、掛け算 1 個ずつの制約（= 0 の式）に分解せよ。w = 2 のとき各値は？</summary><pre>t ← w · w        → t − w·w = 0
+y ← t + 3        → t + 3 − y = 0
+w = 2 なら t = 4, y = 7。2 本とも代入して 0 になる</pre></details>
+      <details class="ex"><summary>問 2. F₅ で 2 点 (1, 1), (2, 4) を通る 1 次式を求めよ。</summary><pre>傾き (4 − 1)/(2 − 1) = 3、切片 1 − 3·1 = −2 ≡ 3 → f(X) = 3X + 3
+検算 f(2) = 6 + 3 = 9 ≡ 4 ✓     （2 点で 1 次式が決まる = 中 2 の一次関数）</pre></details>
+      <details class="ex"><summary>問 3. P(X) = X² − 3X + 2 は X = 1, 2 で 0 か。0 なら何で割り切れるか。商は？</summary><pre>P(1) = 1 − 3 + 2 = 0、P(2) = 4 − 6 + 2 = 0
+因数定理: (X − 1)(X − 2) = X² − 3X + 2 で割り切れる。商は 1（P = Z_H · 1）
+→ 「2 点で 0」が「Z_H で割り切れる」に化けた</pre></details>
+      <details class="ex"><summary>問 4. 次数 2 の違う 2 つの多項式は、最大で何点で同じ値を取れるか。それが「1 点で確かめる」の根拠になるのはなぜか。</summary><pre>差も次数 ≤ 2 の多項式（0 でない）で、根は最大 2 個 → 一致するのは最大 2 点
+F₁₇ で verifier がランダムに 1 点選ぶと、嘘の多項式が本物と同じ値を返す確率は 2/17 以下。体を大きくすればほぼ 0</pre></details>
+    </div>
   </div>
 </section>
 
@@ -855,6 +941,22 @@ hash にメッセージ m も入れれば π は m への署名。x が秘密鍵
         <p class="sl-hw">計算 → 制約: R1CS。制約 → 多項式: 補間（上の 6 歩）。多項式 → commitment: KZG。対話 → 短い proof: Fiat–Shamir。<b>宿題は最後の 1 本の矢印の最小形。</b></p>
       </article>
     </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">Schnorr を回す（講義と同じ F₂₃*、g = 2、q = 11、x = 7、y = 13）</h3>
+      <details class="ex"><summary>問 1. r = 4、チャレンジ b = 3 のとき、応答 c は？ 検証式 g^c = a·y^b が成り立つことを確かめよ。</summary><pre>c = r + b·x = 4 + 21 = 25 ≡ 3 (mod 11)     ← 指数は mod q = 11
+左辺 g^c = 2³ = 8
+右辺 a = g^r = 2⁴ = 16、y^b = 13³ = 13·169 ≡ 13·8 = 104 ≡ 12、a·y^b = 16·12 = 192 ≡ 8   ← 群は mod p = 23
+一致 → 受理</pre></details>
+      <details class="ex"><summary>問 2. 同じ r = 4 のまま、別のチャレンジ b′ = 6 に答えると c′ は？ 2 つの応答から x を復元せよ。</summary><pre>c′ = 4 + 42 = 46 ≡ 2 (mod 11)
+x = (c − c′)/(b − b′) = (3 − 2)/(3 − 6) = 1/(−3) = 1/8 (mod 11)。8⁻¹ = 7（56 = 55 + 1）→ x = 7 ✓
+→ 同じ r で 2 回答えた瞬間、秘密が出る（宿題の nonce 再利用テスト）</pre></details>
+      <details class="ex"><summary>問 3. simulator: b = 5、c = 9 を先に選んで a を作れ。検証式が成り立つことを確かめよ。</summary><pre>a := g^c · y^{−b} = 2⁹ · 13⁻⁵。2⁹ = 512 ≡ 6、13⁵ ≡ 4、4⁻¹ ≡ 6（24 ≡ 1）→ a = 6·6 = 36 ≡ 13
+検証: g^c = 6、a·y^b = 13·4 = 52 ≡ 6 → 成り立つ。x = 7 を一度も使っていない
+→ 受理された会話 1 本は「知っている」証拠にならない</pre></details>
+      <details class="ex"><summary>問 4. 宿題のトイ曲線（x = 123、r = 456）で e = 90 のとき s は？</summary><pre>s = 456 + 90·123 = 11526 = 11·967 + 889 → 889 (mod 967)
+（採点器 test_nonce_reuse_leaks_secret の s₂。s₁ = 257 と合わせて x = 123 が復元される）</pre></details>
+    </div>
   </div>
 </section>
 
@@ -870,6 +972,54 @@ hash にメッセージ m も入れれば π は m への署名。x が秘密鍵
       </p>
     </div>
     <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">思考過程</span><span class="st">設計は「見せすぎ」と「見せなさすぎ」の綱引き — 自分に問う 8 つ</span></div>
+        <p class="sl-claim">完成した手順ではなく、手順に至るまでに何を問うか。数独で実際にやったはずのことを、問いの列にほどく。</p>
+        <pre>問 0  何を、誰に、何は見せてよくて、何は見せたくない？    → 盤面（公開）／解（秘密）／検査 R = 行・列・箱。この 3 行を書く
+問 1  素朴案 A: 解を全部見せる。何が困る？                → 完全性 ○ 健全性 ○ だが秘密が丸見え（ZK ✗）
+問 2  素朴案 B: 何も見せず「解けた」と言う。何が困る？    → ZK ○ だが嘘つきも同じ台詞が言える（健全性 ✗）
+      → ZK 証明の設計 = A と B の間で「見せる量を最小に、嘘なら見つかる」点を探すこと</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">思考過程</span><span class="st">問 3〜4: どの一部を、誰が選んで見せるか</span></div>
+        <pre>問 3  一部だけ見せるなら、どの一部で嘘が見つかる？
+      → R は 1 個の大きな条件ではなく、小さな検査の集まり（行 4 + 列 4 + 箱 4 = 12 個）。
+        1 個の検査「その 4 マスに 1〜4 が 1 回ずつ」は、その 4 マスさえ見れば verifier が自分でできる
+      → 検査 1 個ぶんだけ開ければよい。「R を、少ない情報で確かめられる小さな検査に分解できるか」が最初の分かれ道
+問 4  開ける場所を prover が選んだら？  → 嘘つきは正しい所だけ見せる → 場所は verifier が乱数で選ぶ（challenge）
+      鉄則: 「どこを見るか」を prover に決めさせない</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">思考過程</span><span class="st">問 5: この検査に本当に必要な情報は何か — 一番のキモ</span></div>
+        <pre>問 5  verifier が選んで開けると、その 4 マスの秘密が漏れる。減らせないか？
+      → 自問: この検査に本当に必要な情報は何か？  「4 つが全部違う」だけ。数字そのものは要らない
+      → 1〜4 を毎回ランダムに別の記号に置き換えてから見せる。「全部違う」は確かめられるのに元の数字は分からない
+      = 隠す手 ①「乱数で覆う」
+
+      Schnorr でも同じ問い: 検査 s·G = R + e·P に必要なのは s だけで、x の値は要らない
+      → x を r で覆って s = r + e·x だけ渡す。s = r + e·x の「形」はこの問いから出る</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">思考過程</span><span class="st">問 6〜7: 後出しを封じ、偶然を潰す</span></div>
+        <pre>問 6  置き換えたカードを、聞かれてから作ったら？  → 聞かれた場所だけ辻褄を合わせられる
+      → 開ける前に全部を伏せて置く（commit）。伏せたら変えられない（binding）。順番は「伏せる → verifier が選ぶ → その分だけめくる」
+      = 隠す手 ②「聞かれた分だけ開ける」が成立する条件
+      ①と②は両方要る。①だけ（全部めくる）→ 置き換え表ごと割れる。②だけ（生の数字を一部めくる）→ 秘密がそのまま出る
+問 7  1 回で嘘つきが通る確率は？  → 12 か所中 1 か所しか見ない。1 か所だけ間違った嘘は 11/12 で通る
+      → 置き換えを毎回変えて繰り返す。20 回で (11/12)²⁰ ≈ 17%、50 回で ≈ 1.3%
+      Schnorr は e の候補が 967 通り（実物 2²⁵⁶）なので 1 回で十分。「1 回でどれだけ潰せるか」= challenge の候補数</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">思考過程</span><span class="st">問 8: 3 つの性質を 3 つの問いで検算する</span></div>
+        <pre>完全性   本当の解を持つ人は、どの場所を聞かれても通るか        → 4 つは必ず違う ○
+健全性   同じ伏せカードのまま 12 か所全部に答えられる人から、解を取り出せるか
+         → 全部通る = 置き換えを戻せば本物の解。「通り続ける人は解を持つ」（抽出器）
+ゼロ知識 見せる場所が先に分かっていれば、解なしで同じ見た目が作れるか
+         → その 4 マスに違う 4 色を置いたカードを用意すればよい（simulator）。作れる = 漏れていない
+→ 健全性もゼロ知識も「順番」の話。本物は「伏せる → 選ぶ」、simulator は「選ぶ → 作る」。この順番を verifier の乱数（対話）かハッシュ（Fiat–Shamir）が強制する</pre>
+        <p class="sl-hw"><b>手元に置く 1 行</b>: R を小さな検査に分ける → 1 検査に必要な最小情報を見つける → それ以外を乱数で潰す → 先に伏せる → verifier に選ばせる → 繰り返す。</p>
+        <p class="sl-hw"><b>「20 歳以上」で止まる場所は問 3</b>: 大小比較は「一部を開けて確かめられる小さな検査」に分解できない（何を開けても生年月日そのもの）。ここで初めて左半分（計算 → 制約 → 多項式）が要る。</p>
+      </article>
       <article class="sl">
         <div class="sl-head"><span class="sn">手順 1</span><span class="st">主張を ∃w : R(x, w) = 1 の形に書く</span></div>
         <pre>数独:    x = 問題の盤面,  w = 解,  R = 「行・列・箱に 1〜4 が 1 回ずつ」を全部満たすか
@@ -916,6 +1066,18 @@ Schnorr: 「e = 77 で答えて」→ s = r + e·x だけ返す（r と x は個
       → だから 計算（比較）→ 制約 → 多項式 の左半分が要る。Week 1〜4 はその道具作り</pre>
         <p class="sl-hw"><b>この「開けるだけでは示せない主張」に出会ったとき、左半分（算術化）が必要になる。</b>数独と Schnorr は「開けるだけで示せる」特別に易しい主張。</p>
       </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">自分で組み立てる</h3>
+      <details class="ex"><summary>問 1. 4×4 数独のカード方式で、1 回の対話で「1 か所だけ間違った解」が通ってしまう確率は？ 30 回繰り返すと？</summary><pre>検査は行 4 + 列 4 + 箱 4 = 12 か所。間違いのある 1 か所を引かない確率 11/12
+30 回連続で見逃す確率 (11/12)³⁰ ≈ 7.4%、50 回で ≈ 1.3%</pre></details>
+      <details class="ex"><summary>問 2. Schnorr で verifier のチャレンジ e の候補が 2 通りしかなかったら、嘘つきが 1 回で通る確率は？ 1/1024 まで下げるには何回か。</summary><pre>先に e を当てて simulator の順で作れば通るので 1/2。10 回で (1/2)¹⁰ = 1/1024
+宿題の e は 967 通り、実物は 2²⁵⁶ 通りなので 1 回で十分（ソムリエの例と同じ計算）</pre></details>
+      <details class="ex"><summary>問 3. 「隣り合う 2 頂点の色が違う」（3 彩色）の検査に本当に必要な情報は何か。それをどう覆うか。</summary><pre>「2 つの色が違う」ことだけ。色の名前は要らない
+→ 毎回 3 色の名前をランダムに入れ替えてから封筒に入れ、聞かれた辺の両端だけ開ける（問 5 と同じ問い）</pre></details>
+      <details class="ex"><summary>問 4. 「20 歳以上」を数独と同じ「開けるだけ」の方式で示せないのはなぜか。</summary><pre>大小比較は、生年月日のどの一部を開けても確かめられない（開けたら生年月日そのもの）
+→ 「小さな検査に分解」ができない。だから比較を = 0 の式に翻訳する左半分（算術化 → 多項式）が要る</pre></details>
     </div>
   </div>
 </section>
@@ -1205,6 +1367,78 @@ R が一致している: True   <span class="c">← 公開情報だけで再利�
         <b>1 本でも欠ければ、静かに壊れます。</b>
       </p>
     </div>
+  </div>
+</section>
+
+<!-- ============================================ GLOSSARY -->
+<section class="band" id="glossary">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語集</p>
+      <h2>用語の意味・なぜその言葉か・宿題での実物</h2>
+      <p>読み返して引っかかった語をここで引く。由来が分かると、その言葉が何を約束しているかが分かります。</p>
+    </div>
+
+    <h3 class="note-title">登場人物と、渡すもの</h3>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>宿題では</th></tr></thead><tbody>
+      <tr><td>prover / verifier</td><td>示す側／確かめる側</td><td>ただの役名（証明者・検証者）</td><td>schnorr_sign を呼ぶ側／schnorr_verify を呼ぶ側</td></tr>
+      <tr><td>statement</td><td>公開される主張。「〜が存在する」の文</td><td>state = 述べる。数学の「命題」</td><td>「P = x·G となる x がある」</td></tr>
+      <tr><td>witness</td><td>それを見せれば主張が真だと誰でも確認できる値</td><td>法廷の「証人」。証人が居れば裁判が決まるように、w があれば R(x,w)=1 が確かめられる</td><td>秘密鍵 x</td></tr>
+      <tr><td>proof</td><td>verifier に渡すデータ列 π</td><td>「証明」だが文章ではなくバイト列</td><td>(R, s)</td></tr>
+      <tr><td>transcript</td><td>会話の記録</td><td>transcribe = 書き起こす</td><td>(R, e, s)</td></tr>
+    </tbody></table></div>
+
+    <h3 class="note-title">3 手の部品</h3>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>宿題では</th></tr></thead><tbody>
+      <tr><td>commitment</td><td>値を先に固定して渡し、後で開ける約束の仕組み。封をした封筒</td><td>commit = 約束する・確定させる（git commit と同じ語）。「一度確定したら取り消せない」が語感</td><td>R = r·G が封筒</td></tr>
+      <tr><td>commit / open</td><td>封をする／開ける</td><td>—</td><td>sigma_commit／s を返す</td></tr>
+      <tr><td>binding</td><td>開けられるのは最初に入れた値だけ</td><td>bind = 縛る。封筒を差し替えられない</td><td>r·G は r を決めれば 1 つ</td></tr>
+      <tr><td>hiding</td><td>開けるまで中身が見えない</td><td>hide = 隠す</td><td>R から r が出ない（離散対数）</td></tr>
+      <tr><td>challenge / response</td><td>verifier が投げるランダムな問い／prover の答え</td><td>挑戦状と応答</td><td>e と s</td></tr>
+      <tr><td>nonce</td><td>一度しか使わない乱数</td><td>"number used once" の縮約。名前が「使い回すな」と言っている</td><td>r。使い回すと x が漏れる</td></tr>
+      <tr><td>sigma protocol</td><td>出す → 選ぶ → 答える の 3 手の総称</td><td>矢印 →←→ が Σ の字に見える</td><td>Part 3 の 3 関数</td></tr>
+      <tr><td>Schnorr</td><td>離散対数でこの 3 手を作った方式</td><td>人名（Claus-Peter Schnorr、1989）</td><td>課題名</td></tr>
+      <tr><td>Fiat–Shamir 変換</td><td>verifier の乱数をハッシュで置き換えて対話を消す</td><td>人名 2 人（1986）</td><td>challenge_hash</td></tr>
+    </tbody></table></div>
+
+    <h3 class="note-title">3 つの性質と、それを測る 2 つの装置</h3>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>宿題では</th></tr></thead><tbody>
+      <tr><td>completeness（完全性）</td><td>正しい主張はすべて通る</td><td>complete = 欠けがない。通すべきものを取りこぼさない</td><td>test_honest_transcript_accepts</td></tr>
+      <tr><td>soundness（健全性）</td><td>通ったなら真。嘘を通さない</td><td>sound = 確かな・堅牢な</td><td>test_wrong_response_rejects</td></tr>
+      <tr><td>knowledge soundness</td><td>通ったなら「知っている」</td><td>健全性の強い版</td><td>test_nonce_reuse_leaks_secret</td></tr>
+      <tr><td>zero-knowledge</td><td>verifier が得る知識の増分がゼロ。公開情報だけで再現できる</td><td>knowledge（知識）が zero</td><td>ラボ 1 の simulator モード</td></tr>
+      <tr><td>simulator</td><td>本物そっくりを秘密なしで作る装置</td><td>ゼロ知識の定義に使う道具。作れる = 漏れていない</td><td>R := s·G − e·P</td></tr>
+      <tr><td>extractor（抽出器）</td><td>prover から秘密を絞り出す装置</td><td>知識健全性の定義に使う道具。絞り出せる = 知っていた</td><td>x = (s₁−s₂)/(e₁−e₂)</td></tr>
+    </tbody></table></div>
+
+    <h3 class="note-title">数学の道具</h3>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>宿題では</th></tr></thead><tbody>
+      <tr><td>mod／法（modulus）</td><td>p で割った余りだけ見る</td><td>modulus = 尺度・基準</td><td>% p、% n</td></tr>
+      <tr><td>体（field）／有限体 F_p</td><td>四則が全部できる数の集合／元が有限個のもの</td><td>ドイツ語 Körper（体）の直訳。p が素数のときだけ体</td><td>p = 1009</td></tr>
+      <tr><td>群（group）</td><td>演算 1 つで閉じた集合</td><td>—</td><td>曲線の点の足し算</td></tr>
+      <tr><td>生成元（generator）／位数（order）</td><td>1 個で全員を作れる元／何回で一周するか</td><td>generate = 生む。order = 個数</td><td>G と n = 967</td></tr>
+      <tr><td>楕円曲線（elliptic curve）</td><td>y² = x³ + ax + b の点の集合 + O</td><td>曲線は楕円ではない。楕円の弧の長さの積分（楕円積分）の研究から出た名前が残った</td><td>y² = x³ + 11</td></tr>
+      <tr><td>スカラー（scalar）倍</td><td>点を x 回足す x·G</td><td>scalar = 目盛りの数 = ただの数（点やベクトルに対して）</td><td>ec_scalar_mul</td></tr>
+      <tr><td>離散対数（discrete log）</td><td>x·G から x を求める問題（難しい）</td><td>log = 何乗したか。連続でない（離散）世界の log</td><td>公開鍵から x が出ない理由</td></tr>
+      <tr><td>ハッシュ（hash）</td><td>入力を固定長のぐちゃぐちゃな値にする一方向関数</td><td>hash = 細切れにする（ハッシュドポテト）</td><td>challenge_hash の中身</td></tr>
+      <tr><td>多項式（polynomial）</td><td>係数表現 (5,2,3) と評価表現（点での値）の 2 つの持ち方</td><td>poly = 多い、nomial = 項</td><td>（宿題には出ない）</td></tr>
+      <tr><td>補間（interpolation）</td><td>点から式を復元する</td><td>inter = 間、pole = 点。点と点の間を補う。Lagrange は人名</td><td>弦の傾きの計算が 1 次の補間</td></tr>
+      <tr><td>フーリエ変換</td><td>係数 ↔ 評価値の翻訳機</td><td>人名（1800 年頃、熱の研究）</td><td>（Week 4）</td></tr>
+    </tbody></table></div>
+
+    <h3 class="note-title">変換と方式の名前</h3>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>宿題では</th></tr></thead><tbody>
+      <tr><td>arithmetization（算術化）</td><td>計算を算術の式（制約）に直す工程</td><td>arithmetic = 算術（+ − × ÷）</td><td>（Week 1・4）</td></tr>
+      <tr><td>constraint（制約）</td><td>= 0 になるべき式</td><td>constrain = 縛る</td><td>—</td></tr>
+      <tr><td>R1CS</td><td>各制約が掛け算 1 個の制約系</td><td>Rank-1 Constraint System。行列の階数（rank）が 1</td><td>—</td></tr>
+      <tr><td>AIR</td><td>実行トレースの表と、行のあいだの制約</td><td>Algebraic Intermediate Representation。コンパイラの「中間表現」を借用</td><td>（Week 4 STARK）</td></tr>
+      <tr><td>SNARK</td><td>短く・非対話で・知っていることを論証する方式</td><td>Succinct Non-interactive ARgument of Knowledge。argument は「計算力の限られた prover には破れない」、proof は「無限の計算力でも破れない」の使い分け</td><td>—</td></tr>
+      <tr><td>oracle／IOP</td><td>何でも正しく答える仮想の箱／検証者が証明の好きな場所だけ問い合わせる形</td><td>神託。実物のオラクル ≈ commitment。random oracle = ハッシュを理想の乱数箱と見なす仮定</td><td>Fiat–Shamir の仮定</td></tr>
+      <tr><td>KZG／SRS／trusted setup</td><td>多項式のコミットメント／皆が参照する公開の点の列／τ を捨てる儀式</td><td>Kate・Zaverucha・Goldberg（人名 3 人、2010）。Structured Reference String</td><td>（Week 4 PLONK）</td></tr>
+      <tr><td>Merkle 木</td><td>ハッシュを木にして根 1 個で全体を代表</td><td>Ralph Merkle（人名）</td><td>（Week 4 STARK）</td></tr>
+      <tr><td>FRI</td><td>多項式が低次数かを折り畳みで確かめる</td><td>Fast Reed–Solomon IOP of Proximity</td><td>（Week 4）</td></tr>
+      <tr><td>SumCheck</td><td>和が正しいかを、全部足さずに確かめる</td><td>そのまま「和の検査」</td><td>（Week 4 GKR）</td></tr>
+    </tbody></table></div>
   </div>
 </section>
 
