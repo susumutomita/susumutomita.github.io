@@ -327,6 +327,28 @@
 
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
+
+  /* ---------- スライド追従カード ---------- */
+  .deck { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
+        display: flex; flex-direction: column; gap: 0.55rem; }
+  .sl-head { display: flex; gap: 0.75rem; align-items: baseline; }
+  .sl-head .sn { font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; }
+  .sl-head .st { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .sl-claim { font-weight: 700; font-size: 1rem; line-height: 1.7; color: var(--ink); }
+  .sl p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .sl p.sl-claim { color: var(--ink); font-size: 1rem; }
+  .sl pre { background: var(--panel-2); font-size: var(--fs-xs); }
+  .sl-hw { border-left: 3px solid var(--pass); padding-left: 0.75rem; }
+  .sl-hw b { color: var(--pass); }
+  .sl-q { color: var(--accent); }
+  .appx { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: 0.6rem; }
+  .appx > summary { cursor: pointer; padding: 0.8rem 1rem; font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .appx > summary:hover { color: var(--accent); }
+  .appx .band { padding: 0.5rem 0 1.5rem; }
+  .appx .band + .band { border-top: none; }
+  table.hwmap td, table.hwmap th { white-space: normal; }
+  table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -348,22 +370,17 @@
     <p class="eyebrow">Advanced Cryptography Program 2026 / Week 3 自習ノート</p>
     <h1><span>知っている</span>ことだけを、<span>渡す</span></h1>
     <p class="lead">
-      Week 3 は、有限体の逆元から始めて楕円曲線の群を作り、その上に
-      <strong>シグマプロトコル</strong>と <strong>Fiat–Shamir 変換</strong>を積んで
-      Schnorr 署名まで一気に登ります。課題 <code>schnorr-from-scratch</code> は、
-      その全段を自分で書く構成でした。
+      このノートは<strong>講義スライド「zkSNARK part 1」65 枚と同じ順番</strong>で進みます。
+      1 カード = スライド 1〜2 枚 = 主張 1 つ。宿題 <code>schnorr-from-scratch</code> の 10 個の関数が
+      スライドのどこに当たるかを、毎回「宿題ではここ」で示します。
     </p>
     <p class="lead">
-      このノートで特に確認するのは 2 つです。<strong>秘密鍵を一度も使わずに作った会話が検証に通る</strong>こと。
-      そして <strong>nonce を 1 回使い回しただけで、本物の secp256k1 の秘密鍵が復元できる</strong>こと。
-      この 2 つが、ゼロ知識と知識健全性の正体です。
-    </p>
-    <p class="lead">
-      課題を「理解して出す」ために、まず<a href="#homework"><strong>宿題の読み方</strong></a>の節を読んでください。
-      10 個の関数を、中学・高校の数学のどこから来たかを先に言ってから 1 個ずつ、採点器と同じ数値で追います。
+      講義が飛ばしている 2 歩 — <strong>ゼロ知識証明を自分で組み立てる手順（隠す手は 2 つ）</strong>と、
+      <strong>制約を多項式にして短い証明にする 1 歩（F₁₇ の数値で最後まで）</strong> — を専用のカード群にしました。
+      宿題は地図の右半分（コミット → 短い証明）だけです。
     </p>
     <div class="meta-row">
-      <span class="tag">読了 45 分</span>
+      <span class="tag">カード 45 枚</span>
       <span class="tag">対話ラボ 2 つ</span>
       <span class="tag">検問クイズ</span>
       <span class="tag">前提は土台編</span>
@@ -372,6 +389,835 @@
   </div>
 </header>
 
+<!-- ============================================ 0 : 出発点 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>このノートは、講義スライド 65 枚と同じ順番で進む</h2>
+      <p>
+        1 枚のカードがスライド 1〜2 枚に対応し、<strong>主張は 1 つ、式か例は 1 個</strong>です。
+        宿題 <code>schnorr-from-scratch</code> の関数がスライドのどこに当たるかを、
+        「宿題ではここ」のタグで毎回示します。講義が飛ばしている 2 歩
+        （<a href="#recipe">ゼロ知識証明を自分で組み立てる手順</a>と、
+        <a href="#poly">制約を多項式にして短い証明にする 1 歩</a>）は、専用のカード群として間に挟みました。
+      </p>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み方</p>
+        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。答えは次のカードか、宿題タグの中にあります。</p>
+        <p class="strong-line">スライドを横に開いて、同じ番号を見比べながら読むのがいちばん速いです。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">宿題は、この地図の右半分だけ</p>
+        <p>
+          Schnorr は「主張」が <code>P = x·G</code> という 1 本の式なので、<b>計算 → 制約 → 多項式</b> の左半分が要りません。
+          宿題で書くのは <b>コミット（R = r·G）→ 短い証明（s）</b> の右半分。左半分は Week 4 の 3 スキームが本番です。
+        </p>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D1 : 導入 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 3〜11 / 導入</p>
+      <h2>秘密を手元に置いたまま、「知っている」だけを渡す</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">3/65</span><span class="st">zkSNARK で実現したいこと</span></div>
+        <p class="sl-claim">秘密を手元に置いたまま、「条件を満たすものを知っている」という主張だけを相手に納得させたい。</p>
+        <p>示す側が <b>prover（証明者）</b>、確かめる側が <b>verifier（検証者）</b>。パスワードを伏せたまま「知っている」を示す、取引の中身を伏せたまま「ルールどおり」を示す。</p>
+        <p class="sl-q">Q. 「知っている」を渡すのに、中身を渡さずに済む例を 1 つ挙げられるか。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">4/65</span><span class="st">例 1: ウォーリーを探せ</span></div>
+        <p class="sl-claim">大きな紙で絵全体を覆い、ウォーリーだけが見える穴を開けて渡す。</p>
+        <p>verifier が受け取るのは「確かにいる」という事実だけ。<b>どこにいたか</b>は prover の手元に残る。</p>
+        <p class="sl-hw"><b>隠す手 ①</b>: 聞かれた分だけ見せる（穴）。これが後で「開示」になる。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">5/65</span><span class="st">例 2: ワインソムリエ</span></div>
+        <p class="sl-claim">「出す → 隠す → 答える」の 3 手を 1 回とし、何度も繰り返す。1 回なら偶然 1/2、10 回連続なら 1/1024。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: 3 手 = <code>sigma_commit</code>（出す）→ 検証者の e（隠す・選ぶ）→ <code>sigma_response</code>（答える）。「偶然で通る確率」が健全性の話。</p>
+        <p class="sl-q">Q. 3 手のうち、verifier が選ぶのはどれか。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">6〜7/65</span><span class="st">例から用語を取り出す／登場人物と流れ</span></div>
+        <p class="sl-claim">statement（公開の主張）・witness（秘密）・proof（証拠）。枠をまたぐのは proof だけ。</p>
+        <pre>            ウォーリー           ソムリエ              宿題（Schnorr）
+statement   群衆の中にいる       2 つを区別できる       P = x·G となる x がある
+witness     位置                見分け方のコツ         x（秘密鍵）
+proof       穴から見える姿       正答の列              (R, s)</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: 検証者に渡るのは statement と proof だけ。<code>schnorr_verify(P, message, (R, s))</code> の引数がまさにそれで、x は引数に無い。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">8〜9/65</span><span class="st">statement を式で見る／検査プログラム R</span></div>
+        <p class="sl-claim">主張は「∃w : R(y, w) = 1」の形にそろう。R は y と候補 w を受け取り合否を返す関数。</p>
+        <pre>y = 15,  R(y, w) = 1 ⇔ w³ + w + 5 = y      w = 2 なら 8 + 2 + 5 = 15 → 1</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: R(P, x) = 1 ⇔ x·G = P。証明したいのは「この R を 1 にする x を知っている」。</p>
+        <p class="sl-q">Q. 数独なら R は何か。（盤面 y と解 w を受け取り、行・列・箱の規則を全部満たせば 1）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">10/65</span><span class="st">zkSNARK とは — 頭文字が性質の一覧</span></div>
+        <p class="sl-claim">zk（漏れない）・S（短い・速い）・N（1 通で完結）・ARK（有効な proof を作れるなら witness を知っている + 正しければ通る）。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: 宿題の Schnorr は <b>zk と ARK</b> を持ち、Fiat–Shamir で <b>N</b> になる。<b>S</b>（多項式・commitment で短くする）は宿題に無い。だから左半分が要らない。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">11/65</span><span class="st">今日使う道具の全体像</span></div>
+        <div class="pipe">
+          <div class="pipe-box"><span class="t">計算</span><span class="s">program</span></div><span class="pipe-arrow">→</span>
+          <div class="pipe-box"><span class="t">制約</span><span class="s">arithmetization</span></div><span class="pipe-arrow">→</span>
+          <div class="pipe-box"><span class="t">多項式</span><span class="s">polynomials</span></div><span class="pipe-arrow">→</span>
+          <div class="pipe-box"><span class="t">commitment</span><span class="s">楕円曲線・ハッシュ</span></div><span class="pipe-arrow">→</span>
+          <div class="pipe-box on"><span class="t">短い証明</span><span class="s">proof</span></div>
+        </div>
+        <p class="sl-claim">矢印は 1 本ずつ、「前の箱のままでは困ることが 1 つある」から引かれている。</p>
+        <pre>計算 → 制約      プログラムのままでは数学で真偽を確かめられない → 「= 0 の式の束」にする
+制約 → 多項式    式が 1 万本あると全部読む手間 → 1 本の多項式なら「ランダムな 1 点」で確かめられる
+多項式 → 封筒    1 点だけ聞くには、証明者が後出しで書き換えられないこと → 先に封筒（commitment）
+封筒 → 短い証明  封筒 1 個 + 開示数か所 + 答え合わせ。質問をハッシュに選ばせれば会話も不要</pre>
+        <p class="sl-q">Q. 逆順にできない理由を 1 本ずつ言えるか（式にする前に多項式にはできない、封筒の前に 1 点で聞くと後出しされる）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D2 : 数の準備 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 12〜14 / 数の準備</p>
+      <h2>余りの世界で計算する — 法は素数にとる</h2>
+      <div class="pipe-tools"><div class="pipe-tool on">有限体</div><div class="pipe-tool">フーリエ変換</div><div class="pipe-tool">楕円曲線・ハッシュ</div></div>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">13/65</span><span class="st">有限体: 余りの世界で計算する</span></div>
+        <p class="sl-claim">整数を 7 で割った余りだけを見る。7 以上になったら余りへ戻す。計算は 7 個の点を巡る輪の上の移動。</p>
+        <pre>5 + 6 = 11 ≡ 4,   3 · 5 = 15 ≡ 1  (mod 7)         中 1 の「割り算の余り」、時計の 13 時 = 1 時</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>field_add(a,b,p) = (a+b) % p</code>、<code>field_mul = (a·b) % p</code>。p = 1009。負の入力でも Python の % は 0..p−1 を返す。</p>
+        <p class="sl-q">Q. field_add(−3, 1, 7) は？（−2 の余りは 5）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">13/65 下</span><span class="st">法は素数にとる</span></div>
+        <p class="sl-claim">法が素数 p のときに限り、0 以外のすべての値に「掛けて 1 になる相手（逆元）」がそろい、割り算まで自由にできる。この世界 F_p を有限体と呼ぶ。</p>
+        <p>合成数だと 2 · 3 = 6 ≡ 0 (mod 6) のように、0 でないのに掛けて 0 になる組が出て、割り算が壊れる。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: 1009 も secp256k1 の p も素数。<code>field_inv</code> が「0 以外なら必ず答えがある」前提はここから。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">14/65</span><span class="st">有限体: 逆元と割り算</span></div>
+        <p class="sl-claim">a の逆元 a⁻¹ は「掛けると 1 になる値」。割り算は逆元を掛ける操作（小 6 の「割り算 = 逆数を掛ける」）。</p>
+        <pre>F₇:  a    1 2 3 4 5 6           例: 3x = 5 を解く → 3⁻¹ = 5、x = 5·5 = 25 ≡ 4。検算 3·4 = 12 ≡ 5 ✓
+     a⁻¹  1 4 5 2 3 6</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>field_inv(a, p)</code>。求め方は拡張ユークリッド（Appendix A4、下のカード）。<code>field_inv(3, 11) = 4</code>（3·4 = 12 ≡ 1）。</p>
+        <p class="sl-q">Q. 0 の逆元が無い理由は？（0 × 何 = 0、1 にならない → 宿題は ValueError）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">A4/A41</span><span class="st">拡張 Euclid 互除法で逆元を求める</span></div>
+        <p class="sl-claim">中 1 の互除法（最大公約数を求める手順）を逆にたどると、a·x + p·y = 1 の x が見つかる。mod p では p·y が消えて a·x ≡ 1。この x が逆元。</p>
+        <pre>F₁₃ で 5⁻¹:  13 = 2·5 + 3,  5 = 1·3 + 2,  3 = 1·2 + 1        ← 1 まで下りる
+逆にたどる:  1 = 3 − 2 = 3 − (5 − 3) = 2·3 − 5 = 2·(13 − 2·5) − 5 = 2·13 − 5·5
+→ 5 · (−5) ≡ 1 (mod 13)。 −5 を 0..12 に直して 8。検算 5·8 = 40 ≡ 1 ✓</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>extended_gcd(a, p)</code> は与えられていて (g, x, y) を返す。<code>extended_gcd(5, 13) = (1, −5, 2)</code>。<b>x が負のことがあるので <code>x % p</code> を忘れない</b>（忘れると採点器「0..p−1 に正規化して返してください」）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D3 : 多項式の準備 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 15〜20 / 多項式の準備</p>
+      <h2>たくさんの等式を、1 本の多項式にまとめる言語</h2>
+      <div class="pipe-tools"><div class="pipe-tool">有限体</div><div class="pipe-tool on">フーリエ変換</div><div class="pipe-tool">楕円曲線・ハッシュ</div></div>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">16/65</span><span class="st">有限体から多項式へ</span></div>
+        <p class="sl-claim">等式を 1 本ずつ確認すると、本数だけ手間が増える。列を 1 本の多項式で表せば、ランダムに選んだ 1 点の値を比べるだけで全体をまとめて確かめられる。</p>
+        <p>これが「制約 → 多項式」の矢印の理由。<b>講義はここで理由だけ言って、実際の変換は見せない</b>。変換の 1 歩は下の <a href="#poly">「制約 → 多項式 → 短い証明」</a>で数値ごと追う。</p>
+        <p class="sl-hw"><b>宿題には出ない</b>（Schnorr は式が 1 本）。Week 4 で本番。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">17/65</span><span class="st">係数表現と評価表現</span></div>
+        <p class="sl-claim">f(X) = 3X² + 2X + 5 は「係数 (5, 2, 3)」でも「点での値 (f(x₀), f(x₁), f(x₂))」でも表せる。次数 d は d + 1 点で一意に決まる。</p>
+        <p class="sl-q">Q. 2 点で決まるのは何次式か。（1 次 — 中 2 の一次関数）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">18/65</span><span class="st">補間で点から式を復元する</span></div>
+        <p class="sl-claim">f(1) = 3, f(2) = 5 なら、傾き (5−3)/(2−1) = 2、切片 1、f(X) = 2X + 1。点が増えても同じ（Lagrange 補間、Appendix）。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: この「2 点の傾き」の計算が、そのまま <code>ec_add</code> の λ = (y₂−y₁)/(x₂−x₁)。分母の割り算が <code>field_inv</code>。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19〜20/65</span><span class="st">フーリエ変換: 二つの表し方を行き来する</span></div>
+        <p class="sl-claim">評価点を「1 の n 乗根 ω の冪」H = {1, ω, …, ωⁿ⁻¹} にそろえると、係数 ↔ 評価値の行き来が O(n log n)（FFT）でできる。</p>
+        <p class="sl-hw"><b>宿題には出ない</b>。Week 4 の STARK で「行番号 t を ω^t に置く」（F₁₇、ω = 4）として再登場。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D4 : 楕円曲線/離散対数 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 21〜30 / 楕円曲線・離散対数</p>
+      <h2>点の足し算で群を作り、逆向きだけ難しくする</h2>
+      <div class="pipe-tools"><div class="pipe-tool">有限体</div><div class="pipe-tool">フーリエ変換</div><div class="pipe-tool on">楕円曲線・ハッシュ</div></div>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">22/65</span><span class="st">群: 巡回群と位数</span></div>
+        <p class="sl-claim">閉じている・単位元・逆元・結合法則、の 4 つで群。1 つの元 g を掛け続けて全体を巡れるなら巡回群、巡って戻るまでの回数が位数。</p>
+        <pre>F₇* は g = 3 で巡る: 3¹=3, 3²=2, 3³=6, 3⁴=4, 3⁵=5, 3⁶=1     3 の位数は 6</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: G の位数 n = 967。<b>G を n 回足すと単位元 O に戻る</b>（採点器 <code>test_order_times_generator_is_identity</code>）。だからスカラーは mod n。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">23〜24/65</span><span class="st">楕円曲線: 点の足し算で群を作る／式で見る</span></div>
+        <p class="sl-claim">曲線 y² = x³ + ax + b の点どうしに「足し算」を定義すると群になる。x·P は P を x 回足す。x·P から x を逆算するのが難しい。無限遠点 O が足し算の 0 の役。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: トイ曲線 y² = x³ + 11 over F₁₀₀₉、G = (1, 298)、O は <code>None</code>。<code>ec_add</code> が足し算、<code>ec_scalar_mul</code> が x·P。</p>
+        <p class="sl-q">Q. 「点を足す」は座標を足すことか。（違う。次の 2 枚）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">25/65</span><span class="st">加法公式 (1/2): 3 つ目の交点</span></div>
+        <p class="sl-claim">P, Q を通る直線が曲線と 3 つ目に交わる点 R′ を、x 軸で反転した R を P + Q と定める。直線の傾きは λ = (y₂ − y₁)/(x₂ − x₁)。図は実数の直感、暗号では同じ式を mod p で計算する。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>ec_add</code> の「弦」の場合。λ の分母は <code>field_inv(x_Q − x_P)</code>。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">26/65</span><span class="st">加法公式 (2/2): 反転して和を作る／点倍算</span></div>
+        <p class="sl-claim">x₃ = λ² − x₁ − x₂（3 次方程式の根と係数の関係: 3 解の和 = λ²）、y₃ = λ(x₁ − x₃) − y₁（直線上の点を反転）。P = Q なら接線 λ = (3x₁² + a)/(2y₁)。y₁ = 0 なら垂直で 2P = O。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>ec_add</code> の 4 場合分け — (1) どちらかが None → 相手を返す、(2) x が同じで y が符号違い → None、(3) P == Q → 接線 λ、(4) それ以外 → 弦 λ。<b>(2) を (3)(4) より先に</b>（分母 0 を避ける）。<b>y₃ の符号を反転し忘れると点が曲線から落ちる</b>。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">27/65</span><span class="st">例: F₁₁ 上で 2P を計算する</span></div>
+        <pre>講義:  y² = x³ + x + 6 (F₁₁, a = 1),  P = (2, 7)
+       λ = (3·4 + 1)/(14) = 13·14⁻¹ ≡ 2·3⁻¹ ≡ 2·4 = 8      x₃ = 64 − 4 = 60 ≡ 5,  y₃ = 8·(2−5) − 7 = −31 ≡ 2  → 2P = (5, 2)
+
+宿題:  y² = x³ + 11 (F₁₀₀₉, a = 0),  G = (1, 298)
+       λ = 3·1²/(2·298) = 3/596 = 3·601 ≡ 794             x₃ = 794² − 2 ≡ 818,  y₃ = 794·(1−818) − 298 ≡ 800  → 2G = (818, 800)</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: 採点器の <code>test_doubling</code> は 2G = (818, 800)、続けて G + 2G = 3G = (851, 516)。</p>
+        <p class="sl-q">Q. 講義の λ で「14⁻¹ ≡ 3⁻¹」と約分しているのはなぜか。（14 ≡ 3 mod 11）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">28/65</span><span class="st">スカラー倍は倍々で速くなる</span></div>
+        <p class="sl-claim">13 = (1101)₂ = 8 + 4 + 1。P → 2P → 4P → 8P と倍にして、13P = 8P + 4P + P。5 回で届く（定義どおりなら 12 回）。回数は log₂ x に比例。</p>
+        <pre>宿題: 123 = (1111011)₂ → 123·G は 2 倍 6 回 + 足し算 6 回 = 12 回（素直にやると 122 回）
+      結果 (376, 128) が公開鍵 P。   secp256k1 の 2²⁵⁶ 回は素直にやると終わらない</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>ec_scalar_mul</code>。<code>k, bit = divmod(k, 2)</code> で下の桁から読み、bit が 1 なら足し、毎回 addend を 2 倍。k = 0 なら None。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">29〜30/65</span><span class="st">離散対数問題／仲間の問題</span></div>
+        <p class="sl-claim">x → x·P は速い（倍々法）。P と x·P から x を求めるのは難しい。ハッシュと同じ見方（m → H(m) は速く、逆は難しい）。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: 公開鍵 P = x·G を公開しても x が漏れない理由。R = r·G を公開しても r が漏れない理由。<b>Week 3 の安全性はここに全部乗っている</b>。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D5 : ペアリング -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 31〜34 / ペアリング</p>
+      <h2>隠したスカラーどうしの「掛け算」だけを検査する演算</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">32〜33/65</span><span class="st">ペアリング: なぜ要るのか／定義</span></div>
+        <p class="sl-claim">aP と bP から足し算で作れるのは (a+b)P まで。積 abP はその先。ペアリング e は e(aP, bQ) = e(P, Q)^{ab} と、スカラーを指数へ移せる（双線形性）。分かるのは積が一致するかどうかだけで、離散対数の難しさは残る。</p>
+        <p class="sl-hw"><b>宿題には出ない</b>。KZG の検証式（次の節）で「指数の等式をペアリングで確かめる」ために使う。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">34/65</span><span class="st">積の関係を等式で確かめる</span></div>
+        <pre>aP, bQ, cP を受け取った verifier:   e(aP, bQ) = e(cP, Q)  ⇔  ab ≡ c (mod q)      手に取るのは点だけ。a, b, c は隠れたまま</pre>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D6 : Commitment -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 35〜42 / Commitment</p>
+      <h2>大きな対象を短い値で代表させ、必要な点だけ開ける</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">36〜37/65</span><span class="st">Commitment: 役割／scheme</span></div>
+        <p class="sl-claim">値 m を短い c に固定して先に渡し、後で中身を見せて開ける。封をした封筒。開けられるのは最初に入れた m だけ（binding）、開けるまで verifier が持つのは c だけ（hiding）。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>sigma_commit</code> の R = r·G が封筒。<b>hiding</b> は「R から r が出ない」（離散対数）、<b>binding</b> は「同じ R に別の r を後から当てられない」（r·G は一意）。</p>
+        <p class="sl-q">Q. 封筒を先に渡す理由は？（後出しの防止 — 次の節の simulator が答え）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">38/65</span><span class="st">Hash commitment</span></div>
+        <p class="sl-claim">c = Hash(m)。m の候補が少ないと総当たりで割れるので、十分長い乱数 r を混ぜて c = Hash(r, m)。</p>
+        <p class="sl-hw"><b>隠す手 ②</b>: 乱数で覆う。宿題の s = r + e·x で x を r が覆っているのと同じ役。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">39〜40/65</span><span class="st">KZG: setup／commitment</span></div>
+        <p class="sl-claim">秘密 τ を 1 つ選び SRS = (P, τP, τ²P, …, τᵈP; Q, τQ) を公開して τ は捨てる（MPC で作れる）。多項式 f のコミットは C = a₀P + a₁(τP) + … = f(τ)P。τ を知らずに作れ、次数によらず点 1 個。</p>
+        <p class="sl-hw"><b>宿題には出ない</b>。「多項式を封筒に入れる」の実装。Week 4 の PLONK で本番。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">41〜42/65</span><span class="st">KZG: opening／例 f(X) = X² + 1 で f(2) = 5 を開く</span></div>
+        <pre>f(z) = y なら f(X) − y は X = z で 0 → (X − z) で割り切れる → q(X) = (f(X) − y)/(X − z)
+proof π = q(τ)P。 verifier: e(C − yP, Q) = e(π, τQ − zQ)     ← 「f(τ) − y = q(τ)(τ − z)」を指数で確かめている
+
+例: f = X² + 1, z = 2, y = 5:  q = (X² − 4)/(X − 2) = X + 2, π = τP + 2P。 割り切れるのは f(2) = 5 が本当のときだけ</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 「割り切れる ⇔ 値が本当」。因数定理（数 II）。下の <a href="#poly">制約 → 多項式</a> でも、Week 4 の STARK/PLONK でも同じ道具。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D7 : Arithmetization -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 43〜52 / Arithmetization</p>
+      <h2>「計算が正しく実行された」を、有限体上の制約に書き表す</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">44〜45/65</span><span class="st">目的／制約は「0 になる式」</span></div>
+        <p class="sl-claim">a + b = c は「c は結果」と読むが、a + b − c = 0 は「与えられた a, b, c が整合しているか」と読む。左辺が 0 になる形にそろえる。掛け算 ab − c = 0、AND なら加えて b(b − 1) = 0。</p>
+        <p class="sl-hw"><b>Week 1 の回路そのもの</b>。方程式を移項して右辺を 0 にしただけ（中 1）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">46/65</span><span class="st">witness と中間値を制約へ分解する</span></div>
+        <pre>w³ + w + 5 = y (y = 15)      t₁ ← w·w        →  t₁ − w²   = 0
+                             t₂ ← t₁·w       →  t₂ − t₁w  = 0
+                             y  ← t₂ + w + 5  →  t₂ + w + 5 − y = 0
+w = 2 なら t₁ = 4, t₂ = 8, y = 15。 3 本とも 0 なら、提出された w, t₁, t₂ は y と整合</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 1 ステップ = 1 本の制約。中間値 t₁, t₂ も witness に入る。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">47〜49/65</span><span class="st">R1CS: 線形結合／掛け算 1 個の制約／行列で書く</span></div>
+        <p class="sl-claim">1 本の制約に掛け算を 1 個だけ許す: (線形結合) × (線形結合) = (線形結合)。z = (1, y, w, t₁, t₂) に係数の行を並べて (Az) ∘ (Bz) = Cz。</p>
+        <pre>行 1: (w) × (w)  = (t₁)          A の行 (0,0,1,0,0), B の行 (0,0,1,0,0), C の行 (0,0,0,1,0)
+行 2: (t₁) × (w) = (t₂)
+行 3: (t₂ + w + 5 − y) × (1) = 0    掛け算の無い制約は右因子を 1 にする</pre>
+        <p class="sl-hw"><b>次のカード群でこの 3 行を多項式にする</b>。ここまでが講義。ここから先が講義に無い 1 歩。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">50〜52/65</span><span class="st">AIR: 表として見る／2 種類の制約／同じ計算を違う形に</span></div>
+        <p class="sl-claim">AIR は計算を「横に変数、縦に時間」の表（実行トレース）として見る。境界制約（どこから始まるか）と遷移制約（隣の行の関係）。行が増えても式は 1 組のまま。R1CS / AIR / Plonkish / CCS は同じ計算の並べ方違い。</p>
+        <p class="sl-hw"><b>Week 4 の STARK（AIR）と PLONK（Plonkish）がこの続き</b>。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D8 : 制約 → 多項式 → 短い証明（講義に無い 1 歩） -->
+<section class="band" id="poly">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">講義が飛ばした 1 歩 — スライド 16 と 47 のあいだ</p>
+      <h2>制約 → 多項式 → 短い証明を、1 つの数値例で最後まで</h2>
+      <p>
+        「プロトコルをどうやって多項式に変換するのか」の答えです。上の R1CS の 3 行を、F₁₇ で最後まで運びます。
+        道具は 3 つだけ: <strong>補間（3 点で 2 次式が決まる）</strong>、<strong>因数定理（全点で 0 ⇔ 割り切れる）</strong>、
+        <strong>ランダムな 1 点（違う多項式はほぼ違う値）</strong>。
+      </p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">歩 1</span><span class="st">制約 3 行の「値」を並べる</span></div>
+        <p class="sl-claim">witness z = (1, 15, 2, 4, 8) を各行の左因子・右因子・右辺に代入すると、行ごとに 3 つの数が出る。</p>
+        <pre>行 i    左因子 aᵢ    右因子 bᵢ    右辺 cᵢ     aᵢ·bᵢ − cᵢ
+ 1        w = 2       w = 2       t₁ = 4      4 − 4 = 0
+ 2       t₁ = 4       w = 2       t₂ = 8      8 − 8 = 0
+ 3   t₂+w+5−y = 0        1           0        0 − 0 = 0        ← 全部 0 = 制約が全部成り立つ</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">歩 2</span><span class="st">列ごとに補間して、3 本の多項式にする</span></div>
+        <p class="sl-claim">「行番号 X = 1, 2, 3 で、その行の値になる 2 次式」を列ごとに作る（3 点 → 2 次式）。</p>
+        <pre>a(X): (1,2),(2,4),(3,0) を通る → a(X) = 11 + 11X + 14X²      検算 a(1) = 36 ≡ 2 ✓
+b(X): (1,2),(2,2),(3,1) を通る → b(X) = 1 + 10X + 8X²
+c(X): (1,4),(2,8),(3,0) を通る → c(X) = 5 + 5X + 11X²         （すべて mod 17）</pre>
+        <p class="sl-hw"><b>何をしたか</b>: 3 行 × 3 列 = 9 個の数を、3 本の多項式に「圧縮」した。行が 1 万あっても、多項式は 3 本のまま（次数が上がるだけ）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">歩 3</span><span class="st">「全行で aᵢbᵢ − cᵢ = 0」は「1 本の多項式が X = 1, 2, 3 で 0」</span></div>
+        <pre>P(X) := a(X)·b(X) − c(X) = 6 + 14X + 14X² + 7X³ + 10X⁴        P(1) = P(2) = P(3) = 0  ← 3 本の制約が 1 本に</pre>
+        <p class="sl-claim">因数定理: X = 1, 2, 3 で 0 なら (X−1)(X−2)(X−3) で割り切れる。この積が Z_H(X) = X³ + 11X² + 11X + 11（mod 17、= X³ − 6X² + 11X − 6）。</p>
+        <pre>P(X) = Z_H(X) · Q(X),   Q(X) = 16 + 10X,   余り 0     ← 「制約が全部成り立つ」⇔「Q が多項式として存在する」</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">歩 4</span><span class="st">封筒に入れて、ランダムな 1 点で開ける（これが「短い証明」）</span></div>
+        <p class="sl-claim">prover は a, b, c, Q を commitment（KZG なら点 4 個）にして渡す。verifier がランダムに z を選び、prover は 4 つの値と開示証明を返す。verifier は 1 本の等式だけ見る。</p>
+        <pre>z = 5:  a(5) = 8, b(5) = 13, c(5) = 16, Q(5) = ?,  Z_H(5) は verifier が自分で計算
+        a(5)·b(5) − c(5) = 104 − 16 = 88 ≡ 3        Z_H(5)·Q(5) ≡ 3     一致 → 受理
+z = 9:  1 = 1 ✓      z = 11:  8 = 8 ✓                （3 行読まずに、1 点で 3 行分を確かめた）</pre>
+        <p class="sl-hw"><b>なぜ 1 点でよいか</b>: 嘘の P′ ≠ Z_H·Q′ は、違う多項式なので<b>次数個の点でしか一致しない</b>。F₁₇ で次数 4 なら 17 点中せいぜい 4 点。実物は 2²⁵⁴ 点中せいぜい数百万点。<b>先に封筒に入れた</b>から z を見てから書き換えられない。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">歩 5</span><span class="st">嘘をつくと何が起きるか</span></div>
+        <pre>witness を w = 3 に変える（t₁, t₂ はそのまま）:  行の値 aᵢbᵢ − cᵢ = (5, 4, 1)   ← 0 でない
+P′(X) = 10 + 13X + 10X² + 4X³ + 2X⁴,  Z_H で割ると余り 4 + 2X + 16X²  ← 割り切れない。Q が存在しない
+無理に「商だけ」を送っても  z = 5: 1 ≠ 12,  z = 9: 9 ≠ 0,  z = 11: 14 ≠ 7   → 17 点すべてで拒否</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 健全性は「割り切れない → 商が無い → ランダムな点でずれる」の 3 段。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">歩 6</span><span class="st">ゼロ知識にする — H の上だけ元のまま、外はランダム</span></div>
+        <p class="sl-claim">a(5) = 8 のような開示値は witness から作られた値なので、集めると漏れる。そこで ã(X) = a(X) + Z_H(X)·r（r は乱数）に差し替える。X = 1, 2, 3 では Z_H = 0 なので値は同じ、外ではランダム。</p>
+        <pre>r = 6:  ã(X) = 9 + 9X + 12X² + 6X³     ã(1), ã(2), ã(3) = 2, 4, 0（元と同じ）    ã(5) = 16（元は 8。r で覆われた）</pre>
+        <p class="sl-hw"><b>宿題との対応</b>: s = r + e·x で x を r が覆うのと同じ構図。覆う量が「数 1 個」から「多項式 1 本」に増えただけ。<b>隠す手 ②（乱数で覆う）</b>の多項式版。</p>
+        <p class="sl-q">Q. なぜ Z_H を掛けた乱数を足すのか。（制約の検査は H の上でしか見ないから、H の上の値を変えなければ検査は壊れない）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">まとめ</span><span class="st">Week 4 の 3 スキームは、この 6 歩の大規模版</span></div>
+        <pre>STARK  : 歩 2 の「行番号」を ω^t にし（FFT）、封筒は Merkle 木、歩 4 の「1 点」の代わりに FRI で次数を確かめる
+PLONK  : 歩 2 を 11 本の多項式で、封筒は KZG、歩 3 のゼロテストに加えて配線の大積
+GKR    : 歩 2〜4 を SumCheck に置き換える（封筒なしでも対話なら成立）
+Schnorr: 制約が 1 本なので歩 1〜3 が不要。歩 4 の「封筒 → 乱数 → 開示」だけ = 宿題</pre>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D9 : 対話 ZK / FS -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 53〜62 / 対話 ZK・FS（宿題の本体）</p>
+      <h2>Schnorr — 3 手で「x を知っている」を渡し、ハッシュで 1 通にする</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">54/65</span><span class="st">Schnorr: 問題設定</span></div>
+        <p class="sl-claim">公開は g と y = g^x。prover は x を明かさずに、y が g^x の形で作られていることを納得させる。statement: ∃x : g^x = y、witness: x。</p>
+        <pre>講義の記号（乗法）   g     y = g^x    a = g^r    b       c = r + bx    mod q
+宿題の記号（加法）   G     P = x·G    R = r·G    e       s = r + e·x   mod n</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: 記号の対応表を手元に置く。<b>g^x と x·G は同じ操作の書き方違い</b>（スライド 30）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">55/65</span><span class="st">Schnorr: 対話式プロトコル</span></div>
+        <pre>prover（x を持つ）                              verifier（g, y を知る）
+乱数 r を選び a := g^r を送る      ── a ──▶
+                                 ◀── b ──      チャレンジ b をランダムに選ぶ
+c := r + b·x を返す              ── c ──▶      g^c = a·y^b を確認
+
+完全性: y = g^x なら g^c = g^{r+bx} = g^r (g^x)^b = a·y^b</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>sigma_commit(r) = r·G</code>、<code>sigma_response(x, r, e) = (r + e·x) % n</code>、<code>sigma_verify(P, R, e, s)</code>: <code>s·G == R + e·P</code>。完全性の 1 行は分配法則（中 1）: (r + e·x)·G = r·G + e·(x·G)。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">56/65</span><span class="st">Schnorr: 例 小さな数で回す</span></div>
+        <pre>講義: F₂₃*, g = 2, q = 11, x = 7, y = 2⁷ = 128 ≡ 13.  r = 3 → a = 8.  b = 5.  c = 3 + 35 = 38 ≡ 5 (mod 11)
+      g^c = 2⁵ = 32 ≡ 9,  a·y^b = 8·13⁵ ≡ 8·4 = 32 ≡ 9  → 受理      指数は mod 11、群は mod 23
+
+宿題: 曲線 F₁₀₀₉, n = 967, x = 123, P = 123·G = (376,128).  r = 456 → R = (822,106).  e = 77.
+      s = 456 + 77·123 = 9927 = 10·967 + 257 → 257 (mod 967)
+      s·G = 257·G = (595,110),  R + e·P = (822,106) + 77·(376,128) = (595,110)  → 受理     座標は mod 1009、s は mod 967</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: 採点器の <code>test_response</code>（257）と <code>test_honest_transcript_accepts</code>。<b>mod を p = 1009 で取ると 846 になって落ちる</b> — 「指数は mod q、群は mod p」の講義の注意そのもの。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">57〜58/65</span><span class="st">知識健全性: 抽出器が witness を取り出せる</span></div>
+        <p class="sl-claim">「知っている」の定義: 検証に通る prover を巻き戻して、同じ a に別のチャレンジ b′ を投げ、2 つの応答から x を計算できるなら、x は prover の中にあった。</p>
+        <pre>c = r + b·x,  c′ = r + b′·x  → 引くと r が消える → x = (c − c′)(b − b′)⁻¹ (mod q)      中 2 の連立方程式（未知数 2、式 2）</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: 採点器 <code>test_nonce_reuse_leaks_secret</code> は<b>この抽出器そのもの</b>。r = 456, e₁ = 77, e₂ = 90 → s₁ = 257, s₂ = 889 → x = (257 − 889)·(77 − 90)⁻¹ = 335·595 mod 967 = <b>123</b>。安全性の根拠（抽出できる）と攻撃（nonce 再利用）が同じ 1 本の式。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">59〜60/65</span><span class="st">zero-knowledge: simulator が同じ見え方を作れる</span></div>
+        <p class="sl-claim">秘密 x を使う本物の記録と、公開情報だけから simulator が作る記録が見分けられないなら、漏れていない。Schnorr なら会話 (a, b, c) を x なしで作れればよい。<b>順番を逆にする</b>: b と c を先に選び、a := g^c · y^{−b} と置く。検証式は定義から成り立つ。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: 下の<a href="#lab1">ラボ 1</a>で simulator モードに切り替えると、x なしの会話が受理される。<b>受理された 1 本は「知っている」証拠にならない</b>。証拠になるのは「先に a を出してから b に答えた」順番だけ。</p>
+        <p class="sl-q">Q. なぜ本物では a を先に出さなければならないか。（後出しなら simulator と同じ手で誰でも通る）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">61/65</span><span class="st">Fiat–Shamir 変換: チャレンジを hash で作る</span></div>
+        <p class="sl-claim">verifier が選んでいた b を、会話ログの hash b := H(ctx, g, y, a) にする。a は公開なので verifier も同じ b を計算できる。返事を待たずに proof が 1 通で作れる。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>challenge_hash(R, P, message, n)</code>。<b>引数の順番 (R, P, message) を入れ替えると、自分の verify では通るのに採点器の固定ベクトルだけ落ちる</b>（他人と互換性がない）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">62/65</span><span class="st">Fiat–Shamir 後の非対話版 — これはそのまま署名になる</span></div>
+        <pre>prover: r → a = g^r → b = H(ctx, g, y, a) → c = r + bx → π = (a, c)      verifier: b を再計算して g^c = a·y^b
+hash にメッセージ m も入れれば π は m への署名。x が秘密鍵、y が公開鍵。BIP-340 / Ed25519 がこの系統
+
+宿題: schnorr_sign(x=123, "week3", nonce=456): R = (822,106), P = (376,128), e = H(R,P,"week3") = 57, s = 456 + 57·123 = 7467 ≡ 698
+      schnorr_verify(P, "week3", (R, 698)): e を計算し直して 57 → 698·G == R + 57·P → True
+      メッセージを "week3!" に改ざん → e′ = 723 → False</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>schnorr_sign</code> = sigma_commit → challenge_hash → sigma_response。<code>schnorr_verify</code> = challenge_hash を計算し直して sigma_verify。<b>e を署名に含めて送らない</b>（送ると証明者が e を選べて simulator の順番になる）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">63/65</span><span class="st">全体像をもう一度 — 一文で言うと</span></div>
+        <p class="sl-claim">zkSNARK は、公開 statement に対して秘密 witness が存在することを、計算を制約と多項式へ翻訳し、commitment で短く固定して、短い proof として検証する仕組み。</p>
+        <p class="sl-hw">計算 → 制約: R1CS。制約 → 多項式: 補間（上の 6 歩）。多項式 → commitment: KZG。対話 → 短い proof: Fiat–Shamir。<b>宿題は最後の 1 本の矢印の最小形。</b></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D10 : レシピ -->
+<section class="band" id="recipe">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">講義が飛ばしたもう 1 歩 — 数独のカードから一般へ</p>
+      <h2>ゼロ知識証明を自分で組み立てる手順 — 隠す手は 2 つしかない</h2>
+      <p>
+        ホワイトボードで数独はできた。一般の主張でも同じ 5 手順です。<strong>隠したい情報を守る手は 2 つだけ</strong>で、
+        3 つの性質（完全性・健全性・ゼロ知識）はそれぞれ「1 つの問い」で確かめられます。
+      </p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">手順 1</span><span class="st">主張を ∃w : R(x, w) = 1 の形に書く</span></div>
+        <pre>数独:    x = 問題の盤面,  w = 解,  R = 「行・列・箱に 1〜4 が 1 回ずつ」を全部満たすか
+Schnorr: x = (G, P),      w = 秘密鍵 x, R = 「x·G = P か」
+3 彩色:  x = グラフ,      w = 塗り分け, R = 「隣どうしが違う色か」</pre>
+        <p class="sl-hw">R が書けない主張は証明できない。<b>まず「何が公開で、何が秘密で、何を確かめれば真か」を 3 行で書く。</b></p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">手順 2</span><span class="st">隠す手 ①: 乱数で覆ってから見せる（commit）</span></div>
+        <p class="sl-claim">秘密そのものは見せない。乱数を混ぜた「封筒」だけを先に出す。封筒は後から中身を変えられない（binding）ことが必要。</p>
+        <pre>数独:    解の数字を色や記号にランダムに置き換えて、カードを伏せて並べる（毎回置き換えを変える）
+Schnorr: r をランダムに選び R = r·G を出す（r も x も出さない）
+3 彩色:  3 色の名前をランダムに入れ替えてから、各頂点の色を封筒に入れる</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">手順 3</span><span class="st">隠す手 ②: verifier が選んだ場所だけ開ける（challenge → open）</span></div>
+        <p class="sl-claim">verifier が「どこを見るか」をランダムに 1 つ選ぶ。prover は<b>その分だけ</b>開ける。全部は開けない。</p>
+        <pre>数独:    「3 行目を見せて」→ その行のカードだけめくる → 1〜4 が 1 回ずつあるか
+Schnorr: 「e = 77 で答えて」→ s = r + e·x だけ返す（r と x は個別には出ない）
+3 彩色:  「この辺の両端を見せて」→ 2 つの封筒だけ開ける → 色が違うか</pre>
+        <p class="sl-hw"><b>ここで秘密が守られる理由</b>: 開けた分は<b>乱数で覆われている</b>（① の置き換え・r）ので、そこから元の秘密は復元できない。<b>①と②を両方</b>やって初めて守れる。①だけなら全部開けたときに置き換え表ごと割れるし、②だけなら開けた場所の秘密がそのまま見える。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">手順 4</span><span class="st">繰り返す — 1 回で通る偶然を小さくする</span></div>
+        <p class="sl-claim">1 回の open で嘘が見つかる確率は「開けた場所の割合」程度。3 手を繰り返して確率を潰す。Schnorr は e の候補が n = 967（実物は 2²⁵⁶）通りあるので 1 回で十分。数独は行・列・箱の 12 か所から 1 つなので何十回も。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">手順 5</span><span class="st">3 つの性質を、3 つの問いで確かめる</span></div>
+        <pre>完全性     「本当の w を持つ正直な prover は、どのチャレンジでも通るか」
+            → 検証式に代入して等号が成り立つことを 1 回計算する（Schnorr: s·G = (r+e·x)·G = R + e·P）
+健全性     「同じ封筒のまま、2 つの違うチャレンジに答えられる prover から、w を取り出せるか」（抽出器）
+            → 取り出せるなら、通る prover は w を持っていた（Schnorr: x = (s₁−s₂)/(e₁−e₂)）
+            → 数独なら: 全部の行・列・箱に答えられる = 置き換え表を戻せば本物の解が出る
+ゼロ知識   「w を使わずに、verifier に同じに見える記録を作れるか」（simulator）
+            → チャレンジを先に決めて封筒を後から作る手が使えれば、漏れていない（Schnorr: R := s·G − e·P）
+            → 数独なら: 見せる行が分かっていれば、その行だけ 1〜4 を並べたカードを用意できる</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 健全性の問いも、ゼロ知識の問いも「順番」の話。<b>本物は封筒が先・チャレンジが後。simulator はチャレンジが先・封筒が後。</b>この順番を守らせるのが verifier の乱数（対話）か hash（Fiat–Shamir）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">自分で試す</span><span class="st">「生年月日を渡さずに、20 歳以上を示す」を組み立ててみる</span></div>
+        <pre>手順 1: x = 公開の何か（発行者の署名つき生年月日のコミットメント）, w = 生年月日, R = 「今日 − 生年月日 ≥ 20 年」
+手順 2: 生年月日を乱数で覆った封筒（発行者が署名）
+手順 3: verifier の質問に「20 歳以上か」の 1 bit 分だけ答える方法が要る → ここが難しい。数字の大小は「開ける」だけでは示せない
+      → だから 計算（比較）→ 制約 → 多項式 の左半分が要る。Week 1〜4 はその道具作り</pre>
+        <p class="sl-hw"><b>この「開けるだけでは示せない主張」に出会ったとき、左半分（算術化）が必要になる。</b>数独と Schnorr は「開けるだけで示せる」特別に易しい主張。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D11 : 宿題対応表 -->
+<section class="band" id="hwmap">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">宿題の 10 関数</p>
+      <h2>宿題の関数 ↔ スライド ↔ 学校で習ったこと</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="data hwmap">
+        <thead><tr><th>関数</th><th>スライド</th><th>学校で習ったこと</th><th>採点器の数値</th><th>落ちやすい所</th></tr></thead>
+        <tbody>
+          <tr><td>field_add / field_mul</td><td>13</td><td>割り算の余り（中 1）</td><td>(3+4)%7 = 0、(3·4)%7 = 5</td><td>負の入力（% で済む）</td></tr>
+          <tr><td>field_inv</td><td>14, A4</td><td>逆数を掛ける（小 6）、互除法（中 1）</td><td>3⁻¹ mod 11 = 4</td><td>x % p 忘れ、0 の ValueError</td></tr>
+          <tr><td>ec_add</td><td>25〜27</td><td>2 点の傾き（中 2）、接線＝微分（数 II）、解と係数（数 II）</td><td>2G = (818,800)、3G = (851,516)</td><td>y₃ の符号、垂直の場合分けの順番</td></tr>
+          <tr><td>ec_scalar_mul</td><td>28</td><td>2 進法（数 A）</td><td>123·G = (376,128)、967·G = None</td><td>素直に k 回足すと終わらない</td></tr>
+          <tr><td>sigma_commit</td><td>55</td><td>封筒（先に出す）</td><td>456·G = (822,106)</td><td>—</td></tr>
+          <tr><td>sigma_response</td><td>55〜56</td><td>連立方程式（中 2）: 式 1 本では解けない</td><td>456 + 77·123 = 9927 ≡ 257 (mod 967)</td><td>mod を p にすると 846</td></tr>
+          <tr><td>sigma_verify</td><td>55</td><td>分配法則（中 1）</td><td>257·G = R + 77·P = (595,110)</td><td>—</td></tr>
+          <tr><td>schnorr_sign</td><td>61〜62</td><td>ハッシュ = 操れないサイコロ</td><td>e = 57, s = 698（"week3"）</td><td>challenge_hash の引数順</td></tr>
+          <tr><td>schnorr_verify</td><td>62</td><td>答え合わせは自分で計算し直す</td><td>改ざんで e′ = 723 → False</td><td>e を受け取らず再計算する</td></tr>
+          <tr><td>（nonce 再利用テスト）</td><td>57〜58</td><td>連立方程式: 式 2 本なら解ける</td><td>x = 335·595 mod 967 = 123</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <p class="eyebrow">提出前の自己チェック — 7 問、自分の言葉で</p>
+      <p>(1) なぜ足したあとにもう一度 % p を取るのか。 (2) なぜ 0 だけ逆元が無く、p は素数でなければならないか。 (3) ec_add で y₃ の符号を反転する理由と、垂直な直線のときの答え。 (4) 123 を 2 進で書いて、ec_add が何回で済むか。 (5) s = r + e·x が x を隠す理由と、同じ r を 2 回使うと漏れる理由。 (6) 検証者が x なしで s·G = R + e·P を確かめられる理由。 (7) e をハッシュにすると何が要らなくなるか。</p>
+      <p class="strong-line">7 つ言えたら、この宿題は「理解して」出せます。詰まった番号だけ、対応するカードに戻る。</p>
+    </div>
+  </div>
+</section>
+<!-- ============================================ 7 : LAB 1 -->
+<section class="band" id="lab1">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 1</p>
+      <h2>Schnorr を回す — 正直な証明者と、simulator</h2>
+      <p>
+        課題と同じトイ曲線（<code>y² = x³ + 11</code> over F₁₀₀₉、位数 967、G = (1, 298)）で
+        3 手を実際に走らせます。<strong>モードを切り替えると、秘密鍵を使わずに同じ形の会話を作ります</strong>。
+        どちらも検証に通ることを確かめてください。
+      </p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">画面の計算を読む順番</p>
+      <p>
+        このラボでは、楕円曲線の点の計算を <code>mod 1009</code>、係数 r・e・s の計算を
+        <code>mod 967</code> で行います。2 つの法は別の役割です。
+      </p>
+      <pre>公開設定: x = 123,  P = xG = (376,128)
+
+[1] r = 456 を選ぶ
+    R = rG = 456G = (822,106)
+
+[2] 検証者が e = 77 を選ぶ
+
+[3] s = r + e·x = 456 + 77·123 = 9927 ≡ 257 (mod 967)
+
+[4] 検証者の確認
+    sG = 257G = (595,110)
+    R + eP = (822,106) + 77(376,128) = (595,110)</pre>
+      <p>
+        <code>rG</code> や <code>eP</code> は、座標を普通に掛ける計算ではなく、
+        楕円曲線上の点を何度も足す<strong>スカラー倍</strong>です。
+        最後の 2 点が一致するのは、<code>s = r + e·x</code> と <code>P = xG</code> を代入すると
+        <code>sG = (r + e·x)G = rG + e(xG) = R + eP</code> になるからです。
+      </p>
+      <p class="strong-line">
+        正直モードの緑は「正しい秘密を持っていれば必ず通る（完全性）」を示します。
+        simulator モードも後で緑になりますが、それは「受理された 1 本だけでは、秘密を知っているとは言えない」ことを示すためです。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>設定</h3><span class="eyebrow">x = 123 / P = (376,128)</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>モード</span><span class="hint">誰が何を知っているか</span></div>
+            <div class="segments" id="seg-mode" role="group" aria-label="モード"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>ノンス r</span><span class="hint">証明者が選ぶ（正直モード）</span></div>
+            <div class="segments" id="seg-r" role="group" aria-label="ノンス"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>チャレンジ e</span><span class="hint">検証者が選ぶ</span></div>
+            <div class="segments" id="seg-e" role="group" aria-label="チャレンジ"></div>
+          </div>
+          <p class="caption" id="mode-note">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="sig-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="sig-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">やりとりと検証の中身</p>
+          <pre id="sig-trace">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 9 : LAB 2 -->
+<section class="band" id="lab2">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 2</p>
+      <h2>nonce を使い回すと、公開情報だけで鍵が出る</h2>
+      <p>
+        ラボ 1 で、<code>R</code> はチャレンジを受け取る前に決める必要があると分かりました。
+        ここでは、その <code>R</code>（正確には r）を使い回すと何が起きるかを確かめます。
+        攻撃者が持っているのは<strong>公開鍵と 2 本の署名だけ</strong>です。
+        r を共通にしたまま 2 つのチャレンジを選ぶと、秘密鍵が復元されます。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>攻撃者が観測する 2 本</h3><span class="eyebrow">同じ r</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>共通のノンス r</span><span class="hint">証明者のミス</span></div>
+            <div class="segments" id="seg-r2" role="group" aria-label="共通ノンス"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>チャレンジ e₁</span><span class="hint">1 本目</span></div>
+            <div class="segments" id="seg-e1" role="group" aria-label="チャレンジ1"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>チャレンジ e₂</span><span class="hint">2 本目</span></div>
+            <div class="segments" id="seg-e2" role="group" aria-label="チャレンジ2"></div>
+          </div>
+          <p class="caption">
+            秘密鍵 x = 123 は攻撃者に見えていません。使うのは R, e, s の公開値だけです。
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="atk-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="atk-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">攻撃者の計算</p>
+          <pre id="atk-trace">—</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout red">
+      <p class="eyebrow">実測 — 本物の secp256k1 でも同じことが起きる</p>
+      <p>
+        トイ曲線だからではありません。課題の実装で、Bitcoin と同じ曲線・256 ビットの秘密鍵に対して
+        同じ攻撃を走らせた結果です。
+      </p>
+      <pre>署名1: R.x = 0xb44cf0c87f8f960c...  s1 = 0x28807ada8ee210bd...
+署名2: R.x = 0xb44cf0c87f8f960c...  s2 = 0x24da65e7523016c0...
+R が一致している: True   <span class="c">← 公開情報だけで再利用が見抜ける</span>
+
+復元した x = 0x1b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
+本物の  x = 0x1b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
+一致: <b>True</b></pre>
+      <p class="strong-line">
+        署名を 2 本公開しただけで、秘密鍵が完全に失われます。
+      </p>
+      <p>
+        実際に、PlayStation 3 の ECDSA 署名鍵や、初期の Bitcoin ウォレットの一部が、
+        この形（乱数生成の不備で nonce が重複）で鍵を失っています。
+        <b>「乱数を毎回変える」は運用上の注意ではなく、安全性の前提そのもの</b>です。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 13 : QUIZ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">検問クイズ</p>
+      <h2>鍵検問 — あなたが検証者になる</h2>
+      <p>
+        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
+        有限体の計算・曲線上の点・トランスクリプトの受理を審査する。問題は毎回その場で生成され、
+        判定は上のラボと同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 14 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">持ち帰り</p>
+      <h2>持っておくと効く問い</h2>
+    </div>
+    <div class="prose">
+      <p>
+        <strong>① 「受理された」は、それ単体では何の証拠でもない。</strong>
+        simulator が秘密なしで受理される会話を作れました。効いているのは中身ではなく、
+        <b>証明者が先にコミットし、チャレンジを後から受け取る</b>という順番です。
+      </p>
+      <p>
+        <strong>② 抽出器と攻撃は、同じ 1 本の式。</strong>
+        <code>x = (s₁−s₂)(e₁−e₂)⁻¹</code> は、
+        「知っていることの証明」でもあり「nonce 再利用で鍵が漏れる理由」でもあります。
+        <b>安全性の根拠と攻撃手順が表裏一体</b>なのは、この分野でよく出てくる形です。
+      </p>
+      <p>
+        <strong>③ 乱数の条件が 1 つ欠けると壊れる。</strong>
+        Week 2 の Beaver triple は<b>使い回した瞬間</b>に、Week 2 の OT は
+        <b>範囲から 0 を除いた瞬間</b>に、Week 3 の nonce は<b>再利用した瞬間</b>に壊れました。
+        3 週連続で同じ教訓です。
+      </p>
+      <p>
+        <strong>④ 2 つの法を混ぜない。</strong>
+        座標は mod p、スカラーは mod n。取り違えても<b>小さい値のケースだけは通ってしまう</b>ので、
+        テストが弱いと気づけません。
+      </p>
+      <p>
+        <strong>⑤ 検算できる不変量を 1 つ持つ。</strong>
+        楕円曲線なら <code>is_on_curve</code>。
+        <b>「結果が必ず満たすはずの性質」を 1 つ決めておくと、デバッグが探索から確認に変わります。</b>
+      </p>
+      <p>
+        そして Week 1 からの問いは、今週こう言い換わります ——
+        <strong>「この値を隠しているのは何で、その条件は何本あるか」</strong>。
+        r がランダムであること、毎回違うこと、ハッシュに正しい文脈が入っていること。
+        <b>1 本でも欠ければ、静かに壊れます。</b>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ APPX -->
+<section class="band" id="appendix">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">付録</p>
+      <h2>深掘り本文 — 各節を開いて読む（旧版の本文）</h2>
+      <p>上のカード列で骨組みが入ったあとで、細部を足したいときに開いてください。壊した採点結果、ペアリング・FFT・R1CS/AIR の具体例、数独 ZKP のグループワークはここにあります。</p>
+    </div>
+    <div>
+<details class="appx"><summary>今週は、資料が 2 つの顔を持っている（旧・出発点）</summary>
 <!-- ============================================ 1 -->
 <section class="band">
   <div class="wrap stack">
@@ -425,6 +1271,8 @@
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>宿題を 10 個の関数で読む — ①〜⑤ の長い版</summary>
 <!-- ============================================ 1.5 : 宿題を関数ごとに読む -->
 <section class="band" id="homework">
   <div class="wrap stack">
@@ -753,6 +1601,8 @@ schnorr_sign ───┬─ sigma_commit ─── ec_scalar_mul
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>「計算が正しい」を、検証できる形へ順番に変える（全体像）</summary>
 <!-- ============================================ 2 -->
 <section class="band">
   <div class="wrap stack">
@@ -901,6 +1751,8 @@ schnorr_sign ───┬─ sigma_commit ─── ec_scalar_mul
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>有限体の逆元 — ここが崩れると上は全部崩れる</summary>
 <!-- ============================================ 3 -->
 <section class="band">
   <div class="wrap stack">
@@ -977,6 +1829,8 @@ AssertionError: False is not true :
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>楕円曲線 — 点の足し算で、もう一つの群を作る</summary>
 <!-- ============================================ 4 -->
 <section class="band">
   <div class="wrap stack">
@@ -1186,6 +2040,8 @@ k ≈ 2^256                  ec_add 446 回 / 12.9 ms
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>離散対数 — 速い向きと、難しい向き（ペアリングまで）</summary>
 <!-- ============================================ 5 -->
 <section class="band">
   <div class="wrap stack">
@@ -1415,6 +2271,8 @@ k ≈ 2^256                  ec_add 446 回 / 12.9 ms
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>シグマプロトコル — 3 手で「知っている」を渡す</summary>
 <!-- ============================================ 6 -->
 <section class="band">
   <div class="wrap stack">
@@ -1505,83 +2363,8 @@ AssertionError: 786 != 123</pre>
   </div>
 </section>
 
-<!-- ============================================ 7 : LAB 1 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ 1</p>
-      <h2>Schnorr を回す — 正直な証明者と、simulator</h2>
-      <p>
-        課題と同じトイ曲線（<code>y² = x³ + 11</code> over F₁₀₀₉、位数 967、G = (1, 298)）で
-        3 手を実際に走らせます。<strong>モードを切り替えると、秘密鍵を使わずに同じ形の会話を作ります</strong>。
-        どちらも検証に通ることを確かめてください。
-      </p>
-    </div>
-
-    <div class="callout">
-      <p class="eyebrow">画面の計算を読む順番</p>
-      <p>
-        このラボでは、楕円曲線の点の計算を <code>mod 1009</code>、係数 r・e・s の計算を
-        <code>mod 967</code> で行います。2 つの法は別の役割です。
-      </p>
-      <pre>公開設定: x = 123,  P = xG = (376,128)
-
-[1] r = 456 を選ぶ
-    R = rG = 456G = (822,106)
-
-[2] 検証者が e = 77 を選ぶ
-
-[3] s = r + e·x = 456 + 77·123 = 9927 ≡ 257 (mod 967)
-
-[4] 検証者の確認
-    sG = 257G = (595,110)
-    R + eP = (822,106) + 77(376,128) = (595,110)</pre>
-      <p>
-        <code>rG</code> や <code>eP</code> は、座標を普通に掛ける計算ではなく、
-        楕円曲線上の点を何度も足す<strong>スカラー倍</strong>です。
-        最後の 2 点が一致するのは、<code>s = r + e·x</code> と <code>P = xG</code> を代入すると
-        <code>sG = (r + e·x)G = rG + e(xG) = R + eP</code> になるからです。
-      </p>
-      <p class="strong-line">
-        正直モードの緑は「正しい秘密を持っていれば必ず通る（完全性）」を示します。
-        simulator モードも後で緑になりますが、それは「受理された 1 本だけでは、秘密を知っているとは言えない」ことを示すためです。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card">
-        <div class="card-head"><h3>設定</h3><span class="eyebrow">x = 123 / P = (376,128)</span></div>
-        <div class="card-body">
-          <div class="field">
-            <div class="field-label"><span>モード</span><span class="hint">誰が何を知っているか</span></div>
-            <div class="segments" id="seg-mode" role="group" aria-label="モード"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>ノンス r</span><span class="hint">証明者が選ぶ（正直モード）</span></div>
-            <div class="segments" id="seg-r" role="group" aria-label="ノンス"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>チャレンジ e</span><span class="hint">検証者が選ぶ</span></div>
-            <div class="segments" id="seg-e" role="group" aria-label="チャレンジ"></div>
-          </div>
-          <p class="caption" id="mode-note">—</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="verdict">
-          <div class="banner" id="sig-banner">—</div>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="sig-note">—</p>
-        </div>
-        <div class="work">
-          <p class="eyebrow">やりとりと検証の中身</p>
-          <pre id="sig-trace">—</pre>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>「通った」から何が分かるのか — 完全性・健全性・ゼロ知識</summary>
 <!-- ============================================ 8 -->
 <section class="band">
   <div class="wrap stack">
@@ -1683,79 +2466,8 @@ x  = (10−3)·(2−7)⁻¹ = 7·6⁻¹ = 7·2 ≡ 3</pre>
   </div>
 </section>
 
-<!-- ============================================ 9 : LAB 2 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ 2</p>
-      <h2>nonce を使い回すと、公開情報だけで鍵が出る</h2>
-      <p>
-        ラボ 1 で、<code>R</code> はチャレンジを受け取る前に決める必要があると分かりました。
-        ここでは、その <code>R</code>（正確には r）を使い回すと何が起きるかを確かめます。
-        攻撃者が持っているのは<strong>公開鍵と 2 本の署名だけ</strong>です。
-        r を共通にしたまま 2 つのチャレンジを選ぶと、秘密鍵が復元されます。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card">
-        <div class="card-head"><h3>攻撃者が観測する 2 本</h3><span class="eyebrow">同じ r</span></div>
-        <div class="card-body">
-          <div class="field">
-            <div class="field-label"><span>共通のノンス r</span><span class="hint">証明者のミス</span></div>
-            <div class="segments" id="seg-r2" role="group" aria-label="共通ノンス"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>チャレンジ e₁</span><span class="hint">1 本目</span></div>
-            <div class="segments" id="seg-e1" role="group" aria-label="チャレンジ1"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>チャレンジ e₂</span><span class="hint">2 本目</span></div>
-            <div class="segments" id="seg-e2" role="group" aria-label="チャレンジ2"></div>
-          </div>
-          <p class="caption">
-            秘密鍵 x = 123 は攻撃者に見えていません。使うのは R, e, s の公開値だけです。
-          </p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="verdict">
-          <div class="banner" id="atk-banner">—</div>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="atk-note">—</p>
-        </div>
-        <div class="work">
-          <p class="eyebrow">攻撃者の計算</p>
-          <pre id="atk-trace">—</pre>
-        </div>
-      </div>
-    </div>
-
-    <div class="callout red">
-      <p class="eyebrow">実測 — 本物の secp256k1 でも同じことが起きる</p>
-      <p>
-        トイ曲線だからではありません。課題の実装で、Bitcoin と同じ曲線・256 ビットの秘密鍵に対して
-        同じ攻撃を走らせた結果です。
-      </p>
-      <pre>署名1: R.x = 0xb44cf0c87f8f960c...  s1 = 0x28807ada8ee210bd...
-署名2: R.x = 0xb44cf0c87f8f960c...  s2 = 0x24da65e7523016c0...
-R が一致している: True   <span class="c">← 公開情報だけで再利用が見抜ける</span>
-
-復元した x = 0x1b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
-本物の  x = 0x1b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
-一致: <b>True</b></pre>
-      <p class="strong-line">
-        署名を 2 本公開しただけで、秘密鍵が完全に失われます。
-      </p>
-      <p>
-        実際に、PlayStation 3 の ECDSA 署名鍵や、初期の Bitcoin ウォレットの一部が、
-        この形（乱数生成の不備で nonce が重複）で鍵を失っています。
-        <b>「乱数を毎回変える」は運用上の注意ではなく、安全性の前提そのもの</b>です。
-      </p>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>Fiat–Shamir 変換 — 検証者を、ハッシュで置き換える</summary>
 <!-- ============================================ 10 -->
 <section class="band">
   <div class="wrap stack">
@@ -1850,6 +2562,8 @@ FAIL: test_roundtrip</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>スライドの後半 — 多項式・commitment・KZG・R1CS/AIR の具体例</summary>
 <!-- ============================================ 11 -->
 <section class="band">
   <div class="wrap stack">
@@ -2640,6 +3354,8 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>グループワーク — 数独 ZKP を組み立てる</summary>
 <!-- ============================================ 12 : GROUP WORK -->
 <section class="band">
   <div class="wrap stack">
@@ -2763,109 +3479,7 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
   </div>
 </section>
 
-<!-- ============================================ 13 : QUIZ -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">検問クイズ</p>
-      <h2>鍵検問 — あなたが検証者になる</h2>
-      <p>
-        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
-        有限体の計算・曲線上の点・トランスクリプトの受理を審査する。問題は毎回その場で生成され、
-        判定は上のラボと同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
-      </p>
-    </div>
-
-    <div class="card" id="quiz">
-      <div class="quiz-pane" id="quiz-start">
-        <div class="quiz-hero">
-          <p class="eyebrow">検問モードを選ぶ</p>
-          <h3>10 問・ライフ 3</h3>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
-            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
-          </p>
-        </div>
-        <div class="mode-grid" id="mode-grid"></div>
-        <p class="quiz-best" id="quiz-best"></p>
-      </div>
-
-      <div class="quiz-pane" id="quiz-play" hidden>
-        <div class="quiz-bar">
-          <span class="qprog" id="qprog">1 / 10</span>
-          <span class="qcat" id="qcat">—</span>
-          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
-        </div>
-        <div class="qmain">
-          <p class="qtext" id="qtext"></p>
-          <div class="qbody" id="qbody"></div>
-          <div class="choices" id="choices"></div>
-          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
-        </div>
-        <div class="quiz-foot">
-          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
-          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
-        </div>
-      </div>
-
-      <div class="quiz-pane" id="quiz-result" hidden>
-        <div class="rank-box">
-          <span class="rank" id="rank">—</span>
-          <div class="rank-meta">
-            <p class="rank-title" id="rank-title">—</p>
-            <p class="rank-sub" id="rank-sub">—</p>
-          </div>
-        </div>
-        <div class="cat-stats" id="cat-stats"></div>
-        <div class="quiz-foot">
-          <button class="btn-main" id="btn-again" type="button">もう一度</button>
-          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================ 14 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">持ち帰り</p>
-      <h2>持っておくと効く問い</h2>
-    </div>
-    <div class="prose">
-      <p>
-        <strong>① 「受理された」は、それ単体では何の証拠でもない。</strong>
-        simulator が秘密なしで受理される会話を作れました。効いているのは中身ではなく、
-        <b>証明者が先にコミットし、チャレンジを後から受け取る</b>という順番です。
-      </p>
-      <p>
-        <strong>② 抽出器と攻撃は、同じ 1 本の式。</strong>
-        <code>x = (s₁−s₂)(e₁−e₂)⁻¹</code> は、
-        「知っていることの証明」でもあり「nonce 再利用で鍵が漏れる理由」でもあります。
-        <b>安全性の根拠と攻撃手順が表裏一体</b>なのは、この分野でよく出てくる形です。
-      </p>
-      <p>
-        <strong>③ 乱数の条件が 1 つ欠けると壊れる。</strong>
-        Week 2 の Beaver triple は<b>使い回した瞬間</b>に、Week 2 の OT は
-        <b>範囲から 0 を除いた瞬間</b>に、Week 3 の nonce は<b>再利用した瞬間</b>に壊れました。
-        3 週連続で同じ教訓です。
-      </p>
-      <p>
-        <strong>④ 2 つの法を混ぜない。</strong>
-        座標は mod p、スカラーは mod n。取り違えても<b>小さい値のケースだけは通ってしまう</b>ので、
-        テストが弱いと気づけません。
-      </p>
-      <p>
-        <strong>⑤ 検算できる不変量を 1 つ持つ。</strong>
-        楕円曲線なら <code>is_on_curve</code>。
-        <b>「結果が必ず満たすはずの性質」を 1 つ決めておくと、デバッグが探索から確認に変わります。</b>
-      </p>
-      <p>
-        そして Week 1 からの問いは、今週こう言い換わります ——
-        <strong>「この値を隠しているのは何で、その条件は何本あるか」</strong>。
-        r がランダムであること、毎回違うこと、ハッシュに正しい文脈が入っていること。
-        <b>1 本でも欠ければ、静かに壊れます。</b>
-      </p>
+</details>
     </div>
   </div>
 </section>
@@ -3142,7 +3756,7 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
   if (!toc) return;
   var heads = document.querySelectorAll(".band-head h2");
   Array.prototype.forEach.call(heads, function (h, i) {
-    if (h.closest("#toc")) return;
+    if (h.closest("#toc") || h.closest(".appx")) return;
     var section = h.closest(".band");
     if (!section) return;
     if (i === 0) return;
