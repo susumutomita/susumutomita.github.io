@@ -1,0 +1,2462 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>証明システムを 3 つの部品に分ける — Week 4 自習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 4 の自習ノート。「証明とは何か」「なぜ検証者は全部を読まずに納得できるのか」から始めて、GKR・STARK・PLONK を算術化・コミットメント・証明システムの 3 部品に分解する。同じトイ計算を 3 通りに翻訳し、嘘の証明者が何回に 1 回すり抜けるかを実測する。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="証明システムを 3 つの部品に分ける — Week 4 自習ノート">
+<meta property="og:description" content="証明 + ゼロ知識性。SumCheck の嘘は 121 通り中 21 通りしか通らない。改ざんしたトレースは商多項式が消える。">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧩</text></svg>">
+<style>
+  @font-face {
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { display: block; max-width: 100%; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  table { border-collapse: collapse; }
+  [hidden] { display: none !important; }
+
+  :root {
+    color-scheme: light dark;
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+
+    --sans: "AXIS Std", "Helvetica Neue", Helvetica, Arial,
+            "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+            "Noto Sans JP", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+            "Cascadia Mono", Consolas, monospace;
+
+    --fs-label: 0.6875rem; --fs-xs: 0.8125rem; --fs-sm: 0.875rem;
+    --fs-lg: 1.25rem; --fs-xl: 1.6875rem; --fs-2xl: clamp(2rem, 5.5vw, 2.9rem);
+    --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+      --line: #3A4449; --line-strong: #4E5B61;
+      --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+      --accent: #99DBFF; --accent-soft: #24333C;
+      --pass: #B5BD68; --pass-soft: #2B3122;
+      --fail: #CC6666; --fail-soft: #3A2626;
+      --free: #F0C674; --free-soft: #3A3122;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+    --line: #3A4449; --line-strong: #4E5B61;
+    --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+    --accent: #99DBFF; --accent-soft: #24333C;
+    --pass: #B5BD68; --pass-soft: #2B3122;
+    --fail: #CC6666; --fail-soft: #3A2626;
+    --free: #F0C674; --free-soft: #3A3122;
+  }
+  :root[data-theme="light"] {
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+  }
+
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); line-height: 1.85; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .eyebrow { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.35; margin: 0; font-weight: 700; }
+  h1 { font-size: var(--fs-2xl); letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+  h3 { font-size: var(--fs-lg); }
+  h4 { font-size: 1rem; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: 0.925em; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .sitebar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
+             background: color-mix(in srgb, var(--ground) 80%, transparent); backdrop-filter: blur(12px); }
+  .sitebar-inner { height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .sitebar-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); text-decoration: none; }
+  .sitebar-links { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+  .sitebar-links a { font-size: var(--fs-xs); color: var(--muted); text-decoration: none; padding: 0.35rem 0.6rem; border-radius: var(--r-md); }
+  .sitebar-links a:hover { color: var(--ink); background: color-mix(in srgb, var(--line) 60%, transparent); }
+
+  .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .masthead-inner { display: flex; flex-direction: column; gap: 1rem; padding: clamp(2.5rem, 7vw, 4rem) 0 clamp(2rem, 5vw, 2.5rem); }
+  .masthead h1 span { color: var(--accent); }
+  .lead { color: var(--ink-2); max-width: 62ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; padding: 0.25rem 0.55rem;
+         border: 1px solid var(--line-strong); border-radius: var(--r-sm); color: var(--ink-2); }
+
+  .band { padding: clamp(2.25rem, 6vw, 3.5rem) 0; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; max-width: 64ch; }
+  .band-head p { color: var(--ink-2); }
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .stack-sm { display: flex; flex-direction: column; gap: 0.9rem; }
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose strong { color: var(--ink); font-weight: 700; }
+  .split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 860px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 1px;
+           background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .steps > li { counter-increment: step; background: var(--panel); padding: 1.25rem 1.4rem 1.35rem;
+                display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem; align-items: start; }
+  .steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); font-size: var(--fs-xs);
+                        font-weight: 700; color: var(--accent); letter-spacing: 0.06em; padding-top: 0.35rem; }
+  .steps h4 { grid-column: 2; }
+  .steps .body { grid-column: 2; display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.35rem; }
+  .steps p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .steps .why { font-size: var(--fs-sm); color: var(--ink-2); border-left: 2px solid var(--line-strong); padding-left: 0.85rem; }
+  .steps .why b { color: var(--ink); }
+
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-md);
+             background: var(--panel); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; max-width: 68ch; }
+  .callout .eyebrow { color: var(--accent); }
+  .callout p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .callout p.strong-line { color: var(--ink); font-weight: 700; }
+  .callout.amber { border-left-color: var(--free); }
+  .callout.amber .eyebrow { color: var(--free); }
+  .callout.red { border-left-color: var(--fail); }
+  .callout.red .eyebrow { color: var(--fail); }
+
+  pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md);
+        padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.75; color: var(--ink); }
+  pre .c { color: var(--muted); }
+  pre b { color: var(--fail); }
+  .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); line-height: 2; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 0.5rem 0.85rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data th { color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: var(--fs-label); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+
+  /* ---------- pipeline ---------- */
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md);
+              background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-box.on .s { color: var(--accent); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
+  .pipe-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .pipe-tool { flex: 1 1 8rem; border: 1px dashed var(--line-strong); border-radius: var(--r-md);
+               background: var(--panel-2); padding: 0.5rem 0.6rem; text-align: center; font-size: var(--fs-xs); color: var(--ink-2); }
+  .pipe-tool.on { border-style: solid; border-color: var(--pass); color: var(--pass); background: var(--pass-soft); font-weight: 700; }
+
+  /* ---------- table of contents ---------- */
+  .toc {
+    list-style: none; margin: 0; padding: 0; counter-reset: toc;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .toc li { counter-increment: toc; background: var(--panel); }
+  .toc a {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: baseline;
+    padding: 0.7rem 1rem; text-decoration: none; color: var(--ink-2);
+    font-size: var(--fs-sm); line-height: 1.5;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--ink); }
+
+  /* ---------- lab ---------- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+               padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .card-head h3 { font-size: var(--fs-sm); }
+  .card-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .lab { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 940px) { .lab { grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); } }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+                 font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); }
+  .field-label .hint { color: var(--muted); font-size: var(--fs-label); }
+  .segments { display: flex; flex-wrap: wrap; gap: 3px; }
+  .segments button { flex: 1 0 2.4rem; font-family: var(--mono); font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
+                     padding: 0.35rem 0.2rem; background: var(--panel-2); color: var(--ink-2);
+                     border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer; }
+  .segments button:hover { border-color: var(--line-strong); }
+  .segments button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  :root[data-theme="light"] .segments button[aria-pressed="true"] { color: #fff; }
+  :root[data-theme="dark"] .segments button[aria-pressed="true"] { color: #0B0E15; }
+  @media (prefers-color-scheme: light) { .segments button[aria-pressed="true"] { color: #fff; } }
+  @media (prefers-color-scheme: dark) { .segments button[aria-pressed="true"] { color: #0B0E15; } }
+
+  .verdict { padding: 1.1rem; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.6rem; }
+  .banner { font-weight: 700; font-size: 1rem; padding: 0.7rem 0.9rem; border-radius: var(--r-md); border-left: 4px solid; }
+  .banner.ok { background: var(--pass-soft); color: var(--pass); border-color: var(--pass); }
+  .banner.bad { background: var(--fail-soft); color: var(--fail); border-color: var(--fail); }
+  .banner.warn { background: var(--free-soft); color: var(--free); border-color: var(--free); }
+  .work { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .work pre { background: var(--panel-2); }
+
+  /* ---------- quiz ---------- */
+  .quiz-pane { padding: 1.25rem 1.35rem 1.35rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .quiz-hero { display: flex; flex-direction: column; gap: 0.35rem; }
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem; }
+  .mode {
+    text-align: left; cursor: pointer; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 0.8rem 0.95rem; display: flex; flex-direction: column; gap: 0.2rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .m-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .mode .m-desc { font-size: var(--fs-label); color: var(--muted); line-height: 1.6; }
+  .mode.primary { background: var(--accent); border-color: var(--accent); }
+  .mode.primary .m-name { color: #fff; }
+  .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+  :root[data-theme="dark"] .mode.primary .m-name { color: #0B0E15; }
+  :root[data-theme="dark"] .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  @media (prefers-color-scheme: dark) {
+    .mode.primary .m-name { color: #0B0E15; }
+    .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  }
+  :root[data-theme="light"] .mode.primary .m-name { color: #fff; }
+  :root[data-theme="light"] .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+
+  .quiz-best { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); margin: 0; }
+  .quiz-bar {
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
+  }
+  .quiz-bar .qcat {
+    padding: 0.1rem 0.5rem; border: 1px solid var(--line-strong);
+    border-radius: 999px; color: var(--ink-2); font-size: var(--fs-label); letter-spacing: 0.06em;
+  }
+  .quiz-bar .lives { margin-left: auto; letter-spacing: 0.2em; color: var(--fail); font-size: 0.95rem; }
+  .quiz-bar .lives .gone { color: var(--line-strong); }
+
+  .qmain { display: flex; flex-direction: column; gap: 0.9rem; }
+  .qtext { font-weight: 700; font-size: 1.0625rem; line-height: 1.7; }
+  .qbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .qbody .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); }
+  .qbody .clist { display: flex; flex-direction: column; gap: 2px; }
+  .qbody .cline {
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+    padding: 0.3rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2);
+    border-left: 3px solid var(--line-strong); overflow-x: auto; white-space: nowrap;
+  }
+
+  .choices { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .choices.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    text-align: left; cursor: pointer; font-size: var(--fs-sm); line-height: 1.6;
+    padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:disabled { cursor: default; }
+  .choice.is-correct { border-color: var(--pass); background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  .choice.is-wrong   { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); }
+  .choice.dim { opacity: 0.5; }
+
+  .fb { border-radius: var(--r-md); padding: 0.85rem 1rem; border-left: 4px solid; font-size: var(--fs-sm); line-height: 1.75; }
+  .fb.ok  { background: var(--pass-soft); border-color: var(--pass); }
+  .fb.bad { background: var(--fail-soft); border-color: var(--fail); }
+  .fb .fb-head { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+  .fb.ok  .fb-head { color: var(--pass); }
+  .fb.bad .fb-head { color: var(--fail); }
+  .fb code { color: var(--ink); }
+
+  .quiz-foot { display: flex; gap: 0.6rem; align-items: center; justify-content: flex-end; }
+  .btn-main {
+    cursor: pointer; font-size: var(--fs-sm); font-weight: 700; padding: 0.55rem 1.2rem;
+    border-radius: var(--r-md); border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  :root[data-theme="dark"] .btn-main { color: #0B0E15; }
+  @media (prefers-color-scheme: dark) { .btn-main { color: #0B0E15; } }
+  :root[data-theme="light"] .btn-main { color: #fff; }
+  .btn-ghost {
+    cursor: pointer; font-size: var(--fs-sm); padding: 0.55rem 1rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--ink-2); border-color: var(--ink-2); }
+
+  .rank-box { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .rank {
+    font-family: var(--mono); font-size: 3.5rem; font-weight: 700; line-height: 1;
+    width: 5rem; height: 5rem; display: grid; place-items: center;
+    border-radius: var(--r-lg); border: 2px solid currentColor; flex: none;
+  }
+  .rank.s { color: var(--accent); }
+  .rank.a { color: var(--pass); }
+  .rank.b { color: var(--free); }
+  .rank.f { color: var(--fail); }
+  .rank-meta { display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank-title { font-weight: 700; font-size: var(--fs-lg); }
+  .rank-sub { font-size: var(--fs-sm); color: var(--ink-2); }
+  .cat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+  .cstat {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+    padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .cstat .cn { font-size: var(--fs-label); color: var(--muted); }
+  .cstat .cv { font-family: var(--mono); font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cstat .cv.full { color: var(--pass); }
+  .cstat .cv.weak { color: var(--fail); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
+  footer a { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  /* ---------- Week 4 追加分 ---------- */
+  .parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.6rem; }
+  .part { border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.85rem 0.95rem;
+          display: flex; flex-direction: column; gap: 0.25rem; }
+  .part .pn { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.1em; color: var(--accent); }
+  .part .pt { font-weight: 700; font-size: var(--fs-sm); }
+  .part .pd { font-size: var(--fs-xs); color: var(--ink-2); line-height: 1.6; }
+
+  .cmp { width: 100%; font-size: var(--fs-xs); }
+  .cmp th, .cmp td { vertical-align: top; white-space: normal; min-width: 8rem; }
+  .cmp td:first-child, .cmp th:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .cmp td small { color: var(--muted); }
+
+  .heat { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; width: 100%; max-width: 22rem; font-family: var(--mono); font-size: var(--fs-label); }
+  .heat span { aspect-ratio: 1; min-width: 0; display: grid; place-items: center; border-radius: 3px; background: var(--panel-2); color: var(--muted); overflow: hidden; }
+  .heat span.h { background: transparent; color: var(--muted); }
+  .heat span.pass { background: var(--fail-soft); color: var(--fail); font-weight: 700; }
+  .heat span.catch { background: var(--pass-soft); color: var(--pass); }
+  .heat span.here { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  table.trace { font-family: var(--mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; width: 100%; }
+  table.trace th, table.trace td { padding: 0.35rem 0.5rem; text-align: center; border-bottom: 1px solid var(--line); }
+  table.trace th { color: var(--muted); font-weight: 400; font-size: var(--fs-label); letter-spacing: 0.06em; }
+  table.trace input { width: 3.2rem; text-align: center; padding: 0.25rem 0.2rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+                      background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  table.trace input.bad { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); font-weight: 700; }
+  table.trace input.fixed { background: var(--panel-2); color: var(--muted); }
+  table.trace td.rowlab { color: var(--muted); font-size: var(--fs-label); text-align: left; white-space: nowrap; }
+  .mini { font-size: var(--fs-xs); color: var(--ink-2); }
+  .mini b { color: var(--ink); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .btn-sm { cursor: pointer; font-size: var(--fs-xs); padding: 0.35rem 0.7rem; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+            background: var(--panel-2); color: var(--ink-2); }
+  .btn-sm:hover { border-color: var(--accent); color: var(--ink); }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.9rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+  .kv dd.ok { color: var(--pass); font-weight: 700; }
+  .kv dd.ng { color: var(--fail); font-weight: 700; }
+  .flow { display: flex; flex-direction: column; gap: 0.35rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .flow .r { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.6rem; padding: 0.35rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2); }
+  .flow .r .who { color: var(--muted); }
+  .flow .r.v { border-left: 3px solid var(--accent); }
+  .flow .r.p { border-left: 3px solid var(--line-strong); }
+  .flow .r.ok { border-left-color: var(--pass); }
+  .flow .r.ng { border-left-color: var(--fail); background: var(--fail-soft); }
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a class="sitebar-name" href="/">Susumu Tomita</a>
+    <nav class="sitebar-links">
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/">ノート一覧</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week0/index.html">土台編</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week3/index.html">Week 3</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 4 自習ノート</p>
+    <h1><span>証明</span>システムを、3 つの部品に分ける</h1>
+    <p class="lead">
+      Week 4 の講義は「証明」と「ゼロ知識性」を分けて扱います。前半は
+      <strong>そもそも証明とは何か</strong>、<strong>なぜ検証者は全部を読まずに納得できるのか</strong>を、
+      計算複雑性の言葉で置き直します。後半は現代のゼロ知識証明を
+      <strong>算術化・コミットメント・証明システム</strong>の 3 部品に分解し、
+      GKR・STARK・PLONK を同じ物差しで並べます。
+    </p>
+    <p class="lead">
+      このノートでは、講義と同じトイ計算 <code>f = (x₁ + x₂) + (x₃·x₄)</code> を
+      <strong>3 通りに翻訳して手で計算し</strong>、そのうえで <strong>嘘の証明者が何回に 1 回すり抜けるか</strong>を実測します。
+      SumCheck の嘘は 121 通り中 21 通りしか通らない。改ざんしたトレースは商多項式が消える。
+      ゲート制約を全部満たしても配線が違えば大積で落ちる。この 3 つが「健全性」の手触りです。
+    </p>
+    <div class="meta-row">
+      <span class="tag">読了 60 分</span>
+      <span class="tag">対話ラボ 3 つ</span>
+      <span class="tag">検問クイズ</span>
+      <span class="tag">前提は Week 3</span>
+      <span class="tag">外部通信なし</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================ 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>Week 3 の Schnorr は、何を渡していたのか</h2>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          先週の課題は、楕円曲線の上で <strong>「秘密鍵 x を知っている」ことを、x を見せずに納得させる</strong>
+          3 手の会話を実装するものでした。数式が多くて全体が見えにくかったので、
+          まず<strong>誰が何を持っていて、何を送り、何を確かめたのか</strong>だけを 1 枚にします。
+        </p>
+        <pre>公開されているもの: 生成点 G、公開鍵 P = x·G   （x は証明者だけが知る）
+
+証明者                                     検証者
+r をその場の乱数で選ぶ
+R = r·G            ── R を送る ──▶
+                   ◀── e を送る ──          e をその場の乱数で選ぶ
+s = r + e·x        ── s を送る ──▶          s·G == R + e·P ?　を計算して比べる</pre>
+        <p>
+          検証者は x を知りません。それでも右辺 <code>R + e·P</code> は、受け取った R と、
+          自分で選んだ e と、公開されている P だけで計算できます。左辺 <code>s·G</code> も、
+          受け取った s と公開の G だけで計算できます。<strong>両辺が同じ点になるのは、
+          s の中に本当に x が入っているときだけ</strong>です（<code>s·G = (r + e·x)·G = R + e·P</code>）。
+        </p>
+        <p>
+          x が漏れないのは、<code>s = r + e·x</code> の x が<strong>毎回違う乱数 r で覆われている</strong>から。
+          そして r を 2 回使い回すと、2 本の s の差から x が割り出せてしまう。
+          先週の「nonce 再利用で鍵が漏れる」テストはこれを実演していました。
+        </p>
+        <p>
+          今週の問いは、ここから一段抽象に上がります。<strong>「x を知っている」を渡せたなら、
+          「この計算全体を正しく実行した」も同じように渡せないか。</strong>
+          そのために「証明」という言葉そのものを、いったん分解します。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">講義の最初の問い — 電子署名とゼロ知識証明の違いは？</p>
+          <p class="strong-line">同じ数式を、違う目的で使っています。</p>
+          <p>
+            上の 3 手で、検証者の e を「ハッシュ値 <code>e = H(R, P, メッセージ)</code>」に置き換えると、
+            会話が要らなくなり、<code>(R, s)</code> だけを渡せば誰でも検証できます。これが <b>Schnorr 署名</b>です
+            （Fiat–Shamir 変換）。
+          </p>
+          <p>
+            <b>署名</b>が渡すのは「この鍵の持ち主が、このメッセージに同意した」という<b>第三者に見せられる証拠</b>。
+            <b>ゼロ知識証明</b>が渡すのは「この主張は真である」という<b>納得</b>で、しかも主張の裏にある秘密
+            （x や、計算の中身）は渡さない。署名は「知識の証明」の特殊な使い方だ、と見ることができます。
+          </p>
+        </div>
+        <div class="callout amber">
+          <p class="eyebrow">前提について</p>
+          <p>
+            このノートは Week 3 の 3 手（上の図）が読めれば進めます。有限体・多項式の割り算・
+            ラグランジュ補間は本文で数値を入れて追いますが、不安があれば
+            <a href="https://susumutomita.github.io/advanced-cryptography-note/week0/index.html">土台編</a>と
+            <a href="https://susumutomita.github.io/advanced-cryptography-note/week3/index.html">Week 3 ノート</a>の
+            後半（多項式と commitment の地図）を先にどうぞ。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">前提 1</p>
+      <h2>証明とは何か — 5 つのパートに分ける</h2>
+      <p>
+        「証明」は数学の専門用語ではなく、日常で毎日やっていることです。年齢を示すために身分証を出す。
+        経費のために領収書を出す。ここに数学もゼロ知識も要りません。講義はまず、この日常の証明を
+        <strong>5 つのパートに分解</strong>するところから始めます。
+      </p>
+    </div>
+
+    <div class="parts">
+      <div class="part"><span class="pn">1</span><span class="pt">証明者（Prover）</span><span class="pd">主張が真だと納得させたい側。秘密や手間をかけた計算を持っている。</span></div>
+      <div class="part"><span class="pn">2</span><span class="pt">証明方法</span><span class="pd">証拠をどう作るか。身分証を出す、領収書を保管する、計算の記録を残す。</span></div>
+      <div class="part"><span class="pn">3</span><span class="pt">証明対象</span><span class="pd">何を主張しているか。「20 歳以上」「この支出は業務」「この出力は正しい」。</span></div>
+      <div class="part"><span class="pn">4</span><span class="pt">検証方法</span><span class="pd">証拠をどう確かめるか。写真と顔を見比べる、宛名と日付を見る、式を計算し直す。</span></div>
+      <div class="part"><span class="pn">5</span><span class="pt">検証者（Verifier）</span><span class="pd">納得する側。時間も能力も限られていて、たいてい証明者より弱い。</span></div>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          この分解をすると、日常の証明の弱点が見えます。<strong>身分証は発行元を信頼している</strong>し、
+          <strong>領収書は偽造できる</strong>し、<strong>アリバイは証言者を信頼している</strong>。
+          検証方法のどこかに「誰かを信じる」が入っています。
+        </p>
+        <p>
+          数学的証明が優れているのは、<strong>検証方法が機械的</strong>で、<strong>証明者を信じる必要がない</strong>ことです。
+          「s·G と R + e·P を計算して比べる」は、誰がやっても同じ結果になります。
+          検証者は証明者の人柄も、計算環境も、発行元も信じなくてよい。<strong>式だけを信じればよい。</strong>
+        </p>
+        <p>
+          ただし数学的証明にも 1 つ、日常の証明と同じ弱点が残っています。
+          <strong>証明が長いと、検証にも時間がかかる</strong>ことです。
+          1 万行の計算が正しいと確かめるのに 1 万行読み直すなら、証明者と検証者の手間は同じ。
+          「弱い検証者が、強い証明者の主張を、短時間で確かめる」ためには、
+          <strong>読まなくても納得できる仕掛け</strong>が要ります。それが次の節です。
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">Week 3 の 3 手を 5 パートに当てはめると</p>
+        <dl class="kv">
+          <dt>証明者</dt><dd>x を知っている人</dd>
+          <dt>証明方法</dt><dd>R = rG を送り、e を受けて s = r + e·x を返す</dd>
+          <dt>証明対象</dt><dd>「P = x·G となる x を知っている」</dd>
+          <dt>検証方法</dt><dd>s·G == R + e·P を計算して比べる</dd>
+          <dt>検証者</dt><dd>x を知らない人（誰でもよい）</dd>
+        </dl>
+        <p class="strong-line">
+          今週はこの 5 パートのうち「証明対象」を「x を知っている」から「計算 f を正しく実行した」に広げます。
+          証明方法と検証方法は、そのぶん複雑になります。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 3 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">前提 2</p>
+      <h2>計算複雑性 — 「解くのは大変、確かめるのは楽」を物差しにする</h2>
+      <p>
+        「証明が長いと検証も長い」を破るために、まず<strong>計算にも難しさがある</strong>ことを
+        物差しにします。難しさは、入力サイズ n に対して<strong>手数がどう増えるか</strong>で測ります。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>複雑性 = 計算にかかる理論的なリソース</h4>
+        <div class="body">
+          <p>
+            時間（ステップ数）、空間（メモリ）、それに証明の話で効いてくる<strong>通信量</strong>と
+            <strong>回路サイズ</strong>。n が 2 倍になったとき手数が 2 倍で済むのが <code>O(n)</code>、
+            2 乗になるのが <code>O(n²)</code>、2 倍ごとに倍々になるのが <code>O(2ⁿ)</code>。
+          </p>
+          <p class="why">
+            <b>Week 3 の double-and-add がまさにこの話でした。</b>k·G を「G を k 回足す」と
+            <code>O(k)</code>、2 進で見て倍々に作ると <code>O(log k)</code>。secp256k1 の k ≈ 2²⁵⁶ では
+            前者は終わらず、後者は 10 ms で終わります。<b>同じ答えでも、手数の増え方が違えば
+            「できる／できない」が変わる。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>P と NP — 「解ける」と「確かめられる」は別</h4>
+        <div class="body">
+          <p>
+            <strong>P</strong> は、多項式時間（<code>O(n)</code>、<code>O(n²)</code>、…）で
+            <strong>答えを見つけられる</strong>問題の集まり。<strong>NP</strong> は、答えの候補（証拠、witness）を
+            渡されたときに、多項式時間で<strong>正しいと確かめられる</strong>問題の集まりです。
+          </p>
+          <p>
+            講義の例はグラフの 3 彩色でした。「隣り合う頂点が同じ色にならないように 3 色で塗れるか」。
+            塗り方を<strong>見つける</strong>のは総当たりだと <code>3ⁿ</code> 通り。
+            塗り方を<strong>確かめる</strong>のは辺の数だけ色を見比べればよい。
+            実際に講義のグラフ（ピーターセングラフ、頂点 10・辺 15）で数えました。
+          </p>
+          <pre>総当たりで試した塗り方   : 59049 通り（3¹⁰）
+そのうち条件を満たすもの : 120 通り
+1 つの塗り方を検証する手数 : 15 回（辺ごとに「両端が違う色か」を見るだけ）</pre>
+          <p class="why">
+            <b>ここが今週いちばん大事な一文です。</b>NP は「証拠を渡せば、弱い検証者でも速く確かめられる」問題の集まり。
+            つまり <b>NP は、最も標準的な証明システムそのもの</b>です。証明者は無限に強くてよい（塗り方を見つける）。
+            検証者は多項式時間しか使えない（塗り方を確かめる）。<b>Week 3 の「x を知っている」も、
+            「回路を正しく実行した」も、全部この形</b>に収まります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>NP に条件を足していくと、現代の証明システムになる</h4>
+        <div class="body">
+          <p>
+            NP のままでは、証拠（塗り方、計算の記録）を<strong>丸ごと</strong>渡すので、検証は証拠の長さに比例します。
+            ここに 3 つの材料を足します。
+          </p>
+          <div class="pipe">
+            <div class="pipe-box on"><span class="t">対話</span><span class="s">Interaction</span></div>
+            <span class="pipe-arrow">＋</span>
+            <div class="pipe-box on"><span class="t">ランダム性</span><span class="s">Randomness</span></div>
+            <span class="pipe-arrow">＋</span>
+            <div class="pipe-box on"><span class="t">オラクル</span><span class="s">Oracle access</span></div>
+          </div>
+          <div class="pipe-tools">
+            <div class="pipe-tool">IP: 対話 + ランダム性 → PSPACE まで届く</div>
+            <div class="pipe-tool">PCP: ランダム性 + オラクル → NP と同じ（証拠の一部だけ読む）</div>
+            <div class="pipe-tool on">IOP: 3 つ全部 → 現代の ZK の主流</div>
+          </div>
+          <p class="why">
+            <b>PCP 定理は驚くべき主張です。</b>NP の証拠は、書き方を工夫すれば
+            <b>「検証者がランダムに数か所だけ読めば十分」な形に書き直せる</b>。1 万行の証明を 1 万行読む必要はない。
+            <b>ただし証明者があとから書き換えられないこと</b>が条件で、それを保証するのが「オラクル」——
+            現実には<b>コミットメント</b>（Merkle 木や KZG）です。<b>先週の commitment は、ここで使うために出てきました。</b>
+          </p>
+          <p class="why">
+            <b>対話型と非対話型の使い分け</b>（講義の Q）。対話型は「特定の検証者を、その場で」納得させるのに向き、
+            非対話型（Fiat–Shamir で e をハッシュにしたもの）は「誰でも、あとから、オンチェーンで」検証できる。
+            先週の Schnorr → 署名の変換と、まったく同じ手です。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 4 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">前提 3</p>
+      <h2>証明システムに求める性質 — 信頼性の軸と、スケーラビリティの軸</h2>
+    </div>
+    <div class="split">
+      <div class="prose">
+        <p>
+          <strong>完全性（Completeness）</strong>: 主張が真なら、正直な証明者は必ず通る。
+          <strong>健全性（Soundness）</strong>: 主張が偽なら、どんな証明者も（ほぼ）通らない。
+          Week 3 で「simulator の会話も受理される」を見たとき、この 2 つに加えて
+          <strong>ゼロ知識性</strong>（会話から秘密が漏れない）を分けて考えました。今週も同じ 3 本柱です。
+        </p>
+        <p>
+          今週新しく加わるのが<strong>スケーラビリティの軸</strong>です。証明を作る時間、検証する時間、証明のサイズ、鍵のサイズ。
+          講義の問い「証明者向けと検証者向けの最適化、どちらが重要？」には両方の答えがあります。
+          <strong>検証者</strong>は「多数・弱い端末・オンチェーンでガス代を払う」ので、検証コストと証明サイズが小さいほど使い道が広がる。
+          一方で<strong>証明者</strong>のコストが実用範囲に収まらなければ、そもそも証明が作れない。
+          スキームの違いは、ほぼこの<strong>トレードオフをどこに置くか</strong>の違いです。
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">「主張の真偽」と「証明可能性」を一致させる</p>
+        <p>
+          スライドの右側の図は、この 2 つを上下に置いて双方向の矢印で結んでいました。
+          完全性は「真 → 証明できる」、健全性は「証明できる → 真」。<b>両方向が揃って初めて、
+          「証明が通った」を「主張が真」と読み替えてよい</b>。
+        </p>
+        <p>
+          ただし現代のスキームの健全性は<b>確率的</b>です。嘘の証明者は「たまに」通る。
+          その確率が 2⁻¹⁰⁰ なら実用上ゼロ。<b>このノートのラボは体を小さく（F₁₁、F₁₇）してあるので、
+          その「たまに」を数えられます。</b>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">部品表</p>
+      <h2>ゼロ知識証明 = 算術化 + コミットメント + 証明システム</h2>
+      <p>
+        講義は GKR・STARK・PLONK の 3 つを、毎回同じ 3 つの箱で説明していました。
+        箱の名前を先に固定しておくと、どのスキームも「箱の中身が違うだけ」に見えてきます。
+      </p>
+    </div>
+
+    <div class="parts">
+      <div class="part"><span class="pn">A</span><span class="pt">算術化（Arithmetization）</span><span class="pd">証明したい計算を、+ と × だけの式（多項式）に翻訳する。Week 1 の算術回路の続き。</span></div>
+      <div class="part"><span class="pn">B</span><span class="pt">コミットメントスキーム</span><span class="pd">翻訳した多項式を「あとから書き換えられない箱」に入れる。オラクルの実体。</span></div>
+      <div class="part"><span class="pn">C</span><span class="pt">証明システム</span><span class="pd">箱の中身について、検証者がランダムな質問を投げて少ない手数で納得する手順。</span></div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data cmp">
+        <thead><tr><th></th><th>GKR（2008）</th><th>STARK（2018）</th><th>PLONK（2019）</th></tr></thead>
+        <tbody>
+          <tr><td>系統</td><td>IP ベース</td><td>IOP ベース ①</td><td>IOP ベース ②（多項式 IOP）</td></tr>
+          <tr><td>A. 算術化</td><td>レイヤー付き算術回路 → <b>多重線形多項式</b>（MLE）</td><td>実行トレース → <b>AIR</b>（遷移多項式と制約多項式）</td><td>ゲート表 → <b>Plonkish</b>（11 本の一変数多項式）</td></tr>
+          <tr><td>B. コミットメント</td><td>元論文では<b>なし</b>（後の Virgo/Libra が FRI/KZG を導入）</td><td><b>Merkle 木</b>ベースの多項式コミットメント</td><td><b>KZG</b>（楕円曲線・ペアリング）ベースの多項式コミットメント</td></tr>
+          <tr><td>C. 証明システム</td><td><b>SumCheck</b> をレイヤーごとに</td><td><b>FRI</b>（商多項式の低次数性）</td><td>KZG の開示証明 + <b>ゼロテスト</b>と<b>大積</b></td></tr>
+          <tr><td>ゼロ知識化の手</td><td>多項式のマスキング + コミットメント</td><td>ブラインド多項式 + Merkle のソルト</td><td>ブラインド多項式（witness・配線・商）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">このノートの読み方</p>
+      <p>
+        以下、3 スキームとも<b>講義と同じトイ計算</b> <code>f(x₁,x₂,x₃,x₄) = (x₁ + x₂) + (x₃·x₄)</code>、
+        入力 <code>(3, 1, 2, 4)</code> を使います。GKR は F₁₁ で答え <code>4 + 8 = 12 ≡ 1</code>、
+        STARK と PLONK は F₁₇ で答え <code>12</code>。同じ計算が、3 通りの多項式に翻訳されるのを見てください。
+      </p>
+      <p class="strong-line">
+        各節の最後に「壊した実測」を置きました。嘘の証明者がどこで、どのくらいの確率で落ちるかを数えています。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 6 : GKR -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スキーム 1 / GKR</p>
+      <h2>GKR — 回路をレイヤーに切って、SumCheck で上から降りる</h2>
+      <p>
+        GKR は「証明者は強い、検証者は弱い」を一番素直に形にしたスキームです。
+        回路の<strong>出力側から入力側へ 1 レイヤーずつ</strong>、「このレイヤーの値は正しい」という主張を
+        「1 つ下のレイヤーのある 1 点の値は正しい」という主張に<strong>置き換え</strong>ていきます。
+        置き換えの道具が SumCheck です。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>回路をレイヤーごとの式にする</h4>
+        <div class="body">
+          <pre>L₀ : y  = y₀ + y₁                       出力: 1
+L₁ : y₀ = x₁ + x₂ ,  y₁ = x₃ · x₄        値: 4, 8
+L₂ : x₁, x₂, x₃, x₄ ∈ F₁₁               入力: 3, 1, 2, 4
+
+ゲートに 2 進の番地をつける:  L₁ の 2 個 → 0, 1   L₂ の 4 個 → 00, 01, 10, 11
+f(3,1,2,4) = (3 + 1) + (2 · 4) = 12 ≡ 1 (mod 11)</pre>
+          <p class="why">
+            <b>Week 1 の算術回路そのものです。</b>違いは、レイヤーごとに区切って
+            <b>「各レイヤーの値の表」</b>と<b>「レイヤー間の配線の表」</b>を別々に扱うこと。
+            前者は秘密（witness）、後者は公開（回路の形）です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>表を多項式に伸ばす — MLE（多重線形拡張）</h4>
+        <div class="body">
+          <p>
+            レイヤー 2 の値の表は「番地 (z₁,z₂) → 値」で <code>00→3, 01→1, 10→2, 11→4</code>。
+            これを、<strong>0/1 の格子点では表と一致し、格子の外まで滑らかに伸ばした</strong>唯一の多項式にします。
+            各変数について 1 次（線形）なので「多重線形」です。
+          </p>
+          <pre>W̃₂(z₁,z₂) = 3(1−z₁)(1−z₂) + 1(1−z₁)z₂ + 2z₁(1−z₂) + 4z₁z₂
+           = 3 − z₁ − 2z₂ + 4z₁z₂            ← 展開して整理（mod 11 で係数は 3, 10, 9, 4）
+
+W̃₁(z) = 4(1−z) + 8z = 4 + 4z                 ← レイヤー 1 の表 {0→4, 1→8}
+W̃₀( ) = 1                                     ← レイヤー 0（変数なし）</pre>
+          <p class="why">
+            <b>なぜ 0/1 の外まで伸ばすのか。</b>あとで検証者が <b>0 でも 1 でもないランダムな点</b>で値を聞くからです。
+            表のままなら「番地 2」に値はありませんが、多項式にしておけば W̃₁(2) = 4 + 8 = 12 ≡ 1 が定まる。
+            <b>ランダムな点で聞けるようにすること</b>が、少ない手数で嘘を見つける仕掛けの土台になります。
+          </p>
+          <p>
+            配線の表も多項式にします。レイヤー 0 のゲートは「レイヤー 1 の番地 0 と番地 1 を<strong>足す</strong>」でした。
+            それを式にしたのが g₀ です。
+          </p>
+          <pre>g₀(a, b) = (1−a) · b · ( W̃₁(a) + W̃₁(b) )
+             ↑ (a,b) = (0,1) のときだけ 1、それ以外の格子点では 0
+W̃₀ = Σ_{a,b∈{0,1}} g₀(a,b) = g₀(0,1) = 1·(4 + 8) = 12 ≡ 1  ✓</pre>
+          <p class="why">
+            <b>ここで主張の形が決まります。</b>「レイヤー 0 の値は 1 である」は
+            <b>「ある多項式 g₀ を 0/1 の全組み合わせで足すと 1 になる」</b>という形に書き直された。
+            レイヤーが深くなっても、主張は必ずこの「<b>格子点全部の和</b>」の形になります。
+            格子点は変数の数を k とすると 2ᵏ 個。<b>検証者はこれを全部足したくない。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>SumCheck — 和を全部足さずに、和が正しいと納得する</h4>
+        <div class="body">
+          <p>
+            変数を 1 つずつ「潰し」ます。各ラウンドで証明者は<strong>一変数多項式</strong>を送り、
+            検証者は<strong>2 点の値を足す</strong>だけで前ラウンドと辻褄が合うか見て、
+            <strong>ランダムな点</strong>でその多項式を評価し、それを次ラウンドの「主張」にします。
+          </p>
+          <pre>主張: Σ_{a,b} g₀(a,b) = 1
+
+ラウンド 0（a を潰す）
+  証明者 → p₁(x) = Σ_{b∈{0,1}} g₀(x,b) = g₀(x,0) + g₀(x,1)
+                = 0 + (1−x)·(W̃₁(x) + W̃₁(1)) = (1−x)(12 + 4x)
+                = 12 − 8x − 4x² ≡ 1 + 3x + 7x²  (mod 11)
+  検証者:  p₁(0) + p₁(1) = 1 + 11 = 12 ≡ 1  … 主張と一致 ✓
+           r₁ = 2 を選ぶ → p₁(2) = 1 + 6 + 28 = 35 ≡ 2   ← 次の主張は「g₀(2, b) の b についての和 = 2」
+
+ラウンド 1（b を潰す）
+  証明者 → p₂(y) = g₀(2, y) = (1−2)·y·(W̃₁(2) + W̃₁(y)) = −y(16 + 4y)
+                = −5y − 4y² ≡ 6y + 7y²  (mod 11)
+  検証者:  p₂(0) + p₂(1) = 0 + 13 = 13 ≡ 2  … 前ラウンドの p₁(2) と一致 ✓
+           r₂ = 3 を選ぶ → p₂(3) = 18 + 63 = 81 ≡ 4
+
+最後（自分で 1 点だけ計算する）
+  検証者:  g₀(2, 3) = (1−2)·3·(W̃₁(2) + W̃₁(3)) = −3·(1 + 5) = −18 ≡ 4  … p₂(3) と一致 ✓</pre>
+          <p class="why">
+            <b>検証者がやったこと</b>: 各ラウンドで 2 点の値の足し算と 1 点の評価、最後に g₀ を 1 回だけ評価。
+            <b>4 項の和（本物なら 2ᵏ 項）を一度も足していません。</b>
+            それで納得できる理由は、<b>嘘をつくなら多項式そのものを変えるしかなく、
+            違う多項式は 0/1 以外のほとんどの点で値が違う</b>から。ランダムな r で聞けば高い確率でずれが出ます。
+          </p>
+          <p class="why">
+            <b>ただし最後の 1 行に注意。</b>検証者は g₀(2,3) を計算するのに W̃₁(2) と W̃₁(3) が要ります。
+            これはレイヤー 1 の値の表（秘密）から作る多項式なので、<b>検証者は自分では計算できません</b>。
+            そこで証明者が「W̃₁(2) = 1、W̃₁(3) = 5 です」と<b>主張し</b>、その 2 つが次のレイヤーで確かめる新しい主張になります。
+            <b>「レイヤー 0 の和」が「レイヤー 1 の 2 点の値」に置き換わった</b>——これが「1 段降りる」の正体です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>線形削減 — 2 点の主張を 1 点にまとめる</h4>
+        <div class="body">
+          <p>
+            2 点のまま降りると、次は 4 点、その次は 8 点と倍々に増えます。
+            そこで<strong>2 点を通る直線を引き、W̃₁ をその直線上に制限した一変数多項式 q</strong>を証明者に送らせ、
+            直線上のランダムな 1 点だけを次の主張にします。
+          </p>
+          <pre>2 点 u = 2, v = 3 を通る直線:  l(t) = (1−t)·2 + t·3 = 2 + t
+証明者 → q(t) = W̃₁(l(t)) = 4 + 4(2 + t) = 12 + 4t ≡ 1 + 4t
+検証者:  q(0) = 1 = 主張された W̃₁(2) ✓,  q(1) = 5 = 主張された W̃₁(3) ✓
+         r = 4 を選ぶ → q(4) = 17 ≡ 6 → 新しい主張は「W̃₁(6) = 6」の 1 つだけ</pre>
+          <p class="why">
+            <b>この繰り返しで入力レイヤーまで降りる</b>と、最後の主張は「W̃₂(ある点) = ある値」になります。
+            入力は公開なので、検証者はこれだけは<b>自分で</b>計算して照合できる（入力が秘密ならコミットメントの開示で代える）。
+            <b>回路の深さぶんだけラウンドを重ねて、最後に 1 回だけ本物の値に触る。</b>これが GKR の全体です。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout red">
+      <p class="eyebrow">壊した実測 — 嘘の主張は、何回に 1 回通るか</p>
+      <p>
+        証明者が「レイヤー 0 の値は <b>5</b> だ」と嘘をついたとします。ラウンド 0 の検査
+        <code>p₁(0) + p₁(1) = 5</code> を通すには、本物の p₁ に <code>4·(1−x)</code> を足した偽物を送ればよい
+        （0 で 4、1 で 0 なので和が 4 増える）。ラウンド 1 も同じ手で辻褄を合わせられます。
+        <b>ずれが露見するのは最後の 1 点</b>だけ。
+      </p>
+      <pre>嘘の主張 5 に対して、検証者の (r₁, r₂) を 11 × 11 = 121 通り全部試した結果:
+  受理されてしまう組  : 21 通り  （r₁ = 1 または r₂ = 1 のとき — 偽物の足し分 (1−x) が 0 になる点）
+  嘘が露見する組      : 100 通り
+→ 嘘がすり抜ける確率 21 / 121 ≈ 17%。体を F₁₁ から 2²⁵⁴ 元の体にすると 2 / 2²⁵⁴ ≈ 0。</pre>
+      <p class="strong-line">
+        健全性は「絶対に落ちる」ではなく「ランダムな点で聞くから、ほぼ落ちる」。体の大きさがその確率を決めます。
+        下のラボで、どの (r₁, r₂) が嘘を見逃すかを地図にしました。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 7 : LAB 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 1</p>
+      <h2>SumCheck を回す — 検証者の乱数と、嘘の証明者</h2>
+      <p>
+        レイヤー 0 の SumCheck を F₁₁ で回します。<strong>あなたが検証者</strong>で、r₁ と r₂ を選びます。
+        証明者を「嘘」にすると、主張した値だけを変えて辻褄合わせの多項式を送ってきます。
+        右の地図は、いまの主張に対して 121 通りの (r₁, r₂) のどれが受理してしまうかです。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>設定</h3><span class="eyebrow">F₁₁ / g₀ のレイヤー 0</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>入力 (x₁,x₂,x₃,x₄)</span><span class="hint">回路は同じ、値だけ変える</span></div>
+            <div class="segments" id="sc-in" role="group" aria-label="入力"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>証明者</span><span class="hint">嘘なら主張値を選ぶ</span></div>
+            <div class="segments" id="sc-mode" role="group" aria-label="証明者"></div>
+          </div>
+          <div class="field" id="sc-claim-field">
+            <div class="field-label"><span>主張する値</span><span class="hint">本当の値と違うものを</span></div>
+            <div class="segments" id="sc-claim" role="group" aria-label="主張値"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>r₁（ラウンド 0 の乱数）</span><span class="hint">検証者が選ぶ</span></div>
+            <div class="segments" id="sc-r1" role="group" aria-label="r1"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>r₂（ラウンド 1 の乱数）</span><span class="hint">検証者が選ぶ</span></div>
+            <div class="segments" id="sc-r2" role="group" aria-label="r2"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>受理地図</span><span class="hint">横 r₁ / 縦 r₂。赤 = 受理してしまう</span></div>
+            <div class="heat" id="sc-heat" aria-label="受理地図"></div>
+            <p class="caption" id="sc-heat-note">—</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="sc-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="sc-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">やりとり</p>
+          <div class="flow" id="sc-flow"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 8 : STARK -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スキーム 2 / STARK</p>
+      <h2>STARK — 実行の記録を多項式にして、「割り切れるか」だけを見る</h2>
+      <p>
+        STARK は計算を回路ではなく<strong>プログラムの実行記録（トレース）</strong>として見ます。
+        各ステップの状態を表に書き、「隣り合う行の関係が正しい」を多項式の等式にし、
+        最後は<strong>ある多項式が別の多項式で割り切れるか</strong>という 1 つの問いに落とします。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>計算を実行トレースにする</h4>
+        <div class="body">
+          <pre>f(x₁,x₂,x₃,x₄) = (x₁ + x₂) + (x₃·x₄) ∈ F₁₇,   f(3,1,2,4) = 12
+
+ t   a   m   y        ← a: 加算結果, m: 乗算結果, y: 最終結果
+ 0   0   0   0        初期状態
+ 1   4   0   0        a ← x₁ + x₂ = 4
+ 2   4   8   0        m ← x₃ · x₄ = 8
+ 3   4   8  12        y ← a + m = 12</pre>
+          <p class="why">
+            <b>回路とトレースの違い。</b>回路は「値がどう繋がるか」の図、トレースは「時間ごとに状態がどう変わるか」の表。
+            CPU の命令実行や VM のように「同じ規則を何万ステップも繰り返す」計算は、トレースのほうが自然に書けます。
+            <b>制約は「行と次の行の関係」だけで済み、ステップ数が増えても制約の種類は増えない。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>各列を多項式にする — 評価ドメインと遷移多項式</h4>
+        <div class="body">
+          <p>
+            行番号 t を、そのまま数字ではなく <strong>ω の t 乗</strong>に置きます。F₁₇ で ω = 4 は
+            <code>4⁰=1, 4¹=4, 4²=16, 4³=13, 4⁴=1</code> と 4 回で 1 に戻る（位数 4）ので、
+            4 行の表にぴったりです。この 4 点 <code>H = {1, 4, 16, 13}</code> が<strong>評価ドメイン</strong>。
+          </p>
+          <pre>各列を、H の 4 点を通る 3 次以下の多項式に補間する（ラグランジュ補間）:
+  A(X) = 3 − X − X² − X³         A(1)=0, A(4)=4, A(16)=4, A(13)=4  ✓
+  M(X) = 4 + 6X + 7X³            M(1)=0, M(4)=0, M(16)=8, M(13)=8  ✓
+  Y(X) = 3 + 12X + 14X² + 5X³    Y(1)=0, Y(4)=0, Y(16)=0, Y(13)=12 ✓</pre>
+          <p class="why">
+            <b>なぜ t を ω^t にするのか。</b>「次の行」が <b>X → ωX</b> というただの掛け算になるからです。
+            A(ωX) は「1 行あとの a の値」を表す多項式になり、行と次の行の関係を <b>A(X) と A(ωX) の式</b>で書けます。
+            そして H が「ω の冪」であることが、次のステップの消滅多項式を <b>X⁴ − 1</b> という短い形にします。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>行のあいだの規則を 1 本の制約多項式にまとめる — AIR</h4>
+        <div class="body">
+          <pre>規則（遷移制約）:
+  X = ω⁰ の行で  A(ωX) − 4 = 0                 （次の a は x₁+x₂ = 4）
+  X = ω¹ の行で  M(ωX) − 8 = 0                 （次の m は x₃·x₄ = 8）
+  X = ω² の行で  Y(ωX) − A(X) − M(X) = 0       （次の y は a + m）
+
+S_i(X) を「H の中で ω^i でだけ 1、他では 0」の選択多項式として 1 本に足す:
+  C(X) = S₀(X)(A(ωX) − 4) + S₁(X)(M(ωX) − 8) + S₂(X)(Y(ωX) − A(X) − M(X))
+       = 2 − 5X − 5X² − 2X⁴ + 5X⁵ + 5X⁶      （mod 17 では 2 + 12X + 12X² + 15X⁴ + 5X⁵ + 5X⁶）
+  C(1) = C(4) = C(16) = C(13) = 0             ← H の全点で 0。ここが「トレースが正しい」の言い換え</pre>
+          <p class="why">
+            <b>スライドの「= 0」は「多項式として 0」ではなく「H の全点で 0」の意味です。</b>
+            C(X) 自体は 6 次の立派な多項式で、H の外では 0 になりません。
+            <b>「H の全点で 0」を検証者がどう確かめるか</b>——4 点なら全部評価すればよいが、
+            2²⁰ 行のトレースでは無理。次の一手が STARK の要です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>因数定理 — 「全点で 0」を「割り切れる」に変える</h4>
+        <div class="body">
+          <p>
+            多項式 C が点 h で 0 なら、C は (X − h) で割り切れる（因数定理）。
+            H の全点で 0 なら、<strong>全部の (X − h) の積で割り切れる</strong>。
+            その積が消滅多項式 <code>Z_H(X) = Π_{h∈H}(X − h) = X⁴ − 1</code> です
+            （H が 1 の 4 乗根の集合だから、こんなに短い）。
+          </p>
+          <pre>Q₀(X) = C(X) / Z_H(X) = C(X) / (X⁴ − 1) = 5X² + 5X − 2      余り 0
+検算: (X⁴ − 1)(5X² + 5X − 2) = 5X⁶ + 5X⁵ − 2X⁴ − 5X² − 5X + 2 = C(X) ✓</pre>
+          <p class="why">
+            <b>問いが入れ替わりました。</b>「C は H の全点で 0 か」→「Q₀ = C / Z_H は<b>多項式か</b>（割り切れて余りが出ないか）」。
+            さらに Q₀ が多項式なら次数は <b>deg C − 4 = 2</b> 以下のはず。
+            だから検証者が確かめるべきことは <b>「証明者が持っている Q₀ は、次数 2 以下の多項式か」</b>。
+            トレースが 1 か所でも間違っていれば、C は H のどこかで 0 にならず、Z_H で割り切れず、
+            <b>Q₀ は多項式にならない</b>（点ごとに値は作れても、低い次数の多項式にはならない）。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>Merkle 木でコミットする — あとから書き換えられないように</h4>
+        <div class="body">
+          <p>
+            証明者は Q₀ を、H より広い評価ドメイン（例: g = 2 の冪、8 点 <code>{1,2,4,8,16,15,13,9}</code>）で評価し、
+            その値を葉にした Merkle 木を作り、<strong>根だけ</strong>を検証者に渡します。
+            検証者があとで「g³ の値を見せて」と言えば、証明者は葉と経路を出す。根が固定されているので値は差し替えられません。
+          </p>
+          <p class="why">
+            <b>ここが「オラクル ≈ コミットメント」の実体です。</b>PCP の「検証者が証明の一部だけ読む」を実現するには、
+            証明者が<b>質問を見てから証明を書き換えられない</b>ことが必要。Merkle 根がそれを保証する。
+            ハッシュだけでできるので<b>信頼設定が要らず（透明）</b>、量子計算にも比較的強い。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>FRI — 「次数が低い」を、折り畳んで確かめる</h4>
+        <div class="body">
+          <p>
+            Q₀ を偶数次と奇数次に分けると <code>Q₀(X) = Q_even(X²) + X·Q_odd(X²)</code>。
+            検証者がランダムな β を送り、証明者は <code>Q₁(Y) = Q_even(Y) + β·Q_odd(Y)</code> を作ってまたコミット。
+            <strong>次数が半分になる</strong>ので、繰り返すと定数になります。
+          </p>
+          <pre>Q₀(X) = 5X² + 5X − 2 = (5X² − 2) + X·5      → Q_even(Y) = 5Y − 2,  Q_odd(Y) = 5
+β₁ = 3:  Q₁(Y) = (5Y − 2) + 3·5 = 5Y + 13         次数 2 → 1
+β₂ = 5:  Q₂    = 13 + 5·5 = 38 ≡ 4                次数 1 → 0（定数。これは平文で送る）
+
+クエリ（検証者が x = 8 を選ぶ）:
+  証明者が Q₀(8) = 1 と Q₀(−8) = Q₀(9) = 6 を Merkle 経路つきで開示
+  検証者:  Q_even(8²) = (Q₀(8) + Q₀(9)) / 2  = 7·9  ≡ 12
+           Q_odd(8²)  = (Q₀(8) − Q₀(9)) / (2·8) = −5·16 ≡ 5
+           → Q₁(8²=13) は 12 + 3·5 = 27 ≡ 10 のはず。Q₁ の Merkle 開示 5·13 + 13 = 78 ≡ 10 と一致 ✓</pre>
+          <p class="why">
+            <b>x と −x の 2 点だけで偶奇部分が復元できる</b>のがミソです（x² が同じだから）。
+            各ラウンドで数か所クエリすれば、「本当に半分の次数の多項式に折り畳まれているか」が
+            Schwartz–Zippel の確率で確かめられる。<b>検証者は Q₀ を丸ごと読まない。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout red">
+      <p class="eyebrow">壊した実測 — トレースを 1 マス書き換える</p>
+      <pre>y₃ を 12 → 13 に改ざん（他はそのまま）
+  C(X) は H の上で [0, 0, 1, 0]      ← X = ω² の行の規則 y₃ = a₂ + m₂ が破れた
+  C(X) を X⁴ − 1 で割った余り = 13 + 4X + 13X² + 4X³   ← 0 でない。商多項式が存在しない
+  それでも「点ごとに C/Z_H を作って 8 点分」を証明者が送ったとして、その 8 点を補間すると
+    次数 7 の多項式になる（正直なら次数 2）→ FRI の低次数テストが落ちる
+
+a を全部 5、y₃ を 13 にした「自己整合」な改ざん（4+8=12 の代わりに 5+8=13）
+  C(X) は H の上で [1, 0, 0, 0]      ← 今度は X = ω⁰ の行の規則 a₁ = x₁ + x₂ = 4 が破れる
+  → 公開入力から決まる 4 が制約に焼き込まれているので、内部だけ整合させても逃げられない</pre>
+      <p class="strong-line">
+        改ざんの場所がどこでも、必ず「割り切れない」に現れる。検証者はどのマスが変わったかを知らなくてよい。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 9 : LAB 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 2</p>
+      <h2>トレースを改ざんして、商多項式が消えるのを見る</h2>
+      <p>
+        F₁₇ のトレース（公開入力 3, 1, 2, 4）のマスを直接書き換えられます。
+        書き換えるたびに、遷移多項式 → 制約多項式 → Z_H で割った商と余り → コセット上の低次数テスト、
+        そして商が存在するときは FRI の折り畳みまで計算し直します。
+      </p>
+      <p>
+        1 つ注意があります。講義のトイ AIR が縛っているのは <code>a₁ = x₁+x₂</code>、<code>m₂ = x₃·x₄</code>、
+        <code>y₃ = a₂+m₂</code> の 3 本だけです。<strong>制約の無いマス（y₁ など）は書き換えても通ります</strong>——
+        Week 1 で見たアンダー制約そのもの。実物の AIR は境界制約（初期状態が 0）と「値を保持する」制約
+        （<code>A(ωX) − A(X) = 0</code> など）を足して全マスを縛ります。「y₁ を 5 に」を押して確かめてください。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>実行トレース</h3><span class="eyebrow">F₁₇ / ω = 4 / H = {1,4,16,13}</span></div>
+        <div class="card-body">
+          <div class="table-scroll" style="border:none;">
+            <table class="trace" id="st-table">
+              <thead><tr><th>t</th><th>X = ω^t</th><th>a</th><th>m</th><th>y</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="btn-row">
+            <button class="btn-sm" type="button" data-preset="honest">正しいトレースに戻す</button>
+            <button class="btn-sm" type="button" data-preset="y13">y₃ を 13 に</button>
+            <button class="btn-sm" type="button" data-preset="m9">m を 9 に</button>
+            <button class="btn-sm" type="button" data-preset="a5">a を 5・y₃ を 13 に（自己整合）</button>
+            <button class="btn-sm" type="button" data-preset="y1">y₁ を 5 に（制約の無いマス）</button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>FRI の β₁</span><span class="hint">検証者の乱数</span></div>
+            <div class="segments" id="st-b1" role="group" aria-label="beta1"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>FRI の β₂</span><span class="hint">検証者の乱数</span></div>
+            <div class="segments" id="st-b2" role="group" aria-label="beta2"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>クエリ点 x</span><span class="hint">評価ドメイン g = 2 の冪</span></div>
+            <div class="segments" id="st-x" role="group" aria-label="query"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="st-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="st-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">遷移多項式 → 制約多項式 → 商</p>
+          <pre id="st-poly">—</pre>
+          <p class="eyebrow">FRI</p>
+          <pre id="st-fri">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 10 : PLONK -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スキーム 3 / PLONK</p>
+      <h2>PLONK — ゲートを表にして、「型」と「配線」を別々の多項式で縛る</h2>
+      <p>
+        PLONK は回路を<strong>ゲート 1 個 = 表の 1 行</strong>として並べます。各行に「入力左・入力右・出力」の
+        3 つの値と、「このゲートは足し算か掛け算か」を表す係数を置き、行の中の関係と、行をまたぐ配線を
+        <strong>別々の多項式の等式</strong>で確かめます。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>回路をゲートの表にする — 11 本のベクトル</h4>
+        <div class="body">
+          <pre>            witness（秘密）      selector（公開: 回路の型）         wiring（公開: 配線）
+            L    R    O          Q_L  Q_R  Q_M  Q_O  Q_C           σ_L      σ_R      σ_O
+gate 0 (+)  3    1    4           1    1    0   −1    0            ω⁰k₀     ω⁰k₁     ω⁰k₂ →(L,gate2)
+gate 1 (×)  2    4    8           0    0    1   −1    0            ω¹k₀     ω¹k₁     ω¹k₂ →(R,gate2)
+gate 2 (+)  4    8   12           1    1    0   −1    0            ω²k₀→(O,gate0)  ω²k₁→(O,gate1)  ω²k₂
+
+ゲート方程式（全行で 0 になるべき）:
+  Q_L·L + Q_R·R + Q_M·L·R + Q_O·O + Q_C = 0
+  gate 0:  3 + 1 + 0 − 4 + 0 = 0 ✓     gate 1:  0 + 0 + 8 − 8 + 0 = 0 ✓     gate 2:  4 + 8 + 0 − 12 + 0 = 0 ✓</pre>
+          <p class="why">
+            <b>1 本の式で足し算も掛け算も表せる</b>のがセレクターの役目です。(Q_L,Q_R,Q_M,Q_O) = (1,1,0,−1) なら
+            L + R − O = 0 で足し算、(0,0,1,−1) なら L·R − O = 0 で掛け算。<b>回路の形はセレクターに、値は witness に</b>分かれる。
+            11 本のベクトルはそれぞれ、行番号 ω⁰, ω¹, ω² を通る一変数多項式にラグランジュ補間されます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>配線 — 「gate 0 の出力は gate 2 の左入力と同じ」をどう縛るか</h4>
+        <div class="body">
+          <p>
+            ゲート方程式は行の中しか見ません。gate 2 の L に 4 でなく 5 を書き、O を 13 にしても、
+            <code>5 + 8 − 13 = 0</code> で gate 2 の式は通ってしまう。
+            <strong>行をまたぐ「同じ値であるべき場所」</strong>を縛るのがコピー制約です。
+          </p>
+          <p>
+            各マスに番地 <code>ω^行 · k_列</code>（k₀, k₁, k₂ は列を区別する定数）をつけ、
+            「同じ値であるべきマス」を巡回置換 σ で入れ替えます。すると
+            <strong>「マスの (値, 番地) の集まり」と「(値, σ(番地)) の集まり」が、集合として同じ</strong>ことが配線の正しさそのもの。
+          </p>
+          <pre>集合の一致を 1 個の数で確かめる（大積 / grand product）:
+  検証者がランダムな β, γ を選ぶ
+  Π_マス (値 + β·番地 + γ)  と  Π_マス (値 + β·σ(番地) + γ)  が等しいか
+
+F₁₀₁、ω = 10、k = (1,2,3)、β = 5、γ = 7 で計算すると（行ごとの積 f_i / g_i と累積）:
+  gate 0:  f = 51,  g = 4    累積 51/4          = 38
+  gate 1:  f = 87,  g = 21   累積 38·87/21      = 42
+  gate 2:  f = 19,  g = 91   累積 42·19/91      = 1   ← 一周して 1 に戻る = 集合が一致</pre>
+          <p class="why">
+            <b>累算器 p(X)</b> は「p(ω⁰) = 1、p(ω^{i+1}) = p(ω^i)·f_i/g_i」という<b>行ごとの漸化式</b>で、
+            最後に 1 に戻ることを <b>p(ωX)·g(X) − p(X)·f(X) = 0（H の全点で）</b>という<b>ゼロテスト</b>にして、
+            STARK と同じく Z_H で割った商を作ります。<b>「H の全点で 0 ⇔ Z_H で割り切れる」は、ここでも同じ道具です。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>KZG — 多項式を楕円曲線の 1 点にして、開示を 1 回の等式で確かめる</h4>
+        <div class="body">
+          <pre>Setup（信頼設定）:  秘密の τ を選び、SRS = { τ·g₁, τ²·g₁, …, τᵈ·g₁, g₂, τ·g₂ } を公開して τ は捨てる
+Commit:            Com_f = f(τ)·g₁    ← τ を知らなくても Σ cᵢ·(τⁱ·g₁) で作れる（Week 3 の「スカラー倍」）
+Open（α で開く）:   q(X) = (f(X) − f(α)) / (X − α)   ← f(α) が本当の値なら割り切れる（また因数定理）
+                   Com_q = q(τ)·g₁
+Verify:            f(τ) = (τ − α)·q(τ) + f(α) を、ペアリングで「指数の中の掛け算」として確認
+                   e(Com_f − f(α)·g₁, g₂) = e(Com_q, τ·g₂ − α·g₂)</pre>
+          <p class="why">
+            <b>証明が短い理由</b>: 多項式が何次でも、コミットメントは楕円曲線の点 1 個（数十バイト）。
+            <b>信頼設定が要る理由</b>: τ を誰かが覚えていれば偽のコミットメントが作れる。だから MPC 儀式で「誰も τ を知らない」状態にする。
+            <b>Week 3 ノート後半の「f(X) = X² + 1 について f(2) = 5 を開く」</b>が、この Open の最小例です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>3 種類の制約を、それぞれ多項式の等式にして KZG で開く</h4>
+        <div class="body">
+          <pre>インプット制約:  公開入力に対応するマスの値を KZG の開示証明で見せる
+ゲート制約:      f(X) = Q_L(X)L(X) + Q_R(X)R(X) + Q_M(X)L(X)R(X) + Q_O(X)O(X) + Q_C(X)  が H で 0
+                 → Q(X) = f(X) / Z_H(X) の存在を、ランダム点での開示で確かめる
+コピー制約:      累算器 p(X) について p(ωX)g(X) − p(X)f(X) が H で 0（p(ω⁰) = 1 も）
+                 → 同じくゼロテスト → 商多項式 → ランダム点での開示</pre>
+          <p class="why">
+            <b>検証者の仕事は最終的に「数個のランダム点で、数個の多項式の値が等式を満たすか」だけ</b>になり、
+            ペアリングの計算が数回で済む。証明サイズも検証時間も回路の大きさによらない（O(1)）。
+            そのぶん<b>証明者は 11 本の多項式を作って FFT と MSM を回す</b>ので重い。ここがトレードオフです。
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout red">
+      <p class="eyebrow">壊した実測 — ゲート制約は全部通し、配線だけ違う witness</p>
+      <pre>gate 2 を (L, R, O) = (5, 8, 13) にする
+  ゲート方程式:  gate 0: 0 ✓   gate 1: 0 ✓   gate 2: 5 + 8 − 13 = 0 ✓   ← 3 行とも通ってしまう
+  コピー制約:    gate 0 の O = 4  ≠  gate 2 の L = 5   ✗
+  大積（F₁₀₁, β = 5, γ = 7）:  左辺 88 ≠ 右辺 75   ✗
+  β, γ を 10100 通り全部試すと、この偽 witness を受理してしまう組は 681 通り（≈ 6.7%）
+  → 実際の 254 ビット体では ≈ 9 / 2²⁵⁴ ≈ 0</pre>
+      <p class="strong-line">
+        ゲート制約は「各行が正しい型で計算されている」しか言わない。配線がなければ、行ごとに勝手な値を置いても通る。
+        2 種類の制約が揃って初めて「この回路をこの入力で実行した」になります。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 11 : LAB 3 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 3</p>
+      <h2>PLONK の表を書き換える — ゲート制約と配線制約は別の目で見る</h2>
+      <p>
+        witness の 9 マス（F₁₇）を書き換えられます。行ごとのゲート方程式、2 本のコピー制約、
+        そして β, γ を変えながらの大積（F₁₀₁）を同時に計算します。
+        <strong>ゲート制約が全部緑でも大積が赤になる表</strong>を作ってみてください。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>ゲート表</h3><span class="eyebrow">値は F₁₇ / 大積は F₁₀₁</span></div>
+        <div class="card-body">
+          <div class="table-scroll" style="border:none;">
+            <table class="trace" id="pk-table">
+              <thead><tr><th></th><th>型</th><th>L</th><th>R</th><th>O</th><th>セレクター</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="btn-row">
+            <button class="btn-sm" type="button" data-preset="honest">正しい表に戻す</button>
+            <button class="btn-sm" type="button" data-preset="bad">gate 2 を (5, 8, 13) に</button>
+            <button class="btn-sm" type="button" data-preset="swap">gate 2 の L と R を入れ替える</button>
+            <button class="btn-sm" type="button" data-preset="wrongo">gate 1 の O を 9 に</button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>β</span><span class="hint">検証者の乱数（F₁₀₁）</span></div>
+            <div class="segments" id="pk-beta" role="group" aria-label="beta"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>γ</span><span class="hint">検証者の乱数（F₁₀₁）</span></div>
+            <div class="segments" id="pk-gamma" role="group" aria-label="gamma"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="pk-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="pk-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">ゲート制約（行の中）</p>
+          <div class="flow" id="pk-gates"></div>
+          <p class="eyebrow">コピー制約（行をまたぐ）</p>
+          <div class="flow" id="pk-copies"></div>
+          <p class="eyebrow">大積 — 累算器の 1 周</p>
+          <pre id="pk-grand">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 12 : ZK -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ゼロ知識性</p>
+      <h2>証明スキームのゼロ知識化 — 多項式にランダムを足して、H の上だけ元のまま残す</h2>
+      <p>
+        ここまでの 3 スキームは、実は<strong>ゼロ知識ではありません</strong>。検証者は「主張が真」と納得できますが、
+        途中で開示された多項式の値（Q₀(8) = 1 など）は witness から作られた値なので、集めれば witness の情報が漏れます。
+        講義の後半はこれを塞ぐ手です。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>ブラインド多項式 — H の上では 0、外ではランダム</h4>
+        <div class="body">
+          <pre>f̃(X) := f(X) + Z_H(X)·R(X)        R(X) は証明者が毎回選ぶランダム多項式
+
+例（F₁₇、f = Y(X) = 3 + 12X + 14X² + 5X³、R(X) = 6 + 2X）:
+  f̃(X) = 14 + 10X + 14X² + 5X³ + 6X⁴ + 2X⁵
+  H の上:   X=1: (0, 0)  X=4: (0, 0)  X=16: (0, 0)  X=13: (12, 12)   ← (f, f̃) 一致。Z_H が 0 だから
+  H の外:   X=2: (4, 1)  X=3: (11, 2)  X=5: (1, 6)                    ← 別の値。R によって毎回変わる</pre>
+          <p class="why">
+            <b>検証者が値を聞くのは H の外のランダムな点</b>でした（Schwartz–Zippel のため）。
+            そこでは f̃ の値は R で覆われていて、f の情報を含まない。
+            <b>そして制約の検査は H の上でしか見ていない</b>ので、f を f̃ に差し替えても「H の全点で 0」は保たれる。
+            Week 3 の <code>s = r + e·x</code> で x を r が覆っていたのと同じ構図で、
+            <b>覆う量が数 1 個から多項式 1 本に増えた</b>だけです。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>スキームごとに、何をブラインドするか</h4>
+        <div class="body">
+          <p>
+            <strong>STARK</strong>: 遷移多項式と制約多項式。FRI で開示する回数ぶんのランダムネスが要り、
+            Merkle の葉にもソルトを混ぜる（葉のハッシュから値を総当たりされないため）。
+            <strong>PLONK</strong>: witness 多項式、配線（累算器）多項式、各商多項式。
+          </p>
+          <p class="why">
+            <b>講義の Q「なぜセレクター多項式はブラインド化しないのか」</b>。セレクターは<b>回路の型</b>で、
+            もともと公開情報だから隠す理由がない。それどころかブラインドすると次数が上がって証明者のコストだけ増える。
+            <b>隠すべきは witness とそれから派生する多項式だけ。</b>「何が秘密で何が公開か」を 11 本のベクトルの段階で
+            分けておいたことが、ここで効きます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>GKR のゼロ知識化 — マスキングとコミットメントの両方が要る</h4>
+        <div class="body">
+          <p>
+            GKR は SumCheck の途中で p₁(x), p₂(y) を平文で送るので、そのままでは W̃ の情報が漏れます。
+            そこで (1) 回路の値の多項式をコミットし、(2) マスク用の多変数多項式 R をコミットし、
+            (3) f + R に対して SumCheck を回し、(4) 終盤に <code>V_original = V_total − V_random</code> と引き算で相殺し、
+            (5) 多項式評価はコミットメントの開示証明（Merkle + FRI など）で代える。
+          </p>
+          <p class="why">
+            <b>講義の Q「どちらか片方だけではなぜダメか」</b>。マスキングだけだと、
+            証明者が R を<b>あとから</b>都合よく選び直せる（相殺の式で辻褄を合わせられる）ので、R は先にコミットして固定する必要がある。
+            コミットメントだけだと、SumCheck で送る一変数多項式そのものが W̃ の情報を持ったまま。
+            <b>「隠す」（マスク）と「固定する」（コミット）は別の仕事</b>で、両方が要ります。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================ 13 : 比較 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">同じ物差しで並べる</p>
+      <h2>3 スキームの計算量・証明サイズ・前提 — 講義で伏せられていた答え合わせ</h2>
+      <p>
+        スライドの各所にあった「Q. 各種計算量、通信量、証明サイズは？」の答えのページは、配布版では伏せられています
+        （ワークショップで考える問いのため）。以下は<strong>このノートの整理</strong>で、講義の公式解答ではありません。
+        n は回路サイズまたはトレース長です。
+      </p>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data cmp">
+        <thead><tr><th></th><th>GKR</th><th>STARK</th><th>PLONK（KZG）</th></tr></thead>
+        <tbody>
+          <tr><td>証明者の計算量</td><td>O(n)（Libra 以降。元論文は多項式時間）</td><td>O(n log n)（FFT）— 定数はやや重い</td><td>O(n log n) FFT + 楕円曲線の MSM — 定数が重い</td></tr>
+          <tr><td>検証者の計算量</td><td>O(深さ · log n) + 入力の評価</td><td>O(log² n)（FRI のクエリ）</td><td>O(1)（ペアリング数回）</td></tr>
+          <tr><td>証明サイズ / 通信量</td><td>O(深さ · log n) 個の体の元。対話型のまま使うことが多い</td><td>O(log² n)。数十〜数百 KB</td><td>O(1)。数百バイト</td></tr>
+          <tr><td>信頼設定</td><td>不要</td><td>不要（透明）</td><td>要（universal SRS。回路ごとには不要）</td></tr>
+          <tr><td>使う仮定</td><td>なし（情報理論的） + コミットメント次第</td><td>ハッシュ関数のみ → 量子計算に比較的強い</td><td>ペアリング（離散対数系）→ 量子計算に弱い</td></tr>
+          <tr><td>ゼロ知識</td><td>そのままでは無し。マスク + コミットで付ける</td><td>ブラインド多項式 + ソルト</td><td>ブラインド多項式</td></tr>
+          <tr><td>得意な形</td><td>浅くて幅の広い回路、構造の規則的な回路（行列積など）</td><td>長い繰り返し（VM の実行）</td><td>任意の回路。カスタムゲート・lookup で拡張しやすい</td></tr>
+          <tr><td>子孫</td><td>Virgo / Libra（FRI・KZG を導入）、Jolt（部分的に）</td><td>Redshift（AIR → Plonkish）、zkSTARK（DEEP FRI）</td><td>Halo2（KZG → IPA）、Plonky2/3（Plonkish/AIR + FRI）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          まとめのスライドにあった分類図（Thaler の教科書の図）を言葉にすると、実用 SNARK は大きく 2 系統です。
+          <strong>「多項式 IOP + 多項式コミットメント」</strong>——今日の 3 つは全部これで、
+          IOP 側に IP ベース（GKR）・MIP ベース（Spartan など）・定数ラウンド多項式 IOP（Marlin、PLONK）があり、
+          コミットメント側に IOP ベース（FRI）・離散対数ベースで透明なもの（Bulletproofs、IPA）・ペアリングベース（KZG）がある。
+          もう 1 系統が<strong>「線形 PCP + ペアリング」</strong>で、Groth16 がここ。
+        </p>
+        <p>
+          <strong>大枠と構成要素は共通、組み合わせはさまざま</strong>。同じ名前でも論文と実装で細部が違う
+          （Halo2 は PLONK の算術化に KZG でなく IPA を組む、Plonky2 は Plonkish に FRI を組む）。
+          だから<strong>「どの算術化・どのコミットメント・どの証明システムか」を 3 つ言えれば、初見のスキームでも読める</strong>。
+          それが今週の一番の持ち帰りです。
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">共通して何度も出てきた道具</p>
+        <p><b>ラグランジュ補間</b>: 表を多項式にする（W̃、A/M/Y、11 本のベクトル）。</p>
+        <p><b>因数定理と消滅多項式</b>: 「H の全点で 0」⇔「Z_H で割り切れる」（STARK の商、PLONK のゼロテスト、KZG の開示）。</p>
+        <p><b>Schwartz–Zippel</b>: 違う多項式はランダムな点でほぼ違う値（SumCheck、FRI、大積、KZG）。</p>
+        <p><b>ランダム線形結合</b>: 複数の検査を 1 本にまとめる（線形削減、FRI の β、大積の β・γ）。</p>
+        <p class="strong-line">道具は 4 つ。並べ方が 3 通り。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 14 : ワークショップ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ワークショップの準備</p>
+      <h2>ZK, or not ZK — AI エージェント保険のケーススタディを、3 部品で考える</h2>
+      <p>
+        課題: <strong>AI エージェントの運用実績（例: タスク完了率）を、サービスの機密データ（顧客データ）を渡さずに、
+        外部の損保会社に証明するシステムを設計する。</strong>検討すべきは、指標と測定・証明方法、
+        機密データの秘匿方法、トラストモデル、現実的なトレードオフ。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          今週の 5 パートに当てはめると、<strong>証明者はサービス事業者</strong>、<strong>検証者は損保会社</strong>、
+          <strong>証明対象は「期間 T のタスク完了率 ≥ 95%」のような命題</strong>。
+          問題は<strong>証明方法</strong>——「完了率」の元になるログは顧客データを含み、渡せない——と、
+          <strong>検証方法</strong>——損保会社は事業者の自己申告を信じたくない——です。
+        </p>
+        <p>
+          設計の分岐は、まず<strong>「何を信頼するか」</strong>で決まります。
+        </p>
+        <ol style="margin:0; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">
+          <li><strong>ログの真正性</strong>: 完了率の元データそのものが事業者の作り物なら、どんな ZK も「作り物の上で正しく計算した」しか言えない。
+            外部データソース（決済、チケットシステム、ユーザーの署名つき評価）にログをコミットさせるか、TEE で計測させるか。</li>
+          <li><strong>指標の定義</strong>: 「完了」の定義を回路に固定できるか。曖昧な指標は算術化できない。</li>
+          <li><strong>誰が回路を書くか</strong>: 損保会社が指定した回路（公開）を、事業者が自分のデータで実行する。セレクターは公開、witness は秘密——PLONK の 11 本と同じ分け方。</li>
+        </ol>
+        <p>
+          そのうえで<strong>候補</strong>を並べます。(a) <strong>ZK 証明</strong>: ログの Merkle 根（第三者が署名）を公開入力に、
+          完了率の計算を回路にして証明。STARK 系なら信頼設定なし、PLONK 系なら証明が短くオンチェーン検証向き。
+          (b) <strong>MPC</strong>: 事業者と損保会社で秘密計算——Week 2 の道具。ZK と違って両者が同時に参加する必要がある。
+          (c) <strong>TEE</strong>: 計測プログラムを enclave で走らせ、attestation を渡す。証明ではなくハードウェアへの信頼。
+          (d) <strong>監査 + NDA</strong>: 第三者監査人が中身を見る。技術ではなく契約で秘匿。
+        </p>
+        <p>
+          <strong>「not ZK」が正解の場合も多い。</strong>指標が粗く、頻度が低く、監査人を置けるなら (d) が最も安い。
+          ZK が効くのは「継続的・自動・第三者に見せたくない・検証者が多い」とき——今週の
+          「検証者向けの最適化」の話がそのまま判断基準になります。
+        </p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">議論で使える 3 つの問い</p>
+        <p><b>1. 何がゼロ知識で守られ、何は守られないか。</b>完了率 95% という数字そのものは漏れる。それで十分か。分布は要るか。</p>
+        <p><b>2. 健全性の穴はどこか。</b>ログの改ざん（証明の前）、指標の定義のずれ（回路の外）、nonce や乱数の使い回し（Week 3）。</p>
+        <p><b>3. コストは誰が払うか。</b>証明者（事業者）が毎月証明を作るコスト。検証者（損保）の検証コスト。回路を書く人件費。</p>
+        <p class="strong-line">
+          3 部品（算術化・コミットメント・証明システム）と 5 パート（証明者・方法・対象・検証・検証者）を
+          表に書いてから話すと、議論が具体になります。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 15 : QUIZ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">検問クイズ</p>
+      <h2>検証者検問 — 少ない手数で嘘を見つける</h2>
+      <p>
+        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
+        SumCheck のラウンド、トレースの制約、ゲート表、FRI の折り畳みを審査する。問題は毎回その場で生成され、
+        判定は上のラボと同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 16 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">持ち帰り</p>
+      <h2>持っておくと効く問い</h2>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み終わったら答えられるはずのこと</p>
+        <p>・NP が「最も標準的な証明システム」だと言えるのはなぜか。証明者と検証者はそれぞれ何をするか。</p>
+        <p>・SumCheck で検証者が「和を足さない」のに納得できる理由を、Schwartz–Zippel の一言で言うと。</p>
+        <p>・「H の全点で 0」を「Z_H で割り切れる」に変えると、何が検証しやすくなるのか。</p>
+        <p>・PLONK でゲート制約とコピー制約の両方が要る理由を、壊れる witness の例つきで。</p>
+        <p>・ブラインド多項式 f + Z_H·R が、H の上で元の値を保つ理由と、外でランダムになる理由。</p>
+        <p>・KZG の信頼設定で「τ を捨てる」が必要な理由。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">次に向けて</p>
+        <p>
+          今週の 3 部品は、これ以降の週の地図です。新しいスキーム名が出てきたら、
+          <b>算術化は何か・コミットメントは何か・証明システムは何か</b>の 3 つを埋めてみてください。
+          埋まらない箱があれば、そこがそのスキームの新しさです。
+        </p>
+        <p>
+          そして Week 3 の Schnorr に戻ると、あれは<b>算術化なし・コミットメント R = rG・証明システムはシグマプロトコル</b>の
+          最小構成でした。今週の GKR / STARK / PLONK は、その「主張」を「x を知っている」から
+          「計算全体が正しい」に広げるために、3 つの箱を大きくしたものです。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Advanced Cryptography Program 2026 / Week 4 の自習ノート。講義スライド（小林聖弥氏）と、
+      同じトイ計算を自分で計算し直した結果をもとに書いています。伏せられていたスライドの内容は含みません。
+      数値はすべて F₁₁ / F₁₇ / F₁₀₁ で再計算済み。誤りがあれば
+      <a href="https://github.com/susumutomita/advanced-cryptography-note">リポジトリ</a>へ。
+    </p>
+  </div>
+</footer>
+
+<script>
+// ---- Week 4 共通計算器（ラボとクイズが同じ関数を使う） ----
+(function (root) {
+  "use strict";
+
+  function mod(v, m) { return ((v % m) + m) % m; }
+  function powmod(b, e, m) {
+    var r = 1; b = mod(b, m);
+    while (e > 0) { if (e & 1) r = (r * b) % m; b = (b * b) % m; e = Math.floor(e / 2); }
+    return r;
+  }
+  function inv(a, m) {
+    a = mod(a, m);
+    if (a === 0) throw new Error("0 に逆元はない");
+    return powmod(a, m - 2, m);
+  }
+
+  // ---- 多項式: 係数配列（低次 → 高次） ----
+  function ptrim(a) {
+    a = a.slice();
+    while (a.length > 1 && a[a.length - 1] === 0) a.pop();
+    if (a.length === 0) a = [0];
+    return a;
+  }
+  function padd(a, b, m) {
+    var n = Math.max(a.length, b.length), r = [];
+    for (var i = 0; i < n; i++) r.push(mod((a[i] || 0) + (b[i] || 0), m));
+    return ptrim(r);
+  }
+  function pscale(a, c, m) { return ptrim(a.map(function (x) { return mod(x * c, m); })); }
+  function pmul(a, b, m) {
+    var r = [];
+    for (var i = 0; i < a.length + b.length - 1; i++) r.push(0);
+    for (i = 0; i < a.length; i++) for (var j = 0; j < b.length; j++) r[i + j] = mod(r[i + j] + a[i] * b[j], m);
+    return ptrim(r);
+  }
+  function peval(a, x, m) {
+    var r = 0;
+    for (var i = a.length - 1; i >= 0; i--) r = mod(r * x + a[i], m);
+    return r;
+  }
+  function pdeg(a) { a = ptrim(a); return (a.length === 1 && a[0] === 0) ? -1 : a.length - 1; }
+  function pdivmod(a, b, m) {
+    a = ptrim(a); b = ptrim(b);
+    if (pdeg(b) < 0) throw new Error("0 で割れない");
+    var q = [], r = a.slice(), ib = inv(b[b.length - 1], m);
+    for (var i = 0; i <= Math.max(0, a.length - b.length); i++) q.push(0);
+    while (pdeg(r) >= pdeg(b)) {
+      var d = r.length - b.length, c = mod(r[r.length - 1] * ib, m);
+      q[d] = c;
+      for (var j = 0; j < b.length; j++) r[j + d] = mod(r[j + d] - c * b[j], m);
+      r = ptrim(r);
+      if (pdeg(r) < 0) break;
+    }
+    return { q: ptrim(q), r: ptrim(r) };
+  }
+  function lagrange(xs, ys, m) {
+    var res = [0];
+    for (var i = 0; i < xs.length; i++) {
+      var num = [1], den = 1;
+      for (var j = 0; j < xs.length; j++) {
+        if (i === j) continue;
+        num = pmul(num, [mod(-xs[j], m), 1], m);
+        den = mod(den * (xs[i] - xs[j]), m);
+      }
+      res = padd(res, pscale(num, mod(ys[i] * inv(den, m), m), m), m);
+    }
+    return ptrim(res);
+  }
+  function pfmt(a, v) {
+    a = ptrim(a); v = v || "X";
+    var t = [];
+    for (var i = 0; i < a.length; i++) {
+      var c = a[i];
+      if (c === 0) continue;
+      if (i === 0) t.push(String(c));
+      else if (i === 1) t.push((c === 1 ? "" : c) + v);
+      else t.push((c === 1 ? "" : c) + v + sup(i));
+    }
+    return t.length ? t.join(" + ") : "0";
+  }
+  function sup(n) {
+    var s = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
+    return String(n).split("").map(function (d) { return s[d]; }).join("");
+  }
+  // 係数を「−」つきで見せたい場面用（例: 12 (mod 17) を −5 と読む）
+  function signed(c, m) { return c > m / 2 ? (c - m) : c; }
+
+  // ================= GKR / SumCheck（F_11 のトイ回路） =================
+  // f(x1..x4) = (x1 + x2) + (x3 * x4)。レイヤ 1 の値 y0 = x1+x2, y1 = x3*x4。
+  var SC = { p: 11 };
+  SC.layer1 = function (x) {
+    return [mod(x[0] + x[1], SC.p), mod(x[2] * x[3], SC.p)];
+  };
+  // W1~(z) = y0(1−z) + y1 z （多重線形拡張）
+  SC.W1 = function (y, z) { return mod(y[0] * (1 - z) + y[1] * z, SC.p); };
+  SC.W1poly = function (y) { return ptrim([mod(y[0], SC.p), mod(y[1] - y[0], SC.p)]); };
+  // g0(a,b) = (1−a)·b·(W1(a) + W1(b))  … (a,b)=(0,1) の足し算ゲートだけ生き残る
+  SC.g0 = function (y, a, b) { return mod((1 - a) * b * (SC.W1(y, a) + SC.W1(y, b)), SC.p); };
+  SC.claim = function (y) {
+    var s = 0;
+    for (var a = 0; a < 2; a++) for (var b = 0; b < 2; b++) s = mod(s + SC.g0(y, a, b), SC.p);
+    return s;
+  };
+  // ラウンド 0 の一変数多項式 p1(x) = Σ_b g0(x,b)（次数 ≤ 2 なので 3 点から補間）
+  SC.p1 = function (y) {
+    var xs = [0, 1, 2], ys = xs.map(function (x) { return mod(SC.g0(y, x, 0) + SC.g0(y, x, 1), SC.p); });
+    return lagrange(xs, ys, SC.p);
+  };
+  // ラウンド 1: p2(t) = g0(r1, t)
+  SC.p2 = function (y, r1) {
+    var xs = [0, 1, 2], ys = xs.map(function (t) { return SC.g0(y, r1, t); });
+    return lagrange(xs, ys, SC.p);
+  };
+  // 1 回分のプロトコルを走らせる。claim を偽ると、証明者は「和だけ合う」偽多項式を送る戦略を取る。
+  SC.run = function (x, r1, r2, fakeClaim) {
+    var p = SC.p, y = SC.layer1(x), C = SC.claim(y);
+    var honest = (fakeClaim === null || fakeClaim === undefined || fakeClaim === C);
+    var claim = honest ? C : mod(fakeClaim, p);
+    var p1 = SC.p1(y), d1 = mod(claim - C, p);
+    var p1s = padd(p1, pscale([1, p - 1], d1, p), p);           // + d1·(1 − x)
+    var s1 = mod(peval(p1s, 0, p) + peval(p1s, 1, p), p);
+    var v1 = peval(p1s, r1, p);
+    var p2 = SC.p2(y, r1);
+    var d2 = mod(v1 - mod(peval(p2, 0, p) + peval(p2, 1, p), p), p);
+    var p2s = padd(p2, pscale([1, p - 1], d2, p), p);
+    var s2 = mod(peval(p2s, 0, p) + peval(p2s, 1, p), p);
+    var v2 = peval(p2s, r2, p);
+    var direct = SC.g0(y, r1, r2);
+    return {
+      y: y, W0: C, claim: claim, honest: honest,
+      p1: p1s, p1sum: s1, r1: r1, v1: v1,
+      p2: p2s, p2sum: s2, r2: r2, v2: v2,
+      direct: direct,
+      check1: s1 === claim, check2: s2 === v1, check3: v2 === direct,
+      accepted: (s1 === claim) && (s2 === v1) && (v2 === direct)
+    };
+  };
+  // 線形削減: 2 点 (u, v) を通る直線に W1 を制限して、1 回の評価にまとめる
+  SC.lineReduce = function (y, u, v, r) {
+    var p = SC.p, l = ptrim([mod(u, p), mod(v - u, p)]);           // l(t) = (1−t)u + tv
+    var q = lagrange([0, 1], [SC.W1(y, u), SC.W1(y, v)], p);      // q(t) = W1(l(t))（次数 1）
+    return { l: l, q: q, q0: peval(q, 0, p), q1: peval(q, 1, p), lr: peval(l, r, p), qr: peval(q, r, p), W1lr: SC.W1(y, peval(l, r, p)) };
+  };
+
+  // ================= STARK（F_17、ω = 4、H = {1,4,16,13}） =================
+  var ST = { p: 17, w: 4 };
+  ST.H = [1, 4, 16, 13];
+  ST.G = 2; ST.D = [1, 2, 4, 8, 16, 15, 13, 9];        // 8 点の評価ドメイン（g = 2）
+  ST.COSET = ST.D.map(function (d) { return mod(3 * d, 17); }); // H と交わらない 8 点（3·g^i）
+  ST.ZH = [16, 0, 0, 0, 1];                               // X⁴ − 1
+  ST.trace = function (x) {
+    var p = ST.p, a1 = mod(x[0] + x[1], p), m2 = mod(x[2] * x[3], p);
+    return { a: [0, a1, a1, a1], m: [0, 0, m2, m2], y: [0, 0, 0, mod(a1 + m2, p)] };
+  };
+  ST.lag = function (i) { return lagrange(ST.H, ST.H.map(function (_, j) { return i === j ? 1 : 0; }), ST.p); };
+  ST.compose = function (P) { return ptrim(P.map(function (c, i) { return mod(c * powmod(ST.w, i, ST.p), ST.p); })); }; // P(ωX)
+  ST.air = function (T, x) {
+    var p = ST.p;
+    var A = lagrange(ST.H, T.a, p), M = lagrange(ST.H, T.m, p), Y = lagrange(ST.H, T.y, p);
+    var c0 = padd(ST.compose(A), [mod(-(x[0] + x[1]), p)], p);
+    var c1 = padd(ST.compose(M), [mod(-(x[2] * x[3]), p)], p);
+    var c2 = padd(ST.compose(Y), pscale(padd(A, M, p), p - 1, p), p);
+    var C = padd(padd(pmul(ST.lag(0), c0, p), pmul(ST.lag(1), c1, p), p), pmul(ST.lag(2), c2, p), p);
+    var dm = pdivmod(C, ST.ZH, p);
+    var onH = ST.H.map(function (h) { return peval(C, h, p); });
+    // H と交わらないコセットで点ごとに C/Z_H を作り、その 8 点を補間したときの次数
+    var vals = ST.COSET.map(function (c) { return mod(peval(C, c, p) * inv(peval(ST.ZH, c, p), p), p); });
+    var ldt = pdeg(lagrange(ST.COSET, vals, p));
+    // どの遷移が破れたか
+    var broken = [];
+    if (mod(T.a[1] - (x[0] + x[1]), p) !== 0) broken.push("step0→1: a₁ = x₁+x₂");
+    if (mod(T.m[2] - x[2] * x[3], p) !== 0) broken.push("step1→2: m₂ = x₃·x₄");
+    if (mod(T.y[3] - T.a[2] - T.m[2], p) !== 0) broken.push("step2→3: y₃ = a₂+m₂");
+    return { A: A, M: M, Y: Y, C: C, Q: dm.q, R: dm.r, onH: onH, divisible: pdeg(dm.r) < 0, ldt: ldt, cosetVals: vals, broken: broken };
+  };
+  ST.split = function (Q) {
+    var e = [], o = [];
+    for (var i = 0; i < Q.length; i++) (i % 2 === 0 ? e : o).push(Q[i]);
+    return { even: ptrim(e.length ? e : [0]), odd: ptrim(o.length ? o : [0]) };
+  };
+  ST.fold = function (Q, beta) {
+    var s = ST.split(Q);
+    return { even: s.even, odd: s.odd, next: padd(s.even, pscale(s.odd, beta, ST.p), ST.p) };
+  };
+  ST.friRounds = function (Q, betas) {
+    var rounds = [], cur = ptrim(Q);
+    for (var i = 0; i < betas.length; i++) {
+      var f = ST.fold(cur, betas[i]);
+      rounds.push({ from: cur, even: f.even, odd: f.odd, beta: betas[i], to: f.next });
+      cur = f.next;
+      if (pdeg(cur) <= 0) break;
+    }
+    return { rounds: rounds, last: cur };
+  };
+  // クエリ検査: x と −x の 2 点から偶奇部分を復元し、次のラウンドの値と一致するか
+  ST.query = function (Q, beta, xq) {
+    var p = ST.p, s = ST.split(Q);
+    var fx = peval(Q, xq, p), fmx = peval(Q, mod(-xq, p), p);
+    var ev = mod((fx + fmx) * inv(2, p), p);
+    var od = mod((fx - fmx) * inv(mod(2 * xq, p), p), p);
+    var next = padd(s.even, pscale(s.odd, beta, p), p);
+    var x2 = mod(xq * xq, p);
+    return { fx: fx, fmx: fmx, ev: ev, od: od, x2: x2, evDirect: peval(s.even, x2, p), odDirect: peval(s.odd, x2, p),
+             folded: mod(ev + beta * od, p), nextAt: peval(next, x2, p) };
+  };
+
+  // ================= PLONK（ゲート表は F_17、大積は F_101） =================
+  var PK = { p: 17, pp: 101, w: 10, k: [1, 2, 3] };
+  PK.sel = [[1, 1, 0, -1, 0], [0, 0, 1, -1, 0], [1, 1, 0, -1, 0]];   // Q_L, Q_R, Q_M, Q_O, Q_C
+  // 配線: (列, 行) → (列, 行)。列 0=L, 1=R, 2=O
+  PK.sigma = { "0,0": [0, 0], "1,0": [1, 0], "2,0": [0, 2], "0,1": [0, 1], "1,1": [1, 1], "2,1": [1, 2], "0,2": [2, 0], "1,2": [2, 1], "2,2": [2, 2] };
+  PK.pos = function (col, row) { return mod(powmod(PK.w, row, PK.pp) * PK.k[col], PK.pp); };
+  PK.gate = function (rows, i) {
+    var p = PK.p, s = PK.sel[i], L = rows[i][0], R = rows[i][1], O = rows[i][2];
+    var v = mod(s[0] * L + s[1] * R + s[2] * L * R + s[3] * O + s[4], p);
+    return { value: v, ok: v === 0, terms: [s[0] * L, s[1] * R, s[2] * L * R, s[3] * O, s[4]] };
+  };
+  PK.copies = function (rows) {
+    var out = [];
+    Object.keys(PK.sigma).forEach(function (k) {
+      var from = k.split(",").map(Number), to = PK.sigma[k];
+      if (from[0] === to[0] && from[1] === to[1]) return;
+      if (from[0] > to[0] || (from[0] === to[0] && from[1] > to[1])) return; // 片方向だけ
+      var a = rows[from[1]][from[0]], b = rows[to[1]][to[0]];
+      out.push({ from: from, to: to, a: a, b: b, ok: a === b });
+    });
+    return out;
+  };
+  PK.grand = function (rows, beta, gamma) {
+    var p = PK.pp, num = 1, den = 1, walk = [];
+    for (var i = 0; i < 3; i++) {
+      var f = 1, g = 1;
+      for (var c = 0; c < 3; c++) {
+        var v = rows[i][c], s = PK.sigma[c + "," + i];
+        f = mod(f * (v + beta * PK.pos(c, i) + gamma), p);
+        g = mod(g * (v + beta * PK.pos(s[0], s[1]) + gamma), p);
+      }
+      num = mod(num * f, p); den = mod(den * g, p);
+      walk.push({ row: i, f: f, g: g, acc: den === 0 ? null : mod(num * inv(den, p), p) });
+    }
+    return { num: num, den: den, ok: num === den, walk: walk };
+  };
+
+  root.__w4 = {
+    mod: mod, inv: inv, powmod: powmod,
+    padd: padd, pscale: pscale, pmul: pmul, peval: peval, pdeg: pdeg, pdivmod: pdivmod, lagrange: lagrange, pfmt: pfmt, signed: signed, ptrim: ptrim, sup: sup,
+    SC: SC, ST: ST, PK: PK
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+// ---- 共通 UI ヘルパ ----
+(function () {
+  "use strict";
+  var W = window.__w4;
+  function seg(host, values, labels, cur, onpick) {
+    host.textContent = "";
+    values.forEach(function (v, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = labels ? labels[i] : String(v);
+      b.setAttribute("aria-pressed", String(v === cur));
+      b.addEventListener("click", function () { onpick(v); });
+      host.appendChild(b);
+    });
+  }
+  function press(host, values, cur) {
+    Array.prototype.forEach.call(host.children, function (b, i) {
+      b.setAttribute("aria-pressed", String(values[i] === cur));
+    });
+  }
+  function row(host, who, text, cls) {
+    var r = document.createElement("div");
+    r.className = "r " + (cls || "");
+    var w = document.createElement("span"); w.className = "who"; w.textContent = who;
+    var t = document.createElement("span"); t.textContent = text;
+    r.appendChild(w); r.appendChild(t); host.appendChild(r);
+  }
+  function range(n) { var a = []; for (var i = 0; i < n; i++) a.push(i); return a; }
+  W.ui = { seg: seg, press: press, row: row, range: range };
+})();
+
+// ---- ラボ 1: SumCheck ----
+(function () {
+  "use strict";
+  var W = window.__w4, SC = W.SC, U = W.ui, p = SC.p;
+  var hostIn = document.getElementById("sc-in");
+  if (!hostIn) return;
+  var INPUTS = [[3, 1, 2, 4], [5, 6, 7, 8], [1, 1, 1, 1], [9, 10, 2, 3]];
+  var st = { inIdx: 0, mode: "honest", claim: 5, r1: 2, r2: 3 };
+  var els = {
+    mode: document.getElementById("sc-mode"), claim: document.getElementById("sc-claim"),
+    claimField: document.getElementById("sc-claim-field"),
+    r1: document.getElementById("sc-r1"), r2: document.getElementById("sc-r2"),
+    heat: document.getElementById("sc-heat"), heatNote: document.getElementById("sc-heat-note"),
+    banner: document.getElementById("sc-banner"), note: document.getElementById("sc-note"), flow: document.getElementById("sc-flow")
+  };
+  U.seg(hostIn, [0, 1, 2, 3], INPUTS.map(function (x) { return "(" + x.join(",") + ")"; }), 0, function (v) { st.inIdx = v; render(); });
+  U.seg(els.mode, ["honest", "cheat"], ["正直", "嘘をつく"], "honest", function (v) { st.mode = v; render(); });
+  U.seg(els.claim, U.range(p), null, st.claim, function (v) { st.claim = v; render(); });
+  U.seg(els.r1, U.range(p), null, st.r1, function (v) { st.r1 = v; render(); });
+  U.seg(els.r2, U.range(p), null, st.r2, function (v) { st.r2 = v; render(); });
+
+  function pf(a, v) { return W.pfmt(a, v); }
+  function render() {
+    U.press(hostIn, [0, 1, 2, 3], st.inIdx);
+    U.press(els.mode, ["honest", "cheat"], st.mode);
+    U.press(els.claim, U.range(p), st.claim);
+    U.press(els.r1, U.range(p), st.r1);
+    U.press(els.r2, U.range(p), st.r2);
+    var x = INPUTS[st.inIdx];
+    var fake = st.mode === "cheat" ? st.claim : null;
+    var r = SC.run(x, st.r1, st.r2, fake);
+    els.claimField.hidden = st.mode !== "cheat";
+
+    // flow
+    var f = els.flow; f.textContent = "";
+    U.row(f, "公開", "回路 f = (x₁+x₂) + (x₃·x₄)、入力 (" + x.join(",") + ") → レイヤー 1 の値 y₀ = " + r.y[0] + ", y₁ = " + r.y[1] + "（本当の出力 W̃₀ = " + r.W0 + "）", "p");
+    U.row(f, "証明者", "主張: Σ_{a,b∈{0,1}} g₀(a,b) = " + r.claim + (r.honest ? "" : "　← 嘘（本当は " + r.W0 + "）"), r.honest ? "p" : "p ng");
+    U.row(f, "証明者", "p₁(x) = " + pf(r.p1, "x") + (r.honest ? "" : "　← 和だけ合わせた偽物"), "p");
+    U.row(f, "検証者", "p₁(0) + p₁(1) = " + r.p1sum + "　=? 主張 " + r.claim + "　" + (r.check1 ? "✓" : "✗"), r.check1 ? "v ok" : "v ng");
+    U.row(f, "検証者", "r₁ = " + r.r1 + " を選ぶ → p₁(" + r.r1 + ") = " + r.v1 + "　（次の主張）", "v");
+    U.row(f, "証明者", "p₂(y) = g₀(" + r.r1 + ", y) = " + pf(r.p2, "y") + (r.honest ? "" : "　← 辻褄合わせ済み"), "p");
+    U.row(f, "検証者", "p₂(0) + p₂(1) = " + r.p2sum + "　=? p₁(r₁) = " + r.v1 + "　" + (r.check2 ? "✓" : "✗"), r.check2 ? "v ok" : "v ng");
+    U.row(f, "検証者", "r₂ = " + r.r2 + " を選ぶ → p₂(" + r.r2 + ") = " + r.v2, "v");
+    U.row(f, "検証者", "自分で g₀(" + r.r1 + "," + r.r2 + ") = (1−" + r.r1 + ")·" + r.r2 + "·(W̃₁(" + r.r1 + ") + W̃₁(" + r.r2 + ")) = " + r.direct +
+      "　=? p₂(r₂) = " + r.v2 + "　" + (r.check3 ? "✓" : "✗") + "　（W̃₁ の 2 点は証明者が主張し、次のレイヤーで確かめる）", r.check3 ? "v ok" : "v ng");
+
+    // banner
+    if (r.accepted && r.honest) {
+      els.banner.className = "banner ok"; els.banner.textContent = "受理 — 正直な証明者は必ず通る（完全性）";
+      els.note.textContent = "検証者がしたのは 2 点の足し算 2 回・1 点の評価 2 回・最後に g₀ を 1 回。4 項の和は一度も足していません。";
+    } else if (r.accepted) {
+      els.banner.className = "banner warn"; els.banner.textContent = "受理 — 嘘がすり抜けた（r₁ = 1 または r₂ = 1）";
+      els.note.textContent = "偽物の足し分 (1−x) がちょうど 0 になる点を検証者が引いてしまいました。F₁₁ では 121 通り中 21 通り。大きな体ならほぼ起きません。";
+    } else {
+      els.banner.className = "banner bad"; els.banner.textContent = "拒否 — 最後の 1 点で辻褄が合わない";
+      els.note.textContent = "途中の 2 回の「和の検査」は偽物でも通せますが、検証者が自分で計算する g₀(r₁, r₂) とはずれます。嘘は多項式そのものを変えるので、ランダムな点で露見します。";
+    }
+
+    // heat map
+    var h = els.heat; h.textContent = "";
+    var accepted = 0;
+    var corner = document.createElement("span"); corner.className = "h"; corner.textContent = ""; h.appendChild(corner);
+    for (var a = 0; a < p; a++) { var hh = document.createElement("span"); hh.className = "h"; hh.textContent = String(a); h.appendChild(hh); }
+    for (var b = 0; b < p; b++) {
+      var lab = document.createElement("span"); lab.className = "h"; lab.textContent = String(b); h.appendChild(lab);
+      for (a = 0; a < p; a++) {
+        var rr = SC.run(x, a, b, fake), c = document.createElement("span");
+        c.className = rr.accepted ? "pass" : "catch";
+        if (a === st.r1 && b === st.r2) c.className += " here";
+        c.textContent = rr.accepted ? "●" : "·";
+        if (rr.accepted) accepted++;
+        h.appendChild(c);
+      }
+    }
+    els.heatNote.textContent = r.honest
+      ? "正直な主張は 121 通りすべてで受理（完全性）。"
+      : "嘘の主張 " + r.claim + " を受理してしまう (r₁, r₂) は " + accepted + " / 121 通り（" + (100 * accepted / 121).toFixed(1) + "%）。";
+  }
+  render();
+})();
+
+// ---- ラボ 2: STARK ----
+(function () {
+  "use strict";
+  var W = window.__w4, ST = W.ST, U = W.ui, p = ST.p;
+  var table = document.getElementById("st-table");
+  if (!table) return;
+  var X = [3, 1, 2, 4];
+  var st = { T: ST.trace(X), b1: 3, b2: 5, xq: 8 };
+  var els = { b1: document.getElementById("st-b1"), b2: document.getElementById("st-b2"), xq: document.getElementById("st-x"),
+              banner: document.getElementById("st-banner"), note: document.getElementById("st-note"),
+              poly: document.getElementById("st-poly"), fri: document.getElementById("st-fri") };
+  var tbody = table.querySelector("tbody");
+  var CONSTRAINED = { "a1": true, "m2": true, "y3": true, "a2": true };
+  var inputs = {};
+  function buildTable() {
+    tbody.textContent = "";
+    for (var t = 0; t < 4; t++) {
+      var tr = document.createElement("tr");
+      var td0 = document.createElement("td"); td0.textContent = String(t); tr.appendChild(td0);
+      var td1 = document.createElement("td"); td1.textContent = "ω" + W.sup(t) + " = " + ST.H[t]; td1.className = "rowlab"; tr.appendChild(td1);
+      ["a", "m", "y"].forEach(function (col) {
+        var td = document.createElement("td");
+        var inp = document.createElement("input");
+        inp.type = "number"; inp.min = "0"; inp.max = "16"; inp.inputMode = "numeric";
+        inp.value = String(st.T[col][t]);
+        inp.setAttribute("aria-label", col + t);
+        (function (col, t, inp) {
+          inp.addEventListener("input", function () {
+            var v = parseInt(inp.value, 10);
+            if (isNaN(v)) return;
+            st.T[col][t] = W.mod(v, p);
+            render();
+          });
+        })(col, t, inp);
+        inputs[col + t] = inp;
+        td.appendChild(inp); tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+  }
+  buildTable();
+  Array.prototype.forEach.call(table.closest(".card").querySelectorAll("button[data-preset]"), function (b) {
+    b.addEventListener("click", function () {
+      var k = b.getAttribute("data-preset");
+      st.T = ST.trace(X);
+      if (k === "y13") st.T.y[3] = 13;
+      if (k === "m9") { st.T.m[2] = 9; st.T.m[3] = 9; }
+      if (k === "a5") { st.T.a[1] = 5; st.T.a[2] = 5; st.T.a[3] = 5; st.T.y[3] = 13; }
+      if (k === "y1") st.T.y[1] = 5;
+      Object.keys(inputs).forEach(function (key) { inputs[key].value = String(st.T[key[0]][+key[1]]); });
+      render();
+    });
+  });
+  U.seg(els.b1, U.range(p), null, st.b1, function (v) { st.b1 = v; render(); });
+  U.seg(els.b2, U.range(p), null, st.b2, function (v) { st.b2 = v; render(); });
+  U.seg(els.xq, ST.D, null, st.xq, function (v) { st.xq = v; render(); });
+
+  function pf(a, v) { return W.pfmt(a, v); }
+  function render() {
+    U.press(els.b1, U.range(p), st.b1); U.press(els.b2, U.range(p), st.b2); U.press(els.xq, ST.D, st.xq);
+    var honest = ST.trace(X);
+    Object.keys(inputs).forEach(function (key) {
+      var col = key[0], t = +key[1], v = st.T[col][t], ok = v === honest[col][t];
+      inputs[key].className = ok ? "" : "bad";
+    });
+    var r = ST.air(st.T, X);
+    var lines = [];
+    lines.push("A(X) = " + pf(r.A) + "      M(X) = " + pf(r.M) + "      Y(X) = " + pf(r.Y));
+    lines.push("C(X) = S₀(A(ωX) − 4) + S₁(M(ωX) − 8) + S₂(Y(ωX) − A(X) − M(X))");
+    lines.push("     = " + pf(r.C));
+    lines.push("C の H 上の値 [X=1, 4, 16, 13] = [" + r.onH.join(", ") + "]");
+    if (r.divisible) {
+      lines.push("C(X) ÷ (X⁴ − 1):  商 Q₀(X) = " + pf(r.Q) + "   余り 0   ← 割り切れる");
+      lines.push("コセット 8 点で C/Z_H を点ごとに作って補間 → 次数 " + r.ldt + "（≤ 2 なら低次数）");
+    } else {
+      lines.push("C(X) ÷ (X⁴ − 1):  余り " + pf(r.R) + "   ← 割り切れない。商多項式は存在しない");
+      lines.push("それでも点ごとに C/Z_H を 8 点分作って補間すると次数 " + r.ldt + "（正直なら 2）→ 低次数テストで落ちる");
+    }
+    els.poly.textContent = lines.join("\n");
+
+    var fl = [];
+    if (r.divisible) {
+      var fr = ST.friRounds(r.Q, [st.b1, st.b2]);
+      fr.rounds.forEach(function (rd, i) {
+        fl.push("ラウンド " + i + ": " + pf(rd.from) + " = (" + pf(rd.even, "X²") + ") + X·(" + pf(rd.odd, "X²") + ")");
+        fl.push("           β = " + rd.beta + " → 次 = " + pf(rd.even, "Y") + " + " + rd.beta + "·(" + pf(rd.odd, "Y") + ") = " + pf(rd.to, "Y") + "   次数 " + W.pdeg(rd.from) + " → " + W.pdeg(rd.to));
+      });
+      fl.push("最後は定数 " + pf(fr.last) + " を平文で送る");
+      var q = ST.query(r.Q, st.b1, st.xq);
+      fl.push("");
+      fl.push("クエリ x = " + st.xq + ":  Q₀(" + st.xq + ") = " + q.fx + ",  Q₀(−" + st.xq + " = " + W.mod(-st.xq, p) + ") = " + q.fmx);
+      fl.push("  Q_even(x²=" + q.x2 + ") = (Q₀(x)+Q₀(−x))/2 = " + q.ev + "   直接計算 " + q.evDirect + " " + (q.ev === q.evDirect ? "✓" : "✗"));
+      fl.push("  Q_odd(x²)  = (Q₀(x)−Q₀(−x))/(2x) = " + q.od + "   直接計算 " + q.odDirect + " " + (q.od === q.odDirect ? "✓" : "✗"));
+      fl.push("  Q₁(x²) は " + q.ev + " + " + st.b1 + "·" + q.od + " = " + q.folded + " のはず。Q₁ の開示 " + q.nextAt + " " + (q.folded === q.nextAt ? "✓" : "✗"));
+    } else {
+      fl.push("商多項式が無いので、FRI に渡せる低次数の Q₀ が作れない。");
+      fl.push("証明者が「点ごとの値」を無理に Merkle にしても、折り畳みの整合検査（x と −x）がランダムなクエリで破れる。");
+    }
+    els.fri.textContent = fl.join("\n");
+
+    var tampered = Object.keys(inputs).some(function (k) { return inputs[k].className === "bad"; });
+    if (r.divisible && !tampered) {
+      els.banner.className = "banner ok"; els.banner.textContent = "商多項式あり — 制約多項式は H の全点で 0（トレースは正しい）";
+      els.note.textContent = "Q₀ の次数は 2。FRI で 2 → 1 → 0 と折り畳めて、クエリの整合検査も通ります。";
+    } else if (r.divisible) {
+      els.banner.className = "banner warn"; els.banner.textContent = "商多項式あり — 書き換えたのに通ってしまった（制約の無いマス）";
+      els.note.textContent = "この AIR が縛っているのは a₁ = x₁+x₂、m₂ = x₃·x₄、y₃ = a₂+m₂ の 3 本だけ。他のマスは Week 1 のアンダー制約と同じで、変えても検出されません。実物の AIR は境界制約（初期状態）と「値を保持する」制約（A(ωX) − A(X) = 0 など）を足して、全マスを縛ります。";
+    } else {
+      els.banner.className = "banner bad"; els.banner.textContent = "商多項式なし — 破れた制約: " + r.broken.join(" / ");
+      els.note.textContent = "検証者はどのマスが変わったかを知らなくても、「割り切れない」の 1 点で拒否できます。";
+    }
+  }
+  render();
+})();
+
+// ---- ラボ 3: PLONK ----
+(function () {
+  "use strict";
+  var W = window.__w4, PK = W.PK, U = W.ui, p = PK.p;
+  var table = document.getElementById("pk-table");
+  if (!table) return;
+  var GOOD = [[3, 1, 4], [2, 4, 8], [4, 8, 12]];
+  var st = { rows: GOOD.map(function (r) { return r.slice(); }), beta: 5, gamma: 7 };
+  var els = { beta: document.getElementById("pk-beta"), gamma: document.getElementById("pk-gamma"),
+              banner: document.getElementById("pk-banner"), note: document.getElementById("pk-note"),
+              gates: document.getElementById("pk-gates"), copies: document.getElementById("pk-copies"), grand: document.getElementById("pk-grand") };
+  var tbody = table.querySelector("tbody"), inputs = {};
+  var TYPES = ["+", "×", "+"], COLN = ["L", "R", "O"];
+  for (var i = 0; i < 3; i++) {
+    var tr = document.createElement("tr");
+    var td0 = document.createElement("td"); td0.className = "rowlab"; td0.textContent = "gate " + i; tr.appendChild(td0);
+    var td1 = document.createElement("td"); td1.textContent = TYPES[i]; tr.appendChild(td1);
+    for (var c = 0; c < 3; c++) {
+      var td = document.createElement("td"), inp = document.createElement("input");
+      inp.type = "number"; inp.min = "0"; inp.max = "16"; inp.inputMode = "numeric"; inp.value = String(st.rows[i][c]);
+      inp.setAttribute("aria-label", COLN[c] + i);
+      (function (i, c, inp) {
+        inp.addEventListener("input", function () {
+          var v = parseInt(inp.value, 10); if (isNaN(v)) return;
+          st.rows[i][c] = W.mod(v, p); render();
+        });
+      })(i, c, inp);
+      inputs[c + "," + i] = inp; td.appendChild(inp); tr.appendChild(td);
+    }
+    var tds = document.createElement("td"); tds.className = "rowlab"; tds.textContent = PK.sel[i].join("  "); tr.appendChild(tds);
+    tbody.appendChild(tr);
+  }
+  Array.prototype.forEach.call(table.closest(".card").querySelectorAll("button[data-preset]"), function (b) {
+    var k = b.getAttribute("data-preset");
+    b.addEventListener("click", function () {
+      st.rows = GOOD.map(function (r) { return r.slice(); });
+      if (k === "bad") st.rows[2] = [5, 8, 13];
+      if (k === "swap") st.rows[2] = [8, 4, 12];
+      if (k === "wrongo") st.rows[1] = [2, 4, 9];
+      Object.keys(inputs).forEach(function (key) { var cc = key.split(","); inputs[key].value = String(st.rows[+cc[1]][+cc[0]]); });
+      render();
+    });
+  });
+  var BETAS = [5, 23, 42, 77], GAMMAS = [7, 19, 58, 90];
+  U.seg(els.beta, BETAS, null, st.beta, function (v) { st.beta = v; render(); });
+  U.seg(els.gamma, GAMMAS, null, st.gamma, function (v) { st.gamma = v; render(); });
+
+  function render() {
+    U.press(els.beta, BETAS, st.beta); U.press(els.gamma, GAMMAS, st.gamma);
+    Object.keys(inputs).forEach(function (key) { var cc = key.split(","); inputs[key].className = st.rows[+cc[1]][+cc[0]] === GOOD[+cc[1]][+cc[0]] ? "" : "bad"; });
+    var allGates = true, g = els.gates; g.textContent = "";
+    for (var i = 0; i < 3; i++) {
+      var r = PK.gate(st.rows, i), s = PK.sel[i], L = st.rows[i][0], R = st.rows[i][1], O = st.rows[i][2];
+      var expr = s[0] + "·" + L + " + " + s[1] + "·" + R + " + " + s[2] + "·" + L + "·" + R + " + (" + s[3] + ")·" + O + " + " + s[4] + " = " + r.value + " (mod 17)";
+      U.row(g, "gate " + i, expr + "  " + (r.ok ? "✓" : "✗"), r.ok ? "v ok" : "v ng");
+      if (!r.ok) allGates = false;
+    }
+    var cps = PK.copies(st.rows), allCopies = true, cE = els.copies; cE.textContent = "";
+    cps.forEach(function (cp) {
+      var txt = COLN[cp.from[0]] + " of gate " + cp.from[1] + " (= " + cp.a + ")  と  " + COLN[cp.to[0]] + " of gate " + cp.to[1] + " (= " + cp.b + ")  は同じ配線 → " + (cp.ok ? "一致 ✓" : "不一致 ✗");
+      U.row(cE, "σ", txt, cp.ok ? "v ok" : "v ng");
+      if (!cp.ok) allCopies = false;
+    });
+    var gp = PK.grand(st.rows, st.beta, st.gamma), lines = [];
+    lines.push("F₁₀₁、番地 = ω^行 · k_列（ω = 10、k = 1, 2, 3）、β = " + st.beta + "、γ = " + st.gamma);
+    gp.walk.forEach(function (wk) {
+      lines.push("gate " + wk.row + ":  f = Π(値 + β·番地 + γ) = " + wk.f + "    g = Π(値 + β·σ(番地) + γ) = " + wk.g + "    累積 f/g = " + (wk.acc === null ? "（分母 0）" : wk.acc));
+    });
+    lines.push("左辺の積 " + gp.num + "  =?  右辺の積 " + gp.den + "   " + (gp.ok ? "✓ 一周して 1 に戻る" : "✗ 一致しない"));
+    els.grand.textContent = lines.join("\n");
+
+    var same = st.rows.every(function (r, i) { return r.every(function (v, c) { return v === GOOD[i][c]; }); });
+    if (allGates && allCopies) {
+      els.banner.className = "banner ok"; els.banner.textContent = same ? "受理 — ゲート制約もコピー制約も通る" : "受理 — この表も回路として整合している";
+      els.note.textContent = same ? "3 行のゲート方程式と 2 本の配線が揃って初めて「この回路をこの入力で実行した」になります。" : "witness を変えても、型と配線の両方に整合していれば別の入力での正しい実行です（公開入力の制約はこのラボでは省略）。";
+    } else if (allGates && !allCopies) {
+      els.banner.className = gp.ok ? "banner warn" : "banner bad";
+      els.banner.textContent = gp.ok ? "ゲート制約は全部通る・配線が違う — この β, γ では大積がすり抜けた" : "ゲート制約は全部通る・配線が違う — 大積で拒否";
+      els.note.textContent = gp.ok ? "F₁₀₁ では偽 witness を見逃す (β, γ) が約 6.7% あります。実際の 254 ビット体では無視できます。別の β, γ に切り替えてみてください。" : "行の中だけを見るゲート制約では、行をまたぐ「同じ値」を縛れません。配線を σ で入れ替えた集合の一致を、大積が 1 個の数で確かめています。";
+    } else {
+      els.banner.className = "banner bad"; els.banner.textContent = "ゲート制約が破れている";
+      els.note.textContent = "セレクターが決める型（+ か ×）に、その行の L, R, O が合っていません。ゲート方程式は行ごとに独立に落ちます。";
+    }
+  }
+  render();
+})();
+
+// ---- 目次を h2 から自動生成 ----
+(function () {
+  "use strict";
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var heads = document.querySelectorAll(".band-head h2");
+  Array.prototype.forEach.call(heads, function (h, i) {
+    var section = h.closest(".band");
+    if (!section || i === 0) return;
+    if (!section.id) section.id = "sec-" + i;
+    var li = document.createElement("li"), a = document.createElement("a");
+    a.href = "#" + section.id; a.textContent = h.textContent.trim();
+    li.appendChild(a); toc.appendChild(li);
+  });
+})();
+
+// ---- 検証者検問（出題はその場で生成、判定はラボと同じ計算器） ----
+(function () {
+  "use strict";
+  var W = window.__w4;
+  if (!W || !document.getElementById("quiz")) return;
+  var SC = W.SC, ST = W.ST, PK = W.PK;
+  var TOTAL = 10, MAX_LIVES = 3, STORE_KEY = "ac26-w4-checkpoint-best";
+
+  function ri(n) { return Math.floor(Math.random() * n); }
+  function pick(a) { return a[ri(a.length)]; }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = ri(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function numChoices(correct, m, extra) {
+    var seen = {}, out = [{ t: String(correct), ok: true }]; seen[String(correct)] = true;
+    (extra || []).forEach(function (v) { v = String(W.mod(v, m)); if (!seen[v] && out.length < 4) { seen[v] = true; out.push({ t: v, ok: false }); } });
+    var guard = 0;
+    while (out.length < 4 && guard++ < 100) { var v = String(ri(m)); if (!seen[v]) { seen[v] = true; out.push({ t: v, ok: false }); } }
+    return shuffle(out);
+  }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function cl(lines) { return '<div class="clist">' + lines.map(function (l) { return '<div class="cline">' + esc(l) + "</div>"; }).join("") + "</div>"; }
+
+  // ---- 複雑性・証明システム（理論） ----
+  var THEORY_A = [
+    { q: "NP を「最も標準的な証明システム」と見るとき、証明者と検証者の役割は？",
+      a: "証明者は無限の計算力で証拠を見つけ、検証者は多項式時間で証拠を確かめる",
+      d: ["証明者も検証者も多項式時間で、対話しながら証拠を作る", "証明者は多項式時間で証拠を作り、検証者は無限の計算力で確かめる", "証明者は証拠を送らず、検証者が自力で問題を解く"],
+      why: "NP は「証拠を渡されれば多項式時間で検証できる」問題の集まり。証拠を見つける側（証明者）は強くてよく、確かめる側（検証者）は弱くてよい。この非対称がそのまま証明システムの形です。" },
+    { q: "ピーターセングラフ（頂点 10・辺 15）の 3 彩色で、「見つける」と「確かめる」の手数の差は？",
+      a: "総当たりは 3¹⁰ = 59049 通り、検証は辺 15 本を見比べるだけ",
+      d: ["どちらも 59049 通り", "総当たりは 15 通り、検証は 59049 回", "どちらも辺の数 15 で済む"],
+      why: "塗り方を探すのは 3 の頂点数乗、塗り方が正しいかは辺ごとに両端の色を比べるだけ。この差が「NP = 検証は速い」の実感です。" },
+    { q: "IP・PCP・IOP を作るときに NP に足した 3 つの材料は？",
+      a: "対話・ランダム性・オラクルアクセス",
+      d: ["対話・暗号化・署名", "ランダム性・ハッシュ・楕円曲線", "オラクル・信頼設定・ペアリング"],
+      why: "IP = 対話 + ランダム性、PCP = ランダム性 + オラクルアクセス、IOP = 3 つ全部。オラクルの実体がコミットメントです。" },
+    { q: "PCP 定理が驚くべき理由は？",
+      a: "NP の証拠は、検証者がランダムに数か所だけ読めば十分な形に書き直せる",
+      d: ["NP の問題はすべて多項式時間で解ける", "証明者が検証者になりすませる", "証拠の長さを 0 にできる"],
+      why: "証拠を丸ごと読む必要がなくなる。ただし証明者が質問を見てから証拠を書き換えられないことが条件で、それを保証するのがコミットメント（Merkle 木・KZG）です。" },
+    { q: "対話型ではなく非対話型の証明を選ぶ典型的な理由は？",
+      a: "誰でも・あとから・オンチェーンなどで検証できるようにしたい",
+      d: ["検証者のランダム性を無くしたい", "証明サイズを必ず小さくできる", "証明者の計算量が必ず減る"],
+      why: "Fiat–Shamir でチャレンジをハッシュに置き換えると、特定の検証者との会話が要らなくなり、証明が「誰でも検証できる証拠」になります。Schnorr → 署名と同じ手です。" },
+    { q: "完全性（Completeness）と健全性（Soundness）の正しい組み合わせは？",
+      a: "完全性: 真なら必ず通る／健全性: 偽ならほぼ通らない",
+      d: ["完全性: 偽なら通らない／健全性: 真なら通る", "完全性: 秘密が漏れない／健全性: 証明が短い", "完全性: 検証が速い／健全性: 証明者が速い"],
+      why: "スライドの図で言えば「真 → 証明できる」が完全性、「証明できる → 真」が健全性。両方向が揃って「通った = 真」と読めます。ゼロ知識性はこれとは別の 3 本目の柱です。" },
+    { q: "「証明者向けと検証者向け、どちらの最適化が重要か」への妥当な答えは？",
+      a: "検証者は多数・弱い端末・オンチェーンなので検証コストと証明サイズが効く。ただし証明者が実用範囲でなければ証明自体が作れない",
+      d: ["常に証明者。検証はどうせ一瞬だから", "常に検証者。証明者のコストは無視してよい", "どちらも関係ない。健全性だけが問題"],
+      why: "スキームの違いは、このトレードオフの置き場所の違いです。PLONK は検証 O(1) だが証明者が重い、STARK は証明が長いが透明で証明者が比較的軽い、GKR は証明者が最も軽いが対話的。" },
+    { q: "電子署名とゼロ知識証明の関係として最も近い説明は？",
+      a: "同じシグマプロトコルの数式を、署名は「鍵の持ち主がメッセージに同意した証拠」として、ZK 証明は「主張が真だという納得」として使う",
+      d: ["まったく別の数学で、共通点はない", "署名は必ずゼロ知識で、ZK 証明は必ず署名になる", "署名は対話型で、ZK 証明は非対話型"],
+      why: "Schnorr の 3 手（R, e, s）で e をハッシュにすれば署名。証明対象が「x を知っている」から「計算が正しい」に広がったのが今週の証明システムです。" }
+  ];
+  // ---- 原理（部品・ZK 化・KZG） ----
+  var THEORY_B = [
+    { q: "現代のゼロ知識証明を 3 部品に分けると？",
+      a: "算術化・コミットメントスキーム・証明システム",
+      d: ["ハッシュ・署名・暗号化", "証明者・検証者・オラクル", "有限体・楕円曲線・ペアリング"],
+      why: "GKR / STARK / PLONK はこの 3 つの箱の中身が違うだけ。新しいスキームを見たら 3 つを埋めてみるのが今週の地図です。" },
+    { q: "STARK と PLONK のゼロ知識化「多項式のマスキング」の式は？",
+      a: "f̃(X) = f(X) + Z_H(X)·R(X)（R はランダム多項式）",
+      d: ["f̃(X) = f(X)·R(X)", "f̃(X) = f(X) + R（R はランダムな定数）", "f̃(X) = R(f(X))"],
+      why: "Z_H は評価ドメイン H の全点で 0 なので、H の上では f のまま（制約の検査は壊れない）。H の外ではランダムな値になり、検証者が聞くランダム点で情報が漏れません。" },
+    { q: "PLONK でセレクター多項式をブラインド化しない理由は？",
+      a: "回路の型を表す公開情報で、隠すものがなく、ブラインドすると次数が上がって証明者のコストだけ増える",
+      d: ["セレクターは witness より重要な秘密だから、別の方法で隠す", "セレクターは多項式ではないから", "ブラインドすると健全性が壊れるから"],
+      why: "隠すべきは witness とそこから派生する多項式（配線の累算器、商多項式）だけ。11 本のベクトルの段階で「秘密／公開」を分けたことがここで効きます。" },
+    { q: "GKR のゼロ知識化で「マスキングだけ」でも「コミットメントだけ」でも不十分な理由は？",
+      a: "マスク R を先にコミットして固定しないと証明者があとから R を選び直せる。コミットだけでは SumCheck で送る一変数多項式が W̃ の情報を持ったまま",
+      d: ["どちらか一方で十分だが、両方あると証明が短くなる", "マスキングは健全性のため、コミットメントは完全性のため", "GKR は元からゼロ知識なので、どちらも不要"],
+      why: "「隠す」（マスク）と「固定する」（コミット）は別の仕事。相殺 V_original = V_total − V_random は、R が固定されているからこそ検証者が信じられます。" },
+    { q: "KZG コミットメントで信頼設定（τ を捨てる）が必要な理由は？",
+      a: "τ を知っている者は、任意の値に開ける偽のコミットメントや偽の開示証明を作れるから",
+      d: ["τ が無いとペアリングが計算できないから", "τ は検証者の秘密鍵だから", "τ を捨てないと証明が長くなるから"],
+      why: "Com_f = f(τ)·g₁ は τ を知らなくても SRS から作れますが、τ を知っていれば f(τ) の値を直接いじれる。だから MPC 儀式で「誰も τ を知らない」状態を作ります。" },
+    { q: "KZG の開示証明 q(X) = (f(X) − f(α)) / (X − α) が多項式になる条件は？",
+      a: "f(α) が本当の値であること（因数定理: f(X) − f(α) は X = α で 0 なので X − α で割り切れる）",
+      d: ["α が評価ドメイン H の元であること", "f の次数が 2 以下であること", "τ = α であること"],
+      why: "偽の値 v ≠ f(α) を主張すると f(X) − v は X − α で割り切れず、q が多項式にならないので Com_q が作れない。STARK の商多項式とまったく同じ道具です。" },
+    { q: "「H の全点で 0」を「Z_H で割り切れる」に言い換える利点は？",
+      a: "検証者が全点を評価しなくても、「商が低次数の多項式か」を数回のランダムなクエリで確かめられる",
+      d: ["割り算のほうが評価より計算が速いから", "Z_H が 0 になる点が無くなるから", "商多項式は必ず定数になるから"],
+      why: "因数定理で「点の集合の条件」が「多項式の割り算の条件」に変わり、FRI（STARK）や開示証明（PLONK）で扱える形になります。" },
+    { q: "Week 3 の Schnorr を今週の 3 部品で言うと？",
+      a: "算術化なし・コミットメントは R = rG・証明システムはシグマプロトコル（+ Fiat–Shamir）",
+      d: ["算術化は AIR・コミットメントは Merkle・証明システムは FRI", "算術化は Plonkish・コミットメントは KZG・証明システムは SumCheck", "3 部品のどれにも当てはまらない"],
+      why: "主張が「x を知っている」1 本だけなので算術化が要らない最小構成。今週は主張を「計算全体が正しい」に広げるために 3 つの箱を大きくしました。" }
+  ];
+  function genTheory(bank, cat) {
+    var t = pick(bank);
+    return { cat: cat, q: t.q, body: "", choices: shuffle([{ t: t.a, ok: true }].concat(t.d.map(function (x) { return { t: x, ok: false }; }))), why: t.why };
+  }
+
+  // ---- SumCheck ----
+  function genSum() {
+    var p = SC.p, x = [1 + ri(p - 1), 1 + ri(p - 1), 1 + ri(p - 1), 1 + ri(p - 1)];
+    var y = SC.layer1(x), C = SC.claim(y), p1 = SC.p1(y);
+    var kind = ri(3);
+    if (kind === 0) {
+      return { cat: "sum", q: "レイヤー 1 の値が y₀ = " + y[0] + ", y₁ = " + y[1] + " のとき、証明者の主張 W̃₀ = Σ g₀(a,b) は？（F₁₁）",
+        body: cl(["g₀(a,b) = (1−a)·b·(W̃₁(a) + W̃₁(b))", "生き残る格子点は (a,b) = (0,1) だけ"]),
+        choices: numChoices(C, p, [W.mod(y[0] * y[1], p), W.mod(y[0] - y[1], p), W.mod(y[0] + y[1] + 1, p)]),
+        why: "Σ g₀ = g₀(0,1) = 1·(W̃₁(0) + W̃₁(1)) = " + y[0] + " + " + y[1] + " ≡ " + C + " (mod 11)。足し算ゲート 1 個ぶんの和です。" };
+    }
+    if (kind === 1) {
+      var r1 = 2 + ri(p - 2), v = W.peval(p1, r1, p);
+      return { cat: "sum", q: "証明者が p₁(x) = " + W.pfmt(p1, "x") + " を送ってきた。検証者が r₁ = " + r1 + " を選んだとき、次のラウンドの主張 p₁(r₁) は？（F₁₁）",
+        body: cl(["まず p₁(0) + p₁(1) = " + W.mod(W.peval(p1, 0, p) + W.peval(p1, 1, p), p) + " が主張と合うことを見る", "次に r₁ を代入する"]),
+        choices: numChoices(v, p, [W.mod(v + 1, p), W.mod(W.peval(p1, 0, p) + W.peval(p1, 1, p), p), W.mod(v * 2, p)]),
+        why: "p₁(" + r1 + ") = " + W.pfmt(p1, "x").replace(/x/g, "(" + r1 + ")") + " ≡ " + v + " (mod 11)。この値が「g₀(" + r1 + ", b) の b についての和」という次の主張になります。" };
+    }
+    var fake = W.mod(C + 1 + ri(p - 1), p), a = ri(p), b = ri(p), res = SC.run(x, a, b, fake);
+    return { cat: "sum", q: "本当の値は " + C + " なのに証明者が「" + fake + "」と嘘をつき、和だけ合わせた偽多項式で辻褄を合わせてきた。検証者が (r₁, r₂) = (" + a + ", " + b + ") を選んだ。結果は？",
+      body: cl(["偽物は本物に (嘘 − 本当)·(1−x) を足したもの", "最後に検証者が自分で g₀(r₁,r₂) を計算する"]),
+      choices: shuffle([{ t: res.accepted ? "受理してしまう（見逃し）" : "拒否（最後の 1 点でずれる）", ok: true },
+                        { t: res.accepted ? "拒否（最後の 1 点でずれる）" : "受理してしまう（見逃し）", ok: false },
+                        { t: "ラウンド 0 の和の検査で落ちる", ok: false }, { t: "ラウンド 1 の和の検査で落ちる", ok: false }]),
+      why: "偽物の足し分 (1−x) は x = 1 で 0 になるので、r₁ = 1 か r₂ = 1 のときだけ見逃します。今回は (" + a + ", " + b + ") なので" + (res.accepted ? "見逃し。121 通り中 21 通りの側です。" : "拒否。p₂(r₂) = " + res.v2 + " と g₀(r₁,r₂) = " + res.direct + " がずれます。") };
+  }
+
+  // ---- AIR / トレース ----
+  function genAir() {
+    var X = [3, 1, 2, 4], T = ST.trace(X);
+    var cells = [["a", 1], ["m", 2], ["y", 3], ["y", 1], ["a", 3], ["m", 3], ["y", 2]];
+    var c = pick(cells), old = T[c[0]][c[1]], nv = W.mod(old + 1 + ri(15), 17);
+    T[c[0]][c[1]] = nv;
+    var r = ST.air(T, X);
+    var labels = { "step0→1: a₁ = x₁+x₂": "割り切れない（step 0→1: a₁ = x₁+x₂ が破れる）", "step1→2: m₂ = x₃·x₄": "割り切れない（step 1→2: m₂ = x₃·x₄ が破れる）", "step2→3: y₃ = a₂+m₂": "割り切れない（step 2→3: y₃ = a₂+m₂ が破れる）" };
+    var correct = r.divisible ? "割り切れる（そのマスは制約されていない）" : labels[r.broken[0]];
+    var all = ["割り切れる（そのマスは制約されていない）", labels["step0→1: a₁ = x₁+x₂"], labels["step1→2: m₂ = x₃·x₄"], labels["step2→3: y₃ = a₂+m₂"]];
+    return { cat: "air", q: "トレース（F₁₇、公開入力 3,1,2,4）の " + c[0] + "₍" + c[1] + "₎ を " + old + " → " + nv + " に書き換えた。制約多項式 C(X) は X⁴ − 1 で割り切れるか？",
+      body: cl(["制約: X=ω⁰ で A(ωX)=4、X=ω¹ で M(ωX)=8、X=ω² で Y(ωX)=A(X)+M(X)", "C の H 上の値 = [" + r.onH.join(", ") + "]"]),
+      choices: shuffle(all.map(function (t) { return { t: t, ok: t === correct }; })),
+      why: r.divisible ? "このトイ AIR が縛っているのは a₁, m₂, y₃（と y₃ を通じた a₂, m₂）だけ。" + c[0] + "₍" + c[1] + "₎ は Week 1 のアンダー制約と同じで、変えても C は H の全点で 0 のまま。実物の AIR は境界制約と保持制約で全マスを縛ります。"
+        : "C の H 上の値に 0 でない点があるので Z_H で割り切れず、商多項式が存在しない。余り = " + W.pfmt(r.R) + "。コセット上で点ごとに割った値を補間すると次数 " + r.ldt + "（正直なら 2）で、FRI が落とします。" };
+  }
+
+  // ---- FRI ----
+  function genFri() {
+    var p = 17, Q = [ri(p), ri(p), 1 + ri(p - 1)];
+    var kind = ri(2);
+    if (kind === 0) {
+      var beta = 1 + ri(p - 1), f = ST.fold(Q, beta);
+      var wrong1 = W.padd(f.even, W.pscale(f.odd, W.mod(beta + 1, p), p), p), wrong2 = W.padd(f.odd, W.pscale(f.even, beta, p), p), wrong3 = W.padd(f.even, f.odd, p);
+      var opts = [{ t: W.pfmt(f.next, "Y"), ok: true }, { t: W.pfmt(wrong1, "Y"), ok: false }, { t: W.pfmt(wrong2, "Y"), ok: false }, { t: W.pfmt(wrong3, "Y"), ok: false }];
+      var seen = {}; opts = opts.filter(function (o) { if (seen[o.t]) return false; seen[o.t] = true; return true; });
+      while (opts.length < 4) { var rp = [ri(p), 1 + ri(p - 1)]; var t = W.pfmt(rp, "Y"); if (!seen[t]) { seen[t] = true; opts.push({ t: t, ok: false }); } }
+      return { cat: "fri", q: "Q₀(X) = " + W.pfmt(Q) + "（F₁₇）を偶奇に分け、検証者の β = " + beta + " で折り畳んだ Q₁(Y) は？",
+        body: cl(["Q₀(X) = Q_even(X²) + X·Q_odd(X²)", "Q₁(Y) = Q_even(Y) + β·Q_odd(Y)"]),
+        choices: shuffle(opts),
+        why: "Q_even(Y) = " + W.pfmt(f.even, "Y") + "、Q_odd(Y) = " + W.pfmt(f.odd, "Y") + "。Q₁ = " + W.pfmt(f.even, "Y") + " + " + beta + "·(" + W.pfmt(f.odd, "Y") + ") = " + W.pfmt(f.next, "Y") + "。次数が 2 → 1 に半分になります。" };
+    }
+    var xq = pick(ST.D), q = ST.query(Q, 3, xq);
+    return { cat: "fri", q: "Q₀(X) = " + W.pfmt(Q) + "（F₁₇）。クエリ点 x = " + xq + " で証明者が Q₀(x) = " + q.fx + "、Q₀(−x) = " + q.fmx + " を開示した。検証者が復元する Q_even(x²) は？",
+      body: cl(["Q_even(x²) = (Q₀(x) + Q₀(−x)) / 2", "2 の逆元は 9（2·9 = 18 ≡ 1）"]),
+      choices: numChoices(q.ev, p, [q.od, W.mod(q.fx + q.fmx, p), W.mod(q.fx - q.fmx, p)]),
+      why: "(" + q.fx + " + " + q.fmx + ")·9 ≡ " + q.ev + " (mod 17)。直接計算した Q_even(" + q.x2 + ") = " + q.evDirect + " と一致。x と −x は x² が同じなので、2 点で偶奇部分が復元できます。" };
+  }
+
+  // ---- PLONK ----
+  function genPlonk() {
+    var GOOD = [[3, 1, 4], [2, 4, 8], [4, 8, 12]], rows = GOOD.map(function (r) { return r.slice(); });
+    var kind = ri(4);
+    var desc;
+    if (kind === 0) { rows[2] = [5, 8, 13]; desc = "gate 2 を (5, 8, 13) に"; }
+    else if (kind === 1) { var i = ri(3), c = ri(3); rows[i][c] = W.mod(rows[i][c] + 1 + ri(15), 17); desc = "gate " + i + " の " + ["L", "R", "O"][c] + " を " + rows[i][c] + " に"; }
+    else if (kind === 2) { rows[2] = [8, 4, 12]; desc = "gate 2 の L と R を入れ替えて (8, 4, 12) に"; }
+    else { desc = "何も変えずそのまま"; }
+    var gates = [0, 1, 2].map(function (i) { return PK.gate(rows, i).ok; }), copies = PK.copies(rows).every(function (c) { return c.ok; });
+    var correct = !gates.every(Boolean) ? "gate " + gates.indexOf(false) + " のゲート方程式が破れる" : (!copies ? "ゲート方程式は全部通るが、コピー制約（配線）が破れる" : "ゲート方程式もコピー制約も通る");
+    var all = ["gate 0 のゲート方程式が破れる", "gate 1 のゲート方程式が破れる", "gate 2 のゲート方程式が破れる", "ゲート方程式は全部通るが、コピー制約（配線）が破れる", "ゲート方程式もコピー制約も通る"];
+    var opts = [{ t: correct, ok: true }];
+    shuffle(all.filter(function (t) { return t !== correct; })).slice(0, 3).forEach(function (t) { opts.push({ t: t, ok: false }); });
+    return { cat: "plonk", q: "PLONK のゲート表（F₁₇）で、" + desc + "した。検証はどうなる？",
+      body: cl(["gate 0: " + rows[0].join(", ") + " (+)   gate 1: " + rows[1].join(", ") + " (×)   gate 2: " + rows[2].join(", ") + " (+)", "配線: O of gate 0 = L of gate 2、O of gate 1 = R of gate 2"]),
+      choices: shuffle(opts),
+      why: correct.indexOf("gate ") === 0
+        ? "その行の Q_L·L + Q_R·R + Q_M·L·R + Q_O·O + Q_C が 0 になりません。ゲート方程式は行ごとに独立に落ちます。"
+        : (!copies ? "各行は型どおりに計算されていますが、行をまたぐ「同じ値」が壊れています。大積（grand product）が集合の不一致として拾います。"
+                   : "型と配線の両方に整合しているので受理されます（この検問では公開入力の制約は省略）。") };
+  }
+
+  var CATS = [
+    { key: "cx",    name: "証明システム", desc: "NP・IP・PCP・IOP と性質",       gen: function () { return genTheory(THEORY_A, "cx"); } },
+    { key: "sum",   name: "SumCheck",     desc: "ラウンドの計算と嘘の見逃し",     gen: genSum },
+    { key: "air",   name: "AIR / 商",     desc: "改ざんで割り切れるか",           gen: genAir },
+    { key: "fri",   name: "FRI",          desc: "折り畳みとクエリの復元",         gen: genFri },
+    { key: "plonk", name: "PLONK",        desc: "ゲート制約と配線",               gen: genPlonk },
+    { key: "zk",    name: "原理",         desc: "3 部品・ゼロ知識化・KZG",        gen: function () { return genTheory(THEORY_B, "zk"); } }
+  ];
+
+  var els = {};
+  ["quiz-start", "quiz-play", "quiz-result", "mode-grid", "quiz-best", "qprog", "qcat", "lives", "qtext", "qbody", "choices", "fb",
+   "btn-quit", "btn-next", "rank", "rank-title", "rank-sub", "cat-stats", "btn-again", "btn-modes"].forEach(function (id) { els[id] = document.getElementById(id); });
+  var state = null;
+  function pane(w) { els["quiz-start"].hidden = w !== "start"; els["quiz-play"].hidden = w !== "play"; els["quiz-result"].hidden = w !== "result"; }
+  function readBest() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { return null; } }
+  function writeBest(b) { try { localStorage.setItem(STORE_KEY, JSON.stringify(b)); } catch (e) {} }
+  function showBest() {
+    var b = readBest();
+    els["quiz-best"].textContent = b ? "自己ベスト: " + b.correct + " / " + TOTAL + "（ランク " + b.rank + "・挑戦 " + b.runs + " 回）" : "まだ記録なし — 最初の検問から始めてください。";
+  }
+  function renderLives() {
+    var s = "";
+    for (var i = 0; i < MAX_LIVES; i++) s += i < state.lives ? "◆" : '<span class="gone">◇</span>';
+    els["lives"].innerHTML = s; els["lives"].setAttribute("aria-label", "残りライフ " + state.lives + " / " + MAX_LIVES);
+  }
+  function start(mode) { state = { mode: mode, i: 0, lives: MAX_LIVES, correct: 0, stats: {}, answered: false, cur: null }; pane("play"); nextQuestion(); }
+  function nextQuestion() {
+    state.i++; state.answered = false;
+    var cat = state.mode === "mixed" ? pick(CATS) : CATS.filter(function (c) { return c.key === state.mode; })[0];
+    state.cur = cat.gen(); state.cur.cat = cat.key;
+    els["qprog"].textContent = state.i + " / " + TOTAL; els["qcat"].textContent = cat.name; renderLives();
+    els["qtext"].textContent = state.cur.q; els["qbody"].innerHTML = state.cur.body || "";
+    els["fb"].hidden = true; els["btn-next"].hidden = true; els["choices"].textContent = "";
+    var short = state.cur.choices.every(function (c) { return c.t.length <= 20; });
+    els["choices"].className = "choices" + (short ? " two" : "");
+    state.cur.choices.forEach(function (c) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "choice"; b.textContent = c.t;
+      b.addEventListener("click", function () { answer(c, b); }); els["choices"].appendChild(b);
+    });
+  }
+  function answer(choice, btn) {
+    if (state.answered) return;
+    state.answered = true;
+    var cat = state.cur.cat;
+    if (!state.stats[cat]) state.stats[cat] = { ok: 0, n: 0 };
+    state.stats[cat].n++;
+    Array.prototype.forEach.call(els["choices"].children, function (b, i) {
+      b.disabled = true; var c = state.cur.choices[i];
+      if (c.ok) b.classList.add("is-correct"); else if (b === btn) b.classList.add("is-wrong"); else b.classList.add("dim");
+    });
+    if (choice.ok) { state.correct++; state.stats[cat].ok++; els["fb"].className = "fb ok"; els["fb"].innerHTML = '<span class="fb-head">正しい判定</span>' + esc(state.cur.why); }
+    else { state.lives--; renderLives(); els["fb"].className = "fb bad"; els["fb"].innerHTML = '<span class="fb-head">誤判定</span>' + esc(state.cur.why); }
+    els["fb"].hidden = false;
+    els["btn-next"].textContent = (state.lives === 0 || state.i === TOTAL) ? "結果を見る" : "次の検問へ";
+    els["btn-next"].hidden = false;
+  }
+  function finish() {
+    pane("result");
+    var busted = state.lives === 0;
+    var rank = state.correct === TOTAL ? "S" : state.correct >= 8 ? "A" : state.correct >= 6 ? "B" : "F";
+    var titles = { S: "完璧な検証 — 1 本も見逃していない", A: "信頼できる検証者 — 惜しいのはあと少し", B: "見習い検証者 — 弱い分野を訓練モードで", F: "要再訓練 — 本文の実測をもう一度" };
+    els["rank"].textContent = rank; els["rank"].className = "rank " + rank.toLowerCase();
+    els["rank-title"].textContent = busted ? "検問失敗 — 誤った判定を 3 回してしまった" : titles[rank];
+    els["rank-sub"].textContent = "正解 " + state.correct + " / " + TOTAL + (busted ? "（ライフ切れ）" : "");
+    els["cat-stats"].textContent = "";
+    Object.keys(state.stats).forEach(function (key) {
+      var meta = CATS.filter(function (c) { return c.key === key; })[0], s3 = state.stats[key], div = document.createElement("div");
+      div.className = "cstat";
+      div.innerHTML = '<span class="cn">' + (meta ? meta.name : key) + "</span>" + '<span class="cv ' + (s3.ok === s3.n ? "full" : "weak") + '">' + s3.ok + " / " + s3.n + "</span>";
+      els["cat-stats"].appendChild(div);
+    });
+    var best = readBest() || { correct: -1, rank: "F", runs: 0 };
+    best.runs++; if (state.correct > best.correct) { best.correct = state.correct; best.rank = rank; }
+    writeBest(best);
+  }
+  els["btn-next"].addEventListener("click", function () { if (state.lives === 0 || state.i === TOTAL) finish(); else nextQuestion(); });
+  els["btn-quit"].addEventListener("click", function () { pane("start"); showBest(); });
+  els["btn-again"].addEventListener("click", function () { start(state.mode); });
+  els["btn-modes"].addEventListener("click", function () { pane("start"); showBest(); });
+  var mixed = document.createElement("button"); mixed.type = "button"; mixed.className = "mode primary";
+  mixed.innerHTML = '<span class="m-name">ランダム検問</span><span class="m-desc">全分野から 10 問。まずはこれで実力を測る</span>';
+  mixed.addEventListener("click", function () { start("mixed"); }); els["mode-grid"].appendChild(mixed);
+  CATS.forEach(function (c) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "mode";
+    b.innerHTML = '<span class="m-name">' + c.name + "</span>" + '<span class="m-desc">' + c.desc + "</span>";
+    b.addEventListener("click", function () { start(c.key); }); els["mode-grid"].appendChild(b);
+  });
+  showBest();
+})();
+</script>
+</body>
+</html>
