@@ -585,6 +585,43 @@
   a { color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
+
+  /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+  .deck { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
+        display: flex; flex-direction: column; gap: 0.55rem; }
+  .sl-head { display: flex; gap: 0.75rem; align-items: baseline; }
+  .sl-head .sn { font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; }
+  .sl-head .st { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .sl-claim { font-weight: 700; font-size: 1rem; line-height: 1.7; color: var(--ink); }
+  .sl p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .sl p.sl-claim { color: var(--ink); font-size: 1rem; }
+  .sl pre { background: var(--panel-2); font-size: var(--fs-xs); }
+  .sl-hw { border-left: 3px solid var(--pass); padding-left: 0.75rem; }
+  .sl-hw b { color: var(--pass); }
+  .sl-q { color: var(--accent); }
+  .exs { border: 1px dashed var(--line-strong); border-radius: var(--r-md); padding: 1rem 1.1rem 0.6rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.5rem; }
+  .exs .eyebrow { color: var(--free); }
+  .ex { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); }
+  .ex > summary { cursor: pointer; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); color: var(--ink); line-height: 1.6; }
+  .ex > summary:hover { color: var(--accent); }
+  .ex > pre { border: none; border-top: 1px solid var(--line); border-radius: 0; }
+  .appx { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: 0.6rem; }
+  .appx > summary { cursor: pointer; padding: 0.8rem 1rem; font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .appx > summary:hover { color: var(--accent); }
+  .appx .band { padding: 0.5rem 0 1.5rem; }
+  .appx .band + .band { border-top: none; }
+  table.hwmap td, table.hwmap th, table.gloss td, table.gloss th { white-space: normal; }
+  table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
+  table.gloss td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  #glossary .note-title { margin-top: 0.5rem; }
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
@@ -604,17 +641,16 @@
     <p class="eyebrow">Advanced Cryptography Program 2026 / Week 1 自習ノート</p>
     <h1>算術回路の<span>作り方</span>と、<span>壊し方</span></h1>
     <p class="lead">
-      Week 1 の課題 <code>proof-of-exploit</code> を、前提から順に理解するためのページ。
-      「そもそもなぜ回路で書くのか」から始めて、制約を 1 本ずつ数値で読み、
-      最後は<strong>実際に制約を外して回路を壊せる対話型のラボ</strong>まで通します。
+      このノートは<strong>講義スライド 37 枚と、課題 proof-of-exploit の README</strong> と同じ順番で進みます。
+      1 カード = スライド 1〜2 枚（または README の 1 概念）= 主張 1 つ。宿題の 2 関数 <code>build</code> / <code>attack</code> が
+      どこに当たるかを、毎回「宿題ではここ」で示します。
     </p>
     <p class="lead">
-      この週で掴むことを 1 行にすると——
-      <strong>回路には <code>if</code> が無く、あるのは「この式は 0 でなければならない」という条件だけ。
-      条件を 1 本書き忘れると、その信号は攻撃者の持ち物になる。</strong>
+      数は 0〜7 の整数と 1 桁の掛け算だけ。「やってみる」を紙で解いてから答えを開いてください。
+      制約を 1 本ずつ外して回路を壊せるラボと、検問クイズはそのまま残してあります。
     </p>
     <div class="meta-row">
-      <span class="tag">読了 15〜25 分</span>
+      <span class="tag">カード 20 枚・演習 6 問</span>
       <span class="tag">対話ラボあり</span>
       <span class="tag">前提知識なし</span>
       <span class="tag">外部通信なし</span>
@@ -622,6 +658,523 @@
   </div>
 </header>
 
+<!-- ============================================================ 0 : 出発点 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>このノートは、講義スライド 37 枚と課題 README の順番で進む</h2>
+      <p>
+        Week 1 のスライドは前半（1〜14）がプログラム紹介、後半（15〜37）が「なぜ Programmable Cryptography か」と「ZK / MPC / FHE の違い」、
+        そして技術の実体は<strong>課題 <code>proof-of-exploit</code> の README</strong> にあります。
+        このノートはスライド 15〜37 をカードにしたあと、README を同じ形（1 カード = 1 主張 + 1 例）でカードにします。
+        宿題で書く 2 関数 <code>build</code>（Part A）と <code>attack</code>（Part B）がどこに当たるかを「宿題ではここ」で示します。
+      </p>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み方</p>
+        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。章の終わりの<b>「やってみる」</b>は紙と鉛筆で。数は 0〜7 の整数と 1 桁の掛け算だけです。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">この週の 1 行</p>
+        <p><b>回路 = 「全部 0 になるべき式の束」。信号は、式で縛らない限り自由。</b>だから式を 1 本忘れると、嘘の値が通る（アンダー制約）。Week 2〜4 は、この「式の束」を分けて計算し（MPC）、見せずに納得させ（ZK）、多項式にまとめる（SNARK）話です。</p>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ D1 : 背景 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 15〜24 / Programmable Cryptography が重要となっている背景</p>
+      <h2>監査の外で起きる事故を、数学で止めたい</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">15/37</span><span class="st">本日の流れ</span></div>
+        <p class="sl-claim">背景 → Programmable Cryptography とは → それを使ったシステム開発。午後はホワイトボードセッション（題材: KelpDAO 事件）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">17〜18/37</span><span class="st">背景: サイバー攻撃範囲の拡大／KelpDAO 事件</span></div>
+        <p class="sl-claim">被害はコードのバグより、監査対象外（設定ミス・運用・ブリッジの信頼設定）で起きる割合が増えている。KelpDAO × LayerZero は 2026 年想定の仮想シナリオとして、その典型を示す。</p>
+        <p class="sl-q">Q. 「監査で見つからない」事故に、監査を増やす以外の手はあるか。（次のカード）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19〜20/37</span><span class="st">Q1 ／ Proof-of-Exploit × Circuit-Breaker</span></div>
+        <p class="sl-claim">「攻撃手順 W でこのコントラクトが壊れる」ことを、W を見せずに証明できれば、証明が通った瞬間にコントラクトを自動停止（circuit breaker）できる。原発の非常停止（スクラム）と同じ発想: 人の判断を待たない安全装置。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: 課題名 <code>proof-of-exploit</code> の由来。Part B の <code>attack()</code> が「壊れる手順（witness）」を作る側、採点器の solver が「壊れないことを確かめる」側。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">21/37</span><span class="st">ProgCrypto は、防御の範囲を押し上げるためにある</span></div>
+        <p class="sl-claim">監査は「人が読んで見つける」。ProgCrypto は「壊れないことを数学で保証する」か「壊れたら数学が検知する」。守れる範囲が変わる。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">22〜24/37</span><span class="st">なぜ今か — 耐量子・プライバシーのデフォルト化・機関投資家</span></div>
+        <pre>耐量子: 署名・コミットメントをハッシュベースへ、実行の検証は zkVM の証明が担う（lean Ethereum）
+プライバシー: イーサリアムのプライバシーをデフォルト化する（PSE、Kohaku、PIR）
+機関投資家: 取引内容を隠したまま規則どおりだと示せないと DeFi に入れない</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 3 つとも「見せずに正しいと示す」＝ ZK の需要。Week 3・4 の題材はこの需要の中身。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ D2 : ProgCrypto とは -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 26〜31 / Programmable Cryptography とは</p>
+      <h2>ZK・MPC・FHE は「何を、誰から隠すか」が違う。共通の中間表現が回路</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">26/37</span><span class="st">「ゼロ知識証明」の「証明」とは何を指すか</span></div>
+        <p class="sl-claim">数学の証明（文章）ではなく、「検証者が機械的に確かめられるデータ」。Goldwasser–Micali–Rackoff（1985）が「対話しながら確かめる」形に広げ、そこから「知識を漏らさない証明」が定義された。</p>
+        <p class="sl-hw"><b>Week 3 で本番</b>: 証明 = (R, s) というデータ、検証 = s·G = R + e·P という計算。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">27/37</span><span class="st">ZK / MPC / FHE</span></div>
+        <pre>        隠す対象              信頼前提                        敵対モデル                     用途例
+ZK      prover の witness w   prover を信頼しなくてよい（数学）  prover（偽証）／verifier（窃取） 年齢証明 — 生年月日を出さず 18 以上
+MPC     各参加者の入力         n 台中 k を信頼                  参加者（最大 t 名が逸脱）        秘密入札 — 額を漏らさず最高値
+FHE     計算データと中間状態    User の鍵管理。Server は見ない     盗聴者／Server（正しさは別途）    暗号文のまま機械学習を委託
+ZK: π : ∃w. C(x, w) = 1        MPC: f(x₁, x₂, x₃)        FHE: E(x) → E(f(x))</pre>
+        <p class="sl-q">Q. 「1 者が自分のデータを見せずに計算してもらう」はどれか。（FHE）「複数者が持ち寄る」は？（MPC）「条件を満たすことだけ示す」は？（ZK）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">28/37</span><span class="st">Programmable Cryptography — 暗号とシステムを一体化するパラダイム</span></div>
+        <pre>1. SOURCE（用途別のコード）   age_check.rs（ZK）／auction.rs（MPC）／diagnose.rs（FHE）
+        ↓ compile（circom / halo2 / noir / arkworks）
+2. CIRCUIT（共通の中間表現）  y = (a × b) + c     ゲートとワイヤ。低レベルの数学的表現
+        ↓ run（prover / protocol / FHE eval）
+3. EXECUTABLE（共通）         end user には backend が裏で動くだけ</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: 課題は 2 の CIRCUIT を手で書く。「回路」が ZK / MPC / FHE の共通の土台だから、Week 1 に置かれている。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">29〜31/37</span><span class="st">ZK の実用化 10 年で 2 桁以上／身近な例／Longfellow</span></div>
+        <p class="sl-claim">SumCheck（1992）→ GKR（2008）→ Groth16（2016）→ Spartan・Nova・Lasso・Jolt と、証明時間は 10 年で 2 桁以上速くなった。Google の Longfellow は既存の身分証規格の上で ZK を動かす。</p>
+        <p class="sl-hw"><b>Week 4 との接続</b>: SumCheck・GKR・Groth16 が Week 4 の 3 部品表に出てくる。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ D3 : システム開発 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 33〜37 / ProgCrypto を使ったシステム開発</p>
+      <h2>4 つの問いが決まってから、暗号を選ぶ</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">33/37</span><span class="st">ProgCrypto をサービスに組み込むときの考え方</span></div>
+        <pre>STEP 1 誰が   STEP 2 何の情報を誰から隠して   STEP 3 どういう計算をして   STEP 4 誰が検証するか
+KelpDAO: off-chain の AI Auditor が／攻撃手順 W を事業者・第三者・他ユーザーから隠して／「W でコントラクトが壊れる」を計算し／on-chain コントラクトが検証（成功したら自動遮断）</pre>
+        <p class="sl-hw"><b>Week 2・4 でも同じ問い</b>: MPC の party / input / function / output、Week 4 の 5 パート（証明者・方法・対象・検証・検証者）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">34〜35/37</span><span class="st">どの暗号を使うのかは要件次第／パターン A を実装する（RISC Zero × Rust）</span></div>
+        <p class="sl-claim">要件が決まると、ZK か MPC か FHE か、対話型か非対話型か、が決まる。KelpDAO のパターン A は zkVM（RISC Zero）で「攻撃手順を実行したら壊れた」の実行を証明する。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">36〜37/37</span><span class="st">ホワイトボードセッション／今週の課題</span></div>
+        <pre>ホワイトボード: KelpDAO 事件を防ぐシステムを 1 つ（アーキテクチャ図・要件・選定技術）
+課題: ① 健全な回路を組む（許可された資格だけを通す制約）  ② 壊れた回路を破る（制約の抜けを突く witness）  ③ PR で提出</pre>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ D4 : 宿題 README -->
+<section class="band" id="homework">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">課題 README / proof-of-exploit</p>
+      <h2>回路は「0 になるべき式の束」— 信号は縛らない限り自由</h2>
+      <p>ここからが技術の実体です。README の言葉を 1 つずつ、中学の方程式から橋を架けて読みます。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">用語 1</span><span class="st">信号・制約・witness — 中学の方程式で言うと</span></div>
+        <pre>信号（signal）   回路に出てくる変数。値は有限体 F_p の元（大きな素数の余りの世界）
+制約（constraint） 「ある式が 0 になる」という条件。 例: b·b − b = 0 は「b は 0 か 1」
+witness          全部の信号に値を入れた割当。全制約を満たす witness があれば「証明できた」
+
+中学: 「x + 3 = 5」を移項して「x + 3 − 5 = 0」。右辺を 0 にそろえるのが制約の書き方</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>cs.input(name, value)</code> が入力の信号、<code>cs.aux(name, value)</code> が補助信号、<code>cs.assert_zero(expr)</code> が制約、<code>cs.set_output(granted)</code> が出力。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">用語 2</span><span class="st">健全性（soundness）と、この課題の肝</span></div>
+        <p class="sl-claim">本当は条件を満たしていない入力で制約を満たす witness が作れてしまうと、回路は「嘘の証明」を受理する。防げていれば健全。<b>信号は、制約で縛らない限り好きな値にできる</b>。だから必要な制約を書き忘れると健全性が壊れる（アンダー制約）。</p>
+        <p class="sl-q">Q. 「制約を 1 本忘れる」と「制約を 1 本多く書く」、危ないのはどっちか。（忘れる方。多い方は正直な人が通らなくなる＝完全性の問題で、嘘は通さない）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">題材</span><span class="st">アクセス制御 — 3 つの許可リスト</span></div>
+        <pre>資格 (role, clearance, region) は各 0〜7。 ROLE_OK = {2, 5, 6},  CLEARANCE_OK = {3, 4, 7},  REGION_OK = {1, 6}
+authorized ⇔ role ∈ ROLE_OK かつ clearance ∈ CLEARANCE_OK かつ region ∈ REGION_OK      （通る組は 3 × 3 × 2 = 18 通り／512 通り）
+作るもの: granted == 1 にできる ⇔ その資格が authorized</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">部品 1</span><span class="st">ビット制約 b·b − b = 0 — 因数分解で読む</span></div>
+        <pre>b·b − b = b·(b − 1) = 0  ⇔  b = 0 または b = 1        （中 3 の因数分解: 積が 0 なら、どちらかが 0）
+b = 2 なら 4 − 2 = 2 ≠ 0 → 通らない。 b = 1 なら 0 ✓、b = 0 なら 0 ✓</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>cs.assert_zero(f * f - f)</code> を f_role, f_clearance, f_region, granted の 4 本。「フラグ」を 0/1 に縛る。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">部品 2</span><span class="st">メンバーシップ f·(x − 2)(x − 5)(x − 6) = 0 — 「x はリストの中」を式にする</span></div>
+        <pre>(x − 2)(x − 5)(x − 6) = 0  ⇔  x ∈ {2, 5, 6}        （因数分解の解。x = 3 なら (1)(−2)(−3) = 6 ≠ 0、x = 5 なら 0）
+前に f を掛ける: f·(x − 2)(x − 5)(x − 6) = 0  ⇔  f = 0 または x ∈ {2, 5, 6}
+→ 「f = 1 なら x はリストの中」。f = 0 のときは x に何も言わない（それでよい: granted は f の AND だから）</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>_membership_product(x, allowlist)</code> が積を作り、<code>cs.assert_zero(f_role * _membership_product(r, ROLE_OK))</code> など 3 本。<b>この 3 本のどれかを忘れるのが Part B の穴</b>。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">部品 3</span><span class="st">AND は掛け算 — granted = f_role · f_clearance · f_region</span></div>
+        <pre>3 つが全部 1 のときだけ積が 1、どれか 0 なら 0。 制約: granted − f_role·f_clearance·f_region = 0
+（Week 2 の Boolean 回路の AND、Week 4 の PLONK の掛け算ゲートと同じもの）</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>cs.assert_zero(granted - f_role * f_clearance * f_region)</code>。これで build は 8 本の制約（ビット 4 + リンク 3 + AND 1）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">Part B</span><span class="st">アンダー制約を突く — 抜けている 1 本を読む</span></div>
+        <pre>tests/challenge.py の制約:  ビット 4 本 ✓、role のリンク ✓、clearance のリンク ✓、region のリンク ✗（無い）、AND ✓
+→ f_region は「1 なのに region が {1, 6} の外」という値を取れる。region の値そのものに触れる式が 1 本も無い
+
+attack():  honest_witness(2, 3, 1) から始めて  region = 0,  f_region = 1,  granted = 1 に書き換える
+検算: ビット制約 4 本 → 0 ✓、role リンク f·(2−2)(…) = 0 ✓、clearance リンク f·(3−3)(…) = 0 ✓、AND 1 − 1·1·1 = 0 ✓
+      region = 0 は REGION_OK に無いのに granted = 1 → 本来入れない人が通った</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>attack()</code> は全信号名 → 値の dict を返す。<b>「どの信号に触れている式が無いか」を探す</b>のが解き方。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">採点</span><span class="st">完全性・構造・健全性・exploit — 4 つは別々に壊れる</span></div>
+        <pre>完全性: authorized な 18 通りは全部 granted = 1 で通るか        （制約が多すぎると落ちる）
+構造:   制約の集合が入力値に依存しないか                          （if で制約を出し分けると落ちる）
+健全性: authorized でない 494 通りで granted = 1 にできないか      （solver が攻撃者として探す。制約が足りないと落ちる）
+exploit: attack() が challenge を破っているか</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 完全性は「通すべき人を通す」、健全性は「通してはいけない人を通さない」。Week 3・4 でも同じ 2 語が主役。</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">制約を数値で読む（0〜7 の整数）</h3>
+      <details class="ex"><summary>問 1. b·b − b を b = 0, 1, 2, 3 で計算せよ。0 になるのはどれか。</summary><pre>b=0: 0、b=1: 0、b=2: 2、b=3: 6。0 になるのは 0 と 1 だけ → 「ビット」の制約になっている。</pre></details>
+      <details class="ex"><summary>問 2. (x − 2)(x − 5)(x − 6) を x = 2, 4, 6 で計算せよ。</summary><pre>x=2: 0·(−3)·(−4) = 0、x=4: 2·(−1)·(−2) = 4、x=6: 4·1·0 = 0。リストの中（2, 6）だけ 0。</pre></details>
+      <details class="ex"><summary>問 3. f·(x − 2)(x − 5)(x − 6) = 0 で、x = 4 のとき f に許される値は？ x = 5 のときは？</summary><pre>x=4: 積が 4 なので f·4 = 0 → f = 0 だけ（F_p では 4 に逆元があるので f = 0 が唯一）。
+x=5: 積が 0 なので f は 0 でも 1 でもよい（ビット制約が別にある）。
+→ 「リストの外なら f は 0 に固定、中なら自由」。granted = 1 にするには f = 1 が要るので、外の人は通れない。</pre></details>
+      <details class="ex"><summary>問 4. (f_role, f_clearance, f_region) = (1, 1, 0) のとき granted は？ (1, 1, 1) では？</summary><pre>積なので 0 と 1。3 つ全部 1 のときだけ 1（AND）。</pre></details>
+      <details class="ex"><summary>問 5. 次の 7 本の制約のうち、抜けているのはどれか。「f_role·f_role − f_role, f_c·f_c − f_c, f_g·f_g − f_g, g·g − g, f_role·Π(r − ROLE_OK), f_g·Π(region − REGION_OK), g − f_role·f_c·f_g」</summary><pre>clearance のリンク f_c·Π(clearance − CLEARANCE_OK) が無い。
+→ 攻撃: honest_witness(2, 3, 1) から clearance = 0, f_clearance = 1, granted = 1 に書き換えると全制約が通る。</pre></details>
+      <details class="ex"><summary>問 6. 「制約の集合が入力値に依存してはいけない」のはなぜか。</summary><pre>制約は verifier が事前に固定して持つ「型」。prover の入力に合わせて式を出し分けられるなら、prover が都合のよい式を選べてしまう。
+Week 4 の PLONK で「セレクター（回路の型）は公開、witness は秘密」と分けたのと同じ線引き。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ D5 : 宿題対応表 -->
+<section class="band" id="hwmap">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">宿題の 2 関数</p>
+      <h2>宿題の関数 ↔ 部品 ↔ 学校で習ったこと</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="data hwmap">
+        <thead><tr><th>関数 / 部品</th><th>スライド・README</th><th>学校で習ったこと</th><th>小さい数の例</th><th>落ちやすい所</th></tr></thead>
+        <tbody>
+          <tr><td>build: ビット制約</td><td>README「制約」</td><td>因数分解 b(b−1) = 0（中 3）</td><td>b=2 → 2 ≠ 0</td><td>4 本（granted も）</td></tr>
+          <tr><td>build: メンバーシップ</td><td>README「考え方」</td><td>因数分解の解 (x−a)(x−b)… = 0（中 3）</td><td>x=4 → 4、x=5 → 0</td><td>3 本のうち 1 本忘れる</td></tr>
+          <tr><td>build: AND</td><td>スライド 28 の × ゲート</td><td>掛け算 = 全部 1 のときだけ 1</td><td>1·1·0 = 0</td><td>—</td></tr>
+          <tr><td>build: 構造</td><td>採点 2</td><td>—</td><td>—</td><td>if で制約を出し分けない</td></tr>
+          <tr><td>attack</td><td>README Part B</td><td>「式が触れていない変数は自由」</td><td>region = 0, f_region = 1</td><td>honest_witness から書き換える</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <p class="eyebrow">提出前の自己チェック — 5 問、自分の言葉で</p>
+      <p>(1) 「回路」とは何か、1 文で。 (2) b·b − b = 0 がビットを表す理由。 (3) f·(x−2)(x−5)(x−6) = 0 で f = 0 のとき x に何も言えない理由と、それで困らない理由。 (4) 制約が 1 本抜けると何が起きるか、具体的な witness で。 (5) 完全性と健全性の違いを、この課題の採点で言うと。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ GLOSSARY -->
+<section class="band" id="glossary">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語集</p>
+      <h2>用語の意味・なぜその言葉か・宿題での実物</h2>
+    </div>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>宿題では</th></tr></thead><tbody>
+      <tr><td>Programmable Cryptography</td><td>ZK / MPC / FHE などの総称。「何を計算するか」をプログラムのように書ける暗号</td><td>0xPARC の造語。programmable = 書ける</td><td>—</td></tr>
+      <tr><td>回路（circuit）</td><td>+ と × のゲートとワイヤで書いた計算。= 「0 になるべき式の束」</td><td>電気回路の比喩（ゲート・ワイヤ）。ZK / MPC / FHE 共通の中間表現</td><td>build が組むもの</td></tr>
+      <tr><td>信号（signal）／ワイヤ</td><td>回路の変数。値は F_p の元</td><td>回路の線に乗る値</td><td>cs.input / cs.aux</td></tr>
+      <tr><td>制約（constraint）</td><td>「この式は 0」という条件</td><td>constrain = 縛る。中学の方程式を移項したもの</td><td>cs.assert_zero</td></tr>
+      <tr><td>witness</td><td>全信号への値の割当。全制約を満たせば「証明できた」</td><td>法廷の「証人」。見せれば真だと分かる値</td><td>attack() が返す dict</td></tr>
+      <tr><td>aux（補助信号）</td><td>入力でも出力でもない中間の信号（フラグなど）</td><td>auxiliary = 補助の</td><td>f_role など</td></tr>
+      <tr><td>完全性（completeness）</td><td>正しい入力は必ず通る</td><td>complete = 取りこぼしがない</td><td>採点 1</td></tr>
+      <tr><td>健全性（soundness）</td><td>正しくない入力は通らない</td><td>sound = 確かな</td><td>採点 3（solver）</td></tr>
+      <tr><td>アンダー制約（under-constrained）</td><td>縛る式が足りず、嘘の値が通る状態</td><td>under = 不足</td><td>challenge.py の穴</td></tr>
+      <tr><td>メンバーシップ</td><td>「x はリストの中」の制約</td><td>membership = 所属</td><td>f·Π(x − a) = 0</td></tr>
+      <tr><td>Proof-of-Exploit</td><td>「この手順で壊れる」ことを、手順を見せずに証明</td><td>exploit = 脆弱性を突く手順</td><td>課題名</td></tr>
+      <tr><td>circuit breaker</td><td>異常を検知したら自動で止める仕組み</td><td>電気のブレーカー</td><td>KelpDAO の例</td></tr>
+      <tr><td>ZK / MPC / FHE</td><td>見せずに証明／集めずに計算／暗号化したまま計算</td><td>Zero-Knowledge / Multi-Party Computation / Fully Homomorphic Encryption</td><td>Week 3・2・5</td></tr>
+      <tr><td>zkVM</td><td>プログラムの実行そのものを ZK で証明する仮想マシン</td><td>RISC Zero、SP1 など</td><td>スライド 35</td></tr>
+      <tr><td>DSL</td><td>回路を書くための小さな専用言語</td><td>Domain-Specific Language。circom / noir など。課題の aclib はトイ DSL</td><td>tests/aclib.py</td></tr>
+      <tr><td>F_p（有限体）</td><td>素数 p で割った余りの世界。信号の値の住処</td><td>土台編</td><td>信号の値</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<!-- ============================================================ 8 : LAB -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ</p>
+      <h2>実際に壊してみる</h2>
+      <p>
+        左のパネルで prover の主張（witness）を組み立て、右の台帳で 8 本の式が 0 になるかを見る。
+        各行のスイッチを切ると、その 1 本を<strong>書き忘れた回路</strong>になり、
+        下の採点器が「その回路なら何通りの不正資格が通るか」をブラウザ内で総当たりして数える。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card console">
+        <div class="card-head">
+          <h3>prover の主張（witness）</h3>
+          <span class="eyebrow">7 signals</span>
+        </div>
+        <div class="card-body">
+          <div class="presets">
+            <button class="preset" data-preset="honest">正直な資格</button>
+            <button class="preset" data-preset="exploit">攻撃 witness</button>
+            <button class="preset" data-preset="denied">権限のない人</button>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>role</span><span class="allow">許可 2, 5, 6</span></div>
+            <div class="segments" id="seg-role" role="group" aria-label="role の値"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>clearance</span><span class="allow">許可 3, 4, 7</span></div>
+            <div class="segments" id="seg-clearance" role="group" aria-label="clearance の値"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>region</span><span class="allow">許可 1, 6</span></div>
+            <div class="segments" id="seg-region" role="group" aria-label="region の値"></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label"><span>補助信号（フラグと出力）</span><span class="allow">bit</span></div>
+            <div class="flags" id="flags"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div class="card">
+          <div class="verdict">
+            <div class="banner" id="banner">—</div>
+            <div class="verdict-line">
+              <span>この witness は</span>
+              <span class="pill" id="pill-sat">—</span>
+              <span class="pill" id="pill-granted">—</span>
+              <span class="pill" id="pill-auth">—</span>
+            </div>
+          </div>
+          <div class="ledger" id="ledger"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>採点器（悪意ある prover 役）</h3>
+            <span class="eyebrow">brute force</span>
+          </div>
+          <div class="grader">
+            <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;">
+              いま有効な制約だけを使い、<strong>権限のない 494 通りの資格</strong>それぞれについて
+              「フラグをどう置けば <code>granted = 1</code> のまま全制約を満たせるか」を総当たりする。
+              1 つでも見つかれば、その回路は嘘の証明を受理する。
+            </p>
+            <div class="stat-grid">
+              <div class="stat">
+                <span class="k">完全性 completeness</span>
+                <span class="v ok" id="stat-comp">18 / 18</span>
+                <span class="note">正当な資格が通る数（多いほどよい）</span>
+              </div>
+              <div class="stat">
+                <span class="k">健全性 soundness</span>
+                <span class="v" id="stat-sound">—</span>
+                <span class="note">通ってしまう不正資格の数（0 でなければ欠陥）</span>
+              </div>
+            </div>
+            <div id="exploit-box" hidden>
+              <p class="eyebrow" style="margin-bottom:0.4rem;">見つかった反例（押すと witness に読み込む）</p>
+              <div class="examples" id="exploit-list"></div>
+            </div>
+            <p class="caption" style="margin:0;">
+              この探索器はフラグを 0/1 に限って総当たりする簡易版。本物の <code>tests/solver.py</code> は
+              ビットを場合分けしつつ、残りを F_p 上の連立一次方程式として解く。
+              結論は今回の回路では一致することを確認済み。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exps">
+      <div class="exp">
+        <p class="eyebrow">実験 1</p>
+        <h4>1 本の書き忘れを再現する</h4>
+        <ol>
+          <li>「正直な資格」を押して、全部 0 が揃う状態を見る</li>
+          <li>#6（region のリンク）のスイッチを切る</li>
+          <li>region を <code>0</code> に、<code>f_region</code> を <code>1</code> のままにする</li>
+        </ol>
+        <p class="expect">
+          <b>起きること:</b> 全制約を満たしたまま granted = 1。
+          これが <code>tests/challenge.py</code> の状態そのもので、Part B の答えでもある。
+        </p>
+      </div>
+      <div class="exp">
+        <p class="eyebrow">実験 2</p>
+        <h4>被害の大きさを比べる</h4>
+        <ol>
+          <li>#4（role のリンク）だけを切り、採点器の数字を見る → 30</li>
+          <li>戻して #6（region）だけを切る → 54</li>
+          <li>戻して #7（AND）だけを切る → 494</li>
+        </ol>
+        <p class="expect">
+          <b>読み取ること:</b> 穴の大きさは「その 1 本が守っていた自由度」で決まる。
+          AND を落とすと 3 フラグ全部が無意味になるため、全滅する。
+        </p>
+      </div>
+      <div class="exp">
+        <p class="eyebrow">実験 3</p>
+        <h4>ビット制約を切っても壊れないことを確かめる</h4>
+        <ol>
+          <li>#0〜#3（ビット制約）を好きに切ってみる</li>
+          <li>採点器の健全性が 0 のまま動かないことを確認する</li>
+        </ol>
+        <p class="expect">
+          <b>ただし結論を急がない:</b> 「反例が出ない」と「安全である」は別のこと。
+          理由は次の節で。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 12.5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">理解度チェック</p>
+      <h2>制約検問 — あなたが verifier になる</h2>
+      <p>
+        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
+        提出された witness と回路を審査する。問題は毎回その場で生成され、
+        判定は上のラボとまったく同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <!-- ---------- start ---------- -->
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <!-- ---------- play ---------- -->
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <!-- ---------- result ---------- -->
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">この先</p>
+      <h2>ここで掴んだものが、そのまま次に効く</h2>
+    </div>
+    <div class="prose">
+      <p>
+        今日の 7 信号・8 制約は、<strong>R1CS の一歩手前の形</strong>。
+        中間信号を切って次数 2 に割れば、そのまま Circom が吐く R1CS になる
+        （今回のメンバーシップリンクは次数 4、AND は次数 3 なので、まだ R1CS そのものではない）。
+        <code>aclib.py</code> が使う素数 p は BN254 の scalar field で、実際の Groth16 / PLONK でそのまま出てくる数。
+        <code>cs.input</code> / <code>cs.aux</code> / <code>cs.assert_zero</code> は、Circom の
+        <code>signal input</code> / <code>signal</code> / <code>===</code> にほぼ対応する
+        （Circom の <code>===</code> は次数 2 までしか受け付けない点だけ違う）。
+      </p>
+      <p>
+        ZK・MPC・FHE はどれも「計算を算術回路に翻訳してから暗号をかける」構造を共有している。
+        だから <strong>回路が間違っていれば、その上の暗号がどれだけ正しくても意味がない</strong>。
+        実際、ZK プロジェクトの脆弱性報告の多くは暗号の破れではなく、今日と同じアンダー制約だ。
+      </p>
+      <p>
+        持ち帰る問いは 1 つ。<strong>「この信号を縛っている式は、どれか」</strong>。
+        答えられない信号が 1 本でもあれば、そこが次の穴になる。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ APPX -->
+<section class="band" id="appendix">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">付録</p>
+      <h2>深掘り本文 — 各節を開いて読む（旧版の本文）</h2>
+      <p>上のカード列で骨組みが入ったあとで、細部を足したいときに開いてください。なぜ + と × だけなのか、なぜ回路にするとプライバシーが守れるのか、leave-one-out で「どの制約が効いていたか」の実測、Circom / Noir での同じバグ、はここにあります。</p>
+    </div>
+    <div>
+<details class="appx"><summary>このプログラムは、何を目指しているのか（旧・全体像）</summary>
 <!-- ============================================================ 0 -->
 <section class="band">
   <div class="wrap stack">
@@ -703,11 +1256,13 @@
 
     <div class="stack-sm">
       <p class="eyebrow">このページの構成</p>
-      <ol class="toc" id="toc"></ol>
+      <ol class="toc" id="toc-old"></ol>
     </div>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>なぜ、わざわざ「回路」で書くのか</summary>
 <!-- ============================================================ 1 -->
 <section class="band">
   <div class="wrap stack">
@@ -884,6 +1439,8 @@ f_role * (role-2)*(role-5)*(role-6) == 0</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>なぜ、この課題が proof-of-exploit という名前なのか</summary>
 <!-- ============================================================ 0.5 -->
 <section class="band">
   <div class="wrap stack">
@@ -964,6 +1521,8 @@ on-chain のコントラクトが検証
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>なぜ「回路」にするとプライバシーが守れるのか</summary>
 <!-- ============================================================ 1.2 -->
 <section class="band">
   <div class="wrap stack">
@@ -1198,6 +1757,8 @@ granted − f_role·f_clearance·f_region   = 0</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>ZK・MPC・FHE は、それぞれ違う「信用できなさ」を解いている</summary>
 <!-- ============================================================ 1.5 -->
 <section class="band">
   <div class="wrap stack">
@@ -1376,6 +1937,8 @@ granted − f_role·f_clearance·f_region   = 0</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>この課題で使う 3 つの言葉</summary>
 <!-- ============================================================ 2 -->
 <section class="band">
   <div class="wrap stack">
@@ -1413,6 +1976,8 @@ granted − f_role·f_clearance·f_region   = 0</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>有限体 F_p について、必要な分だけ</summary>
 <!-- ============================================================ 3 -->
 <section class="band">
   <div class="wrap stack">
@@ -1514,6 +2079,8 @@ granted − f_role·f_clearance·f_region   = 0</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>なぜ「足し算と掛け算」だけなのか</summary>
 <!-- ============================================================ 3.5 -->
 <section class="band">
   <div class="wrap stack">
@@ -1815,6 +2382,8 @@ granted − f_role·f_clearance·f_region   = 0</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>なぜ「回路」と呼ぶのか — ゲート、同時性、そして次数</summary>
 <!-- ============================================================ 3.6 -->
 <section class="band">
   <div class="wrap stack">
@@ -1906,6 +2475,8 @@ f_role   ─┘
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>作るもの — アクセス制御</summary>
 <!-- ============================================================ 4 -->
 <section class="band">
   <div class="wrap stack">
@@ -2049,6 +2620,8 @@ role=6 → 6 通り
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>制約を、1 本ずつ数値で読む</summary>
 <!-- ============================================================ 5 -->
 <section class="band">
   <div class="wrap stack">
@@ -2187,6 +2760,8 @@ role=6 → 6 通り
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>回路を組み立てる — 実際の思考順序</summary>
 <!-- ============================================================ 6 -->
 <section class="band">
   <div class="wrap stack">
@@ -2308,6 +2883,8 @@ cs.assert_zero(granted - f_role * f_clearance * f_region)</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>完全性と健全性は、別々に壊れる</summary>
 <!-- ============================================================ 7 -->
 <section class="band">
   <div class="wrap stack">
@@ -2338,146 +2915,8 @@ cs.assert_zero(granted - f_role * f_clearance * f_region)</pre>
   </div>
 </section>
 
-<!-- ============================================================ 8 : LAB -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ</p>
-      <h2>実際に壊してみる</h2>
-      <p>
-        左のパネルで prover の主張（witness）を組み立て、右の台帳で 8 本の式が 0 になるかを見る。
-        各行のスイッチを切ると、その 1 本を<strong>書き忘れた回路</strong>になり、
-        下の採点器が「その回路なら何通りの不正資格が通るか」をブラウザ内で総当たりして数える。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card console">
-        <div class="card-head">
-          <h3>prover の主張（witness）</h3>
-          <span class="eyebrow">7 signals</span>
-        </div>
-        <div class="card-body">
-          <div class="presets">
-            <button class="preset" data-preset="honest">正直な資格</button>
-            <button class="preset" data-preset="exploit">攻撃 witness</button>
-            <button class="preset" data-preset="denied">権限のない人</button>
-          </div>
-
-          <div class="field">
-            <div class="field-label"><span>role</span><span class="allow">許可 2, 5, 6</span></div>
-            <div class="segments" id="seg-role" role="group" aria-label="role の値"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>clearance</span><span class="allow">許可 3, 4, 7</span></div>
-            <div class="segments" id="seg-clearance" role="group" aria-label="clearance の値"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>region</span><span class="allow">許可 1, 6</span></div>
-            <div class="segments" id="seg-region" role="group" aria-label="region の値"></div>
-          </div>
-
-          <div class="field">
-            <div class="field-label"><span>補助信号（フラグと出力）</span><span class="allow">bit</span></div>
-            <div class="flags" id="flags"></div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:1.25rem;">
-        <div class="card">
-          <div class="verdict">
-            <div class="banner" id="banner">—</div>
-            <div class="verdict-line">
-              <span>この witness は</span>
-              <span class="pill" id="pill-sat">—</span>
-              <span class="pill" id="pill-granted">—</span>
-              <span class="pill" id="pill-auth">—</span>
-            </div>
-          </div>
-          <div class="ledger" id="ledger"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <h3>採点器（悪意ある prover 役）</h3>
-            <span class="eyebrow">brute force</span>
-          </div>
-          <div class="grader">
-            <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;">
-              いま有効な制約だけを使い、<strong>権限のない 494 通りの資格</strong>それぞれについて
-              「フラグをどう置けば <code>granted = 1</code> のまま全制約を満たせるか」を総当たりする。
-              1 つでも見つかれば、その回路は嘘の証明を受理する。
-            </p>
-            <div class="stat-grid">
-              <div class="stat">
-                <span class="k">完全性 completeness</span>
-                <span class="v ok" id="stat-comp">18 / 18</span>
-                <span class="note">正当な資格が通る数（多いほどよい）</span>
-              </div>
-              <div class="stat">
-                <span class="k">健全性 soundness</span>
-                <span class="v" id="stat-sound">—</span>
-                <span class="note">通ってしまう不正資格の数（0 でなければ欠陥）</span>
-              </div>
-            </div>
-            <div id="exploit-box" hidden>
-              <p class="eyebrow" style="margin-bottom:0.4rem;">見つかった反例（押すと witness に読み込む）</p>
-              <div class="examples" id="exploit-list"></div>
-            </div>
-            <p class="caption" style="margin:0;">
-              この探索器はフラグを 0/1 に限って総当たりする簡易版。本物の <code>tests/solver.py</code> は
-              ビットを場合分けしつつ、残りを F_p 上の連立一次方程式として解く。
-              結論は今回の回路では一致することを確認済み。
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="exps">
-      <div class="exp">
-        <p class="eyebrow">実験 1</p>
-        <h4>1 本の書き忘れを再現する</h4>
-        <ol>
-          <li>「正直な資格」を押して、全部 0 が揃う状態を見る</li>
-          <li>#6（region のリンク）のスイッチを切る</li>
-          <li>region を <code>0</code> に、<code>f_region</code> を <code>1</code> のままにする</li>
-        </ol>
-        <p class="expect">
-          <b>起きること:</b> 全制約を満たしたまま granted = 1。
-          これが <code>tests/challenge.py</code> の状態そのもので、Part B の答えでもある。
-        </p>
-      </div>
-      <div class="exp">
-        <p class="eyebrow">実験 2</p>
-        <h4>被害の大きさを比べる</h4>
-        <ol>
-          <li>#4（role のリンク）だけを切り、採点器の数字を見る → 30</li>
-          <li>戻して #6（region）だけを切る → 54</li>
-          <li>戻して #7（AND）だけを切る → 494</li>
-        </ol>
-        <p class="expect">
-          <b>読み取ること:</b> 穴の大きさは「その 1 本が守っていた自由度」で決まる。
-          AND を落とすと 3 フラグ全部が無意味になるため、全滅する。
-        </p>
-      </div>
-      <div class="exp">
-        <p class="eyebrow">実験 3</p>
-        <h4>ビット制約を切っても壊れないことを確かめる</h4>
-        <ol>
-          <li>#0〜#3（ビット制約）を好きに切ってみる</li>
-          <li>採点器の健全性が 0 のまま動かないことを確認する</li>
-        </ol>
-        <p class="expect">
-          <b>ただし結論を急がない:</b> 「反例が出ない」と「安全である」は別のこと。
-          理由は次の節で。
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>どの制約が、実際に効いていたか（leave-one-out の実測）</summary>
 <!-- ============================================================ 9 -->
 <section class="band">
   <div class="wrap stack">
@@ -2543,6 +2982,8 @@ cs.assert_zero(granted - f_role * f_clearance * f_region)</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>攻撃側に回る — 4 手で破る</summary>
 <!-- ============================================================ 10 -->
 <section class="band">
   <div class="wrap stack">
@@ -2635,6 +3076,8 @@ witness[<span class="k">"granted"</span>]  = <span class="k">1</span>   <span cl
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>値を決めるのは prover、条件を課すのは verifier</summary>
 <!-- ============================================================ 11 -->
 <section class="band">
   <div class="wrap stack">
@@ -2688,6 +3131,8 @@ witness[<span class="k">"granted"</span>]  = <span class="k">1</span>   <span cl
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>実際に組み込むときは、4 つの問いから始める</summary>
 <!-- ============================================================ 11.4 -->
 <section class="band">
   <div class="wrap stack">
@@ -2759,6 +3204,8 @@ witness[<span class="k">"granted"</span>]  = <span class="k">1</span>   <span cl
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>実際は何で書くのか — Circom / Noir で同じバグがどう現れるか</summary>
 <!-- ============================================================ 11.5 -->
 <section class="band">
   <div class="wrap stack">
@@ -2852,6 +3299,8 @@ bit * (bit - 1) === 0;   <span class="c">// ← 手で書く</span></pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>ここまでに出た言葉（旧・用語）</summary>
 <!-- ============================================================ 12 -->
 <section class="band">
   <div class="wrap stack">
@@ -2880,97 +3329,7 @@ bit * (bit - 1) === 0;   <span class="c">// ← 手で書く</span></pre>
   </div>
 </section>
 
-<!-- ============================================================ 12.5 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">理解度チェック</p>
-      <h2>制約検問 — あなたが verifier になる</h2>
-      <p>
-        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
-        提出された witness と回路を審査する。問題は毎回その場で生成され、
-        判定は上のラボとまったく同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
-      </p>
-    </div>
-
-    <div class="card" id="quiz">
-      <!-- ---------- start ---------- -->
-      <div class="quiz-pane" id="quiz-start">
-        <div class="quiz-hero">
-          <p class="eyebrow">検問モードを選ぶ</p>
-          <h3>10 問・ライフ 3</h3>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
-            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
-          </p>
-        </div>
-        <div class="mode-grid" id="mode-grid"></div>
-        <p class="quiz-best" id="quiz-best"></p>
-      </div>
-
-      <!-- ---------- play ---------- -->
-      <div class="quiz-pane" id="quiz-play" hidden>
-        <div class="quiz-bar">
-          <span class="qprog" id="qprog">1 / 10</span>
-          <span class="qcat" id="qcat">—</span>
-          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
-        </div>
-        <div class="qmain">
-          <p class="qtext" id="qtext"></p>
-          <div class="qbody" id="qbody"></div>
-          <div class="choices" id="choices"></div>
-          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
-        </div>
-        <div class="quiz-foot">
-          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
-          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
-        </div>
-      </div>
-
-      <!-- ---------- result ---------- -->
-      <div class="quiz-pane" id="quiz-result" hidden>
-        <div class="rank-box">
-          <span class="rank" id="rank">—</span>
-          <div class="rank-meta">
-            <p class="rank-title" id="rank-title">—</p>
-            <p class="rank-sub" id="rank-sub">—</p>
-          </div>
-        </div>
-        <div class="cat-stats" id="cat-stats"></div>
-        <div class="quiz-foot">
-          <button class="btn-main" id="btn-again" type="button">もう一度</button>
-          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 13 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">この先</p>
-      <h2>ここで掴んだものが、そのまま次に効く</h2>
-    </div>
-    <div class="prose">
-      <p>
-        今日の 7 信号・8 制約は、<strong>R1CS の一歩手前の形</strong>。
-        中間信号を切って次数 2 に割れば、そのまま Circom が吐く R1CS になる
-        （今回のメンバーシップリンクは次数 4、AND は次数 3 なので、まだ R1CS そのものではない）。
-        <code>aclib.py</code> が使う素数 p は BN254 の scalar field で、実際の Groth16 / PLONK でそのまま出てくる数。
-        <code>cs.input</code> / <code>cs.aux</code> / <code>cs.assert_zero</code> は、Circom の
-        <code>signal input</code> / <code>signal</code> / <code>===</code> にほぼ対応する
-        （Circom の <code>===</code> は次数 2 までしか受け付けない点だけ違う）。
-      </p>
-      <p>
-        ZK・MPC・FHE はどれも「計算を算術回路に翻訳してから暗号をかける」構造を共有している。
-        だから <strong>回路が間違っていれば、その上の暗号がどれだけ正しくても意味がない</strong>。
-        実際、ZK プロジェクトの脆弱性報告の多くは暗号の破れではなく、今日と同じアンダー制約だ。
-      </p>
-      <p>
-        持ち帰る問いは 1 つ。<strong>「この信号を縛っている式は、どれか」</strong>。
-        答えられない信号が 1 本でもあれば、そこが次の穴になる。
-      </p>
+</details>
     </div>
   </div>
 </section>
@@ -3340,7 +3699,7 @@ bit * (bit - 1) === 0;   <span class="c">// ← 手で書く</span></pre>
   if (!toc) return;
   var heads = document.querySelectorAll(".band-head h2");
   Array.prototype.forEach.call(heads, function (h, i) {
-    if (h.closest("#toc")) return;
+    if (h.closest("#toc") || h.closest(".appx")) return;
     var section = h.closest(".band");
     if (!section) return;
     if (i === 0) return;                 // 「全体像」自身は目次に載せない
