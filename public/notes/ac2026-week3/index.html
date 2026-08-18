@@ -149,6 +149,8 @@
   table.data tr:last-child td { border-bottom: none; }
   table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
   .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+  #homework table.data td, #homework table.data th { white-space: normal; }
+  #homework table.data td:first-child { color: var(--ink-2); }
 
   /* ---------- pipeline ---------- */
   .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
@@ -356,6 +358,10 @@
       そして <strong>nonce を 1 回使い回しただけで、本物の secp256k1 の秘密鍵が復元できる</strong>こと。
       この 2 つが、ゼロ知識と知識健全性の正体です。
     </p>
+    <p class="lead">
+      課題を「理解して出す」ために、まず<a href="#homework"><strong>宿題の読み方</strong></a>の節を読んでください。
+      10 個の関数を、中学・高校の数学のどこから来たかを先に言ってから 1 個ずつ、採点器と同じ数値で追います。
+    </p>
     <div class="meta-row">
       <span class="tag">読了 45 分</span>
       <span class="tag">対話ラボ 2 つ</span>
@@ -416,6 +422,334 @@
       <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
       <ol class="toc" id="toc"></ol>
     </div>
+  </div>
+</section>
+
+<!-- ============================================ 1.5 : 宿題を関数ごとに読む -->
+<section class="band" id="homework">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">宿題の読み方</p>
+      <h2>宿題 schnorr-from-scratch を、10 個の関数で読む — 中学・高校の数学から</h2>
+      <p>
+        課題 <code>solution.py</code> に書く関数は 10 個です。この節は、その 10 個を<strong>上から順に、
+        1 個ずつ、学校で習った数学のどこから来たかを先に言ってから</strong>読みます。
+        他の節は深掘りなので、まずここだけで「自分の解答を自分の言葉で説明できる」状態を作ってください。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">この節の使い方</p>
+        <p>
+          手元で <code>solution.py</code> を開いておいて、関数ごとに次の 5 つを読みます。
+          <b>① 学校の数学のどこから来たか</b> → <b>② 課題での役割（何が入って何が出るか）</b> →
+          <b>③ 数値を 1 組入れて追う</b> → <b>④ 自分のコードの読み方</b> → <b>⑤ 説明できるかの 1 問</b>。
+        </p>
+        <p class="strong-line">
+          数値はすべて課題のトイ曲線（p = 1009、n = 967、G = (1, 298)、秘密鍵 x = 123）で、
+          採点器 <code>tests/public.py</code> に出てくる値そのものです。
+        </p>
+      </div>
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>学校で習ったこと</th><th>課題での姿</th></tr></thead>
+          <tbody>
+            <tr><td>割り算の余り（小 5・中 1）</td><td>mod p — <code>field_add</code> / <code>field_mul</code></td></tr>
+            <tr><td>割り算は逆数を掛けること（小 6）</td><td>逆元 — <code>field_inv</code></td></tr>
+            <tr><td>最大公約数の互除法（中 1・高 1）</td><td>拡張ユークリッド — <code>extended_gcd</code>（与えられる）</td></tr>
+            <tr><td>2 点を通る直線の傾き（中 2）</td><td><code>ec_add</code> の弦の傾き λ</td></tr>
+            <tr><td>接線の傾きは微分（数 II）</td><td><code>ec_add</code> の 2 倍算の λ</td></tr>
+            <tr><td>3 次方程式の解と係数の関係（数 II）</td><td>x_R = λ² − x_P − x_Q</td></tr>
+            <tr><td>2 進法（数 A）</td><td>double-and-add — <code>ec_scalar_mul</code></td></tr>
+            <tr><td>未知数 2 個に式 1 本では解けない（中 2 連立方程式）</td><td>s = r + e·x が x を隠す理由 — <code>sigma_response</code></td></tr>
+            <tr><td>分配法則（中 1）</td><td>s·G = R + e·P — <code>sigma_verify</code></td></tr>
+            <tr><td>「同じ r で 2 本」なら解ける（中 2）</td><td>nonce 再利用で x が漏れる理由</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>field_add / field_mul — 余りの世界の足し算と掛け算</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 「13 ÷ 7 の余りは 6」。時計は 13 時を 1 時と呼ぶ（12 で割った余り）。
+            <b>mod p</b> は「p で割った余りだけを見る」という約束で、それ以上のことは何もありません。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 整数 a, b, 素数 p を受け取り、<code>(a + b) mod p</code>、<code>(a × b) mod p</code> を
+            <b>0 以上 p 未満</b>で返す。負の数が来ても、p より大きい数が来ても、余りに直して返す。
+          </p>
+          <pre>③ field_add(3, 4, 7)  →  3 + 4 = 7,  7 ÷ 7 = 1 余り 0   →  0
+   field_mul(3, 4, 7)  →  3 × 4 = 12, 12 ÷ 7 = 1 余り 5  →  5
+   field_add(-3, 1, 7) →  -3 + 1 = -2  →  余りは 5（-2 = -1×7 + 5）  →  5</pre>
+          <p class="why">
+            <b>④ コード</b>: <code>return (a + b) % p</code> と <code>return (a * b) % p</code>。Python の <code>%</code> は
+            負の数でも 0..p−1 を返すので、これだけで正規化が済みます。
+            <b>⑤ 説明できるか</b>: 「なぜ足したあとにもう一度 % p を取るのか」→ 入力が範囲外でも結果を 0..p−1 に揃えるため。
+            採点器はわざと −3 や 100 を入れてきます。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>field_inv — 「割り算」は、逆数を掛けること</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 6 ÷ 5 は 6 × (1/5)。割り算は「逆数を掛ける」でした。
+            余りの世界には分数がありませんが、<b>「掛けて 1 になる相手」</b>ならいます。
+            mod 13 で 5 × 8 = 40 = 3×13 + 1、余り 1。だから <b>8 が 5 の逆数の役</b>（逆元）で、
+            「÷5」の代わりに「×8」をします。
+          </p>
+          <p>
+            <b>その相手をどう見つけるか</b>: 中学の<b>互除法</b>（最大公約数を求める、大きい方を小さい方で割って余りを取る手順）を
+            <b>逆にたどる</b>と、「5 × (何か) + 13 × (何か) = 1」の形が作れます。この「何か」が逆元です。
+            課題ではこの手順が <code>extended_gcd(a, b)</code> として与えられていて、<code>a·x + b·y = g</code>（g は最大公約数）を
+            満たす <code>(g, x, y)</code> を返します。
+          </p>
+          <pre>③ mod 13 で 5 の逆元
+   互除法:  13 = 2×5 + 3,   5 = 1×3 + 2,   3 = 1×2 + 1     ← 余りが 1 になった
+   逆にたどる: 1 = 3 − 2 = 3 − (5 − 3) = 2×3 − 5 = 2×(13 − 2×5) − 5 = 2×13 − 5×5
+   → 5 × (−5) + 13 × 2 = 1   → extended_gcd(5, 13) は (1, −5, 2)
+   mod 13 で見ると 13×2 は消えて 5 × (−5) ≡ 1。−5 を 0..12 に直して 8。  検算 5×8 = 40 ≡ 1 ✓
+
+   課題の簡易チェック: field_inv(3, 11) → extended_gcd(3, 11) = (1, 4, −1) → 3×4 = 12 ≡ 1 → 4</pre>
+          <p class="why">
+            <b>④ コード</b>: <code>a %= p</code> で範囲に入れ → <code>a == 0</code> なら <code>ValueError</code>（0 に何を掛けても 1 にならない）
+            → <code>g, x, _ = extended_gcd(a, p)</code> → <code>return x % p</code>。
+            <b>最後の % p を忘れると −5 のまま返して落ちます</b>（採点器: 「逆元は 0..p-1 に正規化して返してください」）。
+            <b>⑤ 説明できるか</b>: 「なぜ 0 だけ逆元が無いのか」→ 0 × 何 = 0 で、1 にならないから。
+            「なぜ p は素数でなければならないか」→ 合成数だと 2×3 = 6 ≡ 0（mod 6）のように、0 でないのに逆元を持てない数が出るから（土台編）。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>ec_add — 曲線の上の 2 点から「3 つ目の点」を作る</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 3 つ使います。
+            (a) <b>2 点を通る直線の傾き</b>は「y の増分 ÷ x の増分」（中 2 の一次関数）。
+            (b) 同じ点で 2 回使うときは、直線ではなく<b>接線</b>。接線の傾きは<b>微分</b>（数 II）。
+            (c) 直線と 3 次曲線は<b>最大 3 点</b>で交わり、3 つの x 座標の和は
+            <b>解と係数の関係</b>から決まる（数 II）。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 曲線 <code>y² = x³ + a·x + b</code>（mod p）の上の点 P, Q を受け取り、
+            「P と Q を通る直線が曲線と交わる 3 つ目の点を、x 軸で折り返した点」を返す。
+            これを P + Q と<b>呼ぶことにする</b>。座標を足すのではありません。
+            座標の計算はぜんぶ mod p で、「÷」はぜんぶ <code>field_inv</code> を掛ける操作です。
+          </p>
+          <pre>傾き λ  … 弦（P ≠ Q）:  λ = (y_Q − y_P) / (x_Q − x_P)          ← (a) 中 2
+          … 接線（P = Q）: λ = (3·x_P² + a) / (2·y_P)           ← (b) y² = x³+ax+b を微分: 2y·y' = 3x²+a
+3 つ目の点:  x_R = λ² − x_P − x_Q                                 ← (c) 直線 y = λx + c を代入すると
+                                                                     x³ − λ²x² + … = 0 で、3 解の和 = λ²
+折り返し:    y_R = λ·(x_P − x_R) − y_P                            ← 直線上の点 y_P + λ(x_R − x_P) の符号を反転
+
+③ 2G（G = (1, 298) を 2 倍。p = 1009, a = 0）
+   λ = 3·1² / (2·298) = 3 / 596 = 3 × 596⁻¹ = 3 × 601 = 1803 ≡ 794      （596×601 = 358196 ≡ 1 を検算）
+   x_R = 794² − 1 − 1 = 630436 − 2 = 630434 ≡ 818
+   y_R = 794 × (1 − 818) − 298 = 794 × (−817) − 298 ≡ 800
+   → 2G = (818, 800)   ← 採点器の期待値と一致
+
+   G + 2G（弦）: λ = (800 − 298)/(818 − 1) = 502/817 = 502 × 762 ≡ 113 → x_R = 113² − 1 − 818 ≡ 851, y_R = 516 → 3G = (851, 516)</pre>
+          <p class="why">
+            <b>④ コード</b>の場合分けは 4 つで、順番が大事です。
+            (1) どちらかが <code>None</code>（無限遠点 = 足し算の 0 の役）なら、もう片方を返す。
+            (2) x が同じで y が「符号違い」なら、直線が垂直で 3 つ目の交点が無い → 無限遠点を返す
+            （<b>y_P = 0 の点を 2 倍するときもここ</b>。分母 2y が 0 で割れないから）。
+            (3) P == Q なら接線の λ。(4) それ以外は弦の λ。
+            (2) を先にしないと、(3)(4) で <code>field_inv(0)</code> が例外を投げます。
+            <b>⑤ 説明できるか</b>: 「なぜ y_R の符号を反転するのか」→ 反転しないと結合法則が成り立たず「足し算」にならない。
+            反転を忘れると採点器は「点が曲線上にありません」と言います（2G = (818, 622) は曲線に乗らない）。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>ec_scalar_mul — 「k 回足す」を、2 進法で速くする</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 2 進法（数 A）。13 = 8 + 4 + 1 = 1101₂。
+            「G を 13 回足す」は「8G + 4G + G」と同じで、8G は G を 2 倍、2 倍、2 倍すれば 3 回で作れる。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 整数 k と点 P を受け取り、P を k 回足した点 k·P を返す。
+            素直に k 回 <code>ec_add</code> すると、k ≈ 2²⁵⁶（secp256k1）では宇宙が終わっても終わらないので、
+            <b>k を 2 進で下の桁から読み、桁が 1 のときだけ足し、毎回 P を 2 倍する</b>（double-and-add）。
+          </p>
+          <pre>③ 123·G   123 = 1111011₂ （下の桁から 1,1,0,1,1,1,1）
+   桁 1: 足す   addend = G        = (1,298)   result = (1,298)
+   桁 1: 足す   addend = 2G       = (818,800) result = (851,516)
+   桁 0: 足さない addend = 4G     = (357,812) result = (851,516)
+   桁 1: 足す   addend = 8G       = (900,790) result = (492,153)
+   桁 1: 足す   addend = 16G      = (298,533) result = (932,428)
+   桁 1: 足す   addend = 32G      = (637,315) result = (122,173)
+   桁 1: 足す   addend = 64G      = (834,807) result = (376,128)   ← 123G = (376,128)。これが公開鍵 P
+   ec_add の回数: 足し算 6 回 + 2 倍 6 回 = 12 回（素直にやると 122 回）</pre>
+          <p class="why">
+            <b>④ コード</b>: <code>result = None</code>（0 の役）から始め、<code>while k &gt; 0: k, bit = divmod(k, 2)</code>
+            で最下位の桁を取り出し、<code>bit</code> が 1 なら <code>result = ec_add(result, addend)</code>、
+            そのあと <code>addend = ec_add(addend, addend)</code>。<code>divmod(k, 2)</code> は「2 で割った商と余り」で、
+            余りがその桁、商が「残りの桁」です。
+            <b>⑤ 説明できるか</b>: 「k = 0 のとき何を返すか」→ 何も足さないので None（無限遠点）。
+            「n·G はなぜ None になるか」→ n は G の位数（G を n 回足すと 0 の役に戻る）。採点器の
+            <code>test_order_times_generator_is_identity</code> がこれ。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>sigma_commit — 乱数 r を「封筒に入れて」渡す</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: ここは数学というより約束事です。じゃんけんで「先に手を見せた方が負ける」ので、
+            <b>手を封筒に入れて先に置く</b>。r をそのまま見せず、<b>R = r·G だけ</b>を見せます。
+            R から r を逆算するのが「離散対数問題」で、これが難しいことがこの週の安全性の土台です。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 乱数 r を受け取り、<code>R = ec_scalar_mul(r, G)</code> を返す。それだけ。
+          </p>
+          <pre>③ sigma_commit(456)  →  456·G  =  (822, 106)</pre>
+          <p class="why">
+            <b>④ コード</b>: 1 行。<b>⑤ 説明できるか</b>: 「なぜ r を先に固定する必要があるか」→ あとで来るチャレンジ e を見てから
+            r を選べるなら、秘密を持っていなくても辻褄を合わせられる（次の節の simulator）。<b>先に封をするから、あとの s に意味が出る。</b>
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>sigma_response — 秘密 x を、乱数 r で覆って渡す</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 中 2 の連立方程式。<b>未知数が 2 個（r と x）あって式が 1 本（s = r + e·x）</b>なら、解けません。
+            だから s を渡しても x は分からない。<b>ところが同じ r で 2 本目の式が手に入ると、未知数 2 個・式 2 本で解ける</b>。
+            これが nonce 再利用攻撃の全部です。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 秘密鍵 x、乱数 r、検証者のチャレンジ e を受け取り、
+            <code>s = (r + e·x) mod n</code> を返す。<b>ここだけ mod が n</b>（G の位数）です。
+            座標の計算は「p で割った余り」の世界、r や x のような「G を何回足すか」の数は「n で割った余り」の世界。
+            2 つの世界が 1 つの課題に同居しています。
+          </p>
+          <pre>③ sigma_response(x=123, r=456, e=77)
+   s = 456 + 77 × 123 = 456 + 9471 = 9927,   9927 = 10 × 967 + 257   →  257
+   （mod を p = 1009 で取ってしまうと 846 になり、採点器の期待値 257 と合わない）
+
+   nonce 再利用（同じ r = 456、e₁ = 77 と e₂ = 90）:
+   s₁ = 257,  s₂ = 456 + 90×123 mod 967 = 889
+   s₁ − s₂ = (e₁ − e₂)·x  →  x = (s₁ − s₂) × (e₁ − e₂)⁻¹ = 335 × 954⁻¹ = 335 × 595 mod 967 = 123  ← 秘密鍵が出た</pre>
+          <p class="why">
+            <b>④ コード</b>: <code>return (r + e * x) % curve.n</code>。<b>⑤ 説明できるか</b>: 「なぜ p ではなく n か」→
+            s は「G を何回足すか」の数で、G は n 回で一周するから、n で割った余りだけが意味を持つ。
+            「なぜ r は毎回変えるのか」→ 上の 2 本の式。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>sigma_verify — 検証者は x を持たずに、等式を確かめる</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 分配法則（中 1）。<code>(r + e·x)·G = r·G + e·(x·G)</code>。
+            左辺は s·G、右辺は R + e·P。<b>検証者は x を持っていませんが、R と e と P は持っている</b>ので右辺が計算できます。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 公開鍵 P、封筒 R、チャレンジ e、応答 s を受け取り、
+            <code>s·G == R + e·P</code> かどうかを True / False で返す。
+          </p>
+          <pre>③ sigma_verify(P=(376,128), R=(822,106), e=77, s=257)
+   左辺: 257·G           = (595, 110)
+   右辺: 77·P = (345,630),  R + 77·P = (822,106) + (345,630) = (595, 110)
+   → 一致。True
+
+   s を 1 ずらすと 258·G ≠ (595,110) → False（採点器の test_wrong_response_rejects）</pre>
+          <p class="why">
+            <b>④ コード</b>: <code>left = ec_scalar_mul(s, G)</code>、<code>right = ec_add(R, ec_scalar_mul(e, P))</code>、<code>return left == right</code>。
+            <b>⑤ 説明できるか</b>: 「通ったら x を知っていると言えるか」→ 1 本だけでは言えない（simulator は x なしで通る会話を作れる）。
+            言えるのは「同じ R で 2 つの e に答えられるなら」（次の節）。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>schnorr_sign — 検証者のサイコロを、ハッシュに振らせる</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 対話では検証者が e を「その場で」選びました。<b>その場にいない相手</b>にも渡せるようにするには、
+            e を<b>誰にも操れない機械</b>に選ばせればよい。ハッシュ関数 H(R, P, メッセージ) がその機械です
+            （入力を 1 文字変えると出力が全部変わり、出力から入力は逆算できない）。これが Fiat–Shamir 変換で、
+            出来上がったものが<b>署名</b>です。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 秘密鍵 x、メッセージ、乱数 nonce を受け取り、
+            (1) R = nonce·G、(2) P = x·G、(3) e = <code>challenge_hash(R, P, message, n)</code>、(4) s = nonce + e·x mod n、
+            (5) <code>(R, s)</code> を返す。3 手の e をハッシュに置き換えただけで、他は sigma_* の再利用です。
+          </p>
+          <pre>③ schnorr_sign(x=123, message=b"week3", nonce=456)
+   R = 456·G = (822, 106)
+   P = 123·G = (376, 128)
+   e = H(R, P, "week3") mod 967 = 57            ← 検証者の代わりにハッシュが選んだ
+   s = 456 + 57 × 123 = 7467 = 7 × 967 + 698  →  698
+   署名 = ((822, 106), 698)</pre>
+          <p class="why">
+            <b>④ コード</b>: <code>R = sigma_commit(nonce)</code>、<code>pubkey = ec_scalar_mul(x, G)</code>、
+            <code>e = challenge_hash(R, pubkey, message, curve.n)</code>、<code>s = sigma_response(x, nonce, e)</code>。
+            <b>引数の順番 (R, pubkey, message) を入れ替えると、自分の verify では通るのに採点器の固定ベクトルだけ落ちます</b>
+            （自分同士では整合するが、他人と互換性がない）。
+            <b>⑤ 説明できるか</b>: 「なぜ e にメッセージを入れるのか」→ 入れないと、1 つの署名がどんなメッセージにも使い回せる。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>schnorr_verify — e を自分で計算し直してから、sigma_verify</h4>
+        <div class="body">
+          <p>
+            <b>① 学校の数学</b>: 「答え合わせは、相手の言う e を信じず、自分で同じ機械を回す」。それだけです。
+          </p>
+          <p>
+            <b>② 課題での役割</b>: 公開鍵 P、メッセージ、署名 (R, s) を受け取り、
+            e = <code>challenge_hash(R, P, message, n)</code> を計算し直して、<code>sigma_verify(P, R, e, s)</code> を返す。
+          </p>
+          <pre>③ schnorr_verify(P, b"week3", ((822,106), 698))
+   e = H(R, P, "week3") = 57 → 698·G == (822,106) + 57·P ?  → True
+   メッセージを "week3!" に改ざん → e' = 723 → 698·G ≠ R + 723·P → False</pre>
+          <p class="why">
+            <b>④ コード</b>: 3 行。<b>⑤ 説明できるか</b>: 「なぜ e を署名に含めて送らないのか」→ 送ると、証明者が都合のよい e を選んで
+            R を逆算できてしまう（simulator の順番）。検証者側で計算し直すから、e は証明者に選べない。
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <h4>全体の地図 — どの関数がどの関数を呼ぶか</h4>
+        <div class="body">
+          <pre>schnorr_verify ─┬─ challenge_hash（与えられる）
+                └─ sigma_verify ─┬─ ec_scalar_mul ─── ec_add ─┬─ field_add / field_mul
+                                 └─ ec_add               └─ field_inv ─── extended_gcd（与えられる）
+schnorr_sign ───┬─ sigma_commit ─── ec_scalar_mul
+                ├─ challenge_hash
+                └─ sigma_response（mod n の足し算と掛け算だけ）
+
+下から順に:  余りの計算 → 逆元 → 点の足し算 → 点の k 倍 → 3 手 → 署名
+下が壊れると上は全部壊れる（y_R の符号を間違えると 23 テストが落ちた理由）</pre>
+          <p class="why">
+            <b>提出前の自己チェック</b>（答えは各ステップの ⑤）:
+            (1) なぜ % p をもう一度取るのか。
+            (2) なぜ 0 だけ逆元が無く、p は素数でなければならないか。
+            (3) ec_add で y_R の符号を反転する理由と、垂直な直線のときの答え。
+            (4) 123 を 2 進で書いて、ec_add が何回で済むか。
+            (5) s = r + e·x が x を隠す理由と、同じ r を 2 回使うと漏れる理由。
+            (6) 検証者が x なしで s·G = R + e·P を確かめられる理由。
+            (7) e をハッシュにすると誰が得をするか（対話が要らなくなる）。
+            この 7 つが自分の言葉で言えれば、この宿題は「理解して」出せます。
+          </p>
+        </div>
+      </li>
+    </ol>
   </div>
 </section>
 
