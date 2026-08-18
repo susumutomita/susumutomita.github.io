@@ -327,6 +327,43 @@
 
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
+
+  /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+  .deck { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
+        display: flex; flex-direction: column; gap: 0.55rem; }
+  .sl-head { display: flex; gap: 0.75rem; align-items: baseline; }
+  .sl-head .sn { font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; }
+  .sl-head .st { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .sl-claim { font-weight: 700; font-size: 1rem; line-height: 1.7; color: var(--ink); }
+  .sl p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .sl p.sl-claim { color: var(--ink); font-size: 1rem; }
+  .sl pre { background: var(--panel-2); font-size: var(--fs-xs); }
+  .sl-hw { border-left: 3px solid var(--pass); padding-left: 0.75rem; }
+  .sl-hw b { color: var(--pass); }
+  .sl-q { color: var(--accent); }
+  .exs { border: 1px dashed var(--line-strong); border-radius: var(--r-md); padding: 1rem 1.1rem 0.6rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.5rem; }
+  .exs .eyebrow { color: var(--free); }
+  .ex { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); }
+  .ex > summary { cursor: pointer; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); color: var(--ink); line-height: 1.6; }
+  .ex > summary:hover { color: var(--accent); }
+  .ex > pre { border: none; border-top: 1px solid var(--line); border-radius: 0; }
+  .appx { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: 0.6rem; }
+  .appx > summary { cursor: pointer; padding: 0.8rem 1rem; font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .appx > summary:hover { color: var(--accent); }
+  .appx .band { padding: 0.5rem 0 1.5rem; }
+  .appx .band + .band { border-top: none; }
+  table.hwmap td, table.hwmap th, table.gloss td, table.gloss th { white-space: normal; }
+  table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
+  table.gloss td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  #glossary .note-title { margin-top: 0.5rem; }
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -348,17 +385,16 @@
     <p class="eyebrow">Advanced Cryptography Program 2026 / Week 2 自習ノート</p>
     <h1>秘密を<span>分けて</span>、<span>集めずに</span>計算する</h1>
     <p class="lead">
-      Week 2 のテーマは MPC（秘密計算）です。課題 <code>toy-mpc</code> を実際に解き、
-      <strong>わざと壊した版を採点器に通した実測</strong>も含めて、このノートにまとめ直しました。
+      このノートは<strong>講義スライド「Week 2: MPC」55 枚と同じ順番</strong>で進みます。
+      1 カード = スライド 1〜2 枚 = 主張 1 つ。宿題 <code>toy-mpc</code> の 8 個の関数が
+      スライドのどこに当たるかを、毎回「宿題ではここ」で示します。
     </p>
     <p class="lead">
-      前半は<strong>数の世界</strong> —— 秘密分散、なぜ加算は無料で乗算に通信が要るのか、
-      <strong>Beaver 三つ組</strong>。
-      後半は<strong>ビットの世界</strong> —— XOR シェア、<strong>紛失通信（OT）</strong>、
-      そして OT を 2 回使って AND を作る <strong>GMW</strong>。
+      数はすべて 1〜2 桁（mod 11、mod 23、1 bit）。章ごとの「やってみる」を紙で解いてから答えを開いてください。
+      Shamir を配って集めるラボと、GMW の AND を 1 ステップずつ回すラボ、検問クイズはそのまま残してあります。
     </p>
     <div class="meta-row">
-      <span class="tag">読了 30 分</span>
+      <span class="tag">カード 27 枚・演習 15 問</span>
       <span class="tag">対話ラボ 2 つ</span>
       <span class="tag">検問クイズ</span>
       <span class="tag">Week 1 の知識を使う</span>
@@ -367,192 +403,373 @@
   </div>
 </header>
 
-<!-- ============================================ 1 -->
+<!-- ============================================ 0 : 出発点 -->
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
       <p class="eyebrow">出発点</p>
-      <h2>解きたいのは「持ち寄りたいが、見せたくない」</h2>
+      <h2>このノートは、講義スライド 55 枚と同じ順番で進む</h2>
+      <p>
+        1 枚のカードがスライド 1〜2 枚に対応し、<strong>主張は 1 つ、式か例は 1 個</strong>です。
+        宿題 <code>toy-mpc</code> の 8 個の関数（Part A: <code>share / reconstruct / add_shares / beaver_multiply</code>、
+        Part B: <code>ot_receiver_request / ot_sender_encrypt / ot_receiver_decrypt / gmw_and</code>）が
+        スライドのどこに当たるかを「宿題ではここ」で毎回示します。数はすべて 1〜2 桁です。
+      </p>
     </div>
-
     <div class="split">
-      <div class="prose">
-        <p>
-          3 人が自分の年収を持っています。<strong>平均だけ知りたい。でも自分の額は誰にも見せたくない。</strong>
-        </p>
-        <p>
-          素朴な手はいくつかありますが、どれも壊れます。
-        </p>
-        <p>
-          <strong>案 1: 信頼できる人に集める。</strong>その人は全員の額を知ります。
-          信頼の一点集中が残るだけで、問題は消えていません。
-        </p>
-        <p>
-          <strong>案 2: 順番に足していく。</strong>最初の人が自分の額を言って次に回す——
-          最初の人の額が 2 人目に丸見えです。
-        </p>
-        <p>
-          欲しいのは「<strong>誰も他人の値を知らないまま、全員が結果だけを得る</strong>」仕組み。
-          これが MPC（Multi-Party Computation、秘密計算）です。
-        </p>
-      </div>
-
       <div class="callout">
-        <p class="eyebrow">Week 1 とのつながり</p>
-        <p class="strong-line">
-          MPC も ZK も、計算を<b>算術回路</b>に翻訳してから暗号をかけます。
-        </p>
-        <p>
-          違うのは組み方です。ZK は<b>検証の形</b>——prover が答えを主張し、回路は嘘を禁じるだけ。
-          MPC は<b>計算の形</b>——主張してくれる人がいないので、値そのものを計算します。
-        </p>
-        <p>
-          そして Week 1 で見た「<b>コストは乗算の数で決まる</b>」が、MPC でもそのまま成り立ちます。
-          <strong>ただし理由はまったく別</strong>で、そこが今週の山場です。
-        </p>
-        <p>
-          公式課題は <code>toy-mpc</code>。前半（Part A）が数の乗算を Beaver 三つ組で、
-          後半（Part B）がビットの AND を紛失通信（OT）で解きます。
-          <b>このノートの構成はその対比に合わせてあります。</b>
-        </p>
+        <p class="eyebrow">読み方</p>
+        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。章の終わりの<b>「やってみる」</b>は紙と鉛筆で解いてから答えを開いてください。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">Week 3・4 との関係</p>
+        <p>MPC は「秘密を分けて、集めずに計算する」。Week 3 の Schnorr は「秘密を見せずに、知っていると納得させる」。<b>どちらも「乱数で覆う」で秘密を守る</b>（share の乱数、Beaver の a・b、nonce の r）。使い回した瞬間に壊れるのも同じです。</p>
       </div>
     </div>
-
     <div>
-      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の地図</p>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
       <ol class="toc" id="toc"></ol>
     </div>
   </div>
 </section>
 
-<!-- ============================================ 2 -->
+<!-- ============================================ D1 : 導入・問題設定 -->
 <section class="band">
   <div class="wrap stack">
     <div class="band-head">
-      <p class="eyebrow">中核</p>
-      <h2>Shamir の秘密分散 — 1 行ずつ追う</h2>
-      <p>アイデアは中学校で習った 1 つの事実だけです。そこから積み上げます。</p>
+      <p class="eyebrow">スライド 2〜13 / MPC は何をしたい技術か・問題設定</p>
+      <h2>入力を一か所に集めずに、答えだけを得る</h2>
     </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">2/55</span><span class="st">導入: 3 人の給与平均はいくら？</span></div>
+        <p class="sl-claim">知りたいのは平均だけ。でも普通に計算すると、誰かが全員の給与を見てしまう。個別の給与は誰にも見せず、平均だけを知りたい。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: Part A はこの「見せずに足す・掛ける」を作る。Part B は「見せずに AND を取る」を作る。</p>
+        <p class="sl-q">Q. 「集めて計算する」の何が問題か。（集めた人が全部見える）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">5〜6/55</span><span class="st">目的／ZK との違い</span></div>
+        <p class="sl-claim">MPC は、複数のパーティが秘密の値を持つとき、互いに秘匿したまま共同で計算する技術。ZK は「秘密を明かさずに主張が正しいと証明する」、MPC は「秘密入力を持つ複数の人が、集めずに共同で計算する」。</p>
+        <p class="sl-q">Q. 給与平均は ZK と MPC どちらの問題か。（誰も答えを持っていない → 計算が要る → MPC）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">8〜9/55</span><span class="st">Trusted Third Party の理想世界／MPC の直感的な定義</span></div>
+        <p class="sl-claim">信頼できる第三者 T に全員が入力を送り、T が y だけ返せば簡単。でも T には全部の入力が集まる（漏らす・目的外利用・結託・改ざん）。MPC は T を置かず、T がやるはずだった計算をパーティ間のプロトコルで実現する。</p>
+        <p class="sl-hw"><b>覚える 1 点</b>: MPC = 「T の代わり」。理想世界の T ができることを超えるものではない（次のカードの「保証しないこと」に効く）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">10〜11/55</span><span class="st">基本設定と、守りたい性質</span></div>
+        <pre>まず押さえる 4 つ:  誰が参加する（party）／各 party が何を持つ（input）／何を計算する（function）／誰が結果を受け取る（output）
+性質:  Correctness（仕様どおりの出力）／Privacy（出力から分かる以上は漏れない）／Robustness（止まる・嘘をつく party がいてもどうなるか）</pre>
+        <p class="sl-hw"><b>Privacy の判定法</b>: ある party がプロトコル中に見たものが「自分の入力と最終出力だけから作れそう」なら漏れていない — Week 3 の simulator と同じ考え方。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">12〜13/55</span><span class="st">MPC が保証しないこと — 出力からの漏れ、入力の正しさ</span></div>
+        <p class="sl-claim">「入力が漏れない」を強く言いすぎない。出力そのものから分かる情報は隠せない（平均 1000 万で、自分と他 1 人を知っていれば残り 1 人が分かる）。入力が本当に正しいかも別問題（嘘の給与、資格の無い投票）→ コミットメント・ZK・監査で別途。</p>
+        <p class="sl-q">Q. 3 人の平均を公開してよいか、を決めるのは誰か。（プロトコルではなく設計者。出力を公開すると決めた時点で漏れる分は漏れる）</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">問題設定</h3>
+      <details class="ex"><summary>問 1. 3 人の給与平均が 30 万と公開された。自分は 20 万、もう 1 人が 40 万だと知っている。3 人目の給与は？ これは MPC の失敗か。</summary><pre>合計 = 30 × 3 = 90。90 − 20 − 40 = 30 万。
+失敗ではない。出力（平均）から計算できる情報は、出力を公開すると決めた時点で漏れる（output leakage）。
+防ぐなら「平均を公開しない」「人数を増やす」「差分プライバシーでぼかす」など設計側の話。</pre></details>
+      <details class="ex"><summary>問 2. 「秘密の値が条件を満たすことを、見せずに納得させたい」は ZK か MPC か。「秘密の値を持つ 3 人が、見せずに合計を知りたい」は？</summary><pre>前者は ZK（証明。答えは prover が持っている）。後者は MPC（計算。答えは誰も持っていない）。
+MPC の入力の正しさを保証したければ ZK を組み合わせる（スライド 13）。</pre></details>
+    </div>
+  </div>
+</section>
 
-    <ol class="steps">
-      <li>
-        <h4>出発点は「2 点で直線が 1 本に決まる」</h4>
-        <div class="body">
-          <p>
-            平面に点が 2 つあれば、その両方を通る直線はただ 1 本です。
-            逆に<strong>点が 1 つだけなら、そこを通る直線は無数にあります</strong>。
-          </p>
-          <p class="why">
-            <b>この非対称がすべてです。</b> 2 つ集めれば決まる。1 つでは何も決まらない。
-            <b>「決まらない」を「分からない」に使う</b>のが秘密分散の発想です。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>秘密を「直線の切片」に隠す</h4>
-        <div class="body">
-          <p>
-            秘密の値を <code>s</code> とします。乱数 <code>a</code> を 1 つ用意して、次の直線を作ります。
-          </p>
-          <p class="subst">f(x) = s + a·x</p>
-          <p>
-            ここで <code>x = 0</code> を入れると <code>f(0) = s + a·0 = s</code>。
-            <strong>秘密は「x = 0 のときの値」として埋め込まれています。</strong>
-          </p>
-          <p class="why">
-            <b>なぜ x = 0 に置くのか:</b> 配るのは <code>x = 1, 2, 3, …</code> の値だけにするためです。
-            <b>0 番の値だけは誰にも渡さない</b>。だから直線が復元できて初めて秘密にたどり着きます。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>各人に「直線上の 1 点」を配る</h4>
-        <div class="body">
-          <p>
-            参加者 1 には <code>f(1)</code>、参加者 2 には <code>f(2)</code>、参加者 3 には <code>f(3)</code> を渡す。
-            この値を<strong>シェア</strong>と呼びます。
-          </p>
-          <p>
-            計算はすべて有限体 F_p の上で行います（Week 1 と同じ世界です）。
-            以下では見やすさのため <code>p = 11</code> を使います。
-          </p>
-          <p class="why">
-            <b>なぜ有限体なのか:</b> 実数のままだと、シェアの大きさから秘密の大きさが推測できてしまいます
-            （切片が大きければ値も大きい、など）。mod p で巻いてしまえば<b>大小の手がかりが消えます</b>。
-            Week 1 で見た「順序が存在しない」性質が、ここでは<b>利点として</b>効いています。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>実際に数字で作ってみる</h4>
-        <div class="body">
-          <p>秘密 <code>s = 3</code>、乱数 <code>a = 5</code>、<code>p = 11</code> とします。</p>
-          <p class="subst">
-            f(x) = 3 + 5x　（mod 11）<br><br>
-            f(1) = 3 + 5 = 8<br>
-            f(2) = 3 + 10 = 13 = 11 + 2 → <b>2</b><br>
-            f(3) = 3 + 15 = 18 = 11 + 7 → <b>7</b>
-          </p>
-          <p>
-            配るのは <code>8</code>, <code>2</code>, <code>7</code> の 3 つ。
-            <strong>どれも秘密の 3 とは似ても似つかない数字</strong>です。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>2 人集まれば復元できる</h4>
-        <div class="body">
-          <p>参加者 1（x=1, y=8）と参加者 2（x=2, y=2）が集まったとします。</p>
-          <p class="subst">
-            傾き a = (y₂ − y₁) ÷ (x₂ − x₁) = (2 − 8) ÷ (2 − 1) = −6 ÷ 1 = −6 = <b>5</b>　（mod 11）<br><br>
-            切片 s = y₁ − a·x₁ = 8 − 5·1 = <b>3</b> ✓
-          </p>
-          <p class="why">
-            <b>−6 がなぜ 5 なのか:</b> mod 11 の世界では <code>−6 + 11 = 5</code>。
-            Week 1 でやった「引き算は逆元を足すこと」がここでも効いています。
-            <b>割り算も同じで、÷1 は 1 の逆数 1 を掛けること</b>。
-            もし分母が 1 でなければ、逆数を求めてから掛けます。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>1 人では、秘密は何でもありうる</h4>
-        <div class="body">
-          <p>
-            参加者 1 だけが <code>y = 8</code> を持っているとします。この人にとって、
-            <strong>秘密 s は 0 から 10 のどれでもありえます</strong>。
-          </p>
-          <p class="subst">
-            s = 0 なら a = 8（0 + 8·1 = 8 ✓）<br>
-            s = 1 なら a = 7（1 + 7·1 = 8 ✓）<br>
-            s = 2 なら a = 6（2 + 6·1 = 8 ✓）<br>
-            …… 11 通りすべてに、辻褄の合う a が 1 つずつ存在する
-          </p>
-          <p class="why">
-            <b>これが「情報がゼロ」の正確な意味です。</b>
-            シェアを見る前の推測（11 通りが等確率）と、見た後の推測がまったく同じ。
-            <b>1 ビットも減っていない</b>。「解読が難しい」ではなく「<b>原理的に不可能</b>」です。
-            下のラボで実際に 11 通り全部を並べて確認できます。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>閾値は次数で決まる</h4>
-        <div class="body">
-          <p>
-            直線（次数 1）なら 2 点で決まりました。放物線（次数 2）なら 3 点必要です。
-            一般に<strong>次数 t の多項式は t+1 点で決まる</strong>。
-          </p>
-          <p class="subst">
-            f(x) = s + a₁x + a₂x² + … + a_t x^t　→　復元に必要な人数は <b>t + 1</b>
-          </p>
-          <p class="why">
-            <b>設計の自由度がここにあります。</b> 「5 人中 3 人集まれば復元できる」なら次数 2 を使う。
-            <b>t 人以下では、さっきと同じ理屈で情報がゼロ</b>のままです。
-          </p>
-        </div>
-      </li>
-    </ol>
+<!-- ============================================ D2 : 秘密分散 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 15〜23 / 秘密分散</p>
+      <h2>秘密を、1 個では何も分からない断片（share）に分ける</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">15/55</span><span class="st">秘密分散とは</span></div>
+        <p class="sl-claim">秘密 x を、ランダム性を使って作った share に分けて配る。少数の share では x が分からず、決められた数（k 個）以上集めると復元できる（k-of-n）。Sharing と Reconstruct の 2 つのアルゴリズム。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">16/55</span><span class="st">例: 加法的秘密分散 — 足すと戻る</span></div>
+        <pre>x = share₁ + share₂ + … + shareₙ (mod p)      share₁..shareₙ₋₁ はランダム、shareₙ = x − (残り全部)
+講義: p = 101, x = 42 → 17, 60, 66。 17 + 60 + 66 = 143 = 101 + 42 ✓     1 つの share（17）だけ見ても 42 とは分からない</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>share(secret, randomness, modulus)</code> — randomness が share₁..shareₙ₋₁、最後の 1 つを引き算で作る。<code>reconstruct(shares, modulus)</code> — 全部足して % modulus。<b>結果は必ず 0..p−1 に正規化</b>（Week 3 の逆元と同じ罠。負の share のまま返すと落ちる）。</p>
+        <p class="sl-q">Q. なぜ最後の 1 つだけ計算で決めるのか。（合計が x になるように帳尻を合わせる。他はランダムだから share を見ても x が分からない）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">17/55</span><span class="st">加法的秘密分散の特徴 — share のまま足せる</span></div>
+        <pre>[x + y] = ([x]₁ + [y]₁, [x]₂ + [y]₂, [x]₃ + [y]₃)      各 party が自分の share を足すだけ。通信なし。復元しない</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>add_shares(left, right, modulus)</code>。party 数が違えば拒否する。<b>合計・平均・線形変換が MPC と相性がよい理由はこの 1 行</b>。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">18〜20/55</span><span class="st">k-of-n が欲しい理由／Shamir の直感／Shamir の秘密分散法</span></div>
+        <p class="sl-claim">加法的は n-of-n（1 個欠けると復元できない）。k-of-n にしたい → 多項式。1 点では直線が決まらず、2 点で決まる（中 2）。k 個の点で次数 k−1 の多項式が決まる。secret を切片 q(0) に置き、party i に q(i) を渡す。</p>
+        <pre>p = 11, secret = 5, k = 2:  q(z) = 5 + 3z（3 はランダム）  → P1: q(1) = 8,  P2: q(2) = 11 ≡ 0,  P3: q(3) = 14 ≡ 3
+2 点 (1, 8), (2, 0) から: 傾き (0 − 8)/(2 − 1) = −8 ≡ 3、切片 8 − 3·1 = 5 → secret = 5 ✓    1 点 (1, 8) だけでは切片は何にでもなれる</pre>
+        <p class="sl-hw"><b>宿題には出ない</b>（宿題は加法的）。Week 3 の「補間」と Week 4 の「表を多項式にする」の入口はここ。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">21〜23/55</span><span class="st">比較／何を opening してよいか／現実の値をどう扱うか</span></div>
+        <pre>加法的: 足すと戻る、n-of-n、加減は軽い、乗算は追加処理     Shamir: 点から多項式を戻す、k-of-n、加減は軽い、乗算は追加処理
+流れ:  secret → share → share のまま計算 → output share → 許可された output だけ opening → output
+現実の値（給与・小数・負数）は有限体や固定小数点に encode してから share する</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: opening（share を集めて復元）は「漏らしてよい値」にだけ行う。設計は「何を open するか」を決めること。宿題の Beaver で open するのは d と e の 2 値だけ（採点器が数える）。</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">秘密分散（mod 11）</h3>
+      <details class="ex"><summary>問 1. p = 11 で秘密 7 を 3 人に加法的に分ける。乱数で share₁ = 3、share₂ = 9 を選んだ。share₃ は？</summary><pre>share₃ = 7 − 3 − 9 = −5 ≡ 6 (mod 11)。検算 3 + 9 + 6 = 18 = 11 + 7 ✓
+（宿題の share(7, [3, 9], 11) は [3, 9, 6] を返す。−5 のまま返すと落ちる）</pre></details>
+      <details class="ex"><summary>問 2. 上の 3 人が、別の秘密 y の share [2, 5, 4] も持っている。y は？ 各人が自分の share を足すと、合計は何の share になるか。</summary><pre>y = 2 + 5 + 4 = 11 ≡ 0。
+足した share は [5, 14 ≡ 3, 10]。復元すると 5 + 3 + 10 = 18 ≡ 7 = x + y = 7 + 0 ✓。通信なしで足し算ができた。</pre></details>
+      <details class="ex"><summary>問 3. Shamir（p = 11、k = 2）で share が (1, 8) の 1 点だけのとき、secret は 5 だと言えるか。</summary><pre>言えない。(1, 8) を通る直線は傾きごとに 11 本あり、切片 q(0) は 0〜10 のどれにもなれる。
+2 点目 (2, 0) が来て初めて傾き 3、切片 5 と決まる。「k − 1 個では何も分からない」の意味。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D3 : MPC での演算 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 25〜32 / MPC での演算</p>
+      <h2>足し算は無料、掛け算だけ通信が要る</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">25/55</span><span class="st">線形演算は軽い</span></div>
+        <p class="sl-claim">加算・減算・公開値による定数倍は、各 party が自分の share にローカルで行える。通信なし。</p>
+        <p class="sl-hw"><b>注意（宿題の落とし穴）</b>: 公開値 c を「足す」とき、全 party が自分の share に c を足すと x + n·c になってしまう。<b>1 つの share にだけ足す</b>。Beaver の公開項 d·e も同じ（次のカード）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">26/55</span><span class="st">乗算はローカル計算だけでは閉じない</span></div>
+        <pre>x·y = ([x]₁ + [x]₂)([y]₁ + [y]₂) = [x]₁[y]₁ + [x]₁[y]₂ + [x]₂[y]₁ + [x]₂[y]₂
+                                                ↑ 交差項: party 1 の share と party 2 の share の両方が要る → 誰も 1 人では計算できない</pre>
+        <p class="sl-q">Q. 足し算では交差項が出なかったのはなぜか。（(a+b)+(c+d) は並べ替えるだけ。積は展開すると混ざる — 中学の展開公式）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">27〜28/55</span><span class="st">Beaver triple — 使い捨てマスクで掛け算する</span></div>
+        <pre>前処理で、ランダムな a, b と c = a·b の share を配っておく: [a], [b], [c]
+本番:  [d] = [x] − [a],  [e] = [y] − [b]  を作り、d と e を open（公開）    ← a, b はランダムなので d, e から x, y は分からない
+       [x·y] = [c] + d·[b] + e·[a] + d·e     （d·e は公開値なので 1 つの share にだけ足す）
+
+p = 11, x = 3, y = 4, a = 5, b = 2, c = 10:  d = 3 − 5 ≡ 9,  e = 4 − 2 = 2
+x·y = 10 + 9·2 + 2·5 + 9·2 = 10 + 18 + 10 + 18 = 56 ≡ 1 = 12 mod 11 ✓（3·4 = 12）</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>beaver_multiply(x_shares, y_shares, triple, modulus)</code>。open するのは d と e の 2 値だけ（採点器 test_beaver_multiply が「公開したのは 2 値か」を数える）。<b>triple は 1 回の乗算に 1 個。使い回すと d₁ − d₂ = x₁ − x₂ が漏れる</b>（Week 3 の nonce と同じ）。</p>
+        <p class="sl-q">Q. なぜ d を公開してよいのか。（a がランダムで一度きりだから。Week 3 の s = r + e·x で r が x を覆うのと同じ）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">29〜30/55</span><span class="st">Arithmetic circuit と Boolean circuit／制御フロー</span></div>
+        <pre>Arithmetic: ゲートは + と ×。合計・平均・内積が得意。比較は重い
+Boolean:    ゲートは AND / XOR / NOT。比較・分岐・ビット演算が得意。bit 数だけ回路が大きい
+秘密に依存する if は書けない → [result] = [cond]·[x] + (1 − [cond])·0 のように「選択」に直す（Week 1 の回路と同じ発想）</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: Part A が Arithmetic（+ と Beaver の ×）、Part B が Boolean（XOR は無料、AND に OT）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">31〜32/55</span><span class="st">重くなりやすい演算／コストはどこで決まるか</span></div>
+        <pre>重い: 比較・最大最小・ソート・分岐・秘密での除算・秘密インデックスの配列アクセス（全部「ビット」か「非線形」が要る）
+コストの軸: 通信量／通信ラウンド数／非線形ゲート数（乗算・AND・比較）／party 数／敵対モデル</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 普通のコードで同じ 3 行に見えても、MPC では「乗算・AND が何個か」で速さが決まる。</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">Beaver で掛ける（mod 11、2 人）</h3>
+      <details class="ex"><summary>問 1. x の share [1, 2]、y の share [3, 1]、triple a = [4, 1], b = [0, 2], c = [7, 3]。x, y, a, b, c と a·b は？（c = a·b になっているか確かめる）</summary><pre>x = 3, y = 4, a = 5, b = 2, c = 10。a·b = 10 ✓（triple は正しい）</pre></details>
+      <details class="ex"><summary>問 2. 各人が [d] = [x] − [a]、[e] = [y] − [b] を作り、open する。d, e は？</summary><pre>[d] = [1 − 4, 2 − 1] = [−3 ≡ 8, 1] → d = 9。 [e] = [3 − 0, 1 − 2] = [3, −1 ≡ 10] → e = 13 ≡ 2
+（d = x − a = 3 − 5 ≡ 9、e = 4 − 2 = 2 と一致）</pre></details>
+      <details class="ex"><summary>問 3. [x·y] = [c] + d·[b] + e·[a] + d·e を作る。d·e は party 1 だけが足す。2 人の share と、復元した積は？</summary><pre>party 1: 7 + 9·0 + 2·4 + 9·2 = 7 + 0 + 8 + 18 = 33 ≡ 0
+party 2: 3 + 9·2 + 2·1 + 0 = 3 + 18 + 2 = 23 ≡ 1
+復元 0 + 1 = 1 = x·y = 12 mod 11 ✓</pre></details>
+      <details class="ex"><summary>問 4. もし 2 人とも d·e を足したら復元値はいくつになるか。</summary><pre>1 + 18 = 19 ≡ 8 ≠ 1。公開値を全員が足すと n 倍入る（スライド 25 の注意）。旧版ノートの「壊した実測」で採点器が落としていたのがこれ。</pre></details>
+      <details class="ex"><summary>問 5. 同じ triple を 2 回の乗算（x₁·y と x₂·y）に使い回すと、公開値だけから何が分かるか。</summary><pre>d₁ = x₁ − a、d₂ = x₂ − a → d₁ − d₂ = x₁ − x₂。秘密入力どうしの差が誰にでも分かる。
+Week 3 で nonce r を使い回すと s₁ − s₂ = (e₁ − e₂)·x から x が出るのと同じ形。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D4 : モデルとプロトコル -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 34〜43 / セキュリティモデルと主要プロトコル</p>
+      <h2>「誰が、何人、どこまで悪いか」で使う道具が変わる</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">35/55</span><span class="st">party はどう振る舞うか: semi-honest / malicious</span></div>
+        <p class="sl-claim">semi-honest は手順は守るが好奇心はある（見たものから推論する）。malicious は嘘の share・無応答・結託など何でもする。malicious に耐えるには検証・MAC・ZK が要り、コストが上がる。</p>
+        <p class="sl-hw"><b>宿題ではここ</b>: 課題は semi-honest 前提。だから「手順どおりに動く相手に、見えてしまう値は何か」だけを気にする（Beaver の d, e、OT の request）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">36〜37/55</span><span class="st">何人まで壊れてよいか／出力保証</span></div>
+        <pre>honest majority:   t < n/2（5 人中 2 人まで）→ Shamir 系が使いやすい
+dishonest majority: t ≥ n/2（2 人で片方が悪い）→ 強い道具・前処理が要る（SPDZ）
+出力保証: abort（止まってよい）／fairness（一部だけ得をしない）／guaranteed output delivery（正直な人は必ず出力を得る）</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">38〜39/55</span><span class="st">generic と special-purpose／主要プロトコル</span></div>
+        <pre>generic: 関数を回路にして評価（Yao / GMW / BGW / SPDZ）     special-purpose: PSI、threshold signature、MPC wallet、secure aggregation
+Yao（2 者、Boolean、garbling + OT）／GMW（OT で Boolean 回路）／BGW（n 者、honest majority、Shamir）／SPDZ（dishonest majority、malicious、Beaver + MAC）</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 名前ではなく「party 数・敵対モデル・回路表現・前処理の有無」のセットで見る。宿題の Part B は GMW 型。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">40/55</span><span class="st">紛失通信（OT）: 選んだ方だけを受け取る</span></div>
+        <pre>sender: m₀, m₁    receiver: 選択ビット b    receiver が得るもの: m_b だけ
+隠すもの: receiver は選ばなかった m₁₋b を知らない／sender は b を知らない</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: Part B の 3 関数が OT の 3 手。OT 単体で何かを計算するのではなく、AND を作る部品。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">41/55</span><span class="st">OT プロトコルの実現（離散対数ベース）</span></div>
+        <pre>1. sender: 乱数 a、A = g^a を送る
+2. receiver: 乱数 r、 B = g^r（b = 0）または B = A·g^r（b = 1）を送る   ← どちらもランダムに見えるので sender は b を区別できない
+3. sender: k₀ = H(B^a),  k₁ = H((B/A)^a)、 C₀ = m₀ ⊕ k₀,  C₁ = m₁ ⊕ k₁ を送る
+4. receiver: 計算できる鍵は k = H(A^r) = H(g^{ar}) = k_b だけ → m_b = C_b ⊕ k
+
+mod 23, g = 2, a = 3 → A = 8。 receiver b = 1, r = 4 → B = 8·2⁴ = 128 ≡ 13
+sender: B^a = 13³ ≡ 12 → k₀ = H(12)、 (B/A)^a = (13·8⁻¹)³ = (13·3)³ = 16³ ≡ 2 → k₁ = H(2)
+receiver: A^r = 8⁴ ≡ 2 → k = H(2) = k₁ ✓  b = 1 の方だけ開く。k₀ = H(12) は作れない（12 を出すには a が要る）</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>ot_receiver_request(sender_public, choice, receiver_secret)</code> = 手 2、<code>ot_sender_encrypt(sender_secret, request, m0, m1)</code> = 手 3、<code>ot_receiver_decrypt(...)</code> = 手 4。<b>receiver の r は 0 を含む範囲から一様に</b>（0 を除くと b = 0 と b = 1 で B の分布がずれる — 旧版ノートの分布実測）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">GMW</span><span class="st">GMW の AND — XOR share の交差項を OT で運ぶ</span></div>
+        <pre>x = x₁ ⊕ x₂,  y = y₁ ⊕ y₂ （各自 1 bit ずつ持つ）
+x·y = x₁y₁ ⊕ x₁y₂ ⊕ x₂y₁ ⊕ x₂y₂     ← x₁y₁ は P1、x₂y₂ は P2 が 1 人で計算できる。交差項 x₁y₂ と x₂y₁ が要 OT
+OT①: P1 が sender、乱数 r₁、m₀ = r₁、m₁ = r₁ ⊕ x₁。P2 は y₂ で選ぶ → r₁ ⊕ x₁·y₂ を得る（x₁ は分からない）
+OT②: 役を交代。P2 が乱数 r₂、P1 は y₁ で選び r₂ ⊕ x₂·y₁ を得る
+z₁ = x₁y₁ ⊕ r₁ ⊕ r₂（の P1 側）,  z₂ = x₂y₂ ⊕ (r₁ ⊕ x₁y₂) ⊕ (r₂ ⊕ x₂y₁) → z₁ ⊕ z₂ = x·y
+
+例: x₁=1, x₂=0（x=1）, y₁=1, y₂=1（y=0）, r₁=1, r₂=0
+OT①: P2 は r₁ ⊕ x₁·y₂ = 1 ⊕ 1 = 0    OT②: P1 は r₂ ⊕ x₂·y₁ = 0 ⊕ 0 = 0
+z₁ = 1·1 ⊕ 1 ⊕ 0 = 0,  z₂ = 0·1 ⊕ 0 ⊕ 0 = 0 → z = 0 = 1·0 ✓</pre>
+        <p class="sl-hw"><b>宿題ではここ</b>: <code>gmw_and(x_shares, y_shares, masks, ot_secrets)</code>。OT を<b>ちょうど 2 回</b>使う（採点器が数える）。XOR は <code>xor_shares</code>（提供済み）でローカル。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">42〜43/55</span><span class="st">Yao の Garbled Circuit／SPDZ</span></div>
+        <p class="sl-claim">Yao: 2 者。回路の各 wire の 0/1 にランダムなラベルを付け、一方が回路を「暗号化した表」にし、他方がラベルだけで評価する。自分の入力ラベルは OT で受け取る。SPDZ: offline で Beaver triple を作り、online は速い。share に MAC を付けて malicious を検出。</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">OT と GMW（mod 23 と 1 bit）</h3>
+      <details class="ex"><summary>問 1. 上の OT で receiver が b = 0 を選び r = 4 とすると B は？ そのとき sender の k₀, k₁ の元（H の中身）と receiver の A^r は？</summary><pre>B = g^r = 2⁴ = 16。 sender: B^a = 16³ = 4096 ≡ 2 → k₀ = H(2)、(B/A)^a = (16·3)³ = 48³ ≡ 2³ = 8 → k₁ = H(8)。
+receiver: A^r = 8⁴ ≡ 2 → k = H(2) = k₀ ✓。b = 0 なら m₀ だけ開く。
+（b = 1 のときも B は 13 で「ランダムに見える」。16 か 13 かで sender は b を当てられない）</pre></details>
+      <details class="ex"><summary>問 2. GMW の AND で x₁ = 0, x₂ = 1（x = 1）、y₁ = 0, y₂ = 1（y = 1）、r₁ = 1, r₂ = 1 のとき z₁, z₂ と z は？</summary><pre>OT①: P2 は r₁ ⊕ x₁·y₂ = 1 ⊕ 0 = 1    OT②: P1 は r₂ ⊕ x₂·y₁ = 1 ⊕ 0 = 1
+z₁ = x₁y₁ ⊕ r₁ ⊕ r₂ = 0 ⊕ 1 ⊕ 1 = 0,  z₂ = x₂y₂ ⊕ 1 ⊕ 1 = 1 ⊕ 0 = 1 → z = 1 = 1·1 ✓</pre></details>
+      <details class="ex"><summary>問 3. XOR の share は通信なしで足せるのに、AND だけ OT が要るのはなぜか。</summary><pre>x ⊕ y = (x₁ ⊕ y₁) ⊕ (x₂ ⊕ y₂) と並べ替えられる（各自ローカル）。
+x·y は展開すると x₁y₂, x₂y₁ の交差項が出て、2 人の bit が両方要る → 誰か 1 人では作れない。
+Arithmetic の「加算は無料、乗算は通信」と同じ理由（Boolean では XOR が加算、AND が乗算）。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D5 : 応用・比較・まとめ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 45〜55 / 応用例・比較・まとめ</p>
+      <h2>party・input・function・output・hidden で応用を読む</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">45〜49/55</span><span class="st">応用を見るための型と 4 事例</span></div>
+        <pre>型: party／input／function／output／hidden／cost／type（generic か special-purpose か）
+Fireblocks MPC wallet（2-of-2 の署名。鍵を 1 か所に置かない。special-purpose）
+Meta Private Data Lookup（漏洩パスワード集合との照合。PSI。Meta は結果を得ない）
+Boston 賃金格差（複数企業の給与を集めずに統計。出力からの推測は DP など別設計）
+デンマーク砂糖大根入札（2008、秘密入札の double auction。初期の実用 MPC）</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: どの事例も「MPC だけでは解決しないこと」（入力の正しさ、出力からの推測、可用性、運用）が半分を占める。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">51〜52/55</span><span class="st">関連技術との比較／使い分けの直感</span></div>
+        <pre>ZK:  正しいことを証明する（prover が計算、witness を隠す、proof で保証）
+FHE: 暗号化したまま計算する（evaluator 1 者、データと中間値を隠す）
+MPC: 入力を集めず共同計算（複数 party、各入力を隠す、プロトコルと敵対モデル次第）
+TEE: ハードウェア内で計算（enclave を信頼）      DP: 出力から個人を推測しにくくする（統計的）</pre>
+        <p class="sl-q">Q. 「1 者がデータを預けて計算だけ委託したい」は？（FHE）「複数者が持ち寄る」は？（MPC）「条件を満たすことだけ示したい」は？（ZK）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">53〜54/55</span><span class="st">MPC を使う前に確認すること／講義のまとめ</span></div>
+        <pre>party（誰が、いつオンラインか）／function（非線形が多すぎないか）／security（semi-honest でよいか）／cost（通信・ラウンド・前処理）
+output（出力から漏れすぎないか）／representation（有限体に落とせるか）／operation（運用・監査の責任分界）／そもそも MPC である必要があるか</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">55/55</span><span class="st">ホワイトボードセッション: Private DEX を設計する</span></div>
+        <p class="sl-claim">トレーダーは署名済み注文を share にして MPC ノード委員会へ。委員会が share のままマッチング。約定だけを決済コントラクトへ（オンチェーンでは公開）。設計するのは: ノード構成と adversary、価格・数量・優先順位・部分約定、何を output として開示するか、署名・nonce・取消・abort、MPC とオンチェーンの分担。</p>
+        <p class="sl-hw"><b>型で書く</b>: party = トレーダー + 委員会 / input = 注文 / function = マッチング / output = 約定 / hidden = 未約定の注文 / cost = 比較（価格の大小 — 重い）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D6 : 宿題対応表 -->
+<section class="band" id="hwmap">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">宿題の 8 関数</p>
+      <h2>宿題の関数 ↔ スライド ↔ 学校で習ったこと</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="data hwmap">
+        <thead><tr><th>関数</th><th>スライド</th><th>学校で習ったこと</th><th>小さい数の例</th><th>落ちやすい所</th></tr></thead>
+        <tbody>
+          <tr><td>share</td><td>16</td><td>余り（中 1）、「合計が決まっているとき最後の 1 個は引き算で決まる」</td><td>7 = 3 + 9 + 6 (mod 11)</td><td>最後の share を 0..p−1 に正規化</td></tr>
+          <tr><td>reconstruct</td><td>16</td><td>足し算</td><td>3 + 9 + 6 = 18 ≡ 7</td><td>% modulus 忘れ</td></tr>
+          <tr><td>add_shares</td><td>17, 25</td><td>足し算の順序を入れ替えてよい（結合・交換法則、中 1）</td><td>[1,2] + [3,1] = [4,3] → 7</td><td>party 数が違うのを拒否</td></tr>
+          <tr><td>beaver_multiply</td><td>27〜28</td><td>展開公式 (x−a+a)(y−b+b)（中 3）</td><td>d = 9, e = 2 → x·y = 1</td><td>d·e を全員が足す／open が 2 値を超える</td></tr>
+          <tr><td>ot_receiver_request</td><td>41</td><td>指数法則 (g^a)^r = (g^r)^a（中 2 の累乗）</td><td>B = 13（b=1）/ 16（b=0）</td><td>r の範囲に 0 を含める</td></tr>
+          <tr><td>ot_sender_encrypt</td><td>41</td><td>同上、⊕ は「桁上がりの無い足し算」</td><td>k₀ = H(12), k₁ = H(2)</td><td>k₁ の底は B/A</td></tr>
+          <tr><td>ot_receiver_decrypt</td><td>41</td><td>同上</td><td>A^r = 2 → m₁ だけ開く</td><td>不正な入力を拒否</td></tr>
+          <tr><td>gmw_and</td><td>26, 40〜41</td><td>展開公式（XOR 版）</td><td>z₁ ⊕ z₂ = x·y</td><td>OT をちょうど 2 回</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <p class="eyebrow">提出前の自己チェック — 6 問、自分の言葉で</p>
+      <p>(1) share の最後の 1 個だけ計算で決める理由。 (2) 足し算に通信が要らない理由と、掛け算に要る理由（交差項）。 (3) Beaver で d, e を公開してよい理由と、triple を使い回してはいけない理由。 (4) 公開値 d·e を 1 人だけが足す理由。 (5) OT で sender が b を当てられない理由と、receiver が片方しか開けない理由。 (6) GMW の AND で OT が 2 回要る理由。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ GLOSSARY -->
+<section class="band" id="glossary">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語集</p>
+      <h2>用語の意味・なぜその言葉か・宿題での実物</h2>
+    </div>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>宿題では</th></tr></thead><tbody>
+      <tr><td>MPC / SMPC</td><td>複数の参加者が入力を隠したまま共同で計算する技術</td><td>(Secure) Multi-Party Computation。party = 参加主体</td><td>課題名 toy-mpc</td></tr>
+      <tr><td>party</td><td>計算に参加する 1 主体（人・企業・サーバ）</td><td>「当事者」</td><td>share のリストの各要素</td></tr>
+      <tr><td>Trusted Third Party (TTP)</td><td>全員の入力を預かって計算する、信頼できる仮想の第三者</td><td>MPC はこの T を置かずに同じ結果を得る</td><td>—</td></tr>
+      <tr><td>秘密分散（secret sharing）</td><td>秘密を share に分けて配る。少数では分からず、決められた数で復元</td><td>share = 分け前・持ち分</td><td>share / reconstruct</td></tr>
+      <tr><td>加法的秘密分散</td><td>足すと戻る分け方（n-of-n）</td><td>additive = 足し算の</td><td>Part A 全体</td></tr>
+      <tr><td>Shamir 秘密分散</td><td>多項式の切片に秘密を置き、点を配る（k-of-n）</td><td>Adi Shamir（人名、1979）。RSA の S</td><td>（出ない）</td></tr>
+      <tr><td>k-of-n / threshold</td><td>n 個中 k 個で復元、k−1 個では分からない</td><td>threshold = しきい値</td><td>加法的は n-of-n</td></tr>
+      <tr><td>opening / open</td><td>share を集めて値を復元し、公開すること</td><td>「開ける」。Week 3 の commitment の open と同じ語感</td><td>Beaver の d, e</td></tr>
+      <tr><td>Beaver triple</td><td>前処理で配る (a, b, c = a·b) の share。1 回の乗算に 1 個</td><td>Donald Beaver（人名、1991）。triple = 3 つ組</td><td>beaver_multiply の triple 引数</td></tr>
+      <tr><td>マスク（mask）</td><td>秘密を覆う使い捨ての乱数</td><td>「覆面」。d = x − a の a</td><td>a, b、GMW の r₁, r₂</td></tr>
+      <tr><td>線形（linear）演算</td><td>足し算・引き算・公開定数倍。share のままローカルでできる</td><td>1 次式の形。LSS = Linear Secret Sharing</td><td>add_shares</td></tr>
+      <tr><td>Arithmetic / Boolean circuit</td><td>+ と × のゲート／AND・XOR・NOT のゲート</td><td>arithmetic = 算術、Boolean = ブール（論理）</td><td>Part A / Part B</td></tr>
+      <tr><td>XOR share</td><td>bit を x = x₁ ⊕ x₂ に分ける。XOR はローカル、AND は通信</td><td>⊕ = 排他的論理和（桁上がりの無い足し算 = mod 2 の足し算）</td><td>gmw_and の入力</td></tr>
+      <tr><td>紛失通信（OT）</td><td>2 つのうち選んだ 1 つだけを、選択を知られずに受け取る</td><td>Oblivious Transfer。oblivious = 気づかない（sender は選択に気づかない）</td><td>ot_* の 3 関数</td></tr>
+      <tr><td>GMW</td><td>OT で Boolean 回路を評価するプロトコル</td><td>Goldreich・Micali・Wigderson（人名、1987）</td><td>gmw_and</td></tr>
+      <tr><td>Yao / Garbled Circuit</td><td>回路を暗号化した表にして 2 者で評価</td><td>Andrew Yao（人名、1982）。garble = ごちゃ混ぜにする</td><td>（出ない）</td></tr>
+      <tr><td>SPDZ</td><td>dishonest majority・malicious 向け。offline/online + MAC</td><td>著者 4 人の頭文字（Smart・Pastro・Damgård・Zakarias）。「スピーズ」</td><td>（出ない）</td></tr>
+      <tr><td>semi-honest / malicious</td><td>手順は守るが覗く／何でもする</td><td>半分正直／悪意</td><td>課題は semi-honest</td></tr>
+      <tr><td>honest / dishonest majority</td><td>過半数が正直（t &lt; n/2）／そうでない</td><td>majority = 過半数</td><td>—</td></tr>
+      <tr><td>abort / fairness / GOD</td><td>止まってよい／一部だけ得をしない／正直者は必ず出力を得る</td><td>guaranteed output delivery</td><td>—</td></tr>
+      <tr><td>output leakage</td><td>出力そのものから分かってしまう情報</td><td>leak = 漏れる。プロトコルの失敗ではない</td><td>平均の例</td></tr>
+      <tr><td>generic / special-purpose</td><td>任意の関数を回路で／用途特化（PSI、threshold signature）</td><td>汎用／専用</td><td>—</td></tr>
+      <tr><td>PSI</td><td>2 者の集合の共通部分だけを知る</td><td>Private Set Intersection</td><td>Meta の事例</td></tr>
+      <tr><td>DP</td><td>出力にノイズを入れて個人の寄与を推測しにくくする</td><td>Differential Privacy（差分プライバシー）</td><td>Boston の事例</td></tr>
+    </tbody></table></div>
   </div>
 </section>
 
@@ -602,593 +819,6 @@
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ============================================ 3.5 : additive sharing -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">課題で使った形</p>
-      <h2>加法的秘密分散 — 足して戻る、いちばん単純な分け方</h2>
-      <p>
-        Shamir は「n 人中 t+1 人で復元」という閾値が選べる高機能版です。
-        課題 <code>toy-mpc</code> が使うのは、もっと単純な<strong>加法的秘密分散</strong>——
-        <strong>全員そろわないと戻らない</strong>代わりに、作り方が足し算だけで済みます。
-      </p>
-    </div>
-
-    <div class="split">
-      <div class="prose">
-        <p>
-          秘密 <code>s</code> を n 人に分けるには、<strong>乱数を n−1 個</strong>引いて、
-          それをそのまま最初の n−1 人のシェアにします。最後の 1 人だけが帳尻を合わせます。
-        </p>
-        <p class="subst">
-          share₁ = r₁, …, shareₙ₋₁ = rₙ₋₁<br>
-          shareₙ = s − (r₁ + … + rₙ₋₁)　(mod p)
-        </p>
-        <p>
-          復元は全シェアの合計。<code>p = 67</code> で <code>s = 42</code> を乱数
-          <code>[5, 11]</code> で分けると、シェアは <code>[5, 11, 26]</code>
-          （<code>42 − 16 = 26</code>）。足せば <code>42</code> に戻ります。
-        </p>
-        <p>
-          「n−1 人では情報ゼロ」の理屈は Shamir とまったく同じです。
-          手元のシェアがどんな値でも、<strong>どんな秘密とも辻褄の合う「残り 1 枚」が必ず存在する</strong>ので、
-          候補は 1 つも減りません。
-        </p>
-      </div>
-
-      <div class="callout amber">
-        <p class="eyebrow">実測 — 正規化を忘れると採点器に落とされる</p>
-        <p class="strong-line">
-          シェアは 0..p−1 に丸めた「体の元」でなければいけません。
-        </p>
-        <p>
-          <code>share(-3, [70, -2], 67)</code> の正解は <code>[3, 65, 63]</code>。
-          mod を取らない実装はこう落ちます。
-        </p>
-        <pre>AssertionError:
-Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
-        <p>
-          値としては同じ直線上にあっても、<b>表現がそろっていないと他の関数と噛み合いません</b>。
-          Week 1 で「体の元として正規化する」と言っていたことが、ここで初めて実務の制約になります。
-        </p>
-      </div>
-    </div>
-
-    <div class="callout">
-      <p class="eyebrow">どちらを使うか</p>
-      <p class="strong-line">閾値が要るなら Shamir、全員参加でよいなら加法的。</p>
-      <p>
-        これから見る Beaver 乗算はどちらの上でも同じ形で動きます。課題が加法的を選んだのは、
-        <b>MPC の本質（何を公開してよいか）に集中するため</b>に、復元の仕組みを最小にしたからです。
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================ 4 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">性質</p>
-      <h2>なぜ加算は無料なのか</h2>
-      <p>ここから MPC の本題です。まず「タダでできること」から。</p>
-    </div>
-
-    <div class="split">
-      <div class="prose">
-        <p>
-          2 つの秘密 <code>s</code> と <code>s'</code> を、それぞれ別の直線に隠したとします。
-        </p>
-        <p class="subst">
-          f(x) = s + a·x　　g(x) = s' + b·x
-        </p>
-        <p>
-          参加者 <code>i</code> は <code>f(i)</code> と <code>g(i)</code> を持っています。
-          <strong>この 2 つを手元で足してみます。</strong>
-        </p>
-        <p class="subst">
-          f(i) + g(i)<br>
-          = (s + a·i) + (s' + b·i)<br>
-          = (s + s') + (a + b)·i
-        </p>
-        <p>
-          いま出てきた式を <code>h(x) = (s+s') + (a+b)·x</code> と置くと、
-          これはちょうど <code>h(i)</code> です。
-        </p>
-        <p>
-          つまり<strong>各自が手元で足しただけで、「s + s' を秘密とする直線」のシェアになっている</strong>。
-          誰とも通信していません。
-        </p>
-      </div>
-
-      <div class="stack-sm">
-        <div class="callout">
-          <p class="eyebrow">確かめる</p>
-          <p class="strong-line">s = 3（f = 3 + 5x）と s' = 4（g = 4 + 2x）、p = 11</p>
-          <p class="subst" style="color:var(--ink);">
-            参加者 1: f(1)=8, g(1)=6　→ 8 + 6 = 14 = <b>3</b><br>
-            参加者 2: f(2)=2, g(2)=8　→ 2 + 8 = 10 = <b>10</b><br><br>
-            この 2 点 (1,3), (2,10) から復元すると……<br>
-            傾き = (10−3) ÷ (2−1) = 7<br>
-            切片 = 3 − 7·1 = −4 = <b>7</b><br><br>
-            そして s + s' = 3 + 4 = <b>7</b> ✓
-          </p>
-        </div>
-        <div class="callout">
-          <p class="eyebrow">定数倍も同じ理由でタダ</p>
-          <p>
-            <code>c·f(i) = c·s + c·a·i</code> なので、<b>秘密を c 倍した直線のシェア</b>になります。
-            引き算も定数倍（−1 倍）と加算の組み合わせなので無料です。
-          </p>
-          <p class="strong-line">
-            <b>線形なことは、全部ローカルで完結する。</b>
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================ 5 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">壁</p>
-      <h2>なぜ乗算だけ高いのか</h2>
-      <p>同じことを掛け算でやると、途中で破綻します。どこで破綻するのかを式で見ます。</p>
-    </div>
-
-    <ol class="steps">
-      <li>
-        <h4>掛けてみると、答え自体は合っている</h4>
-        <div class="body">
-          <p>参加者 <code>i</code> が手元で <code>f(i) · g(i)</code> を計算します。</p>
-          <p class="subst">
-            f(i)·g(i) = (s + a·i)(s' + b·i)<br>
-            = s·s' + (s·b + s'·a)·i + (a·b)·i²
-          </p>
-          <p>
-            これを <code>h(x) = s·s' + (sb + s'a)·x + (ab)·x²</code> と置けば、
-            確かに <code>h(i)</code> です。<b>そして h(0) = s·s'</b> —— 欲しかった積が切片に入っています。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>しかし、次数が 1 から 2 に上がっている</h4>
-        <div class="body">
-          <p>
-            <code>h(x)</code> には <code>x²</code> の項があります。<strong>直線ではなく放物線</strong>です。
-          </p>
-          <p class="why">
-            <b>何が困るのか:</b> 次数 1 なら 2 人で復元できました。次数 2 は <b>3 人</b>必要です。
-            掛け算するたびに必要人数が増えていく。
-            <b>2 回掛ければ次数 4、3 回で次数 8</b> —— すぐに参加者の人数を超え、<b>誰も復元できなくなります</b>。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>もう 1 つの問題 — 乱数が足りない</h4>
-        <div class="body">
-          <p>
-            <code>h(x)</code> の係数を見ると、<code>x</code> の係数は <code>s·b + s'·a</code>、
-            <code>x²</code> の係数は <code>a·b</code> です。
-          </p>
-          <p class="why">
-            <b>元の乱数 a, b から作られていて、独立ではありません。</b>
-            本来なら 2 つの係数はそれぞれ独立な乱数であってほしいのに、
-            <code>a·b</code> は <code>a</code> と <code>b</code> に縛られている。
-            <b>ここから情報が漏れる余地が生まれます。</b>
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>だから「次数を戻す」作業が要る</h4>
-        <div class="body">
-          <p>
-            次数 2 になった多項式を、<strong>秘密は同じまま次数 1 に作り直す</strong>必要があります
-            （degree reduction）。そして<b>この作業は 1 人ではできません</b>——
-            自分のシェアしか持っていないからです。
-          </p>
-          <p class="why">
-            <b>これが通信の正体です。</b> 加算は各自の手元で閉じるのに、乗算は参加者どうしのやりとりが要る。
-            <b>MPC のコストが乗算の数で決まるのは、この 1 点に尽きます。</b>
-          </p>
-        </div>
-      </li>
-    </ol>
-
-    <div class="callout amber">
-      <p class="eyebrow">Week 1 と同じ結論、まったく違う理由</p>
-      <p class="strong-line">
-        ZK でも MPC でも「コストは乗算の数で決まる」。でも理由は別物です。
-      </p>
-      <p>
-        <b>ZK（R1CS 系）:</b> 乗算ゲート 1 個が制約 1 本になるから。加算は式の中に畳み込めて行を消費しない。
-      </p>
-      <p>
-        <b>MPC:</b> 加算は手元で閉じるが、乗算は次数が倍になって<b>通信が発生する</b>から。
-      </p>
-      <p>
-        <strong>同じ「回路」を使い、同じ指標でコストを測るのに、痛みの中身が違う。</strong>
-        Week 1 のノートで「3 方式は真ん中の回路を共有する」と書いたことの、具体的な現れ方がこれです。
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================ 6 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">技法</p>
-      <h2>Beaver 三つ組 — 重い部分を前もって済ませる</h2>
-      <p>
-        乗算の通信は消せません。ですが<strong>「いつやるか」はずらせます</strong>。
-        Week 6 の <code>co-snark-prove</code> で実装するのがこれです。
-      </p>
-    </div>
-
-    <ol class="steps">
-      <li>
-        <h4>前処理で、掛け算済みの乱数を用意しておく</h4>
-        <div class="body">
-          <p>
-            まだ何を計算するか決まっていない暇な時間に、次を満たす 3 つの乱数を作ります。
-          </p>
-          <p class="subst">a, b はランダム　　c = a · b</p>
-          <p>
-            そして <code>a</code>, <code>b</code>, <code>c</code> を<strong>それぞれ秘密分散して配ります</strong>。
-            <b>値そのものは誰も知りません</b>。知っているのは「c = a·b という関係があること」だけ。
-          </p>
-          <p class="why">
-            <b>ここがポイント:</b> 掛け算という重い作業を、<b>入力が来る前に</b>済ませてしまう。
-            この 3 つ組を <b>Beaver 三つ組</b> と呼びます。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>本番では、隠したまま 2 つの値を公開する</h4>
-        <div class="body">
-          <p>
-            秘密 <code>x</code> と <code>y</code> の積を計算したくなりました。まず次の 2 つを計算して<strong>公開</strong>します。
-          </p>
-          <p class="subst">d = x − a　　e = y − b</p>
-          <p>
-            引き算はさっき見たとおり無料なので、シェアのまま計算できます。
-          </p>
-          <p class="why">
-            <b>公開して大丈夫なのか:</b> 大丈夫です。<code>a</code> は誰も知らない乱数なので、
-            <code>d = x − a</code> は<b>ランダムな値にしか見えません</b>。
-            Week 1 の言葉で言えば、乱数で撹乱されている状態。<b>x は漏れません。</b>
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>すると積が、足し算だけで書ける</h4>
-        <div class="body">
-          <p>
-            <code>d = x − a</code> を移項すると <code>x = d + a</code>、同様に <code>y = e + b</code>。
-            これを掛けて展開します。
-          </p>
-          <p class="subst">
-            x · y = (d + a)(e + b)<br>
-            = d·e + d·b + a·e + a·b<br>
-            = d·e + d·b + a·e + <b>c</b>　　<span style="color:var(--muted)">（a·b = c だった）</span>
-          </p>
-          <p>
-            右辺を見てください。<code>d</code> と <code>e</code> は<strong>公開済みの普通の数</strong>。
-            <code>a</code>, <code>b</code>, <code>c</code> は<strong>シェアとして持っている</strong>。
-          </p>
-          <p class="why">
-            <b>つまり右辺は「公開された定数」×「シェア」の足し算だけ</b>です。
-            <code>d·b</code> は b のシェアを d 倍するだけ、<code>a·e</code> は a のシェアを e 倍するだけ。
-            <b>定数倍と加算は無料</b>でした。
-            <b>秘密どうしの掛け算が、1 つも残っていません。</b>
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>結果として何が起きたか</h4>
-        <div class="body">
-          <p>
-            乗算 1 回に必要だった「次数を戻す通信」が、<strong>d と e を公開する 1 往復</strong>に置き換わりました。
-            重い前処理は、入力が来る前に終わっています。
-          </p>
-          <p class="why">
-            <b>これが MPC の実装で最初に出てくる工夫です。</b>
-            前処理と本番を分ける設計はこの分野の定石で、
-            <b>Week 6 の <code>co-snark-prove</code> は、まさにこの Beaver 乗算を実装する課題</b>です。
-          </p>
-        </div>
-      </li>
-    </ol>
-  </div>
-</section>
-
-<!-- ============================================ 6.5 : breaking beaver -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">壊してみる</p>
-      <h2>採点器が守らせる、Beaver の 3 つの掟</h2>
-      <p>
-        課題の採点器は「積が合っているか」だけを見ていません。
-        <strong>わざと壊した実装を 3 通り作って通した結果</strong>がこれです。
-        どれも「何を買っている制約なのか」が失敗の形に出ます。
-      </p>
-    </div>
-
-    <ol class="steps">
-      <li>
-        <h4>掟 1 — 公開項 d·e を足すのは、代表 1 人だけ</h4>
-        <div class="body">
-          <p>
-            <code>x·y = c + d·b + e·a + d·e</code> のうち、<code>c</code>, <code>b</code>, <code>a</code> は
-            シェアとして分散されています。でも <code>d·e</code> は<strong>公開値どうしの積、ただの数</strong>です。
-            全員が自分のシェアに足すと、復元時に人数分カウントされます。
-          </p>
-          <pre><span class="c"># d·e を全 party に足した壊れ版（3 party, p = 67）</span>
-AssertionError: 57 != 41   <span class="c"># (n−1)·d·e = 2·d·e だけ余る</span></pre>
-          <p class="why">
-            <b>シェアと公開値は「足し方」が違う。</b>シェアは全員が成分ごとに、
-            公開値は代表 1 人（party 0）だけが足す。この区別が曖昧なままだと、
-            復元して初めて壊れていたと分かります。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>掟 2 — 開いてよいのは d と e の 2 回だけ</h4>
-        <div class="body">
-          <p>
-            いちばん面白い壊れ方です。<code>d = x − a</code> を「x を開いて、a を開いて、引く」と実装しても、
-            <strong>積の値のテストは全部通ります</strong>。落ちるのはこれだけ。
-          </p>
-          <pre>test_fixed_share_vector ................. ok
-test_products_for_two_and_three_parties . ok
-test_opens_exactly_the_two_masked_differences ... <b>FAIL</b>
-AssertionError: 4 != 2   <span class="c"># 開示回数が 2 回ではない</span></pre>
-          <p class="why">
-            <b>「答えが正しい」と「開きすぎていない」は別の性質。</b>採点器は reconstruct の呼び出しを数えて、
-            <b>マスク済みの d, e 以外を開いたら落とします</b>。MPC の正しさは出力だけでは測れない——
-            <b>実行中に何を公開したか</b>まで含めてプロトコルです。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>掟 3 — 三つ組は 1 乗算 1 回限り</h4>
-        <div class="body">
-          <p>
-            同じ <code>a</code> で 2 つの秘密を隠すと、攻撃者は<strong>ネットワーク上の公開値だけ</strong>から
-            差を復元できます。実測（p = 67, x₁ = 12, x₂ = 55, 同じ a = 29）:
-          </p>
-          <pre>公開値: d₁ = 50, d₂ = 26
-攻撃者: d₁ − d₂ = 24 (mod 67)
-真の値: x₁ − x₂ = 12 − 55 = −43 = <b>24</b> (mod 67)  ← 一致</pre>
-          <p class="why">
-            <b>d = x − a が安全なのは、a がワンタイムパッドだから。</b>2 回使えば
-            <code>d₁ − d₂ = x₁ − x₂</code> で a が消え、秘密どうしの関係が丸見えになります。
-            前処理で三つ組を「乗算の回数分」用意する理由がこれです。
-          </p>
-        </div>
-      </li>
-    </ol>
-  </div>
-</section>
-
-<!-- ============================================ 8 : boolean mpc -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ビットの世界へ</p>
-      <h2>XOR シェアと、AND という壁</h2>
-      <p>
-        ここまでは数（有限体の元）の話でした。課題の Part B は<strong>ビット</strong>を扱います。
-        構図は驚くほど同じです。
-      </p>
-    </div>
-
-    <div class="split">
-      <div class="prose">
-        <p>
-          ビット <code>x</code> の XOR シェアは <code>x = x₀ ⊕ x₁</code> となる 2 ビットの組。
-          乱数 <code>m</code> を引いて <code>(m, x ⊕ m)</code> と分ければ、
-          <strong>片方だけ見ても x は 50:50 のまま</strong>です。
-        </p>
-        <p>
-          XOR は手元で完結します。<code>(x₀ ⊕ y₀, x₁ ⊕ y₁)</code> を作れば
-          <code>x ⊕ y</code> のシェアになる——加法的シェアの「加算は無料」と同じ理屈です
-          （XOR は mod 2 の加算そのものです）。
-        </p>
-        <p>
-          壁は AND です。展開してみると:
-        </p>
-        <p class="subst">
-          x·y = (x₀ ⊕ x₁)(y₀ ⊕ y₁)<br>
-          = x₀y₀ ⊕ <b>x₀y₁</b> ⊕ <b>x₁y₀</b> ⊕ x₁y₁
-        </p>
-        <p>
-          <code>x₀y₀</code> は P0 が、<code>x₁y₁</code> は P1 が手元で計算できます。
-          でも<strong>クロス項 x₀y₁ と x₁y₀ は、どちらの手元にも材料がそろっていません</strong>。
-          乗算で次数が上がったのと同じ場所に、同じ形の壁が現れます。
-        </p>
-      </div>
-
-      <div class="callout amber">
-        <p class="eyebrow">実測 — クロス項をサボると、そこだけ落ちる</p>
-        <p class="strong-line">
-          「各自が自分のシェアだけ AND する」壊れ版は、混合シェアの組合せだけ失敗します。
-        </p>
-        <pre>gmw_and (x_shares=(0, 0), ...) ... ok
-gmw_and (x_shares=(0, 1), y_shares=(1, 0)) <b>FAIL</b>
-gmw_and (x_shares=(1, 0), y_shares=(0, 1)) <b>FAIL</b>
-gmw_and (x_shares=(1, 1), y_shares=(1, 0)) <b>FAIL</b>
-AssertionError: 0 != 1</pre>
-        <p>
-          <b>失敗の分布が原因を指しています。</b>両方のシェアが同じ側に寄っている組は
-          クロス項が 0 なので偶然通る。<b>1 が割れて入った組だけ</b>、
-          x₀y₁ / x₁y₀ の欠落が答えに出ます。
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================ 9 : OT -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">道具</p>
-      <h2>紛失通信（OT）— 選んだことを知られずに、1 つだけ受け取る</h2>
-      <p>
-        クロス項 <code>x₀y₁</code> を計算するには「P1 の y₁ に応じて、P0 の持つ 2 つの値のどちらかを渡す」
-        必要があります。ただし <strong>P0 に y₁ を知られてはいけないし、P1 に両方渡してもいけない</strong>。
-        この綱渡りを実現するのが 1-out-of-2 OT です。
-      </p>
-    </div>
-
-    <ol class="steps">
-      <li>
-        <h4>約束は 2 つ — sender は選択を知らない、receiver は片方しか読めない</h4>
-        <div class="body">
-          <p>
-            sender は 2 通のメッセージ <code>m₀</code>, <code>m₁</code> を差し出す。
-            receiver は選択ビット <code>choice</code> で 1 通だけ受け取る。
-          </p>
-          <p class="why">
-            <b>普通の通信では両立しません。</b>どちらが欲しいか言えば sender に選択が漏れ、
-            両方もらえば receiver が読みすぎる。暗号で「開けられない封筒」を作って初めて両立します。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>トイ構成 — Diffie–Hellman の応用（p = 23, g = 2, 位数 q = 11）</h4>
-        <div class="body">
-          <p>
-            sender は秘密 <code>a</code> から <code>A = g^a</code> を公開。
-            receiver は秘密 <code>b</code> を引いて、<strong>request B の作り方を choice で変えます</strong>。
-          </p>
-          <p class="subst">
-            choice = 0 → B = g^b<br>
-            choice = 1 → B = A·g^b
-          </p>
-          <p>
-            sender は 2 つの鍵を <code>K₀ = B^a</code>, <code>K₁ = (B/A)^a</code> と導出して
-            それぞれのメッセージを暗号化。receiver の鍵は常に <code>A^b = g^{ab}</code> です。
-          </p>
-          <p class="why">
-            <b>choice = 0 なら K₀ = (g^b)^a = g^{ab} が一致し、choice = 1 なら K₁ = (A·g^b/A)^a = g^{ab} が一致する。</b>
-            選んだ側の封筒だけが開き、もう一方の鍵を得るには離散対数を解く必要があります。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>b は 0 を含めて選ぶ — 1 点欠けるだけで選択が漏れる</h4>
-        <div class="body">
-          <p>
-            課題の仕様に「receiver secret b は <strong>0..q−1</strong> から選ぶ」とあります。
-            0 を除いて 1..q−1 にすると何が起きるか、request の分布を全部数えました。
-          </p>
-          <div class="table-scroll"><table class="data">
-            <tr><th>b の範囲</th><th>choice = 0 の request 集合</th><th>choice = 1 の request 集合</th></tr>
-            <tr><td>0..10（正）</td><td>部分群の 11 要素すべて</td><td>部分群の 11 要素すべて（同一）</td></tr>
-            <tr class="here"><td>1..10（誤）</td><td>1 が出ない</td><td>8 (= A) が出ない</td></tr>
-          </table></div>
-          <p class="why">
-            <b>request = 8 を見たら choice = 0 と確定、request = 1 なら choice = 1 と確定。</b>
-            「一様分布が choice によらず同じ」という性質は、範囲が 1 点欠けるだけで壊れます。
-            仕様の端の値には、たいてい理由があります。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>実測 — choice を無視した request は、選んだ側の半分だけ壊す</h4>
-        <div class="body">
-          <p>
-            request を常に <code>B = g^b</code> にした壊れ版では、choice = 0 の復号は全部成功し、
-            choice = 1 だけがゴミを返します。
-          </p>
-          <pre>choice=0 ... ok（全部成功）
-choice=1: AssertionError: b'\xc2\x97\xc1W\xb7' != b'right'</pre>
-          <p class="why">
-            <b>B に A を織り込むのは receiver の仕事</b>で、それをして初めて sender 側の
-            K₁ = (B/A)^a と鍵が揃う。「どちらの封筒が開くか」は request の作り方が決めています。
-          </p>
-        </div>
-      </li>
-    </ol>
-  </div>
-</section>
-
-<!-- ============================================ 10 : GMW -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">組み立て</p>
-      <h2>GMW の AND — OT を 2 回で、クロス項を運ぶ</h2>
-      <p>
-        道具がそろいました。クロス項 1 つにつき OT を 1 回。対称なので 2 回で AND が完成します。
-      </p>
-    </div>
-
-    <ol class="steps">
-      <li>
-        <h4>セッション 01 — P0 が sender、P1 が y₁ で選ぶ</h4>
-        <div class="body">
-          <p>
-            P0 は乱数マスク <code>r₀₁</code> を引き、2 通のメッセージを用意します。
-          </p>
-          <p class="subst">
-            m₀ = r₀₁　　m₁ = r₀₁ ⊕ x₀
-          </p>
-          <p>
-            P1 が <code>y₁</code> を choice にして OT すると、受け取る値は
-            <code>t₀₁ = r₀₁ ⊕ x₀·y₁</code>（y₁ = 0 なら m₀、1 なら m₁——ちょうどこの式になります）。
-          </p>
-          <p class="why">
-            <b>クロス項 x₀y₁ が「r₀₁ で焼き付けられた形」で P1 に渡りました。</b>
-            P1 が見るのはマスク済みの 1 ビットだけなので x₀ は漏れない。
-            P0 は OT の約束で y₁ を知らない。<b>誰も何も知らないまま、項だけが移動しています。</b>
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>セッション 10 — 役割を入れ替えてもう 1 回</h4>
-        <div class="body">
-          <p class="subst">
-            P1 が sender: m₀ = r₁₀, m₁ = r₁₀ ⊕ x₁　　P0 が y₀ で選ぶ → t₁₀ = r₁₀ ⊕ x₁·y₀
-          </p>
-          <p class="why">
-            <b>採点器は OT の実行回数も数えています</b>（2 回でなければ落ちる）。
-            クロス項は 2 つ、OT も 2 つ。1 回で済ませる近道はここにはありません。
-          </p>
-        </div>
-      </li>
-      <li>
-        <h4>出力 — 手持ちの材料を全部 XOR するだけ</h4>
-        <div class="body">
-          <p class="subst">
-            z₀ = x₀y₀ ⊕ r₀₁ ⊕ t₁₀　　（P0 の手元にある材料だけ）<br>
-            z₁ = x₁y₁ ⊕ r₁₀ ⊕ t₀₁　　（P1 の手元にある材料だけ）
-          </p>
-          <p>
-            XOR すると、マスクがペアで消えます。
-          </p>
-          <p class="subst">
-            z₀ ⊕ z₁ = x₀y₀ ⊕ x₁y₁ ⊕ <s>r₀₁</s> ⊕ (<s>r₀₁</s> ⊕ x₀y₁) ⊕ <s>r₁₀</s> ⊕ (<s>r₁₀</s> ⊕ x₁y₀)<br>
-            = x₀y₀ ⊕ x₀y₁ ⊕ x₁y₀ ⊕ x₁y₁ = <b>x·y</b> ✓
-          </p>
-          <p class="why">
-            <b>Beaver の d·e と同じく、マスクは「入れた人が自分の側で打ち消す」設計です。</b>
-            r₀₁ は P0 が入れて P0 の z₀ で消える。打ち消しの場所を間違えると、
-            復元して初めて壊れていたと分かる——数の世界とまったく同じ教訓です。
-          </p>
-        </div>
-      </li>
-    </ol>
   </div>
 </section>
 
@@ -1358,6 +988,815 @@ choice=1: AssertionError: b'\xc2\x97\xc1W\xb7' != b'right'</pre>
         OT の request が安全なのは <code>b</code> が 0 込みの一様乱数だから。
         <b>隠している乱数の条件が 1 つ欠けた瞬間に、どちらも壊れます。</b>
       </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ APPX -->
+<section class="band" id="appendix">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">付録</p>
+      <h2>深掘り本文 — 各節を開いて読む（旧版の本文）</h2>
+      <p>上のカード列で骨組みが入ったあとで、細部を足したいときに開いてください。Shamir の 1 行ずつの導出、壊した採点結果（公開項 d·e を全員が足す／開示 4 回／triple 再利用）、OT の分布実測はここにあります。</p>
+    </div>
+    <div>
+<details class="appx"><summary>解きたいのは「持ち寄りたいが、見せたくない」（旧・出発点）</summary>
+<!-- ============================================ 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>解きたいのは「持ち寄りたいが、見せたくない」</h2>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          3 人が自分の年収を持っています。<strong>平均だけ知りたい。でも自分の額は誰にも見せたくない。</strong>
+        </p>
+        <p>
+          素朴な手はいくつかありますが、どれも壊れます。
+        </p>
+        <p>
+          <strong>案 1: 信頼できる人に集める。</strong>その人は全員の額を知ります。
+          信頼の一点集中が残るだけで、問題は消えていません。
+        </p>
+        <p>
+          <strong>案 2: 順番に足していく。</strong>最初の人が自分の額を言って次に回す——
+          最初の人の額が 2 人目に丸見えです。
+        </p>
+        <p>
+          欲しいのは「<strong>誰も他人の値を知らないまま、全員が結果だけを得る</strong>」仕組み。
+          これが MPC（Multi-Party Computation、秘密計算）です。
+        </p>
+      </div>
+
+      <div class="callout">
+        <p class="eyebrow">Week 1 とのつながり</p>
+        <p class="strong-line">
+          MPC も ZK も、計算を<b>算術回路</b>に翻訳してから暗号をかけます。
+        </p>
+        <p>
+          違うのは組み方です。ZK は<b>検証の形</b>——prover が答えを主張し、回路は嘘を禁じるだけ。
+          MPC は<b>計算の形</b>——主張してくれる人がいないので、値そのものを計算します。
+        </p>
+        <p>
+          そして Week 1 で見た「<b>コストは乗算の数で決まる</b>」が、MPC でもそのまま成り立ちます。
+          <strong>ただし理由はまったく別</strong>で、そこが今週の山場です。
+        </p>
+        <p>
+          公式課題は <code>toy-mpc</code>。前半（Part A）が数の乗算を Beaver 三つ組で、
+          後半（Part B）がビットの AND を紛失通信（OT）で解きます。
+          <b>このノートの構成はその対比に合わせてあります。</b>
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の地図</p>
+      <ol class="toc" id="toc-old"></ol>
+    </div>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>Shamir の秘密分散 — 1 行ずつ追う</summary>
+<!-- ============================================ 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">中核</p>
+      <h2>Shamir の秘密分散 — 1 行ずつ追う</h2>
+      <p>アイデアは中学校で習った 1 つの事実だけです。そこから積み上げます。</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>出発点は「2 点で直線が 1 本に決まる」</h4>
+        <div class="body">
+          <p>
+            平面に点が 2 つあれば、その両方を通る直線はただ 1 本です。
+            逆に<strong>点が 1 つだけなら、そこを通る直線は無数にあります</strong>。
+          </p>
+          <p class="why">
+            <b>この非対称がすべてです。</b> 2 つ集めれば決まる。1 つでは何も決まらない。
+            <b>「決まらない」を「分からない」に使う</b>のが秘密分散の発想です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>秘密を「直線の切片」に隠す</h4>
+        <div class="body">
+          <p>
+            秘密の値を <code>s</code> とします。乱数 <code>a</code> を 1 つ用意して、次の直線を作ります。
+          </p>
+          <p class="subst">f(x) = s + a·x</p>
+          <p>
+            ここで <code>x = 0</code> を入れると <code>f(0) = s + a·0 = s</code>。
+            <strong>秘密は「x = 0 のときの値」として埋め込まれています。</strong>
+          </p>
+          <p class="why">
+            <b>なぜ x = 0 に置くのか:</b> 配るのは <code>x = 1, 2, 3, …</code> の値だけにするためです。
+            <b>0 番の値だけは誰にも渡さない</b>。だから直線が復元できて初めて秘密にたどり着きます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>各人に「直線上の 1 点」を配る</h4>
+        <div class="body">
+          <p>
+            参加者 1 には <code>f(1)</code>、参加者 2 には <code>f(2)</code>、参加者 3 には <code>f(3)</code> を渡す。
+            この値を<strong>シェア</strong>と呼びます。
+          </p>
+          <p>
+            計算はすべて有限体 F_p の上で行います（Week 1 と同じ世界です）。
+            以下では見やすさのため <code>p = 11</code> を使います。
+          </p>
+          <p class="why">
+            <b>なぜ有限体なのか:</b> 実数のままだと、シェアの大きさから秘密の大きさが推測できてしまいます
+            （切片が大きければ値も大きい、など）。mod p で巻いてしまえば<b>大小の手がかりが消えます</b>。
+            Week 1 で見た「順序が存在しない」性質が、ここでは<b>利点として</b>効いています。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>実際に数字で作ってみる</h4>
+        <div class="body">
+          <p>秘密 <code>s = 3</code>、乱数 <code>a = 5</code>、<code>p = 11</code> とします。</p>
+          <p class="subst">
+            f(x) = 3 + 5x　（mod 11）<br><br>
+            f(1) = 3 + 5 = 8<br>
+            f(2) = 3 + 10 = 13 = 11 + 2 → <b>2</b><br>
+            f(3) = 3 + 15 = 18 = 11 + 7 → <b>7</b>
+          </p>
+          <p>
+            配るのは <code>8</code>, <code>2</code>, <code>7</code> の 3 つ。
+            <strong>どれも秘密の 3 とは似ても似つかない数字</strong>です。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>2 人集まれば復元できる</h4>
+        <div class="body">
+          <p>参加者 1（x=1, y=8）と参加者 2（x=2, y=2）が集まったとします。</p>
+          <p class="subst">
+            傾き a = (y₂ − y₁) ÷ (x₂ − x₁) = (2 − 8) ÷ (2 − 1) = −6 ÷ 1 = −6 = <b>5</b>　（mod 11）<br><br>
+            切片 s = y₁ − a·x₁ = 8 − 5·1 = <b>3</b> ✓
+          </p>
+          <p class="why">
+            <b>−6 がなぜ 5 なのか:</b> mod 11 の世界では <code>−6 + 11 = 5</code>。
+            Week 1 でやった「引き算は逆元を足すこと」がここでも効いています。
+            <b>割り算も同じで、÷1 は 1 の逆数 1 を掛けること</b>。
+            もし分母が 1 でなければ、逆数を求めてから掛けます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>1 人では、秘密は何でもありうる</h4>
+        <div class="body">
+          <p>
+            参加者 1 だけが <code>y = 8</code> を持っているとします。この人にとって、
+            <strong>秘密 s は 0 から 10 のどれでもありえます</strong>。
+          </p>
+          <p class="subst">
+            s = 0 なら a = 8（0 + 8·1 = 8 ✓）<br>
+            s = 1 なら a = 7（1 + 7·1 = 8 ✓）<br>
+            s = 2 なら a = 6（2 + 6·1 = 8 ✓）<br>
+            …… 11 通りすべてに、辻褄の合う a が 1 つずつ存在する
+          </p>
+          <p class="why">
+            <b>これが「情報がゼロ」の正確な意味です。</b>
+            シェアを見る前の推測（11 通りが等確率）と、見た後の推測がまったく同じ。
+            <b>1 ビットも減っていない</b>。「解読が難しい」ではなく「<b>原理的に不可能</b>」です。
+            下のラボで実際に 11 通り全部を並べて確認できます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>閾値は次数で決まる</h4>
+        <div class="body">
+          <p>
+            直線（次数 1）なら 2 点で決まりました。放物線（次数 2）なら 3 点必要です。
+            一般に<strong>次数 t の多項式は t+1 点で決まる</strong>。
+          </p>
+          <p class="subst">
+            f(x) = s + a₁x + a₂x² + … + a_t x^t　→　復元に必要な人数は <b>t + 1</b>
+          </p>
+          <p class="why">
+            <b>設計の自由度がここにあります。</b> 「5 人中 3 人集まれば復元できる」なら次数 2 を使う。
+            <b>t 人以下では、さっきと同じ理屈で情報がゼロ</b>のままです。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>加法的秘密分散 — 足して戻る、いちばん単純な分け方</summary>
+<!-- ============================================ 3.5 : additive sharing -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">課題で使った形</p>
+      <h2>加法的秘密分散 — 足して戻る、いちばん単純な分け方</h2>
+      <p>
+        Shamir は「n 人中 t+1 人で復元」という閾値が選べる高機能版です。
+        課題 <code>toy-mpc</code> が使うのは、もっと単純な<strong>加法的秘密分散</strong>——
+        <strong>全員そろわないと戻らない</strong>代わりに、作り方が足し算だけで済みます。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          秘密 <code>s</code> を n 人に分けるには、<strong>乱数を n−1 個</strong>引いて、
+          それをそのまま最初の n−1 人のシェアにします。最後の 1 人だけが帳尻を合わせます。
+        </p>
+        <p class="subst">
+          share₁ = r₁, …, shareₙ₋₁ = rₙ₋₁<br>
+          shareₙ = s − (r₁ + … + rₙ₋₁)　(mod p)
+        </p>
+        <p>
+          復元は全シェアの合計。<code>p = 67</code> で <code>s = 42</code> を乱数
+          <code>[5, 11]</code> で分けると、シェアは <code>[5, 11, 26]</code>
+          （<code>42 − 16 = 26</code>）。足せば <code>42</code> に戻ります。
+        </p>
+        <p>
+          「n−1 人では情報ゼロ」の理屈は Shamir とまったく同じです。
+          手元のシェアがどんな値でも、<strong>どんな秘密とも辻褄の合う「残り 1 枚」が必ず存在する</strong>ので、
+          候補は 1 つも減りません。
+        </p>
+      </div>
+
+      <div class="callout amber">
+        <p class="eyebrow">実測 — 正規化を忘れると採点器に落とされる</p>
+        <p class="strong-line">
+          シェアは 0..p−1 に丸めた「体の元」でなければいけません。
+        </p>
+        <p>
+          <code>share(-3, [70, -2], 67)</code> の正解は <code>[3, 65, 63]</code>。
+          mod を取らない実装はこう落ちます。
+        </p>
+        <pre>AssertionError:
+Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
+        <p>
+          値としては同じ直線上にあっても、<b>表現がそろっていないと他の関数と噛み合いません</b>。
+          Week 1 で「体の元として正規化する」と言っていたことが、ここで初めて実務の制約になります。
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">どちらを使うか</p>
+      <p class="strong-line">閾値が要るなら Shamir、全員参加でよいなら加法的。</p>
+      <p>
+        これから見る Beaver 乗算はどちらの上でも同じ形で動きます。課題が加法的を選んだのは、
+        <b>MPC の本質（何を公開してよいか）に集中するため</b>に、復元の仕組みを最小にしたからです。
+      </p>
+    </div>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>なぜ加算は無料なのか</summary>
+<!-- ============================================ 4 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">性質</p>
+      <h2>なぜ加算は無料なのか</h2>
+      <p>ここから MPC の本題です。まず「タダでできること」から。</p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          2 つの秘密 <code>s</code> と <code>s'</code> を、それぞれ別の直線に隠したとします。
+        </p>
+        <p class="subst">
+          f(x) = s + a·x　　g(x) = s' + b·x
+        </p>
+        <p>
+          参加者 <code>i</code> は <code>f(i)</code> と <code>g(i)</code> を持っています。
+          <strong>この 2 つを手元で足してみます。</strong>
+        </p>
+        <p class="subst">
+          f(i) + g(i)<br>
+          = (s + a·i) + (s' + b·i)<br>
+          = (s + s') + (a + b)·i
+        </p>
+        <p>
+          いま出てきた式を <code>h(x) = (s+s') + (a+b)·x</code> と置くと、
+          これはちょうど <code>h(i)</code> です。
+        </p>
+        <p>
+          つまり<strong>各自が手元で足しただけで、「s + s' を秘密とする直線」のシェアになっている</strong>。
+          誰とも通信していません。
+        </p>
+      </div>
+
+      <div class="stack-sm">
+        <div class="callout">
+          <p class="eyebrow">確かめる</p>
+          <p class="strong-line">s = 3（f = 3 + 5x）と s' = 4（g = 4 + 2x）、p = 11</p>
+          <p class="subst" style="color:var(--ink);">
+            参加者 1: f(1)=8, g(1)=6　→ 8 + 6 = 14 = <b>3</b><br>
+            参加者 2: f(2)=2, g(2)=8　→ 2 + 8 = 10 = <b>10</b><br><br>
+            この 2 点 (1,3), (2,10) から復元すると……<br>
+            傾き = (10−3) ÷ (2−1) = 7<br>
+            切片 = 3 − 7·1 = −4 = <b>7</b><br><br>
+            そして s + s' = 3 + 4 = <b>7</b> ✓
+          </p>
+        </div>
+        <div class="callout">
+          <p class="eyebrow">定数倍も同じ理由でタダ</p>
+          <p>
+            <code>c·f(i) = c·s + c·a·i</code> なので、<b>秘密を c 倍した直線のシェア</b>になります。
+            引き算も定数倍（−1 倍）と加算の組み合わせなので無料です。
+          </p>
+          <p class="strong-line">
+            <b>線形なことは、全部ローカルで完結する。</b>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>なぜ乗算だけ高いのか</summary>
+<!-- ============================================ 5 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">壁</p>
+      <h2>なぜ乗算だけ高いのか</h2>
+      <p>同じことを掛け算でやると、途中で破綻します。どこで破綻するのかを式で見ます。</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>掛けてみると、答え自体は合っている</h4>
+        <div class="body">
+          <p>参加者 <code>i</code> が手元で <code>f(i) · g(i)</code> を計算します。</p>
+          <p class="subst">
+            f(i)·g(i) = (s + a·i)(s' + b·i)<br>
+            = s·s' + (s·b + s'·a)·i + (a·b)·i²
+          </p>
+          <p>
+            これを <code>h(x) = s·s' + (sb + s'a)·x + (ab)·x²</code> と置けば、
+            確かに <code>h(i)</code> です。<b>そして h(0) = s·s'</b> —— 欲しかった積が切片に入っています。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>しかし、次数が 1 から 2 に上がっている</h4>
+        <div class="body">
+          <p>
+            <code>h(x)</code> には <code>x²</code> の項があります。<strong>直線ではなく放物線</strong>です。
+          </p>
+          <p class="why">
+            <b>何が困るのか:</b> 次数 1 なら 2 人で復元できました。次数 2 は <b>3 人</b>必要です。
+            掛け算するたびに必要人数が増えていく。
+            <b>2 回掛ければ次数 4、3 回で次数 8</b> —— すぐに参加者の人数を超え、<b>誰も復元できなくなります</b>。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>もう 1 つの問題 — 乱数が足りない</h4>
+        <div class="body">
+          <p>
+            <code>h(x)</code> の係数を見ると、<code>x</code> の係数は <code>s·b + s'·a</code>、
+            <code>x²</code> の係数は <code>a·b</code> です。
+          </p>
+          <p class="why">
+            <b>元の乱数 a, b から作られていて、独立ではありません。</b>
+            本来なら 2 つの係数はそれぞれ独立な乱数であってほしいのに、
+            <code>a·b</code> は <code>a</code> と <code>b</code> に縛られている。
+            <b>ここから情報が漏れる余地が生まれます。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>だから「次数を戻す」作業が要る</h4>
+        <div class="body">
+          <p>
+            次数 2 になった多項式を、<strong>秘密は同じまま次数 1 に作り直す</strong>必要があります
+            （degree reduction）。そして<b>この作業は 1 人ではできません</b>——
+            自分のシェアしか持っていないからです。
+          </p>
+          <p class="why">
+            <b>これが通信の正体です。</b> 加算は各自の手元で閉じるのに、乗算は参加者どうしのやりとりが要る。
+            <b>MPC のコストが乗算の数で決まるのは、この 1 点に尽きます。</b>
+          </p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout amber">
+      <p class="eyebrow">Week 1 と同じ結論、まったく違う理由</p>
+      <p class="strong-line">
+        ZK でも MPC でも「コストは乗算の数で決まる」。でも理由は別物です。
+      </p>
+      <p>
+        <b>ZK（R1CS 系）:</b> 乗算ゲート 1 個が制約 1 本になるから。加算は式の中に畳み込めて行を消費しない。
+      </p>
+      <p>
+        <b>MPC:</b> 加算は手元で閉じるが、乗算は次数が倍になって<b>通信が発生する</b>から。
+      </p>
+      <p>
+        <strong>同じ「回路」を使い、同じ指標でコストを測るのに、痛みの中身が違う。</strong>
+        Week 1 のノートで「3 方式は真ん中の回路を共有する」と書いたことの、具体的な現れ方がこれです。
+      </p>
+    </div>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>Beaver 三つ組 — 重い部分を前もって済ませる</summary>
+<!-- ============================================ 6 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">技法</p>
+      <h2>Beaver 三つ組 — 重い部分を前もって済ませる</h2>
+      <p>
+        乗算の通信は消せません。ですが<strong>「いつやるか」はずらせます</strong>。
+        Week 6 の <code>co-snark-prove</code> で実装するのがこれです。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>前処理で、掛け算済みの乱数を用意しておく</h4>
+        <div class="body">
+          <p>
+            まだ何を計算するか決まっていない暇な時間に、次を満たす 3 つの乱数を作ります。
+          </p>
+          <p class="subst">a, b はランダム　　c = a · b</p>
+          <p>
+            そして <code>a</code>, <code>b</code>, <code>c</code> を<strong>それぞれ秘密分散して配ります</strong>。
+            <b>値そのものは誰も知りません</b>。知っているのは「c = a·b という関係があること」だけ。
+          </p>
+          <p class="why">
+            <b>ここがポイント:</b> 掛け算という重い作業を、<b>入力が来る前に</b>済ませてしまう。
+            この 3 つ組を <b>Beaver 三つ組</b> と呼びます。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>本番では、隠したまま 2 つの値を公開する</h4>
+        <div class="body">
+          <p>
+            秘密 <code>x</code> と <code>y</code> の積を計算したくなりました。まず次の 2 つを計算して<strong>公開</strong>します。
+          </p>
+          <p class="subst">d = x − a　　e = y − b</p>
+          <p>
+            引き算はさっき見たとおり無料なので、シェアのまま計算できます。
+          </p>
+          <p class="why">
+            <b>公開して大丈夫なのか:</b> 大丈夫です。<code>a</code> は誰も知らない乱数なので、
+            <code>d = x − a</code> は<b>ランダムな値にしか見えません</b>。
+            Week 1 の言葉で言えば、乱数で撹乱されている状態。<b>x は漏れません。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>すると積が、足し算だけで書ける</h4>
+        <div class="body">
+          <p>
+            <code>d = x − a</code> を移項すると <code>x = d + a</code>、同様に <code>y = e + b</code>。
+            これを掛けて展開します。
+          </p>
+          <p class="subst">
+            x · y = (d + a)(e + b)<br>
+            = d·e + d·b + a·e + a·b<br>
+            = d·e + d·b + a·e + <b>c</b>　　<span style="color:var(--muted)">（a·b = c だった）</span>
+          </p>
+          <p>
+            右辺を見てください。<code>d</code> と <code>e</code> は<strong>公開済みの普通の数</strong>。
+            <code>a</code>, <code>b</code>, <code>c</code> は<strong>シェアとして持っている</strong>。
+          </p>
+          <p class="why">
+            <b>つまり右辺は「公開された定数」×「シェア」の足し算だけ</b>です。
+            <code>d·b</code> は b のシェアを d 倍するだけ、<code>a·e</code> は a のシェアを e 倍するだけ。
+            <b>定数倍と加算は無料</b>でした。
+            <b>秘密どうしの掛け算が、1 つも残っていません。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>結果として何が起きたか</h4>
+        <div class="body">
+          <p>
+            乗算 1 回に必要だった「次数を戻す通信」が、<strong>d と e を公開する 1 往復</strong>に置き換わりました。
+            重い前処理は、入力が来る前に終わっています。
+          </p>
+          <p class="why">
+            <b>これが MPC の実装で最初に出てくる工夫です。</b>
+            前処理と本番を分ける設計はこの分野の定石で、
+            <b>Week 6 の <code>co-snark-prove</code> は、まさにこの Beaver 乗算を実装する課題</b>です。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>採点器が守らせる、Beaver の 3 つの掟（壊した実測）</summary>
+<!-- ============================================ 6.5 : breaking beaver -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">壊してみる</p>
+      <h2>採点器が守らせる、Beaver の 3 つの掟</h2>
+      <p>
+        課題の採点器は「積が合っているか」だけを見ていません。
+        <strong>わざと壊した実装を 3 通り作って通した結果</strong>がこれです。
+        どれも「何を買っている制約なのか」が失敗の形に出ます。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>掟 1 — 公開項 d·e を足すのは、代表 1 人だけ</h4>
+        <div class="body">
+          <p>
+            <code>x·y = c + d·b + e·a + d·e</code> のうち、<code>c</code>, <code>b</code>, <code>a</code> は
+            シェアとして分散されています。でも <code>d·e</code> は<strong>公開値どうしの積、ただの数</strong>です。
+            全員が自分のシェアに足すと、復元時に人数分カウントされます。
+          </p>
+          <pre><span class="c"># d·e を全 party に足した壊れ版（3 party, p = 67）</span>
+AssertionError: 57 != 41   <span class="c"># (n−1)·d·e = 2·d·e だけ余る</span></pre>
+          <p class="why">
+            <b>シェアと公開値は「足し方」が違う。</b>シェアは全員が成分ごとに、
+            公開値は代表 1 人（party 0）だけが足す。この区別が曖昧なままだと、
+            復元して初めて壊れていたと分かります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>掟 2 — 開いてよいのは d と e の 2 回だけ</h4>
+        <div class="body">
+          <p>
+            いちばん面白い壊れ方です。<code>d = x − a</code> を「x を開いて、a を開いて、引く」と実装しても、
+            <strong>積の値のテストは全部通ります</strong>。落ちるのはこれだけ。
+          </p>
+          <pre>test_fixed_share_vector ................. ok
+test_products_for_two_and_three_parties . ok
+test_opens_exactly_the_two_masked_differences ... <b>FAIL</b>
+AssertionError: 4 != 2   <span class="c"># 開示回数が 2 回ではない</span></pre>
+          <p class="why">
+            <b>「答えが正しい」と「開きすぎていない」は別の性質。</b>採点器は reconstruct の呼び出しを数えて、
+            <b>マスク済みの d, e 以外を開いたら落とします</b>。MPC の正しさは出力だけでは測れない——
+            <b>実行中に何を公開したか</b>まで含めてプロトコルです。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>掟 3 — 三つ組は 1 乗算 1 回限り</h4>
+        <div class="body">
+          <p>
+            同じ <code>a</code> で 2 つの秘密を隠すと、攻撃者は<strong>ネットワーク上の公開値だけ</strong>から
+            差を復元できます。実測（p = 67, x₁ = 12, x₂ = 55, 同じ a = 29）:
+          </p>
+          <pre>公開値: d₁ = 50, d₂ = 26
+攻撃者: d₁ − d₂ = 24 (mod 67)
+真の値: x₁ − x₂ = 12 − 55 = −43 = <b>24</b> (mod 67)  ← 一致</pre>
+          <p class="why">
+            <b>d = x − a が安全なのは、a がワンタイムパッドだから。</b>2 回使えば
+            <code>d₁ − d₂ = x₁ − x₂</code> で a が消え、秘密どうしの関係が丸見えになります。
+            前処理で三つ組を「乗算の回数分」用意する理由がこれです。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>XOR シェアと、AND という壁</summary>
+<!-- ============================================ 8 : boolean mpc -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ビットの世界へ</p>
+      <h2>XOR シェアと、AND という壁</h2>
+      <p>
+        ここまでは数（有限体の元）の話でした。課題の Part B は<strong>ビット</strong>を扱います。
+        構図は驚くほど同じです。
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="prose">
+        <p>
+          ビット <code>x</code> の XOR シェアは <code>x = x₀ ⊕ x₁</code> となる 2 ビットの組。
+          乱数 <code>m</code> を引いて <code>(m, x ⊕ m)</code> と分ければ、
+          <strong>片方だけ見ても x は 50:50 のまま</strong>です。
+        </p>
+        <p>
+          XOR は手元で完結します。<code>(x₀ ⊕ y₀, x₁ ⊕ y₁)</code> を作れば
+          <code>x ⊕ y</code> のシェアになる——加法的シェアの「加算は無料」と同じ理屈です
+          （XOR は mod 2 の加算そのものです）。
+        </p>
+        <p>
+          壁は AND です。展開してみると:
+        </p>
+        <p class="subst">
+          x·y = (x₀ ⊕ x₁)(y₀ ⊕ y₁)<br>
+          = x₀y₀ ⊕ <b>x₀y₁</b> ⊕ <b>x₁y₀</b> ⊕ x₁y₁
+        </p>
+        <p>
+          <code>x₀y₀</code> は P0 が、<code>x₁y₁</code> は P1 が手元で計算できます。
+          でも<strong>クロス項 x₀y₁ と x₁y₀ は、どちらの手元にも材料がそろっていません</strong>。
+          乗算で次数が上がったのと同じ場所に、同じ形の壁が現れます。
+        </p>
+      </div>
+
+      <div class="callout amber">
+        <p class="eyebrow">実測 — クロス項をサボると、そこだけ落ちる</p>
+        <p class="strong-line">
+          「各自が自分のシェアだけ AND する」壊れ版は、混合シェアの組合せだけ失敗します。
+        </p>
+        <pre>gmw_and (x_shares=(0, 0), ...) ... ok
+gmw_and (x_shares=(0, 1), y_shares=(1, 0)) <b>FAIL</b>
+gmw_and (x_shares=(1, 0), y_shares=(0, 1)) <b>FAIL</b>
+gmw_and (x_shares=(1, 1), y_shares=(1, 0)) <b>FAIL</b>
+AssertionError: 0 != 1</pre>
+        <p>
+          <b>失敗の分布が原因を指しています。</b>両方のシェアが同じ側に寄っている組は
+          クロス項が 0 なので偶然通る。<b>1 が割れて入った組だけ</b>、
+          x₀y₁ / x₁y₀ の欠落が答えに出ます。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>紛失通信（OT）— 選んだことを知られずに、1 つだけ受け取る（分布の実測）</summary>
+<!-- ============================================ 9 : OT -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">道具</p>
+      <h2>紛失通信（OT）— 選んだことを知られずに、1 つだけ受け取る</h2>
+      <p>
+        クロス項 <code>x₀y₁</code> を計算するには「P1 の y₁ に応じて、P0 の持つ 2 つの値のどちらかを渡す」
+        必要があります。ただし <strong>P0 に y₁ を知られてはいけないし、P1 に両方渡してもいけない</strong>。
+        この綱渡りを実現するのが 1-out-of-2 OT です。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>約束は 2 つ — sender は選択を知らない、receiver は片方しか読めない</h4>
+        <div class="body">
+          <p>
+            sender は 2 通のメッセージ <code>m₀</code>, <code>m₁</code> を差し出す。
+            receiver は選択ビット <code>choice</code> で 1 通だけ受け取る。
+          </p>
+          <p class="why">
+            <b>普通の通信では両立しません。</b>どちらが欲しいか言えば sender に選択が漏れ、
+            両方もらえば receiver が読みすぎる。暗号で「開けられない封筒」を作って初めて両立します。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>トイ構成 — Diffie–Hellman の応用（p = 23, g = 2, 位数 q = 11）</h4>
+        <div class="body">
+          <p>
+            sender は秘密 <code>a</code> から <code>A = g^a</code> を公開。
+            receiver は秘密 <code>b</code> を引いて、<strong>request B の作り方を choice で変えます</strong>。
+          </p>
+          <p class="subst">
+            choice = 0 → B = g^b<br>
+            choice = 1 → B = A·g^b
+          </p>
+          <p>
+            sender は 2 つの鍵を <code>K₀ = B^a</code>, <code>K₁ = (B/A)^a</code> と導出して
+            それぞれのメッセージを暗号化。receiver の鍵は常に <code>A^b = g^{ab}</code> です。
+          </p>
+          <p class="why">
+            <b>choice = 0 なら K₀ = (g^b)^a = g^{ab} が一致し、choice = 1 なら K₁ = (A·g^b/A)^a = g^{ab} が一致する。</b>
+            選んだ側の封筒だけが開き、もう一方の鍵を得るには離散対数を解く必要があります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>b は 0 を含めて選ぶ — 1 点欠けるだけで選択が漏れる</h4>
+        <div class="body">
+          <p>
+            課題の仕様に「receiver secret b は <strong>0..q−1</strong> から選ぶ」とあります。
+            0 を除いて 1..q−1 にすると何が起きるか、request の分布を全部数えました。
+          </p>
+          <div class="table-scroll"><table class="data">
+            <tr><th>b の範囲</th><th>choice = 0 の request 集合</th><th>choice = 1 の request 集合</th></tr>
+            <tr><td>0..10（正）</td><td>部分群の 11 要素すべて</td><td>部分群の 11 要素すべて（同一）</td></tr>
+            <tr class="here"><td>1..10（誤）</td><td>1 が出ない</td><td>8 (= A) が出ない</td></tr>
+          </table></div>
+          <p class="why">
+            <b>request = 8 を見たら choice = 0 と確定、request = 1 なら choice = 1 と確定。</b>
+            「一様分布が choice によらず同じ」という性質は、範囲が 1 点欠けるだけで壊れます。
+            仕様の端の値には、たいてい理由があります。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>実測 — choice を無視した request は、選んだ側の半分だけ壊す</h4>
+        <div class="body">
+          <p>
+            request を常に <code>B = g^b</code> にした壊れ版では、choice = 0 の復号は全部成功し、
+            choice = 1 だけがゴミを返します。
+          </p>
+          <pre>choice=0 ... ok（全部成功）
+choice=1: AssertionError: b'\xc2\x97\xc1W\xb7' != b'right'</pre>
+          <p class="why">
+            <b>B に A を織り込むのは receiver の仕事</b>で、それをして初めて sender 側の
+            K₁ = (B/A)^a と鍵が揃う。「どちらの封筒が開くか」は request の作り方が決めています。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+</details>
+<details class="appx"><summary>GMW の AND — OT を 2 回で、クロス項を運ぶ</summary>
+<!-- ============================================ 10 : GMW -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">組み立て</p>
+      <h2>GMW の AND — OT を 2 回で、クロス項を運ぶ</h2>
+      <p>
+        道具がそろいました。クロス項 1 つにつき OT を 1 回。対称なので 2 回で AND が完成します。
+      </p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h4>セッション 01 — P0 が sender、P1 が y₁ で選ぶ</h4>
+        <div class="body">
+          <p>
+            P0 は乱数マスク <code>r₀₁</code> を引き、2 通のメッセージを用意します。
+          </p>
+          <p class="subst">
+            m₀ = r₀₁　　m₁ = r₀₁ ⊕ x₀
+          </p>
+          <p>
+            P1 が <code>y₁</code> を choice にして OT すると、受け取る値は
+            <code>t₀₁ = r₀₁ ⊕ x₀·y₁</code>（y₁ = 0 なら m₀、1 なら m₁——ちょうどこの式になります）。
+          </p>
+          <p class="why">
+            <b>クロス項 x₀y₁ が「r₀₁ で焼き付けられた形」で P1 に渡りました。</b>
+            P1 が見るのはマスク済みの 1 ビットだけなので x₀ は漏れない。
+            P0 は OT の約束で y₁ を知らない。<b>誰も何も知らないまま、項だけが移動しています。</b>
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>セッション 10 — 役割を入れ替えてもう 1 回</h4>
+        <div class="body">
+          <p class="subst">
+            P1 が sender: m₀ = r₁₀, m₁ = r₁₀ ⊕ x₁　　P0 が y₀ で選ぶ → t₁₀ = r₁₀ ⊕ x₁·y₀
+          </p>
+          <p class="why">
+            <b>採点器は OT の実行回数も数えています</b>（2 回でなければ落ちる）。
+            クロス項は 2 つ、OT も 2 つ。1 回で済ませる近道はここにはありません。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>出力 — 手持ちの材料を全部 XOR するだけ</h4>
+        <div class="body">
+          <p class="subst">
+            z₀ = x₀y₀ ⊕ r₀₁ ⊕ t₁₀　　（P0 の手元にある材料だけ）<br>
+            z₁ = x₁y₁ ⊕ r₁₀ ⊕ t₀₁　　（P1 の手元にある材料だけ）
+          </p>
+          <p>
+            XOR すると、マスクがペアで消えます。
+          </p>
+          <p class="subst">
+            z₀ ⊕ z₁ = x₀y₀ ⊕ x₁y₁ ⊕ <s>r₀₁</s> ⊕ (<s>r₀₁</s> ⊕ x₀y₁) ⊕ <s>r₁₀</s> ⊕ (<s>r₁₀</s> ⊕ x₁y₀)<br>
+            = x₀y₀ ⊕ x₀y₁ ⊕ x₁y₀ ⊕ x₁y₁ = <b>x·y</b> ✓
+          </p>
+          <p class="why">
+            <b>Beaver の d·e と同じく、マスクは「入れた人が自分の側で打ち消す」設計です。</b>
+            r₀₁ は P0 が入れて P0 の z₀ で消える。打ち消しの場所を間違えると、
+            復元して初めて壊れていたと分かる——数の世界とまったく同じ教訓です。
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+</details>
     </div>
   </div>
 </section>
@@ -1674,7 +2113,7 @@ choice=1: AssertionError: b'\xc2\x97\xc1W\xb7' != b'right'</pre>
   if (!toc) return;
   var heads = document.querySelectorAll(".band-head h2");
   Array.prototype.forEach.call(heads, function (h, i) {
-    if (h.closest("#toc")) return;
+    if (h.closest("#toc") || h.closest(".appx")) return;
     var section = h.closest(".band");
     if (!section) return;
     if (i === 0) return;                 // 「出発点」自身は目次に載せない

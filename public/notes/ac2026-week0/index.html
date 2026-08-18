@@ -360,6 +360,43 @@
 
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
+
+  /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+  .deck { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
+        display: flex; flex-direction: column; gap: 0.55rem; }
+  .sl-head { display: flex; gap: 0.75rem; align-items: baseline; }
+  .sl-head .sn { font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; }
+  .sl-head .st { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .sl-claim { font-weight: 700; font-size: 1rem; line-height: 1.7; color: var(--ink); }
+  .sl p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .sl p.sl-claim { color: var(--ink); font-size: 1rem; }
+  .sl pre { background: var(--panel-2); font-size: var(--fs-xs); }
+  .sl-hw { border-left: 3px solid var(--pass); padding-left: 0.75rem; }
+  .sl-hw b { color: var(--pass); }
+  .sl-q { color: var(--accent); }
+  .exs { border: 1px dashed var(--line-strong); border-radius: var(--r-md); padding: 1rem 1.1rem 0.6rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.5rem; }
+  .exs .eyebrow { color: var(--free); }
+  .ex { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); }
+  .ex > summary { cursor: pointer; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); color: var(--ink); line-height: 1.6; }
+  .ex > summary:hover { color: var(--accent); }
+  .ex > pre { border: none; border-top: 1px solid var(--line); border-radius: 0; }
+  .appx { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: 0.6rem; }
+  .appx > summary { cursor: pointer; padding: 0.8rem 1rem; font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .appx > summary:hover { color: var(--accent); }
+  .appx .band { padding: 0.5rem 0 1.5rem; }
+  .appx .band + .band { border-top: none; }
+  table.hwmap td, table.hwmap th, table.gloss td, table.gloss th { white-space: normal; }
+  table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
+  table.gloss td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  #glossary .note-title { margin-top: 0.5rem; }
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -380,18 +417,16 @@
     <p class="eyebrow">Advanced Cryptography Program 2026 / Week 0 自習ノート</p>
     <h1>有限体と<span>楕円曲線</span></h1>
     <p class="lead">
-      Week 0 は土台編です。扱うのは <strong>mod 演算・群環体・逆元・離散対数問題</strong>——
-      どれも「暗号の前に済ませておく数学」に見えて、実際には
-      <strong>Week 1 以降でつまずく場所そのもの</strong>です。
+      Week 1〜4 のノートに出てくる数学の言葉（mod、体、逆元、位数、楕円曲線、離散対数）を、
+      <strong>1 カード = 主張 1 つ</strong>、数は mod 7・11・13 だけで並べた土台編です。
+      各カードに「どの週で効くか」を付けてあります。
     </p>
     <p class="lead">
-      Week 1 の算術回路は F_p 上に組み、Week 2 の秘密分散も Beaver 三つ組も F_p 上で動き、
-      Week 3 は楕円曲線という<strong>もう一つの群</strong>の上に Schnorr を建てます。
-      <strong>前提はここに全部あります。</strong>単独で読めるように書いたので、
-      他の週で「これは何だったか」と思ったらここに戻ってきてください。
+      章ごとの「やってみる」を紙で解いてから答えを開いてください。法を切り替えて零因子と逆元を見る電卓と、
+      曲線の全点を並べて巡回させるラボ、検問クイズはそのまま残してあります。
     </p>
     <div class="meta-row">
-      <span class="tag">読了 35 分</span>
+      <span class="tag">カード 18 枚・演習 13 問</span>
       <span class="tag">対話ラボ 2 つ</span>
       <span class="tag">検問クイズ 6 分野</span>
       <span class="tag">Week 1〜3 の前提</span>
@@ -400,6 +435,556 @@
   </div>
 </header>
 
+<!-- ============================================ 0 : 出発点 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点</p>
+      <h2>土台編は、Week 1〜4 で使う数学だけを、カード 1 枚 = 主張 1 つで</h2>
+      <p>
+        この週には講義スライドがありません。代わりに、Week 1〜4 のノートに出てくる数学の言葉（mod、体、逆元、位数、楕円曲線、離散対数）を、
+        <strong>中学・高校の数学のどこから来たか</strong>を先に言ってから 1 枚ずつ並べます。数は mod 7・11・13 だけ。
+        「どの週で効くか」のタグで、その道具がどこで使われるかを毎回示します。
+      </p>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み方</p>
+        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。章の終わりの<b>「やってみる」</b>は紙と鉛筆で。答えは開くまで隠れています。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">この編の 1 行</p>
+        <p><b>暗号がほしいのは「四則が全部できて、有限で、大小の手がかりが無く、片方向だけ簡単な」数の世界。</b>それが有限体 F_p と、その上の楕円曲線です。この 4 つの性質を 1 枚ずつ確かめます。</p>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D1 : 余りの世界 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">土台 1 / mod — 余りの世界</p>
+      <h2>普通の整数では困る。余りだけを見る世界に閉じ込める</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">1</span><span class="st">普通の整数では、なぜ暗号にならないのか</span></div>
+        <p class="sl-claim">整数には大小がある（近い数を試せば手がかりになる）、無限にある（計算が終わらない・大きさが漏れる）、逆算が簡単（2x = 10 → x = 5）。暗号がほしいのは「四則が全部できて、有限で、大小の手がかりが無く、片方向だけ簡単な」世界。</p>
+        <p class="sl-q">Q. 「秘密 x を 2 倍した値」を見せると、普通の整数では何が起きるか。（2 で割れば x）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">2</span><span class="st">mod — 時計の世界。余りだけを見る</span></div>
+        <pre>13 時 = 1 時（12 で割った余り）。 mod 7 なら {0, 1, 2, 3, 4, 5, 6} の 7 個だけ
+5 + 6 = 11 = 7 + 4 → 4      3 · 5 = 15 = 14 + 1 → 1      「余りが等しい」を ≡ で書く: 15 ≡ 1 (mod 7)</pre>
+        <p class="sl-hw"><b>どの週で効くか</b>: 全部。Week 1 の信号の値、Week 2 の share、Week 3 の座標（mod p）とスカラー（mod n）、Week 4 の多項式の係数。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">3</span><span class="st">足し算表と掛け算表 — 7 個の点を巡る輪</span></div>
+        <pre>mod 7 の「3 を掛ける」: 0→0, 1→3, 2→6, 3→2, 4→5, 5→1, 6→4     ← 0 以外は 1〜6 を 1 回ずつ通る（並べ替えになる）
+mod 7 の「+6」: 0→6, 1→0, 2→1, …                                  ← 輪を 6 個進む = 1 個戻る</pre>
+        <p class="sl-q">Q. mod 7 で 3 を掛けると 1〜6 が並べ替わるのに、mod 6 で 2 を掛けるとどうなるか。（次の章。0, 2, 4 しか出ない）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">4</span><span class="st">引き算と負の数 — 「足して 0 になる相手」を足す</span></div>
+        <pre>−3 (mod 7) は「3 を足すと 0 になる数」= 4（3 + 4 = 7 ≡ 0）。   −5 ≡ 2、 −1 ≡ 6
+だから 2 − 5 = 2 + 2 = 4 (mod 7)。 負の数が出てきたら 7 を足して 0..6 に直す（宿題の「正規化」）</pre>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 2 の share（−5 のまま返すと落ちる）、Week 3 の逆元（拡張ユークリッドの x が負）。</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">mod 7 の計算</h3>
+      <details class="ex"><summary>問 1. mod 7 で 4 + 5、4 · 5、2 − 6、−5 はそれぞれ何か。</summary><pre>4 + 5 = 9 = 7 + 2 → 2　　4 · 5 = 20 = 14 + 6 → 6　　2 − 6 = −4 → −4 + 7 = 3　　−5 → 2（5 + 2 = 7 ≡ 0）</pre></details>
+      <details class="ex"><summary>問 2. mod 7 で「5 を掛ける」を 1〜6 に施すと何が出るか。全部違う数になるか。</summary><pre>5, 10≡3, 15≡1, 20≡6, 25≡4, 30≡2 → {5, 3, 1, 6, 4, 2}。全部違う（並べ替え）。
+「掛けて 1 になる相手」も表に出ている: 5 · 3 = 15 ≡ 1 → 5⁻¹ = 3。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D2 : 何が使えるか -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">土台 2 / 群・環・体、零因子、逆元</p>
+      <h2>「何が使えるか」の階層 — 法が素数だと割り算まで使える</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">5</span><span class="st">群・環・体 — 使える演算の階層</span></div>
+        <pre>群（group）: 演算が 1 つ。閉じている・単位元・逆元・結合法則           例: mod 7 の足し算、楕円曲線の点の足し算
+環（ring） : 足し算と掛け算がある。割り算はできるとは限らない            例: 整数、mod 6
+体（field）: 足し算・引き算・掛け算・割り算が全部できる                 例: 有理数、mod 7（素数）</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 暗号で「体」と言ったら「割り算ができる」の宣言。ドイツ語 Körper（体）の直訳で、体育の体ではない。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">6</span><span class="st">零因子 — mod 6 では 2·3 = 0。だから法は素数</span></div>
+        <pre>mod 6: 2 · 3 = 6 ≡ 0     0 でない 2 つを掛けて 0 になる（零因子）
+→ 2x = 4 (mod 6) の解は x = 2 と x = 5 の 2 つ。「2 で割る」が決まらない = 割り算が壊れる
+mod 7（素数）: 0 以外の積は 0 にならない → ax = b は必ずただ 1 つの解 → 割り算ができる（体）</pre>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 1〜4 全部の p が素数である理由。Week 3 宿題の p = 1009、n = 967 も素数。</p>
+        <p class="sl-q">Q. mod 8 で零因子の組を 1 つ挙げよ。（2·4 = 8 ≡ 0）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">7</span><span class="st">逆元 — 「掛けて 1 になる相手」の 3 つの求め方</span></div>
+        <pre>小 6: 割り算は逆数を掛けること。 余りの世界には分数が無いが「掛けて 1 になる相手」= 逆元 a⁻¹ がいる（法が素数なら 0 以外の全員に）
+求め方 ① 総当たり:      5 · ? ≡ 1 (mod 11) → 5·1=5, 5·2=10, …, 5·9=45=44+1 → 5⁻¹ = 9
+求め方 ② フェルマー:    a^{p−1} ≡ 1 なので a^{p−2} が逆元。5⁹ mod 11 = 9（Python の pow(5, 9, 11)）
+求め方 ③ 拡張ユークリッド: 互除法を逆にたどる。13 = 2·5 + 3, 5 = 1·3 + 2, 3 = 1·2 + 1 → 1 = 2·13 − 5·5 → 5⁻¹ ≡ −5 ≡ 8 (mod 13)</pre>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 3 宿題 <code>field_inv</code>（③、x が負なら % p）。Week 2 の Shamir 復元の割り算。Week 4 の多項式の割り算。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">8</span><span class="st">有限体には「大小」がない</span></div>
+        <p class="sl-claim">mod 7 で 6 は「大きい」か？ 6 ≡ −1 でもある。輪の上には始点も向きも無いので、「a &lt; b」が定義できない。だから比較・範囲チェック（20 歳以上）は暗号の中では重い（Week 2 の「比較は重い」、Week 3 の「20 歳以上を開けるだけでは示せない」）。</p>
+        <p class="sl-hw"><b>覚える 1 点</b>: 大小が無いのは欠点ではなく目的（大きさが手がかりにならない）。必要なときはビットに分解して比較する。</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">零因子と逆元</h3>
+      <details class="ex"><summary>問 1. mod 8 で 2x = 4 の解をすべて求めよ。mod 7 で 2x = 4 の解は？</summary><pre>mod 8: x = 2, 6（2·6 = 12 ≡ 4）。2 つある → 「2 で割る」が決まらない。
+mod 7: x = 2 だけ（2⁻¹ = 4 なので x = 4·4 = 16 ≡ 2）。素数なら解は 1 つ。</pre></details>
+      <details class="ex"><summary>問 2. mod 11 で 3⁻¹ を総当たりで。そして 3x = 7 を解け。</summary><pre>3·4 = 12 ≡ 1 → 3⁻¹ = 4。 x = 4·7 = 28 = 22 + 6 → 6。検算 3·6 = 18 ≡ 7 ✓</pre></details>
+      <details class="ex"><summary>問 3. mod 13 で 4⁻¹ を拡張ユークリッドで。</summary><pre>13 = 3·4 + 1 → 1 = 13 − 3·4 → 4·(−3) ≡ 1 → −3 ≡ 10。検算 4·10 = 40 = 39 + 1 ✓</pre></details>
+      <details class="ex"><summary>問 4. フェルマーの小定理を確かめよ: 3⁶ mod 7 と 5¹² mod 13。</summary><pre>3⁶ = 729 = 104·7 + 1 → 1。 5¹² mod 13 も 1（順に 5, 12, 8, 1, 5, 12, 8, 1, … で 4 回ごとに 1、12 は 4 の倍数）。
+→ a^{p−1} ≡ 1、だから a^{p−2} は逆元。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D3 : 巡回 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">土台 3 / 位数と生成元</p>
+      <h2>掛け続けると一周して戻る — 何回で戻るかが位数</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">9</span><span class="st">巡回群と生成元 — F₇* は 3 で全部巡れる</span></div>
+        <pre>3¹=3, 3²=2, 3³=6, 3⁴=4, 3⁵=5, 3⁶=1 (mod 7)   6 回で 1〜6 が全部出て 1 に戻る → 3 は生成元、位数 6
+2¹=2, 2²=4, 2³=1                              3 回で戻る → 2 の位数は 3、生成元ではない（{1, 2, 4} しか出ない）</pre>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 3 の G の位数 n = 967（967·G = O）と「スカラーは mod n」。Week 4 の ω（位数 4 の 1 の根、ω⁴ = 1）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">10</span><span class="st">位数は p − 1 の約数 — フェルマーの小定理の言い換え</span></div>
+        <p class="sl-claim">a^{p−1} ≡ 1 なので、どの元も p − 1 回以内で 1 に戻る。戻る回数（位数）は p − 1 の約数。F₇* なら位数は 1, 2, 3, 6 のどれか（上の例: 3 は 6、2 は 3、6 は 2）。</p>
+        <p class="sl-q">Q. F₇* で位数 2 の元は？（6 = −1。(−1)² = 1）</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">位数（mod 7）</h3>
+      <details class="ex"><summary>問 1. F₇* で 4 と 5 の位数を求めよ。生成元はどれか。</summary><pre>4: 4, 16≡2, 8≡1 → 位数 3。 5: 5, 25≡4, 20≡6, 30≡2, 10≡3, 15≡1 → 位数 6（生成元）。
+生成元は 3 と 5。位数はすべて 6 の約数（1, 2, 3, 6）。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D4 : 楕円曲線 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">土台 4 / 楕円曲線</p>
+      <h2>点の集合に「足し算」を定義すると、もう 1 つの群ができる</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">11</span><span class="st">曲線の点 — mod p で y² = x³ + ax + b を満たす (x, y)</span></div>
+        <pre>y² = x³ + 2x + 3 (mod 7) の点を全部探す（x, y を 0〜6 で総当たり）:
+  (2, 1), (2, 6), (3, 1), (3, 6), (6, 0)  の 5 個 + 無限遠点 O = 6 個
+  検算 (3, 1): 左 1² = 1、右 27 + 6 + 3 = 36 = 35 + 1 → 1 ✓</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 「曲線」と言っても mod p では点がぱらぱら散るだけ。式を満たす点の集合、と読む。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">12〜13</span><span class="st">点の足し算 — 直線・3 つ目の交点・反転。式は中 2 と数 II</span></div>
+        <pre>P + Q := 「P, Q を通る直線が曲線と交わる 3 つ目の点を、x 軸で反転した点」
+λ = (y₂ − y₁)/(x₂ − x₁)（弦、中 2 の傾き）  P = Q なら λ = (3x₁² + a)/(2y₁)（接線、数 II の微分）
+x₃ = λ² − x₁ − x₂（数 II: 3 次方程式の解と係数の関係）,  y₃ = λ(x₁ − x₃) − y₁（反転）    ÷ は逆元を掛ける
+
+上の曲線で (2, 1) + (3, 1): λ = (1 − 1)/(3 − 2) = 0 → x₃ = 0 − 2 − 3 = −5 ≡ 2, y₃ = 0·(2 − 2) − 1 = −1 ≡ 6 → (2, 6)
+2·(2, 1): λ = (3·4 + 2)/(2·1) = 14/2 = 7 ≡ 0 → x₃ = 0 − 4 ≡ 3, y₃ = 0 − 1 ≡ 6 → (3, 6)</pre>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 3 宿題 <code>ec_add</code>（4 場合分け）。「y 座標を反転する」を忘れると群にならない。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">14</span><span class="st">群になる — O が 0 の役、−P = (x, −y)</span></div>
+        <p class="sl-claim">O（無限遠点）が足し算の単位元、P の逆元は y を反転した (x, −y)、そして結合法則が成り立つ（証明は重いが事実として使う）。だから「点を k 回足す」が意味を持ち、位数も定義できる。上の曲線は 6 点なので (2, 1) を 6 回足すと O。</p>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 3 の <code>ec_scalar_mul(n, G) = None</code>。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">15</span><span class="st">スカラー倍と double-and-add — 2 進法で回数を log にする</span></div>
+        <pre>13·P = 8P + 4P + P（13 = 1101₂）。 P → 2P → 4P → 8P と倍にして 3 回、足し算 2 回。素直にやると 12 回。
+256 ビットの k でも 512 回以内。逆に「k·P から k を求める」は次のカード。</pre>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 3 宿題 <code>ec_scalar_mul</code>（divmod で下の桁から）。</p>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">小さい曲線 y² = x³ + 2x + 3 (mod 7)</h3>
+      <details class="ex"><summary>問 1. (6, 0) は曲線上か。(1, 1) は？</summary><pre>(6, 0): 左 0、右 216 + 12 + 3 = 231 = 33·7 → 0 ✓ 曲線上。
+(1, 1): 左 1、右 1 + 2 + 3 = 6 ≠ 1 → 曲線上にない。</pre></details>
+      <details class="ex"><summary>問 2. (2, 1) + (2, 6) は何か。理由も。</summary><pre>x が同じで y が符号違い（1 + 6 = 7 ≡ 0）→ 直線が垂直で 3 つ目の交点が無い → O（無限遠点）。(2, 6) は (2, 1) の逆元。</pre></details>
+      <details class="ex"><summary>問 3. 2·(2, 1) = (3, 6) だった。3·(2, 1) = (3, 6) + (2, 1) を計算せよ。</summary><pre>λ = (1 − 6)/(2 − 3) = (−5)/(−1) = 5 (mod 7)。 x₃ = 25 − 3 − 2 = 20 ≡ 6, y₃ = 5·(3 − 6) − 6 = −21 ≡ 0 → (6, 0)
+検算: (6, 0) は問 1 で曲線上。y = 0 なので 2·(6, 0) = O、つまり 6·(2, 1) = O — 6 個の点を全部巡った。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D5 : 離散対数 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">土台 5 / 離散対数</p>
+      <h2>「戻れない」の正体 — 小さければ表で戻せる、大きいと戻せない</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">16</span><span class="st">離散対数 — 2^x ≡ 6 (mod 11) の x は？</span></div>
+        <pre>表を作る: 2¹=2, 2²=4, 2³=8, 2⁴=5, 2⁵=10, 2⁶=9, 2⁷=7, 2⁸=3, 2⁹=6 ← ここ, 2¹⁰=1  →  x = 9
+mod 11 なら 10 個試せば終わる。mod が 256 ビットなら 2²⁵⁶ 個 — 終わらない。「対数（何乗したか）」の離散版</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 速い向き x → 2^x（double-and-add）と、難しい向き 2^x → x（総当たりしかない）。この非対称が全部の土台。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">17</span><span class="st">楕円曲線版 — x·G から x を求めるのが難しい</span></div>
+        <p class="sl-claim">「掛け算」の代わりに「点を足す」に置き換えただけで同じ構造: x → x·G は速く、x·G → x は難しい。ハッシュと同じ見方（m → H(m) は速く、逆は難しい）。楕円曲線のほうが同じ安全性を短い鍵で出せるので、Bitcoin も Ethereum もこちら。</p>
+        <p class="sl-hw"><b>どの週で効くか</b>: Week 3 の公開鍵 P = x·G と封筒 R = r·G（見せても x, r が漏れない理由）。Week 4 の KZG（τ を知らずに τ·P だけ配れる理由）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">18</span><span class="st">この土台が、どの週で効くか</span></div>
+        <pre>Week 1  信号の値は F_p の元。「= 0 の式」の計算は全部 mod p
+Week 2  share は mod p の足し算。Beaver の掛け算。OT は g^a, g^r（離散対数）
+Week 3  座標は mod p、スカラーは mod n。楕円曲線の足し算・倍算。Schnorr は離散対数の難しさの上
+Week 4  多項式の係数は F_p。ω は位数 n の元。KZG は楕円曲線 + ペアリング</pre>
+      </article>
+    </div>
+    <div class="exs">
+      <p class="eyebrow">やってみる — 紙と鉛筆で。答えは開くまで隠れる</p>
+      <h3 class="note-title">離散対数（mod 11）</h3>
+      <details class="ex"><summary>問 1. 2^x ≡ 3 (mod 11) の x は？ 上の表を使ってよい。</summary><pre>表から 2⁸ = 256 = 23·11 + 3 → x = 8。</pre></details>
+      <details class="ex"><summary>問 2. 「x·G を見せても x が漏れない」と「H(m) を見せても m が漏れない」の共通点と違いは？</summary><pre>共通: 片方向（順は速く、逆は難しい）。
+違い: x·G は足し算と相性がよい（(a + b)·G = a·G + b·G）ので、隠したまま計算・検証できる（Week 3 の s·G = R + e·P）。
+ハッシュには演算の構造が無いので、封筒（コミット）にはなるが「隠したまま計算」はできない。</pre></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ GLOSSARY -->
+<section class="band" id="glossary">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語集</p>
+      <h2>用語の意味・なぜその言葉か・どの週で使うか</h2>
+    </div>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>どの週で</th></tr></thead><tbody>
+      <tr><td>mod／法（modulus）</td><td>p で割った余りだけを見る</td><td>modulus = 尺度・基準。「p を基準に」</td><td>全部</td></tr>
+      <tr><td>合同 ≡</td><td>余りが等しい</td><td>「同じ形」。図形の合同と同じ字</td><td>全部</td></tr>
+      <tr><td>正規化</td><td>値を 0..p−1 の代表に直す</td><td>normalize = 標準形にする</td><td>W2 share、W3 逆元</td></tr>
+      <tr><td>群（group）</td><td>演算 1 つで閉じ、単位元・逆元・結合法則を持つ集合</td><td>数学者ガロアの用語（1830 年頃）</td><td>W3 曲線の点</td></tr>
+      <tr><td>環（ring）</td><td>足し算と掛け算がある集合。割り算は保証しない</td><td>ドイツ語 Zahlring（数の環）から</td><td>mod 6 など</td></tr>
+      <tr><td>体（field）</td><td>四則が全部できる集合</td><td>ドイツ語 Körper（体）の直訳。英語は field（分野・場）</td><td>全部（F_p）</td></tr>
+      <tr><td>零因子</td><td>0 でないのに掛けて 0 になる元</td><td>「0 の因数」。法が合成数のとき現れる</td><td>法が素数である理由</td></tr>
+      <tr><td>単位元</td><td>演算しても相手を変えない元（足し算の 0、掛け算の 1、点の O）</td><td>identity = 恒等</td><td>W3 の O</td></tr>
+      <tr><td>逆元</td><td>演算して単位元になる相手（−a、a⁻¹、−P）</td><td>inverse = 逆</td><td>W3 field_inv</td></tr>
+      <tr><td>位数（order）</td><td>元の場合: 何回で単位元に戻るか。群の場合: 元の個数</td><td>order = 順序・数。両方の意味で使うので注意</td><td>W3 の n、W4 の ω</td></tr>
+      <tr><td>生成元（generator）</td><td>繰り返すだけで群の全員を作れる元</td><td>generate = 生む</td><td>W3 の G</td></tr>
+      <tr><td>巡回群</td><td>生成元 1 個で全部が作れる群</td><td>cyclic = 一周する</td><td>W3</td></tr>
+      <tr><td>フェルマーの小定理</td><td>a^{p−1} ≡ 1 (mod p)</td><td>Fermat（人名、1640 年）。「大定理」と区別して「小」</td><td>逆元の求め方 ②</td></tr>
+      <tr><td>拡張ユークリッド</td><td>互除法を逆にたどって a·x + p·y = 1 の x を出す</td><td>Euclid（人名、紀元前 300 年）。互除法 = 互いに割って余りを取る</td><td>W3 extended_gcd</td></tr>
+      <tr><td>楕円曲線</td><td>y² = x³ + ax + b の点の集合 + O</td><td>曲線は楕円ではない。楕円の弧の長さの積分（楕円積分）の研究から出た名前</td><td>W3</td></tr>
+      <tr><td>無限遠点 O</td><td>点の足し算の単位元。「垂直な直線が交わる先」</td><td>infinity = 無限遠</td><td>W3 の None</td></tr>
+      <tr><td>スカラー倍</td><td>点を k 回足す k·P</td><td>scalar = ただの数（点やベクトルに対して）</td><td>W3 ec_scalar_mul</td></tr>
+      <tr><td>double-and-add</td><td>2 進法で倍にしながら足す。回数が log になる</td><td>「倍にして、足す」そのまま</td><td>W3</td></tr>
+      <tr><td>離散対数</td><td>g^x（k·G）から x を求める問題。難しい</td><td>log = 何乗したか。飛び飛び（離散）の世界の log</td><td>W2 OT、W3、W4 KZG</td></tr>
+      <tr><td>一方向（one-way）</td><td>順は速く、逆は難しい</td><td>—</td><td>ハッシュ、離散対数</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<!-- ============================================ 5 : LAB A -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ A</p>
+      <h2>法を切り替えて、零因子と逆元を目で見る</h2>
+      <p>
+        法 <code>p</code> を選ぶと、その世界の<strong>乗法表</strong>が描かれます。
+        <strong>積が 0 になったマスは赤</strong>、<strong>積が 1 になったマス（逆元のペア）は緑</strong>。
+        <strong>合成数（6, 9, 12）を選ぶと赤が現れ、素数（7, 11, 13）を選ぶと消えます。</strong>
+        それが「なぜ素数か」の答えそのものです。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>世界の設定</h3><span class="eyebrow" id="fl-badge">p = 7</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>法 p</span><span class="hint">素数と合成数が混ざっている</span></div>
+            <div class="segments" id="fl-p" role="group" aria-label="法 p"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>元 a</span><span class="hint">逆元を 3 通りで求める</span></div>
+            <div class="segments" id="fl-a" role="group" aria-label="元 a"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>各元の逆元</span><span class="hint">赤 = 逆元を持たない</span></div>
+            <div class="candidates" id="fl-inv"></div>
+          </div>
+          <p class="caption" id="fl-invnote">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="fl-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="fl-note">—</p>
+          <div>
+            <p class="eyebrow" style="margin-bottom:0.35rem;">零因子（0 でない 2 つを掛けて 0 になる組）</p>
+            <div class="candidates" id="fl-zd"></div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="stack-sm">
+            <p class="eyebrow">乗法表 — 縦 a × 横 b</p>
+            <div class="mul-wrap" id="fl-mul"></div>
+            <div class="legend">
+              <span><span class="sw z"></span>積が 0（0 を掛けた行と列を除く ＝ 零因子）</span>
+              <span><span class="sw o"></span>積が 1（互いに逆元）</span>
+            </div>
+          </div>
+
+          <div class="stack-sm">
+            <p class="eyebrow">逆元を 3 通りで求める（同じ答えに着地するか）</p>
+            <div class="method-grid" id="fl-methods"></div>
+          </div>
+
+          <div class="stack-sm">
+            <p class="eyebrow">拡張ユークリッドの中身</p>
+            <pre id="fl-work">—</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">見てほしいこと 1</p>
+        <p class="strong-line">合成数の表には、赤いマスが必ず現れる。</p>
+        <p>
+          <code>p = 6</code> なら <code>2·3</code> と <code>3·4</code> が 0。
+          <code>p = 9</code> なら <code>3·3</code>、<code>3·6</code>、<code>6·6</code>。
+          <code>p = 12</code> にいたっては赤だらけです。
+          <b>赤が 1 つでもあれば、その世界では割り算が定義できません。</b>
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">見てほしいこと 2</p>
+        <p class="strong-line">素数の表では、各行にちょうど 1 つだけ緑がある。</p>
+        <p>
+          「各行に 1 つ」＝<b>すべての元にちょうど 1 つの逆元がある</b>。
+          <b>零因子が消えることと、逆元が全員に行き渡ることが、同じ表の裏表</b>として見えます。
+          さらに、素数の行はどれも <code>0..p−1</code> の全部を 1 回ずつ含みます
+          （<code>a</code> 倍は全単射）——これも零因子が無いことの言い換えです。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 10 : LAB B -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ B</p>
+      <h2>楕円曲線の点をすべて並べて、巡回させる</h2>
+      <p>
+        小さい曲線なら、点は全部数え上げられます。既定は
+        <code>y² = x³ + x + 6</code> over <code>F₁₁</code>。
+        <strong>生成点 P を選ぶと 1P, 2P, 3P … を辿って O に戻る</strong>ところまで見え、
+        <strong>離散対数を総当たりで解く</strong>ボタンで「小さい群では解けてしまう」ことが確かめられます。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>曲線の設定</h3><span class="eyebrow" id="ec-badge">—</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>法 p</span><span class="hint">体の大きさ</span></div>
+            <div class="segments" id="ec-p" role="group" aria-label="法 p"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>係数 a</span><span class="hint">y² = x³ + ax + b</span></div>
+            <div class="segments" id="ec-a" role="group" aria-label="係数 a"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>係数 b</span><span class="hint">a = b = 0 は特異になる</span></div>
+            <div class="segments" id="ec-b" role="group" aria-label="係数 b"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>生成点 P</span><span class="hint">押すと倍々に辿る</span></div>
+            <div class="segments narrow" id="ec-gen" role="group" aria-label="生成点"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>目標の点 Q</span><span class="hint">Q = kP の k を当てさせる</span></div>
+            <div class="segments narrow" id="ec-target" role="group" aria-label="目標の点"></div>
+          </div>
+          <button class="btn-main" id="ec-solve" type="button">離散対数を総当たりで解く</button>
+          <p class="caption" id="ec-dlog">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="ec-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="ec-note">—</p>
+        </div>
+        <div class="card-body">
+          <div class="stack-sm">
+            <p class="eyebrow">曲線上の全点（横 = x、縦 = y、破線 = 対称軸 y = p/2）</p>
+            <div id="ec-plot"></div>
+            <p class="caption">
+              「x 軸に関して対称」は、mod の世界では <code>y</code> と <code>p − y</code> のペアという意味になります。
+              図では中央の破線に関して対称に見えます。<b>y = 0 の点だけが相方を持たず、線の下端に単独で並びます</b>。
+            </p>
+          </div>
+          <div class="stack-sm">
+            <p class="eyebrow">P の倍々（O に戻るまで）</p>
+            <div class="candidates" id="ec-seq"></div>
+          </div>
+          <div class="stack-sm">
+            <p class="eyebrow">計算の中身</p>
+            <pre id="ec-work">—</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">試してほしい設定 1 — 位数が素数の曲線</p>
+        <p class="strong-line">y² = x³ + x + 6 over F₁₁ は、13 個の点を持つ。</p>
+        <p>
+          13 は素数なので、<b>ラグランジュの定理から、O 以外のどの点も位数 13 の生成元</b>です。
+          どの点を選んでも 13 個全部を巡ります。
+          <b>実用の曲線が「位数が素数（またはほぼ素数）」であることを要求するのは、
+          部分群に閉じこもる点を作らないため</b>です。
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">試してほしい設定 2 — y = 0 の点がある曲線</p>
+        <p class="strong-line">a = 1, b = 0 にすると y² = x³ + x、点は 12 個になる。</p>
+        <p>
+          この曲線には <code>(0, 0)</code> があります。<b>選んで倍々を見てください</b>——
+          <code>2P = O</code> で終わり、位数は 2。
+          ⑦ で予告した「分母 <code>2y</code> が 0 になるので O」が、実際に起きています。
+          <b>位数 12 の群には位数 1, 2, 3, 4, 6, 12 の点が混在します</b>（12 の約数）。
+        </p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">試してほしい設定 3 — 特異曲線</p>
+        <p class="strong-line">a = 0, b = 0 は弾かれる。</p>
+        <p>
+          <code>4·0³ + 27·0² = 0</code> なので滑らかさの条件を満たしません。
+          <code>y² = x³</code> は原点に尖点（カスプ）を持ち、そこで接線が決まらない。
+          <b>「群にならない」ことをラボが拒否として見せます。</b>
+          <code>p = 11</code> では <code>(a,b) = (2,3)</code> も特異です
+          （<code>4·8 + 27·9 = 275 = 25·11 ≡ 0</code>）。
+        </p>
+      </div>
+      <div class="callout">
+        <p class="eyebrow">試してほしい設定 4 — 総当たりの試行回数</p>
+        <p class="strong-line">最悪でも位数と同じ回数で必ず当たる。</p>
+        <p>
+          <code>p = 17</code> の曲線でも試行は数十回です。
+          <b>secp256k1 なら 2²⁵⁶ 通り。</b>
+          1 秒に 10¹² 回試せる機械を 10 億台並べても、宇宙の年齢では終わりません。
+          <b>アルゴリズムは同じ、桁だけが違う。</b>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 11 : QUIZ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">検問クイズ</p>
+      <h2>土台検問 — 手が動くかどうかを試す</h2>
+      <p>
+        読んだだけでは定着しません。ここでは<strong>正規化・逆元・体の判定・群の性質・楕円曲線の加算</strong>を
+        その場で出題します。問題は毎回生成され、<strong>判定は上の 2 つのラボと同じ計算器</strong>が行います。
+        <strong>3 回間違えたら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <!-- ---------- start ---------- -->
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <!-- ---------- play ---------- -->
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <!-- ---------- result ---------- -->
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ APPX -->
+<section class="band" id="appendix">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">付録</p>
+      <h2>深掘り本文 — 各節を開いて読む（旧版の本文）</h2>
+      <p>上のカード列で骨組みが入ったあとで、細部を足したいときに開いてください。逆元 3 方式の演算回数比較、加法公式の導出、「大小がない」の意味、はここにあります。</p>
+    </div>
+    <div>
+<details class="appx"><summary>なぜ「普通の整数」では暗号にならないのか（旧・出発点）</summary>
 <!-- ============================================ 1 : 出発点 -->
 <section class="band">
   <div class="wrap stack">
@@ -474,11 +1059,13 @@
 
     <div>
       <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の地図</p>
-      <ol class="toc" id="toc"></ol>
+      <ol class="toc" id="toc-old"></ol>
     </div>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>mod 演算 — 時計の世界に数を閉じ込める</summary>
 <!-- ============================================ 2 : mod -->
 <section class="band">
   <div class="wrap stack">
@@ -616,6 +1203,8 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>群・環・体 — 「何が使えるか」の階層</summary>
 <!-- ============================================ 3 : 群・環・体 -->
 <section class="band">
   <div class="wrap stack">
@@ -808,6 +1397,8 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>逆元 — 割り算の正体（3 方式の演算回数比較）</summary>
 <!-- ============================================ 4 : 逆元 -->
 <section class="band">
   <div class="wrap stack">
@@ -963,97 +1554,8 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
-<!-- ============================================ 5 : LAB A -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ A</p>
-      <h2>法を切り替えて、零因子と逆元を目で見る</h2>
-      <p>
-        法 <code>p</code> を選ぶと、その世界の<strong>乗法表</strong>が描かれます。
-        <strong>積が 0 になったマスは赤</strong>、<strong>積が 1 になったマス（逆元のペア）は緑</strong>。
-        <strong>合成数（6, 9, 12）を選ぶと赤が現れ、素数（7, 11, 13）を選ぶと消えます。</strong>
-        それが「なぜ素数か」の答えそのものです。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card">
-        <div class="card-head"><h3>世界の設定</h3><span class="eyebrow" id="fl-badge">p = 7</span></div>
-        <div class="card-body">
-          <div class="field">
-            <div class="field-label"><span>法 p</span><span class="hint">素数と合成数が混ざっている</span></div>
-            <div class="segments" id="fl-p" role="group" aria-label="法 p"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>元 a</span><span class="hint">逆元を 3 通りで求める</span></div>
-            <div class="segments" id="fl-a" role="group" aria-label="元 a"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>各元の逆元</span><span class="hint">赤 = 逆元を持たない</span></div>
-            <div class="candidates" id="fl-inv"></div>
-          </div>
-          <p class="caption" id="fl-invnote">—</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="verdict">
-          <div class="banner" id="fl-banner">—</div>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="fl-note">—</p>
-          <div>
-            <p class="eyebrow" style="margin-bottom:0.35rem;">零因子（0 でない 2 つを掛けて 0 になる組）</p>
-            <div class="candidates" id="fl-zd"></div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="stack-sm">
-            <p class="eyebrow">乗法表 — 縦 a × 横 b</p>
-            <div class="mul-wrap" id="fl-mul"></div>
-            <div class="legend">
-              <span><span class="sw z"></span>積が 0（0 を掛けた行と列を除く ＝ 零因子）</span>
-              <span><span class="sw o"></span>積が 1（互いに逆元）</span>
-            </div>
-          </div>
-
-          <div class="stack-sm">
-            <p class="eyebrow">逆元を 3 通りで求める（同じ答えに着地するか）</p>
-            <div class="method-grid" id="fl-methods"></div>
-          </div>
-
-          <div class="stack-sm">
-            <p class="eyebrow">拡張ユークリッドの中身</p>
-            <pre id="fl-work">—</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="split">
-      <div class="callout">
-        <p class="eyebrow">見てほしいこと 1</p>
-        <p class="strong-line">合成数の表には、赤いマスが必ず現れる。</p>
-        <p>
-          <code>p = 6</code> なら <code>2·3</code> と <code>3·4</code> が 0。
-          <code>p = 9</code> なら <code>3·3</code>、<code>3·6</code>、<code>6·6</code>。
-          <code>p = 12</code> にいたっては赤だらけです。
-          <b>赤が 1 つでもあれば、その世界では割り算が定義できません。</b>
-        </p>
-      </div>
-      <div class="callout">
-        <p class="eyebrow">見てほしいこと 2</p>
-        <p class="strong-line">素数の表では、各行にちょうど 1 つだけ緑がある。</p>
-        <p>
-          「各行に 1 つ」＝<b>すべての元にちょうど 1 つの逆元がある</b>。
-          <b>零因子が消えることと、逆元が全員に行き渡ることが、同じ表の裏表</b>として見えます。
-          さらに、素数の行はどれも <code>0..p−1</code> の全部を 1 回ずつ含みます
-          （<code>a</code> 倍は全単射）——これも零因子が無いことの言い換えです。
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>有限体には「大小」がない</summary>
 <!-- ============================================ 6 : 順序がない -->
 <section class="band">
   <div class="wrap stack">
@@ -1143,6 +1645,8 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>位数と生成元 — 群は巡回する</summary>
 <!-- ============================================ 7 : 位数と生成元 -->
 <section class="band">
   <div class="wrap stack">
@@ -1268,6 +1772,8 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>楕円曲線 — 点の集合が群になる（加法公式の導出）</summary>
 <!-- ============================================ 8 : 楕円曲線 -->
 <section class="band">
   <div class="wrap stack">
@@ -1486,6 +1992,8 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>離散対数問題 — 「戻れない」の正体</summary>
 <!-- ============================================ 9 : 離散対数 -->
 <section class="band">
   <div class="wrap stack">
@@ -1597,186 +2105,8 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
-<!-- ============================================ 10 : LAB B -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ B</p>
-      <h2>楕円曲線の点をすべて並べて、巡回させる</h2>
-      <p>
-        小さい曲線なら、点は全部数え上げられます。既定は
-        <code>y² = x³ + x + 6</code> over <code>F₁₁</code>。
-        <strong>生成点 P を選ぶと 1P, 2P, 3P … を辿って O に戻る</strong>ところまで見え、
-        <strong>離散対数を総当たりで解く</strong>ボタンで「小さい群では解けてしまう」ことが確かめられます。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card">
-        <div class="card-head"><h3>曲線の設定</h3><span class="eyebrow" id="ec-badge">—</span></div>
-        <div class="card-body">
-          <div class="field">
-            <div class="field-label"><span>法 p</span><span class="hint">体の大きさ</span></div>
-            <div class="segments" id="ec-p" role="group" aria-label="法 p"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>係数 a</span><span class="hint">y² = x³ + ax + b</span></div>
-            <div class="segments" id="ec-a" role="group" aria-label="係数 a"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>係数 b</span><span class="hint">a = b = 0 は特異になる</span></div>
-            <div class="segments" id="ec-b" role="group" aria-label="係数 b"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>生成点 P</span><span class="hint">押すと倍々に辿る</span></div>
-            <div class="segments narrow" id="ec-gen" role="group" aria-label="生成点"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>目標の点 Q</span><span class="hint">Q = kP の k を当てさせる</span></div>
-            <div class="segments narrow" id="ec-target" role="group" aria-label="目標の点"></div>
-          </div>
-          <button class="btn-main" id="ec-solve" type="button">離散対数を総当たりで解く</button>
-          <p class="caption" id="ec-dlog">—</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="verdict">
-          <div class="banner" id="ec-banner">—</div>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="ec-note">—</p>
-        </div>
-        <div class="card-body">
-          <div class="stack-sm">
-            <p class="eyebrow">曲線上の全点（横 = x、縦 = y、破線 = 対称軸 y = p/2）</p>
-            <div id="ec-plot"></div>
-            <p class="caption">
-              「x 軸に関して対称」は、mod の世界では <code>y</code> と <code>p − y</code> のペアという意味になります。
-              図では中央の破線に関して対称に見えます。<b>y = 0 の点だけが相方を持たず、線の下端に単独で並びます</b>。
-            </p>
-          </div>
-          <div class="stack-sm">
-            <p class="eyebrow">P の倍々（O に戻るまで）</p>
-            <div class="candidates" id="ec-seq"></div>
-          </div>
-          <div class="stack-sm">
-            <p class="eyebrow">計算の中身</p>
-            <pre id="ec-work">—</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="split">
-      <div class="callout">
-        <p class="eyebrow">試してほしい設定 1 — 位数が素数の曲線</p>
-        <p class="strong-line">y² = x³ + x + 6 over F₁₁ は、13 個の点を持つ。</p>
-        <p>
-          13 は素数なので、<b>ラグランジュの定理から、O 以外のどの点も位数 13 の生成元</b>です。
-          どの点を選んでも 13 個全部を巡ります。
-          <b>実用の曲線が「位数が素数（またはほぼ素数）」であることを要求するのは、
-          部分群に閉じこもる点を作らないため</b>です。
-        </p>
-      </div>
-      <div class="callout">
-        <p class="eyebrow">試してほしい設定 2 — y = 0 の点がある曲線</p>
-        <p class="strong-line">a = 1, b = 0 にすると y² = x³ + x、点は 12 個になる。</p>
-        <p>
-          この曲線には <code>(0, 0)</code> があります。<b>選んで倍々を見てください</b>——
-          <code>2P = O</code> で終わり、位数は 2。
-          ⑦ で予告した「分母 <code>2y</code> が 0 になるので O」が、実際に起きています。
-          <b>位数 12 の群には位数 1, 2, 3, 4, 6, 12 の点が混在します</b>（12 の約数）。
-        </p>
-      </div>
-      <div class="callout amber">
-        <p class="eyebrow">試してほしい設定 3 — 特異曲線</p>
-        <p class="strong-line">a = 0, b = 0 は弾かれる。</p>
-        <p>
-          <code>4·0³ + 27·0² = 0</code> なので滑らかさの条件を満たしません。
-          <code>y² = x³</code> は原点に尖点（カスプ）を持ち、そこで接線が決まらない。
-          <b>「群にならない」ことをラボが拒否として見せます。</b>
-          <code>p = 11</code> では <code>(a,b) = (2,3)</code> も特異です
-          （<code>4·8 + 27·9 = 275 = 25·11 ≡ 0</code>）。
-        </p>
-      </div>
-      <div class="callout">
-        <p class="eyebrow">試してほしい設定 4 — 総当たりの試行回数</p>
-        <p class="strong-line">最悪でも位数と同じ回数で必ず当たる。</p>
-        <p>
-          <code>p = 17</code> の曲線でも試行は数十回です。
-          <b>secp256k1 なら 2²⁵⁶ 通り。</b>
-          1 秒に 10¹² 回試せる機械を 10 億台並べても、宇宙の年齢では終わりません。
-          <b>アルゴリズムは同じ、桁だけが違う。</b>
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================ 11 : QUIZ -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">検問クイズ</p>
-      <h2>土台検問 — 手が動くかどうかを試す</h2>
-      <p>
-        読んだだけでは定着しません。ここでは<strong>正規化・逆元・体の判定・群の性質・楕円曲線の加算</strong>を
-        その場で出題します。問題は毎回生成され、<strong>判定は上の 2 つのラボと同じ計算器</strong>が行います。
-        <strong>3 回間違えたら、その回は終了。</strong>
-      </p>
-    </div>
-
-    <div class="card" id="quiz">
-      <!-- ---------- start ---------- -->
-      <div class="quiz-pane" id="quiz-start">
-        <div class="quiz-hero">
-          <p class="eyebrow">検問モードを選ぶ</p>
-          <h3>10 問・ライフ 3</h3>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
-            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
-          </p>
-        </div>
-        <div class="mode-grid" id="mode-grid"></div>
-        <p class="quiz-best" id="quiz-best"></p>
-      </div>
-
-      <!-- ---------- play ---------- -->
-      <div class="quiz-pane" id="quiz-play" hidden>
-        <div class="quiz-bar">
-          <span class="qprog" id="qprog">1 / 10</span>
-          <span class="qcat" id="qcat">—</span>
-          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
-        </div>
-        <div class="qmain">
-          <p class="qtext" id="qtext"></p>
-          <div class="qbody" id="qbody"></div>
-          <div class="choices" id="choices"></div>
-          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
-        </div>
-        <div class="quiz-foot">
-          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
-          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
-        </div>
-      </div>
-
-      <!-- ---------- result ---------- -->
-      <div class="quiz-pane" id="quiz-result" hidden>
-        <div class="rank-box">
-          <span class="rank" id="rank">—</span>
-          <div class="rank-meta">
-            <p class="rank-title" id="rank-title">—</p>
-            <p class="rank-sub" id="rank-sub">—</p>
-          </div>
-        </div>
-        <div class="cat-stats" id="cat-stats"></div>
-        <div class="quiz-foot">
-          <button class="btn-main" id="btn-again" type="button">もう一度</button>
-          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>この土台が、どの週で効くのか（旧・全体像）</summary>
 <!-- ============================================ 12 : 全体像 -->
 <section class="band">
   <div class="wrap stack">
@@ -1842,6 +2172,11 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   </div>
 </section>
 
+
+</details>
+    </div>
+  </div>
+</section>
 
 <footer>
   <div class="wrap">
@@ -2512,7 +2847,7 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
   if (!toc) return;
   var heads = document.querySelectorAll(".band-head h2");
   Array.prototype.forEach.call(heads, function (h, i) {
-    if (h.closest("#toc")) return;
+    if (h.closest("#toc") || h.closest(".appx")) return;
     var section = h.closest(".band");
     if (!section) return;
     if (i === 0) return;                 // 「出発点」自身は目次に載せない
