@@ -345,6 +345,8 @@
   .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
   .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
   .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  .drill-codelabel { font-size: var(--fs-xs); color: var(--muted); margin-top: 0.2rem; }
+  .drill-code { background: var(--panel-2); font-size: var(--fs-xs); border-left: 4px solid var(--accent); }
   /* ---------- スライド追従カード ---------- */
   .deck { display: flex; flex-direction: column; gap: 0.75rem; }
   .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
@@ -454,7 +456,7 @@
   <div class="wrap stack">
     <div class="band-head">
       <p class="eyebrow">対話ドリル — 宿題の 7 問を、1 行ずつ</p>
-      <h2>1 行打って、出た値を貼って、1 文読む</h2>
+      <h2>1 行打って、出た値を貼って、1 文読む — そして、その行を関数にする</h2>
       <p>
         自己チェック 7 問を、<strong>自分の Python で 1 行ずつ打ちながら</strong>進みます。各行に「この行の意味」が付き、
         出た値を貼ると、その値を指して 1〜2 文の解説が開きます。<strong>結果と解説が隣にある</strong>のがこのドリルの作りです。
@@ -475,10 +477,24 @@ python3 -i solution.py        ← 簡易チェックが 10 行出たあと、>>>
     </div>
 
     <div class="card" id="drill-card">
-      <div class="card-head"><h3>ドリル</h3><span class="eyebrow" id="drill-progress">0 / 0</span></div>
-      <div class="drill-body" id="drill-body"></div>
+      <div class="card-head"><h3>ドリル 1 — 7 問を値で確かめる</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
       <div class="drill-foot">
-        <button class="btn-ghost" id="drill-reset" type="button">はじめからやり直す</button>
+        <button class="btn-ghost drill-reset" type="button">はじめからやり直す</button>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 2 の前に — 題意からコードへ行く手順は 1 つだけ</p>
+      <p class="strong-line">題意 → 入出力を 1 行で言う → 手で 1 回やる（REPL） → その行の数字を引数名に置き換えて return → 壊れる入力を試して if を 1 個ずつ足す。</p>
+      <p>場合分けは「先に設計する」ものではなく、「壊れた所に足す 1 行」です。下のドリルは、10 関数のうち 7 つをこの順で組みます。各行の下に <b>「関数の中では、この行がこうなる」</b> が出ます — 打った行と関数の 1 行を並べて見てください。</p>
+    </div>
+
+    <div class="card" id="drill2-card">
+      <div class="card-head"><h3>ドリル 2 — 手で出した行を、そのまま関数にする</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot">
+        <button class="btn-ghost drill-reset" type="button">はじめからやり直す</button>
       </div>
     </div>
   </div>
@@ -4441,12 +4457,71 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
 // ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む） ----
 (function () {
   "use strict";
-  var body = document.getElementById("drill-body");
-  if (!body) return;
-  var STORE = "ac26-w3-drill-step";
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; say.textContent = st.say; step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": " + st.mean)); step.appendChild(mean);
+        if (done) {
+          var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
+          var then = document.createElement("p"); then.className = "drill-then"; then.textContent = st.then; step.appendChild(then);
+          if (st.code) {
+            var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "関数の中では、この行がこうなる:"; step.appendChild(cl);
+            var cp = document.createElement("pre"); cp.className = "drill-code"; cp.textContent = st.code; step.appendChild(cp);
+          }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
 
-  // 1 ステップ = { q: 問番号, say: 打つ前の一言, cmd: 打つ 1 行, mean: この行の意味, out: REPL が返す値（文字列）, then: 値を見てからの 1〜2 文 }
-  var STEPS = [
+  var STEPS1 = [
     // ---- 問 1 ----
     { q: "問 1 — なぜ足したあとに % p を取るのか", say: "まず、余りを取らない普通の足し算。",
       cmd: "(-3 + 1)", mean: "ただの整数の足し算。", out: "-2",
@@ -4529,73 +4604,66 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
     { q: "問 7", say: "メッセージを改ざん。",
       cmd: 'schnorr_verify((376, 128), b"week3!", ((822, 106), 698), TOY)', mean: "同じ署名を、違うメッセージで検証。", out: "False",
       then: "False。e にメッセージが入っているので、1 文字でも変わると e が変わり、検証式が崩れる。— 問 7 の答え: 「検証者（その場でサイコロを振る人）が要らなくなり、会話が 1 通の署名になる。メッセージを e に入れるから改ざんも検知できる」。これで 7 問すべて、自分の手で出した数で説明できました。" }
+  ];;
+
+  // ---- ドリル 2: 手で出した行を、そのまま関数にする ----
+  var STEPS2 = [
+    { q: "field_add — 題意: (a + b) mod p を 0..p−1 で返す", say: "入出力を 1 行で言う: 整数 a, b, p が入って、余りが 1 個出る。手で 1 回。",
+      cmd: "(-3 + 1) % 7", mean: "ドリル 1 で打った行そのもの。", out: "5",
+      then: "この行の −3 を a、1 を b、7 を p に置き換えて return すれば関数。数字を引数名にしただけ。",
+      code: "def field_add(a, b, p):\n    return (a + b) % p        # ← (-3 + 1) % 7 の数字を引数名にした" },
+    { q: "field_add", say: "自分の関数が同じ値を返すか。",
+      cmd: "field_add(-3, 1, 7)", mean: "さっきの手計算を関数で。", out: "5",
+      then: "同じ 5。field_mul も同じ手順（(a * b) % p）。『手で 1 回 → 数字を引数名に → return』が最小単位。" },
+    { q: "field_inv — 題意: a·x ≡ 1 となる x を 0..p−1 で返す。a ≡ 0 なら ValueError", say: "与えられた extended_gcd を手で 1 回。",
+      cmd: "extended_gcd(5, 13)", mean: "(g, x, y) で 5·x + 13·y = g。g が 1 なら x が逆元。", out: "(1, -5, 2)",
+      then: "x = −5。負なので、ドリル 1 の問 1 と同じ『名刺をそろえる』が要る。" },
+    { q: "field_inv", say: "名刺をそろえる。",
+      cmd: "(-5) % 13", mean: "−5 を 0..12 に直す。", out: "8",
+      then: "8。手順は『a を % p で 0..p−1 に → 0 なら ValueError → extended_gcd → x % p』の 4 行。壊れる入力（0）を先に弾くのが 2 行目。",
+      code: "def field_inv(a, p):\n    a %= p                       # 名刺をそろえる\n    if a == 0:                   # 壊れる入力を先に弾く（0 に相手はいない）\n        raise ValueError(...)\n    g, x, _ = extended_gcd(a, p) # 手で打った行\n    return x % p                 # (-5) % 13 → 8 と同じこと" },
+    { q: "field_inv", say: "関数で同じ値か。",
+      cmd: "field_inv(5, 13)", mean: "5 の逆元 mod 13。", out: "8",
+      then: "8。『手で 2 行 → 引数名に → 壊れる入力の if』の形が見えたはず。" },
+    { q: "ec_add — 題意: 曲線上の 2 点の和。まず P == Q（2 倍算）だけ", say: "ドリル 1 で手で組んだ 4 行を、そのまま関数の中身にする。関数で呼んで同じ点が出るか。",
+      cmd: "ec_add((1, 298), (1, 298), TOY)", mean: "P = Q = G の 2 倍算。中身は field_inv → λ → x₃ → y₃ の 4 行。", out: "(818, 800)",
+      then: "(818, 800)。4 行の数字（2·298、1009、3、1、818）を y、p、x、… に置き換えただけ。ここまでが『式の 1 本』。残りは場合分けで、それは『壊れる入力を試して if を足す』で作る。",
+      code: "lam = field_mul(3 * x * x + curve.a, field_inv(2 * y, p), p)   # field_inv(2*298,1009) → 601、field_mul(3, 601, 1009) → 794\nx3  = (lam * lam - x - x) % p                               # (794*794 - 1 - 1) % 1009 → 818\ny3  = (lam * (x - x3) - y) % p                              # (794*(1-818) - 298) % 1009 → 800" },
+    { q: "ec_add — 場合分け 1: P が None だったら", say: "壊れる入力を試す。無限遠点 O（= None）に G を足す。",
+      cmd: "print(ec_add(None, TOY.G, TOY))", mean: "None は『足し算の 0』。0 + G = G になってほしい。print は None 対策。", out: "(1, 298)",
+      then: "(1, 298) = G が返った。式 1 本だけの関数なら None[0] で落ちる。だから『if P is None: return Q』を式より前に 1 行足す。場合分けは設計ではなく、壊れた所への 1 行。",
+      code: "if P is None: return Q      # 壊れる入力 None を試して足した 1 行\nif Q is None: return P" },
+    { q: "ec_add — 場合分け 2: x が同じで y が逆", say: "G と、G の y を反転した (1, 711) を足す（711 = 1009 − 298）。",
+      cmd: "print(ec_add(TOY.G, (1, 711), TOY))", mean: "直線が垂直になる入力。3 つ目の交点が無い。", out: "None",
+      then: "None。この if が無いと、弦の λ の分母 x_Q − x_P = 0 で field_inv(0) が ValueError を投げる。『割れない場所には別の答え（O）がある』を 1 行で。",
+      code: "if x1 == x2 and (y1 + y2) % p == 0: return None   # 垂直 → O。これを λ の計算より前に" },
+    { q: "ec_add — 場合分け 3: P ≠ Q なら弦", say: "最後に普通の 2 点。G + 2G。",
+      cmd: "ec_add(TOY.G, (818, 800), TOY)", mean: "違う 2 点なので λ = (y₂ − y₁)/(x₂ − x₁)。", out: "(851, 516)",
+      then: "(851, 516) = 3G。2 倍算との違いは λ の式 1 行だけ。x₃, y₃ の式は共通。これで ec_add は『式 1 本 + if 3 つ』として読める。",
+      code: "if P == Q: lam = 接線            # (3x² + a) / 2y\nelse:      lam = 弦              # (y2 − y1) / (x2 − x1)   ← 分母は field_inv\nx3 = (lam*lam - x1 - x2) % p ; y3 = (lam*(x1 - x3) - y1) % p" },
+    { q: "ec_scalar_mul — 題意: k·P を速く（k ≈ 2²⁵⁶ でも）", say: "2 進で下の桁から読む道具が divmod。手で 1 回。",
+      cmd: "divmod(123, 2)", mean: "123 を 2 で割った商と余り。余りが最下位ビット、商が『残りの桁』。", out: "(61, 1)",
+      then: "(61, 1)。余り 1 なら『いまの addend を足す』、商 61 を次の k にして続ける。addend は毎回 2 倍。これをループにする。",
+      code: "result, addend = None, P\nwhile k > 0:\n    k, bit = divmod(k, 2)                 # ← divmod(123, 2) → (61, 1)\n    if bit: result = ec_add(result, addend, curve)\n    addend = ec_add(addend, addend, curve)  # 2 倍\nreturn result" },
+    { q: "ec_scalar_mul", say: "関数で 13·G。13 = 1101₂ なので足し算 3 回。",
+      cmd: "ec_scalar_mul(13, TOY.G, TOY)", mean: "double-and-add で 13 倍。", out: "(101, 688)",
+      then: "(101, 688)。素直に 12 回足しても同じ点に着くが、256 ビットでは終わらない。" },
+    { q: "sigma_response — 題意: s = r + e·x mod n", say: "手で 1 回。",
+      cmd: "(456 + 77 * 123) % 967", mean: "r + e·x を n で割った余り。", out: "257",
+      then: "257。数字を引数名にして return。唯一の罠: % は curve.p ではなく curve.n（G を何回足すかの数だから）。",
+      code: "def sigma_response(x, r, e, curve):\n    return (r + e * x) % curve.n     # ← (456 + 77*123) % 967。p ではなく n" },
+    { q: "sigma_verify — 題意: s·G == R + e·P", say: "左辺と右辺はドリル 1 で手で出した 2 行。関数にするだけ。",
+      cmd: "sigma_verify((376, 128), (822, 106), 77, 257, TOY)", mean: "left = s·G、right = R + e·P、left == right。", out: "True",
+      then: "True。『手で 2 行 → 変数に入れて == で返す』。検証式はそれ以上でも以下でもない。",
+      code: "left  = ec_scalar_mul(s, curve.G, curve)                 # ← ec_scalar_mul(257, TOY.G, TOY)\nright = ec_add(R, ec_scalar_mul(e, pubkey, curve), curve)  # ← ec_add((822,106), ec_scalar_mul(77,(376,128),TOY), TOY)\nreturn left == right" },
+    { q: "schnorr_sign — 題意: README の手順 1〜5 をそのまま", say: "手順が箇条書きで書いてある関数は、1 項目 = 1 行。",
+      cmd: 'schnorr_sign(123, b"week3", 456, TOY)', mean: "R = nonce·G → P = x·G → e = H(R,P,m) → s = sigma_response → (R, s)。", out: "((822, 106), 698)",
+      then: "((822, 106), 698)。5 行が README の 5 手順と 1 対 1。『題意 → 入出力 1 行 → 手で 1 回 → 引数名に → 壊れる入力の if』が、この課題の 10 関数すべての作り方です。",
+      code: "R = sigma_commit(nonce, curve)                 # 手順 1\npubkey = ec_scalar_mul(x % curve.n, curve.G, curve)  # 手順 2\ne = challenge_hash(R, pubkey, message, curve.n)      # 手順 3（引数の順番は R, P, m）\ns = sigma_response(x, nonce, e, curve)               # 手順 4\nreturn (R, s)                                        # 手順 5" }
   ];
 
-  var progress = document.getElementById("drill-progress");
-  var reset = document.getElementById("drill-reset");
-  var cur = 0;
-  try { cur = Math.min(parseInt(localStorage.getItem(STORE) || "0", 10) || 0, STEPS.length); } catch (e) {}
-
-  function norm(s) {
-    return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase();
-  }
-  function save() { try { localStorage.setItem(STORE, String(cur)); } catch (e) {} }
-
-  function render() {
-    body.textContent = "";
-    progress.textContent = cur + " / " + STEPS.length + " 行";
-    var lastQ = null;
-    for (var i = 0; i <= cur && i < STEPS.length; i++) {
-      var st = STEPS[i], done = i < cur;
-      var step = document.createElement("div");
-      step.className = "drill-step" + (done ? " done" : " now");
-      if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
-        var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
-      }
-      lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
-      var say = document.createElement("p"); say.className = "drill-say"; say.textContent = st.say; step.appendChild(say);
-
-      var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
-      var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
-      var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
-      (function (c, b) { b.addEventListener("click", function () {
-        if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
-      }); })(st.cmd, copy);
-      cmdRow.appendChild(copy); step.appendChild(cmdRow);
-
-      var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": " + st.mean)); step.appendChild(mean);
-
-      if (done) {
-        var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
-        var then = document.createElement("p"); then.className = "drill-then"; then.textContent = st.then; step.appendChild(then);
-      } else {
-        var form = document.createElement("div"); form.className = "drill-form";
-        var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
-        var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
-        var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
-        var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
-        (function (st, inp, fb) {
-          function check(v) {
-            if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
-              var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
-            else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
-          }
-          ok.addEventListener("click", function () { check(inp.value); });
-          inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
-          run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
-        })(st, inp, fb);
-        form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
-      }
-      body.appendChild(step);
-    }
-    if (cur >= STEPS.length) {
-      var fin = document.createElement("div"); fin.className = "banner ok";
-      fin.textContent = "7 問すべて、自分の手で出した数で説明できました。提出前の自己チェックは完了です。";
-      body.appendChild(fin);
-    }
-  }
-  reset.addEventListener("click", function () { cur = 0; save(); render(); });
-  render();
+  makeDrill("drill-card", "ac26-w3-drill-step", STEPS1, "7 問すべて、自分の手で出した数で説明できました。提出前の自己チェックは完了です。");
+  makeDrill("drill2-card", "ac26-w3-drill2-step", STEPS2, "10 関数の作り方が『手で 1 回 → 引数名に → 壊れる入力の if』で読めました。");
 })();
 
 </script>
