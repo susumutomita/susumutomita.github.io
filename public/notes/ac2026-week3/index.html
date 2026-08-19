@@ -328,6 +328,23 @@
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
 
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
   /* ---------- スライド追従カード ---------- */
   .deck { display: flex; flex-direction: column; gap: 0.75rem; }
   .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
@@ -414,7 +431,7 @@
     <div class="split">
       <div class="callout">
         <p class="eyebrow">読み方</p>
-        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。答えは次のカードか、宿題タグの中にあります。章の終わりの<b>「やってみる」</b>は紙と鉛筆で解いてから答えを開いてください。数はすべて 1 桁〜2 桁です。</p>
+        <p><b>まず下の「対話ドリル」から。</b>自分の Python で 1 行打って、出た値を貼って、1 文読む — を 25 行。宿題の 7 問が、自分の手で出した数で説明できる状態になります。そのあとカード列（スライド順）を上から 1 枚ずつ。カード末尾の <b>Q.</b> に答えられたら次へ。章の終わりの<b>「やってみる」</b>は紙と鉛筆で。</p>
         <p class="strong-line">スライドを横に開いて、同じ番号を見比べながら読むのがいちばん速いです。</p>
       </div>
       <div class="callout amber">
@@ -428,6 +445,41 @@
     <div>
       <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
       <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ DRILL : 対話ドリル -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — 宿題の 7 問を、1 行ずつ</p>
+      <h2>1 行打って、出た値を貼って、1 文読む</h2>
+      <p>
+        自己チェック 7 問を、<strong>自分の Python で 1 行ずつ打ちながら</strong>進みます。各行に「この行の意味」が付き、
+        出た値を貼ると、その値を指して 1〜2 文の解説が開きます。<strong>結果と解説が隣にある</strong>のがこのドリルの作りです。
+        Python を開けないときは「ここで実行」を押せば同じ値が出ます（判定は同じ）。
+      </p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">準備（提出フォルダの中で、1 行ずつ）</p>
+      <pre>cd ~/product/advanced-cryptography-2026/week3/submissions/&lt;github-username&gt;/schnorr-from-scratch/python
+export PYTHONPATH="../../../../problems/schnorr-from-scratch/python/tests:."
+python3 -i solution.py        ← 簡易チェックが 10 行出たあと、>>> が出れば準備完了</pre>
+      <p>
+        <b>この 3 行の意味</b>: 1 行目で提出フォルダへ移動。2 行目で「<code>given.py</code> のある tests と、自分のフォルダ」を Python の探し場所に登録
+        （これをしないと <code>No module named 'given'</code> になる）。3 行目の <code>-i</code> は「ファイルを実行したあと、対話モードに入る」。
+        行頭に空白を入れると <code>IndentationError</code> になるので、貼るときは行頭から。
+      </p>
+    </div>
+
+    <div class="card" id="drill-card">
+      <div class="card-head"><h3>ドリル</h3><span class="eyebrow" id="drill-progress">0 / 0</span></div>
+      <div class="drill-body" id="drill-body"></div>
+      <div class="drill-foot">
+        <button class="btn-ghost" id="drill-reset" type="button">はじめからやり直す</button>
+      </div>
     </div>
   </div>
 </section>
@@ -4385,6 +4437,167 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
 
   showBest();
 })();
+
+// ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む） ----
+(function () {
+  "use strict";
+  var body = document.getElementById("drill-body");
+  if (!body) return;
+  var STORE = "ac26-w3-drill-step";
+
+  // 1 ステップ = { q: 問番号, say: 打つ前の一言, cmd: 打つ 1 行, mean: この行の意味, out: REPL が返す値（文字列）, then: 値を見てからの 1〜2 文 }
+  var STEPS = [
+    // ---- 問 1 ----
+    { q: "問 1 — なぜ足したあとに % p を取るのか", say: "まず、余りを取らない普通の足し算。",
+      cmd: "(-3 + 1)", mean: "ただの整数の足し算。", out: "-2",
+      then: "−2。これは普通の整数の答え。次は同じ式に % 7 を付けます。" },
+    { q: "問 1", say: "同じ式を、7 で割った余りで。",
+      cmd: "(-3 + 1) % 7", mean: "% 7 は「7 で割った余り」。負の数でも 0〜6 のどれかになる。", out: "5",
+      then: "−2 と 5 は mod 7 の世界では同じ数（時計で「2 時間前」と「5 時間後」が同じ針）。% p の仕事は、同じ数の 7 通りの書き方を 0〜6 の 1 つにそろえること — 名刺をそろえている。" },
+    { q: "問 1", say: "大きい数でも同じ。",
+      cmd: "100 % 7", mean: "100 = 14·7 + 2。", out: "2",
+      then: "2。採点器は「期待値 5 と == か」を見るので、あなたの関数が −2 を返すと同じ数なのに落ちる。test_add_normalizes の「正規化」はこの「名刺をそろえる」のこと。— 問 1 の答え: 「% p は、同じ数の別の書き方を 0..p−1 の 1 つに決めるため」。" },
+    // ---- 問 2 ----
+    { q: "問 2 — なぜ 0 だけ逆元が無く、p は素数でなければならないか", say: "逆元 = 「掛けて 1 になる相手」。mod 7 で 3 の相手を総当たりで探します。",
+      cmd: "[3 * k % 7 for k in range(7)]", mean: "k = 0〜6 について 3·k を 7 で割った余りを並べる（Python の内包表記）。", out: "[0, 3, 6, 2, 5, 1, 4]",
+      then: "1 がちょうど 1 回、k = 5 の所にいる（3·5 = 15 = 14 + 1）。だから 3 の逆元は 5。しかも 0〜6 が全部 1 回ずつ出た —「3 を掛ける」は 7 個の数を並べ替えているだけ。" },
+    { q: "問 2", say: "同じことを 0 で。",
+      cmd: "[0 * k % 7 for k in range(7)]", mean: "0·k を 7 で割った余りを並べる。", out: "[0, 0, 0, 0, 0, 0, 0]",
+      then: "全部 0。1 が一度も出ない — 「0 × 何 = 0」なので、0 に「掛けて 1 になる相手」は存在しない。課題の field_inv(0, p) が ValueError を投げる理由はこれだけ。" },
+    { q: "問 2", say: "今度は法を素数でない 6 にして、2 を掛けてみます。",
+      cmd: "[2 * k % 6 for k in range(6)]", mean: "mod 6 で「2 を掛ける」の結果を並べる。", out: "[0, 2, 4, 0, 2, 4]",
+      then: "1 が出ない。0 でない 2 なのに逆元が無い（2·3 = 6 ≡ 0 で「0 でないのに掛けて 0」になる組がいる = 零因子）。法が素数なら 0 以外の全員に相手がいる。— 問 2 の答え: 「0 は何を掛けても 0 で 1 にならない。法が合成数だと 0 以外にも相手のいない数が出るので、素数にする」。" },
+    // ---- 問 3 ----
+    { q: "問 3 — ec_add で y₃ の符号を反転する理由と、垂直な直線のときの答え", say: "ec_add は急に難しく見えますが、中身は Part 1 の関数 4 回です。G = (1, 298) を 2 倍する計算を、1 行ずつ手で組みます。まず接線の傾き λ の分母 2y = 2·298 の逆元。",
+      cmd: "field_inv(2 * 298, 1009)", mean: "「÷ (2y)」は「(2y) の逆元を掛ける」。Part 1 の field_inv をそのまま使う。", out: "601",
+      then: "601。596 × 601 = 358196 = 355·1009 + 1 なので確かに逆元。これで割り算の準備ができた。" },
+    { q: "問 3", say: "接線の傾き λ = (3x² + a) / (2y)。a = 0、x = 1 なので分子は 3。",
+      cmd: "field_mul(3 * 1 * 1, 601, 1009)", mean: "分子 3x² に、さっきの逆元を掛ける = 3 ÷ 596 を mod 1009 でやっている。接線の傾きは数 II の微分（y² = x³ + … を微分して 2y·y′ = 3x²）。", out: "794",
+      then: "λ = 794。傾きが出た。次は x 座標。直線 y = λx + c を曲線に代入すると 3 次方程式になり、3 つの解の和が λ²（解と係数の関係）。2 つは x₁ = x₂ = 1 なので 3 つ目は λ² − 1 − 1。" },
+    { q: "問 3", say: "x₃ = λ² − x₁ − x₂。",
+      cmd: "(794 * 794 - 1 - 1) % 1009", mean: "解と係数の関係で 3 つ目の交点の x を出し、% 1009 で名刺をそろえる。", out: "818",
+      then: "818。3 つ目の交点の x 座標。次は y。直線上の点なら y = y₁ + λ(x₃ − x₁) だが、和はそれを x 軸で反転した点なので符号を返す。" },
+    { q: "問 3", say: "y₃ = λ(x₁ − x₃) − y₁（反転込み）。",
+      cmd: "(794 * (1 - 818) - 298) % 1009", mean: "直線上の y を出して符号を反転 = λ(x₁ − x₃) − y₁。", out: "800",
+      then: "800。つまり 2G = (818, 800)。**field_inv 1 回、field_mul 1 回、整数の式 2 本**で ec_add の 2 倍算ができた。ec_add の関数は、この 4 行に「場合分け 4 つ」を付けただけ。次の行で関数本体が同じ答えを出すことを見ます。" },
+    { q: "問 3", say: "自分の ec_add で G を 2 倍します。",
+      cmd: "ec_add(TOY.G, TOY.G, TOY)", mean: "同じ点どうしなので接線の公式 λ = 3x²/(2y) が使われる。", out: "(818, 800)",
+      then: "(818, 800) = 2G。採点器の期待値と一致。次に、この点が本当に曲線の上にあるかを given の is_on_curve で見ます。" },
+    { q: "問 3", say: "曲線 y² = x³ + 11 (mod 1009) の上にあるか。",
+      cmd: "is_on_curve((818, 800), TOY)", mean: "800² と 818³ + 11 を mod 1009 で比べる。", out: "True",
+      then: "True。では y の符号を反転し忘れた版 — 公式を y₃ = λ(x₃ − x₁) − y₁ と書いてしまうと y が 622 になります — を試します。" },
+    { q: "問 3", say: "反転し忘れた y で同じ検査。",
+      cmd: "is_on_curve((818, 622), TOY)", mean: "(818, 622) が曲線上かどうか。", out: "False",
+      then: "False。反転を忘れると、出てくる点は曲線の上にすら乗らない。採点器の「点が曲線上にありません」はこれ。反転する理由は「直線と曲線の 3 つ目の交点をそのまま和にすると結合法則が成り立たず、足し算にならない」から。" },
+    { q: "問 3", say: "最後に垂直な直線。G と、G の y を反転した点 (1, 1009 − 298) を足します。",
+      cmd: "print(ec_add(TOY.G, (1, 1009 - 298), TOY))", mean: "x が同じで y が符号違いの 2 点。print を付けるのは、None は >>> で何も表示されないから。", out: "None",
+      then: "None = 無限遠点 O。x が同じなので直線は垂直、3 つ目の交点が無い。だから「足し算の 0」を返す。— 問 3 の答え: 「反転しないと群にならず点が曲線から落ちる。垂直なら O（None）」。ec_add の場合分け (2) を (3)(4) より先に書く理由も、ここで分母 x_Q − x_P = 0 で割ろうとしないため。" },
+    // ---- 問 4 ----
+    { q: "問 4 — 123 を 2 進で書いて、ec_add が何回で済むか", say: "Python に 2 進表記を出してもらいます。",
+      cmd: "bin(123)", mean: "123 を 2 進法の文字列にする。", out: "'0b1111011'",
+      then: "1111011₂ — 7 桁で、1 が 6 個。double-and-add は「桁ごとに 2 倍（7 桁なら 6 回）、1 の桁だけ足す（6 回）」なので ec_add は 12 回。素直に G を 123 回足すと 122 回。secp256k1 の 2²⁵⁶ では「素直」は終わらない。" },
+    { q: "問 4", say: "それで本当に同じ点に着くか。",
+      cmd: "ec_scalar_mul(123, TOY.G, TOY)", mean: "自分の double-and-add で 123·G。", out: "(376, 128)",
+      then: "(376, 128)。これが秘密鍵 x = 123 の公開鍵 P。— 問 4 の答え: 「123 = 1111011₂。倍 6 回 + 足し算 6 回 = 12 回」。" },
+    // ---- 問 5 ----
+    { q: "問 5 — s = r + e·x が x を隠す理由と、同じ r を 2 回使うと漏れる理由", say: "秘密 x = 123、乱数 r = 456、チャレンジ e = 77 で応答 s を作ります。",
+      cmd: "sigma_response(123, 456, 77, TOY)", mean: "s = (r + e·x) mod n = (456 + 77·123) mod 967。", out: "257",
+      then: "257。この 1 個の数から x = 123 は出ません — 未知数が 2 個（r と x）で式が 1 本（中 2 の連立方程式: 解けない）。r がランダムで x を覆っている。" },
+    { q: "問 5", say: "同じ r = 456 のまま、別のチャレンジ e = 90 に答えてしまう。",
+      cmd: "sigma_response(123, 456, 90, TOY)", mean: "2 本目の式 s₂ = r + 90·x。", out: "889",
+      then: "889。これで式が 2 本。引き算すると r が消えます: s₁ − s₂ = (77 − 90)·x。次の 1 行で x を解きます。" },
+    { q: "問 5", say: "2 本の式から x を解く（割り算は逆元を掛ける）。",
+      cmd: "(257 - 889) * field_inv(77 - 90, 967) % 967", mean: "x = (s₁ − s₂) · (e₁ − e₂)⁻¹ mod n。", out: "123",
+      then: "123 — 秘密鍵が公開情報だけから出た。採点器の test_nonce_reuse_leaks_secret はまさにこの計算。— 問 5 の答え: 「式 1 本では未知数 2 個を解けないから隠れる。同じ r で 2 本目ができると引き算で r が消えて x が解ける」。nonce = number used once。" },
+    // ---- 問 6 ----
+    { q: "問 6 — 検証者が x なしで s·G = R + e·P を確かめられる理由", say: "検証式の左辺。s = 257 を使う。",
+      cmd: "ec_scalar_mul(257, TOY.G, TOY)", mean: "s·G。使っているのは s と G だけ。", out: "(595, 110)",
+      then: "(595, 110)。次に右辺。R = (822, 106)（= 456·G）、e = 77、P = (376, 128) だけを使います。" },
+    { q: "問 6", say: "検証式の右辺。",
+      cmd: "ec_add((822, 106), ec_scalar_mul(77, (376, 128), TOY), TOY)", mean: "R + e·P。x = 123 はどこにも出てこない。", out: "(595, 110)",
+      then: "左辺と同じ (595, 110)。一致する理由は分配法則: s·G = (r + e·x)·G = r·G + e·(x·G) = R + e·P。— 問 6 の答え: 「右辺は R・e・P（全部公開）だけで計算でき、分配法則で左辺と一致する。x は式を展開したときに消えている」。" },
+    // ---- 問 7 ----
+    { q: "問 7 — e をハッシュにすると何が要らなくなるか", say: "検証者が選んでいた e を、ハッシュに選ばせる。",
+      cmd: 'challenge_hash((822, 106), (376, 128), b"week3", 967)', mean: "e = H(R, P, メッセージ) mod n。検証者のサイコロをハッシュに振らせる。", out: "57",
+      then: "57。誰が計算しても同じ 57 になる（ハッシュは決定的）。だから検証者がその場にいなくてもよい。" },
+    { q: "問 7", say: "その e で署名を作る。",
+      cmd: 'schnorr_sign(123, b"week3", 456, TOY)', mean: "R = 456·G、e = 57、s = 456 + 57·123 mod 967 = 698。返り値は (R, s)。", out: "((822, 106), 698)",
+      then: "((822, 106), 698)。これが署名。3 手の会話が「データ 1 個」になった。" },
+    { q: "問 7", say: "検証。e は受け取らず、自分で計算し直す。",
+      cmd: 'schnorr_verify((376, 128), b"week3", ((822, 106), 698), TOY)', mean: "e = H(R, P, message) を計算し直し、s·G == R + e·P を確かめる。", out: "True",
+      then: "True。最後に、メッセージを 1 文字だけ変えてみます。" },
+    { q: "問 7", say: "メッセージを改ざん。",
+      cmd: 'schnorr_verify((376, 128), b"week3!", ((822, 106), 698), TOY)', mean: "同じ署名を、違うメッセージで検証。", out: "False",
+      then: "False。e にメッセージが入っているので、1 文字でも変わると e が変わり、検証式が崩れる。— 問 7 の答え: 「検証者（その場でサイコロを振る人）が要らなくなり、会話が 1 通の署名になる。メッセージを e に入れるから改ざんも検知できる」。これで 7 問すべて、自分の手で出した数で説明できました。" }
+  ];
+
+  var progress = document.getElementById("drill-progress");
+  var reset = document.getElementById("drill-reset");
+  var cur = 0;
+  try { cur = Math.min(parseInt(localStorage.getItem(STORE) || "0", 10) || 0, STEPS.length); } catch (e) {}
+
+  function norm(s) {
+    return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase();
+  }
+  function save() { try { localStorage.setItem(STORE, String(cur)); } catch (e) {} }
+
+  function render() {
+    body.textContent = "";
+    progress.textContent = cur + " / " + STEPS.length + " 行";
+    var lastQ = null;
+    for (var i = 0; i <= cur && i < STEPS.length; i++) {
+      var st = STEPS[i], done = i < cur;
+      var step = document.createElement("div");
+      step.className = "drill-step" + (done ? " done" : " now");
+      if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+        var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+      }
+      lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+      var say = document.createElement("p"); say.className = "drill-say"; say.textContent = st.say; step.appendChild(say);
+
+      var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+      var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+      var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+      (function (c, b) { b.addEventListener("click", function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+      }); })(st.cmd, copy);
+      cmdRow.appendChild(copy); step.appendChild(cmdRow);
+
+      var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": " + st.mean)); step.appendChild(mean);
+
+      if (done) {
+        var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
+        var then = document.createElement("p"); then.className = "drill-then"; then.textContent = st.then; step.appendChild(then);
+      } else {
+        var form = document.createElement("div"); form.className = "drill-form";
+        var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+        var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+        var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+        var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+        (function (st, inp, fb) {
+          function check(v) {
+            if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+              var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+            else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+          }
+          ok.addEventListener("click", function () { check(inp.value); });
+          inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+          run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+        })(st, inp, fb);
+        form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+      }
+      body.appendChild(step);
+    }
+    if (cur >= STEPS.length) {
+      var fin = document.createElement("div"); fin.className = "banner ok";
+      fin.textContent = "7 問すべて、自分の手で出した数で説明できました。提出前の自己チェックは完了です。";
+      body.appendChild(fin);
+    }
+  }
+  reset.addEventListener("click", function () { cur = 0; save(); render(); });
+  render();
+})();
+
 </script>
 </body>
 </html>
