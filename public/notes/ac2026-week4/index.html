@@ -325,6 +325,60 @@
 
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
+
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+  .deck { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
+        display: flex; flex-direction: column; gap: 0.55rem; }
+  .sl-head { display: flex; gap: 0.75rem; align-items: baseline; }
+  .sl-head .sn { font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; }
+  .sl-head .st { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .sl-claim { font-weight: 700; font-size: 1rem; line-height: 1.7; color: var(--ink); }
+  .sl p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .sl p.sl-claim { color: var(--ink); font-size: 1rem; }
+  .sl pre { background: var(--panel-2); font-size: var(--fs-xs); }
+  .sl-hw { border-left: 3px solid var(--pass); padding-left: 0.75rem; }
+  .sl-hw b { color: var(--pass); }
+  .sl-q { color: var(--accent); }
+  .exs { border: 1px dashed var(--line-strong); border-radius: var(--r-md); padding: 1rem 1.1rem 0.6rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.5rem; }
+  .exs .eyebrow { color: var(--free); }
+  .ex { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); }
+  .ex > summary { cursor: pointer; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); color: var(--ink); line-height: 1.6; }
+  .ex > summary:hover { color: var(--accent); }
+  .ex > pre { border: none; border-top: 1px solid var(--line); border-radius: 0; }
+  .appx { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: 0.6rem; }
+  .appx > summary { cursor: pointer; padding: 0.8rem 1rem; font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .appx > summary:hover { color: var(--accent); }
+  .appx .band { padding: 0.5rem 0 1.5rem; }
+  .appx .band + .band { border-top: none; }
+  table.hwmap td, table.hwmap th, table.gloss td, table.gloss th { white-space: normal; }
+  table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
+  table.gloss td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  #glossary .note-title { margin-top: 0.5rem; }
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
   /* ---------- Week 4 追加分 ---------- */
@@ -392,22 +446,17 @@
 <header class="masthead">
   <div class="wrap masthead-inner">
     <p class="eyebrow">Advanced Cryptography Program 2026 / Week 4 自習ノート</p>
-    <h1><span>証明</span>システムを、3 つの部品に分ける</h1>
+    <h1><span>証明</span>システムを、3 つの部品に分ける — 予習ノート</h1>
     <p class="lead">
-      Week 4 の講義は「証明」と「ゼロ知識性」を分けて扱います。前半は
-      <strong>そもそも証明とは何か</strong>、<strong>なぜ検証者は全部を読まずに納得できるのか</strong>を、
-      計算複雑性の言葉で置き直します。後半は現代のゼロ知識証明を
-      <strong>算術化・コミットメント・証明システム</strong>の 3 部品に分解し、
-      GKR・STARK・PLONK を同じ物差しで並べます。
+      Week 4（「証明」と「ゼロ知識性」）の<strong>予習ノート</strong>です。課題はまだ公開されていないので、
+      <strong>対話ドリル 3 本</strong>（mod 11・17・101 の整数だけ。<code>python3</code> と打てば始められる）で GKR の SumCheck、STARK のトレース → AIR → 商 → FRI、PLONK のゲート表と大積を
+      1 行ずつ自分の手で回し、そのあと<strong>講義スライド 38 枚と同じ順番のカード</strong>で言葉を埋めます。
     </p>
     <p class="lead">
-      このノートでは、講義と同じトイ計算 <code>f = (x₁ + x₂) + (x₃·x₄)</code> を
-      <strong>3 通りに翻訳して手で計算し</strong>、そのうえで <strong>嘘の証明者が何回に 1 回すり抜けるか</strong>を実測します。
-      SumCheck の嘘は 121 通り中 21 通りしか通らない。改ざんしたトレースは商多項式が消える。
-      ゲート制約を全部満たしても配線が違えば大積で落ちる。この 3 つが「健全性」の手触りです。
+      ラボ 3 つ（SumCheck の受理地図／トレース改ざん／ゲート表）と検問クイズはそのまま。Week 3 のドリル 4（制約 → 多項式 → 1 点で確かめる）が土台です。
     </p>
     <div class="meta-row">
-      <span class="tag">読了 60 分</span>
+      <span class="tag">対話ドリル 3 本・41 行</span>
       <span class="tag">対話ラボ 3 つ</span>
       <span class="tag">検問クイズ</span>
       <span class="tag">前提は Week 3</span>
@@ -416,6 +465,653 @@
   </div>
 </header>
 
+<!-- ============================================ 0 : 出発点 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点 — Week 4 の予習</p>
+      <h2>「証明」と「ゼロ知識性」を、手で回してから講義に出る</h2>
+      <p>
+        Week 4 の講義は「証明とは何か」から始めて、GKR・STARK・PLONK の 3 つを毎回同じ 3 箱（算術化／コミットメント／証明システム）で説明します。
+        課題はまだ公開されていないので、このノートは <strong>予習用</strong>です。まず下の<strong>対話ドリル 3 本</strong>（mod 11・17・101 の整数だけ、`python3` を開けば動く）で
+        3 スキームの中心の計算を 1 行ずつ自分の手で回し、そのあと<strong>スライド 38 枚と同じ順番のカード</strong>で言葉を埋めます。
+      </p>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み方</p>
+        <p><b>ドリル A（SumCheck）→ B（トレース → AIR → 商 → FRI）→ C（PLONK のゲート表と大積）</b>の順に、1 行打って出た値を貼って 1 文読む。準備は <code>python3</code> と打って <code>&gt;&gt;&gt;</code> が出るだけ（ファイル不要）。そのあとカードを上から。カード末尾の Q. に答えられたら次へ。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">Week 3 とのつながり</p>
+        <p>Week 3 のドリル 4（制約 → 多項式 → 1 点で確かめる）が、この週の全部の土台です。「3 本の式を 1 本の多項式にして、割り切れるかで確かめる」— STARK と PLONK はそれを大規模にやり、GKR は多項式を送り合う対話（SumCheck）で同じことをします。Schnorr は制約が 1 本なので右半分だけでした。</p>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ DRILLS -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — 1 行打って、出た値を貼って、1 文読む</p>
+      <h2>3 スキームの中心を、mod 11・17・101 の整数だけで手で回す</h2>
+      <p>
+        <code>python3</code> を開いて <code>&gt;&gt;&gt;</code> が出たら始められます（import も不要。最後に <code>import math</code> が 1 回だけ）。
+        各行に「この行の意味」、出た値を貼ると、その値を指す解説が開きます。Python を開けないときは「ここで実行」。
+        講義のトイ計算 <code>f = (x₁ + x₂) + (x₃·x₄)</code>、入力 (3, 1, 2, 4) を 3 通りに翻訳します。
+      </p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル A — GKR の SumCheck（F₁₁）</p>
+      <p class="strong-line">「4 項の和が 1 だ」を、和を足さずに納得させる。検証者がやるのは 2 点の足し算と、ランダムな 1 点の評価だけ。</p>
+      <p>回路: レイヤー 1 の値 y₀ = x₁ + x₂ = 4、y₁ = x₃·x₄ = 8。出力 W̃₀ = y₀ + y₁ = 12 ≡ 1。この「和」を SumCheck で確かめる 14 行。最後に嘘の証明者が何回に 1 回すり抜けるか数えます。</p>
+    </div>
+    <div class="card" id="drillA-card">
+      <div class="card-head"><h3>ドリル A — SumCheck を手で回す</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル B — STARK のトレース → AIR → 商多項式 → FRI（F₁₇）</p>
+      <p class="strong-line">計算を「時間ごとの表」にして、行と次の行の関係を多項式にし、「割り切れるか」を折り畳んで確かめる。</p>
+      <p>講義スライド 20〜23 の数値そのまま（ω = 4、A(X) = 3 − X − X² − X³、C(X)、Q₀ = 5X² + 5X − 2、β = 3）。17 行。最後に 1 マス改ざんして割り切れなくなるのを見ます。</p>
+    </div>
+    <div class="card" id="drillB-card">
+      <div class="card-head"><h3>ドリル B — トレース → AIR → 商 → FRI</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル C — PLONK のゲート表・コピー制約・大積（F₁₇ / F₁₀₁）</p>
+      <p class="strong-line">ゲートを表にして「型」と「配線」を別々に縛る。型を全部満たしても配線が違えば大積で落ちる。</p>
+      <p>講義スライド 26〜29 の表そのまま（3 ゲート、セレクター、σ）。10 行。</p>
+    </div>
+    <div class="card" id="drillC-card">
+      <div class="card-head"><h3>ドリル C — ゲート表と大積</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D1 : 導入・証明とは・複雑性 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 2〜11 / 全体像・証明とは何か・計算複雑性</p>
+      <h2>証明を 5 つに分け、「解くのは大変・確かめるのは楽」を物差しにする</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">2/38</span><span class="st">署名と証明 — Q. 電子署名とゼロ知識証明の違いは？</span></div>
+        <p class="sl-claim">講義の最初の問い。答えは伏せられている（スライド 3 は配布版に無い）。</p>
+        <p class="sl-hw"><b>Week 3 からの答え</b>: 同じ 3 手（R, e, s）を、署名は「この鍵の持ち主がメッセージに同意した証拠」として、ZK 証明は「主張が真だという納得」として使う。Fiat–Shamir で e をハッシュにすれば署名になる。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">4/38</span><span class="st">ゼロ知識証明 — コミットメントスキーム（CS）と証明システム（PS）</span></div>
+        <pre>CS: 1. SetUp → 2. Commit → 3. Open → 4. Verify     満たすべき性質: 拘束性（binding）・秘匿性（hiding）
+PS: 証明者 ⇄ 検証者。証明対象を共有し、やりとりの末に ○ か ×
+Q. ハッシュ関数 vs ハッシュコミットメント？   Q. 対話型と非対話型はどう使い分ける？</pre>
+        <p class="sl-hw"><b>答えの見当</b>: c = Hash(m) は m の候補が少ないと総当たりで割れる → 乱数を混ぜて Hash(r, m) にしたものがコミットメント。対話型は「特定の検証者をその場で」、非対話型（Fiat–Shamir）は「誰でも・あとから・オンチェーン」。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">5/38</span><span class="st">概念としての証明 — 5 つのパートから成立する</span></div>
+        <pre>1. 証明者 ── 2. 証明方法 ──▶ 3. 証明対象 ◀── 4. 検証方法 ── 5. 検証者
+Q. 我々は日常的に何を証明しているか？ 数学的証明はどの点で優れているか？</pre>
+        <p class="sl-hw"><b>覚える 1 点</b>: 身分証・領収書は「誰かを信じる」が検証方法に入る。数学的証明は検証が機械的で、証明者を信じなくてよい。ただし「証明が長いと検証も長い」— それを破るのが次の複雑性の話。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">6〜7/38</span><span class="st">計算複雑性／計算複雑性クラス</span></div>
+        <pre>複雑性 = 計算にかかる理論的リソース（時間・空間・通信・回路）
+P = 決定論的に多項式時間で解ける     NP = 多項式時間で検証できる（非決定論的に多項式時間で解ける）
+図: NL ⊂ P ⊂ NP ⊂ PSPACE ⊂ EXPTIME ⊂ EXPSPACE（= かどうかは ?）</pre>
+        <p class="sl-hw"><b>Week 3 の double-and-add がこの話</b>: k·G を k 回足すと O(k)、倍々なら O(log k)。同じ答えでも手数の増え方で「できる／できない」が変わる。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">8〜9/38</span><span class="st">計算複雑性クラスと証明システム — NP = 最も標準的な証明システム</span></div>
+        <pre>NP = PCP（検証者が証明の一部をランダムに読むだけで検証できる）     IP = PSPACE     MIP = NEXPTIME
+証明者: 無限の計算能力で証明を見つける     検証者: 有限の計算能力で、多項式時間内に検証する     例: グラフ 3 彩色</pre>
+        <p class="sl-hw"><b>手で数えた</b>: ピーターセングラフ（頂点 10・辺 15）の塗り方を見つけるのは総当たり 3¹⁰ = 59049 通り、確かめるのは辺 15 本を見るだけ。「証拠を渡せば弱い検証者でも速く確かめられる」= NP = 証明システム。</p>
+        <p class="sl-q">Q. Week 3 の「x を知っている」は、証拠（witness）が何で、検証が何か。（x、s·G = R + e·P）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">10/38</span><span class="st">NP にいろいろな条件を加えていくと、現代の証明システムになる</span></div>
+        <pre>IP（Interactive Proof）   = 対話（prover と verifier がメッセージを交換）+ ランダム性（verifier が確率的）
+PCP                       = ランダム性 + オラクルアクセス（verifier が prover のメッセージに問い合わせる）
+IOP（Interactive Oracle Proof） = 3 つ全部</pre>
+        <p class="sl-hw"><b>オラクルの実体 = コミットメント</b>（スライド 12）。「検証者が証明の一部だけ読む」には、証明者が質問を見てから書き換えられないことが必要。Week 3 の「先に封をする」。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">11/38</span><span class="st">証明の性質 — 信頼性とスケーラビリティ</span></div>
+        <pre>信頼性: 完全性（主張が真なら常に証明可能）／健全性（証明可能なら主張は真）  ← 主張の真偽 ⇄ 証明可能性 を一致させる
+スケーラビリティ: 証明生成・検証コスト、証明サイズ、鍵サイズ
+Q. 証明者と検証者向けの最適化ではどちらが重要？ 他に満たすべき性質は？</pre>
+        <p class="sl-hw"><b>答えの見当</b>: 検証者は多数・弱い端末・オンチェーン（ガス代）なので検証コストと証明サイズが効く。ただし証明者が実用範囲でなければ証明が作れない。「他に」= ゼロ知識性（この週の後半）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D2 : IOP と GKR -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 12〜17 / IOP と GKR</p>
+      <h2>オラクル ≈ コミットメント。GKR は回路をレイヤーに切って SumCheck で降りる</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">12/38</span><span class="st">IOP — 現代のゼロ知識証明における証明スキームの主流</span></div>
+        <pre>証明者: 主張に対する証明を「何らかの数学的構造（オラクル ≈ コミットメント）」として生成
+検証者: ランダムに生成したチャレンジを用いて、効率的かつ段階的に検証（1. 証明の生成 → 2. チャレンジ → 3. 証明の生成 → 4. 検証 → …）</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">13/38</span><span class="st">GKR（2008）— IP ベースのスキーム</span></div>
+        <pre>A. 算術化: 多重線形多項式（Multilinear Polynomial）   B. コミットメントスキーム: なし（組み合わせれば効率化・ゼロ知識化できる）   C. 証明システム: SumCheck プロトコル
+1. 主張（計算）を算術回路に → 2. 回路構造をレイヤーごとに多重線形多項式で表現 → 3. レイヤーごとに SumCheck → 4. ランダム線型結合で検証の計算量を削減</pre>
+        <p class="sl-hw"><b>この 3 箱（A/B/C）が、この週の全部の骨組み</b>。STARK も PLONK も同じ 3 箱で出てくる。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">14/38</span><span class="st">GKR の仕組み 1 — 計算の算術回路化（レイヤーごとに数式を分割）</span></div>
+        <pre>L₀: y = y₀ + y₁（出力 1）     L₁: y₀ = x₁ + x₂（4）, y₁ = x₃·x₄（8）     L₂: x₁..x₄ = 3, 1, 2, 4 ∈ F₁₁
+ゲートに 2 進の番地: L₁ は 0, 1、L₂ は 00, 01, 10, 11      f(x₁..x₄) = (x₁ + x₂) + (x₃·x₄) ∈ F₁₁[x]     上のレイヤーから順に証明</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">15/38</span><span class="st">GKR の仕組み 2 — 計算結果とゲート構造の MLE（多重線形拡張）</span></div>
+        <pre>A. レイヤーごとの計算結果の MLE:  W̃₀ = 1,  W̃₁(z) = 4(1−z) + 8z = 4 + 4z,  W̃₂(z₁,z₂) = 3(1−z₁)(1−z₂) + 1(1−z₁)z₂ + 2z₁(1−z₂) + 4z₁z₂ = 3 − z₁ − 2z₂ + 4z₁z₂
+B. レイヤーごとのゲート構造の MLE:  W̃₀ = Σ_{a,b∈{0,1}} g₀(a,b),  g₀(a,b) = (1−a)·b·(W̃₁(a) + W̃₁(b))       （(a,b)=(0,1) の足し算ゲートだけ生き残る）
+                                  W̃₁(z) = Σ g₁(a₁,a₂,b₁,b₂)（足し算ゲートと掛け算ゲートの項）</pre>
+        <p class="sl-hw"><b>ドリル A の 1〜4 行目がこれ</b>。「表を 0/1 の外まで伸ばした多項式」にするのは、検証者が 0 でも 1 でもないランダムな点で値を聞くため。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">16/38</span><span class="st">GKR の仕組み 3 — SumCheck プロトコル（1990）の適用</span></div>
+        <pre>Σ_{a,b} g₀(a,b) = ? W̃₀ = 1  ⇔  g₀(2,3) = ? 4
+ラウンド 0: p₁(x) = Σ_b g₀(x,b) = 12 − 8x − 4x² ≡ 1 + 3x + 7x²     p₁(0)+p₁(1) = ? 1     p₁(r₁=2) = 35 ≡ 2
+ラウンド 1: p₂(y) = g₀(2,y) = −5y − 4y² ≡ 6y + 7y²                p₂(0)+p₂(1) = ? p₁(2) = 2     p₂(r₂=3) = 81 ≡ 4</pre>
+        <p class="sl-hw"><b>ドリル A の 5〜10 行目がこの 2 ラウンド</b>。検証者は和を足さず、2 点の足し算と 1 点の評価だけ。最後に g₀(2,3) を 1 回評価して一致を見る。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">17/38</span><span class="st">GKR の仕組み 4 — 線形削減（Line Reduction）による検証の効率化</span></div>
+        <pre>g₀(2,3) = (1−2)·3·(W̃₁(2) + W̃₁(3)) — W̃₁ の 2 点が要る → 1 点にまとめる
+4-1. (2,3) を通る直線 l(t) = (1−t)·2 + 3t = 2 + t     4-2. q(t) = W̃₁(l(t)) = 4 + 4(2+t) ≡ 1 + 4t（q(0) = 1 = W̃₁(2), q(1) = 5 = W̃₁(3)）     4-3. q(4) = 17 ≡ 6
+Q. 各種計算量、通信量、証明サイズは？（答えのスライド 18 は伏せられている）</pre>
+        <p class="sl-hw"><b>見当</b>: 証明者 O(|C|)（Libra 以降）、検証者 O(深さ·log|C|) + 入力の評価、証明サイズ O(深さ·log|C|) 個の体の元。信頼設定なし。コミットメントが無いのでそのままではゼロ知識でない。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D3 : STARK -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 19〜23 / STARK（2018）</p>
+      <h2>実行トレース → AIR → 商多項式 → Merkle → FRI</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19/38</span><span class="st">STARK — IOP ベースのスキーム ①（Scalable Transparent ARgument of Knowledge）</span></div>
+        <pre>A. 算術化: AIR（1. 計算を実行トレースに → 2. トレースの制約を多項式として表現・補間）
+B. コミットメント: Merkle ツリーベースの多項式 CS（3. データの堅牢性・証明の効率性 + ゼロ知識性）
+C. 証明システム: FRI プロトコル（4. 多項式の次元数に関する性質を応用し、低次元性の証明に変換）</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">20/38</span><span class="st">STARK の仕組み 1 — 計算の実行トレース化</span></div>
+        <pre> t   a   m   y      f(x₁..x₄) = (x₁ + x₂) + (x₃·x₄) ∈ F₁₇,  f(3,1,2,4) = 12
+ 0   0   0   0      初期状態
+ 1   4   0   0      x₁ + x₂ = 3 + 1 = 4
+ 2   4   8   0      x₃·x₄ = 2·4 = 8
+ 3   4   8  12      a + m = 4 + 8 = 12        ← 実行トレース（execution trace）</pre>
+        <p class="sl-hw"><b>ドリル B の 1 行目</b>。回路が「値の繋がりの図」なら、トレースは「時間ごとの状態の表」。CPU の実行のように同じ規則を何万ステップも繰り返す計算に向く。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">21/38</span><span class="st">STARK の仕組み 2 — 実行トレース制約の多項式化（AIR）</span></div>
+        <pre>評価ドメイン: t → ω^t、ω = 4 ∈ F₁₇（1, 4, 16, 13）
+2-1. ラグランジュ補間による遷移多項式: A(X) = 3 − X − X² − X³,  M(X) = 4 + 6X + 7X³,  Y(X) = 3 + 12X + 14X² + 5X³
+2-2. 制約多項式: C(X) = S₀(X)(A(ωX) − 4) + S₁(X)(M(ωX) − 8) + S₂(X)(Y(ωX) − A(X) − M(X)) = 2 − 5X − 5X² − 2X⁴ + 5X⁵ + 5X⁶ = 0（H の全点で）</pre>
+        <p class="sl-hw"><b>ドリル B の 2〜7 行目</b>。「次の行」が X → ωX の掛け算で書けるように t を ω^t に置く。「= 0」は「H の 4 点で 0」の意味。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">22/38</span><span class="st">STARK の仕組み 3 — マークルツリーを用いた多項式コミットメント</span></div>
+        <pre>3-1. 因数定理: C(X) が H の全点で 0 ⇔ 消滅多項式 Z_H(X) = Π(X − v) = Xⁿ − 1 で割り切れる。  Q₀(X) = C(X)/(X⁴ − 1) = 5X² + 5X − 2
+3-2. 評価ドメインを 4 倍程度に拡張し、各点で Q₀ を評価した値を Merkle 木の葉にしてコミット。根を検証者に渡す</pre>
+        <p class="sl-hw"><b>ドリル B の 8〜10 行目</b>。Week 3 ドリル 4 の「Z で割り切れる」と同じ道具。Merkle 根が「質問を見てから書き換えられない」を保証する。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">23/38</span><span class="st">STARK の仕組み 4 — 商多項式の低次元性証明（FRI）</span></div>
+        <pre>4-1. コミットフェーズ: Q₀(X) = Q₀,even(X²) + X·Q₀,odd(X²) = (5X² − 2) + X·5。 Y = X², β₁ = 3: Q₁(Y) = Q₀,even(Y) + β₁Q₀,odd(Y) = (5Y − 2) + 15 = 5Y + 13（次数 2 → 1）
+4-2. クエリフェーズ: Q₀,even(x²) = (Q₀(x) + Q₀(−x))/2,  Q₀,odd(x²) = (Q₀(x) − Q₀(−x))/(2x)  → 線形結合の正しさを検証（Schwartz–Zippel）
+Q. 各種計算量、通信量、証明サイズは？（スライド 24 は伏せられている）</pre>
+        <p class="sl-hw"><b>ドリル B の 11〜14 行目</b>。x と −x の 2 点で偶奇部分が復元できる。<b>見当</b>: 証明者 O(T log T)、検証者 O(log² T)、証明は数十〜数百 KB、透明（信頼設定なし）、ハッシュだけなので耐量子。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D4 : PLONK -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 25〜29 / PLONK（2019）</p>
+      <h2>ゲート表 → 11 本の多項式 → KZG → ゲート制約とコピー制約</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">25/38</span><span class="st">PLONK — IOP ベースのスキーム ②</span></div>
+        <pre>A. 算術化: Plonkish（複数の一変数多項式）   B. コミットメント: KZG ベースの多項式 CS（楕円曲線上の 1 要素に固定）   C. 証明システム: 多項式 IOP（KZG の評価証明 + ランダムな評価ポイント）</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">26〜27/38</span><span class="st">PLONK の仕組み 1〜2 — 算術回路化と、11 個のベクトルの一変数多項式化</span></div>
+        <pre>           L  R  O  │ Q_L Q_R Q_M Q_O Q_C │  σ_L     σ_R     σ_O
+gate 0 (+) 3  1  4  │  1   1   0  −1   0  │ ω⁰k₀    ω⁰k₁    ω²k₀ (= L of gate 2)
+gate 1 (×) 2  4  8  │  0   0   1  −1   0  │ ω¹k₀    ω¹k₁    ω²k₁ (= R of gate 2)
+gate 2 (+) 4  8 12  │  1   1   0  −1   0  │ ω⁰k₂    ω¹k₂    ω²k₂
+witness（秘密）／selector（公開: 型）／wiring（公開: 配線）。11 本をそれぞれラグランジュ補間</pre>
+        <p class="sl-hw"><b>ドリル C の 1〜3 行目</b>。ゲート方程式 Q_L·L + Q_R·R + Q_M·L·R + Q_O·O + Q_C = 0 が 1 本で足し算も掛け算も表す。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">28/38</span><span class="st">PLONK の仕組み 3 — KZG コミットメント</span></div>
+        <pre>3-1. setup: SRS = {τg₁, τ²g₁, …, τᵈg₁, g₂, τg₂} を MPC 経由で（τ は捨てる）    3-2. commit: Com_f = f(τ)g₁
+3-3. open: q(X) = (f(X) − f(α))/(X − α), Com_q = q(τ)g₁    3-4. verify: ペアリングの双線型性で Com_f = (τ − α)Com_q + f(α)g₁ を確認</pre>
+        <p class="sl-hw"><b>Week 3 スライド 38〜42 と同じ</b>。証明が短い（点 1 個）代わりに信頼設定が要る。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">29/38</span><span class="st">PLONK の仕組み 4 — 多項式制約の証明・検証</span></div>
+        <pre>インプット制約: KZG の開示証明
+ゲート制約: f(X) = Q_L L + Q_R R + Q_M L R + Q_O O + Q_C = ?0 → ゼロテスト（消滅多項式 Z_H で商 Q へ）
+コピー制約: 配線で入れ替える前後の値が並べ替えになっていることを大積（grand product）で → 累算器 p(X): p(ω⁰) = 1, p(ω^{i+1}) = p(ω^i)·f/g ⇔ p(ωX)g(X) − p(X)f(X) = 0
+Q. 各種計算量、通信量、証明サイズは？（スライド 30 は伏せられている）</pre>
+        <p class="sl-hw"><b>ドリル C の 4〜10 行目</b>。<b>見当</b>: 証明者 O(n log n) + MSM、検証者 O(1)（ペアリング数回）、証明は数百バイト、universal な信頼設定が要る。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D5 : ZK 化・まとめ・ワークショップ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 31〜35 / ゼロ知識性の実現手法・まとめ・ワークショップ</p>
+      <h2>ゼロ知識化 ≒ 多項式のマスキング。大枠と構成要素は共通、組み合わせはさまざま</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">31/38</span><span class="st">証明スキームのゼロ知識化 — STARK と PLONK</span></div>
+        <pre>f̃(X) := f(X) + Z_H(X)R(X)   （評価ドメイン内では 0、外ではランダムなブラインド多項式を加える）
+STARK: 遷移多項式・制約多項式に。FRI も踏まえて十分なランダムネス、Merkle にもランダムソルト
+PLONK: ウィットネス多項式・ワイヤリング多項式・各商多項式に。 Q. なぜセレクター多項式はブラインド化しない？</pre>
+        <p class="sl-hw"><b>Week 3 ドリル 4 の最後の行がこれ</b>。答え: セレクターは回路の型で公開情報。隠すものがなく、ブラインドすると次数が上がるだけ。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">32/38</span><span class="st">GKR のゼロ知識化 — 多項式のマスキング + コミットメントスキーム</span></div>
+        <pre>1. 回路構造の多変数多項式をコミット → 2. マスク用 R(X) をコミット（Merkle が多い）→ 3. マスクした状態で SumCheck → f(X) + R(X) → 4. 終盤に引き算で相殺 V_original = V_total − V_random → 5. 開示証明の検証（Merkle パス + FRI）
+Q. どちらかのみではなぜ NG？</pre>
+        <p class="sl-hw"><b>答えの見当</b>: マスクだけだと R を後から選び直せる（先にコミットして固定が要る）。コミットだけだと SumCheck で送る一変数多項式が W̃ の情報を持ったまま。「隠す」と「固定する」は別の仕事。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">33〜34/38</span><span class="st">ゼロ知識証明まとめ — 証明 + ゼロ知識性／大枠と構成要素は共通</span></div>
+        <pre>ゼロ知識証明 := 証明 + ゼロ知識性。 現代の証明システム（IOP）は効率的な検証を可能にする数学的証明の 1 つ
+「算術化」「コミットメントスキーム」「証明システム」の組み合わせ。完全性・健全性・ゼロ知識性の強さで堅牢性、計算量・証明サイズで性能が測れる
+同じ名前でも細部が違う: GKR → Virgo/Libra（FRI/KZG 導入）, Jolt／STARK → Redshift（AIR → Plonkish）, zkSTARK（DEEP FRI）／PLONK → Halo2（KZG → IPA）, Plonky2/3（Plonkish/AIR + FRI）
+SNARK の分類: Polynomial IOP + Polynomial Commitment Scheme（IP / MIP / 定数ラウンド IOP × FRI / 離散対数系 / ペアリング系） と Linear PCP + Pairing（Groth16）</pre>
+        <p class="sl-hw"><b>持ち帰り</b>: 新しいスキーム名を見たら「算術化は何か・コミットメントは何か・証明システムは何か」の 3 つを埋める。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">35/38</span><span class="st">ワークショップ — ZK, or not ZK（ケーススタディ: AI エージェント保険）</span></div>
+        <pre>課題: AI エージェントの運用実績（タスク完了率など）を、サービスの機密データ（顧客データ）を渡さずに外部の損保会社に証明するシステムの設計
+検討: 指標（ISO など）と実績の測定・証明方法／機密データの秘匿方法・具体的スキーム／トラストモデル（誰・何を信頼するか）／現実的なトレードオフ</pre>
+        <p class="sl-hw"><b>考える型</b>: 5 パート（証明者 = 事業者、検証者 = 損保、証明対象 = 「完了率 ≥ 95%」）と 3 箱。まず「ログの真正性を誰が保証するか」（ZK は「作り物の上で正しく計算した」しか言えない）。候補: ZK（STARK 系は信頼設定なし、PLONK 系は短くオンチェーン向き）／MPC／TEE／監査 + NDA。「not ZK」が正解のことも多い。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ CHECK -->
+<section class="band" id="hwmap">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">予習チェック</p>
+      <h2>講義の前に、自分の言葉で言えるか 7 問</h2>
+    </div>
+    <div class="callout">
+      <p>(1) 「NP は最も標準的な証明システム」と言える理由を、証明者と検証者の役割で。 (2) IP・PCP・IOP は NP に何を足したものか（3 つ）。オラクルの実体は何か。 (3) SumCheck で検証者が「和を足さずに」納得できる理由（ドリル A の最後の行）。 (4) 「H の全点で 0」を「Z_H で割り切れる」に変えると何が確かめやすくなるか（ドリル B の 9〜10 行目）。 (5) FRI で x と −x の 2 点から何が復元できるか。 (6) PLONK でゲート制約とコピー制約の両方が要る理由を、壊れる witness（5, 8, 13）で（ドリル C）。 (7) f + Z_H·R が H の上で元の値を保ち、外でランダムになる理由。</p>
+      <p class="strong-line">ドリル A・B・C を通していれば、7 問とも「自分の手で出した数」で答えられます。詰まった番号だけ、対応するドリルの行に戻る。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ GLOSSARY -->
+<section class="band" id="glossary">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語集</p>
+      <h2>用語の意味・なぜその言葉か・どのドリルで触ったか</h2>
+    </div>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>どこで</th></tr></thead><tbody>
+      <tr><td>P / NP</td><td>多項式時間で解ける／多項式時間で検証できる問題の集まり</td><td>Polynomial / Non-deterministic Polynomial。NP は「証拠を渡せば速く確かめられる」</td><td>スライド 7〜9</td></tr>
+      <tr><td>IP / PCP / IOP</td><td>NP に対話・ランダム性・オラクルアクセスを足した証明システム</td><td>Interactive Proof / Probabilistically Checkable Proof / Interactive Oracle Proof</td><td>スライド 10</td></tr>
+      <tr><td>オラクル（oracle）</td><td>何でも正しく答える仮想の箱。検証者が証明の一部だけ問い合わせる</td><td>神託。実物はコミットメント</td><td>スライド 12</td></tr>
+      <tr><td>算術化（arithmetization）</td><td>計算を + と × の式（多項式）に翻訳する工程</td><td>arithmetic = 算術。3 箱の A</td><td>ドリル A〜C の前半</td></tr>
+      <tr><td>MLE（多重線形拡張）</td><td>0/1 の表を、各変数 1 次の多項式に伸ばしたもの</td><td>Multilinear Extension。格子の外のランダムな点で聞くため</td><td>ドリル A の 2 行目</td></tr>
+      <tr><td>SumCheck</td><td>「格子点全部の和」を、変数を 1 つずつ潰して確かめる対話</td><td>そのまま「和の検査」（1990）</td><td>ドリル A</td></tr>
+      <tr><td>線形削減（line reduction）</td><td>2 点の主張を、2 点を通る直線上の 1 点にまとめる</td><td>line = 直線</td><td>スライド 17</td></tr>
+      <tr><td>実行トレース</td><td>横に変数、縦に時間の表</td><td>execution trace = 実行の足跡</td><td>ドリル B の 1 行目</td></tr>
+      <tr><td>AIR</td><td>トレースの行と次の行の関係を多項式の等式にしたもの</td><td>Algebraic Intermediate Representation。コンパイラの中間表現から</td><td>ドリル B の 5〜7 行目</td></tr>
+      <tr><td>評価ドメイン H</td><td>行番号を置く点の集まり {1, ω, ω², …}</td><td>ω は 1 の n 乗根。「次の行」が X → ωX になる</td><td>ドリル B の 2 行目</td></tr>
+      <tr><td>消滅多項式 Z_H</td><td>H の全点で 0 になる最小の多項式 Xⁿ − 1</td><td>vanishing = 消える</td><td>ドリル B の 9 行目</td></tr>
+      <tr><td>商多項式 Q</td><td>C を Z_H で割った商。存在する ⇔ C が H の全点で 0</td><td>quotient = 商。因数定理（数 II）</td><td>ドリル B の 10 行目</td></tr>
+      <tr><td>Merkle 木</td><td>評価値をハッシュで木にまとめ、根 1 個で全体を代表</td><td>Ralph Merkle（人名）</td><td>スライド 22</td></tr>
+      <tr><td>FRI</td><td>多項式を偶数次・奇数次に分けて折り畳み、低次数を確かめる</td><td>Fast Reed–Solomon IOP of Proximity</td><td>ドリル B の 11〜14 行目</td></tr>
+      <tr><td>Plonkish</td><td>ゲート表（witness / selector / wiring の列）を一変数多項式にする算術化</td><td>PLONK 風</td><td>ドリル C</td></tr>
+      <tr><td>セレクター</td><td>ゲートの型（+ か ×）を表す公開の係数列</td><td>selector = 選ぶもの</td><td>ドリル C の 1 行目</td></tr>
+      <tr><td>コピー制約／大積</td><td>行をまたぐ「同じ値」を、番地を σ で入れ替えた集合の一致で確かめる。積で 1 個の数に</td><td>copy constraint / grand product</td><td>ドリル C の 7〜10 行目</td></tr>
+      <tr><td>KZG / SRS / trusted setup</td><td>多項式のコミットメント／公開の点の列／τ を捨てる儀式</td><td>Kate・Zaverucha・Goldberg（人名）。Structured Reference String</td><td>スライド 28</td></tr>
+      <tr><td>ブラインド多項式</td><td>f + Z_H·R。H の上では f と同じ、外ではランダム</td><td>blind = 目隠し</td><td>スライド 31、Week 3 ドリル 4</td></tr>
+      <tr><td>Schwartz–Zippel</td><td>違う多項式はランダムな 1 点でほぼ違う値になる（一致は次数個以下）</td><td>人名 2 人。「1 点で確かめてよい」根拠</td><td>ドリル A・B の検査</td></tr>
+      <tr><td>完全性／健全性</td><td>真なら通る／通ったなら真</td><td>completeness / soundness</td><td>スライド 11</td></tr>
+      <tr><td>succinct / transparent</td><td>証明が短く検証が速い／信頼設定が要らない</td><td>別の軸。片方から片方は出ない</td><td>スライド 19・25</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<!-- ============================================ 7 : LAB 1 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 1</p>
+      <h2>SumCheck を回す — 検証者の乱数と、嘘の証明者</h2>
+      <p>
+        レイヤー 0 の SumCheck を F₁₁ で回します。<strong>あなたが検証者</strong>で、r₁ と r₂ を選びます。
+        証明者を「嘘」にすると、主張した値だけを変えて辻褄合わせの多項式を送ってきます。
+        右の地図は、いまの主張に対して 121 通りの (r₁, r₂) のどれが受理してしまうかです。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>設定</h3><span class="eyebrow">F₁₁ / g₀ のレイヤー 0</span></div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label"><span>入力 (x₁,x₂,x₃,x₄)</span><span class="hint">回路は同じ、値だけ変える</span></div>
+            <div class="segments" id="sc-in" role="group" aria-label="入力"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>証明者</span><span class="hint">嘘なら主張値を選ぶ</span></div>
+            <div class="segments" id="sc-mode" role="group" aria-label="証明者"></div>
+          </div>
+          <div class="field" id="sc-claim-field">
+            <div class="field-label"><span>主張する値</span><span class="hint">本当の値と違うものを</span></div>
+            <div class="segments" id="sc-claim" role="group" aria-label="主張値"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>r₁（ラウンド 0 の乱数）</span><span class="hint">検証者が選ぶ</span></div>
+            <div class="segments" id="sc-r1" role="group" aria-label="r1"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>r₂（ラウンド 1 の乱数）</span><span class="hint">検証者が選ぶ</span></div>
+            <div class="segments" id="sc-r2" role="group" aria-label="r2"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>受理地図</span><span class="hint">横 r₁ / 縦 r₂。赤 = 受理してしまう</span></div>
+            <div class="heat" id="sc-heat" aria-label="受理地図"></div>
+            <p class="caption" id="sc-heat-note">—</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="sc-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="sc-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">やりとり</p>
+          <div class="flow" id="sc-flow"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 9 : LAB 2 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 2</p>
+      <h2>トレースを改ざんして、商多項式が消えるのを見る</h2>
+      <p>
+        F₁₇ のトレース（公開入力 3, 1, 2, 4）のマスを直接書き換えられます。
+        書き換えるたびに、遷移多項式 → 制約多項式 → Z_H で割った商と余り → コセット上の低次数テスト、
+        そして商が存在するときは FRI の折り畳みまで計算し直します。
+      </p>
+      <p>
+        1 つ注意があります。講義のトイ AIR が縛っているのは <code>a₁ = x₁+x₂</code>、<code>m₂ = x₃·x₄</code>、
+        <code>y₃ = a₂+m₂</code> の 3 本だけです。<strong>制約の無いマス（y₁ など）は書き換えても通ります</strong>——
+        Week 1 で見たアンダー制約そのもの。実物の AIR は境界制約（初期状態が 0）と「値を保持する」制約
+        （<code>A(ωX) − A(X) = 0</code> など）を足して全マスを縛ります。「y₁ を 5 に」を押して確かめてください。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>実行トレース</h3><span class="eyebrow">F₁₇ / ω = 4 / H = {1,4,16,13}</span></div>
+        <div class="card-body">
+          <div class="table-scroll" style="border:none;">
+            <table class="trace" id="st-table">
+              <thead><tr><th>t</th><th>X = ω^t</th><th>a</th><th>m</th><th>y</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="btn-row">
+            <button class="btn-sm" type="button" data-preset="honest">正しいトレースに戻す</button>
+            <button class="btn-sm" type="button" data-preset="y13">y₃ を 13 に</button>
+            <button class="btn-sm" type="button" data-preset="m9">m を 9 に</button>
+            <button class="btn-sm" type="button" data-preset="a5">a を 5・y₃ を 13 に（自己整合）</button>
+            <button class="btn-sm" type="button" data-preset="y1">y₁ を 5 に（制約の無いマス）</button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>FRI の β₁</span><span class="hint">検証者の乱数</span></div>
+            <div class="segments" id="st-b1" role="group" aria-label="beta1"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>FRI の β₂</span><span class="hint">検証者の乱数</span></div>
+            <div class="segments" id="st-b2" role="group" aria-label="beta2"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>クエリ点 x</span><span class="hint">評価ドメイン g = 2 の冪</span></div>
+            <div class="segments" id="st-x" role="group" aria-label="query"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="st-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="st-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">遷移多項式 → 制約多項式 → 商</p>
+          <pre id="st-poly">—</pre>
+          <p class="eyebrow">FRI</p>
+          <pre id="st-fri">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 11 : LAB 3 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">ラボ 3</p>
+      <h2>PLONK の表を書き換える — ゲート制約と配線制約は別の目で見る</h2>
+      <p>
+        witness の 9 マス（F₁₇）を書き換えられます。行ごとのゲート方程式、2 本のコピー制約、
+        そして β, γ を変えながらの大積（F₁₀₁）を同時に計算します。
+        <strong>ゲート制約が全部緑でも大積が赤になる表</strong>を作ってみてください。
+      </p>
+    </div>
+
+    <div class="lab">
+      <div class="card">
+        <div class="card-head"><h3>ゲート表</h3><span class="eyebrow">値は F₁₇ / 大積は F₁₀₁</span></div>
+        <div class="card-body">
+          <div class="table-scroll" style="border:none;">
+            <table class="trace" id="pk-table">
+              <thead><tr><th></th><th>型</th><th>L</th><th>R</th><th>O</th><th>セレクター</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="btn-row">
+            <button class="btn-sm" type="button" data-preset="honest">正しい表に戻す</button>
+            <button class="btn-sm" type="button" data-preset="bad">gate 2 を (5, 8, 13) に</button>
+            <button class="btn-sm" type="button" data-preset="swap">gate 2 の L と R を入れ替える</button>
+            <button class="btn-sm" type="button" data-preset="wrongo">gate 1 の O を 9 に</button>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>β</span><span class="hint">検証者の乱数（F₁₀₁）</span></div>
+            <div class="segments" id="pk-beta" role="group" aria-label="beta"></div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>γ</span><span class="hint">検証者の乱数（F₁₀₁）</span></div>
+            <div class="segments" id="pk-gamma" role="group" aria-label="gamma"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="verdict">
+          <div class="banner" id="pk-banner">—</div>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="pk-note">—</p>
+        </div>
+        <div class="work">
+          <p class="eyebrow">ゲート制約（行の中）</p>
+          <div class="flow" id="pk-gates"></div>
+          <p class="eyebrow">コピー制約（行をまたぐ）</p>
+          <div class="flow" id="pk-copies"></div>
+          <p class="eyebrow">大積 — 累算器の 1 周</p>
+          <pre id="pk-grand">—</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 15 : QUIZ -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">検問クイズ</p>
+      <h2>検証者検問 — 少ない手数で嘘を見つける</h2>
+      <p>
+        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
+        SumCheck のラウンド、トレースの制約、ゲート表、FRI の折り畳みを審査する。問題は毎回その場で生成され、
+        判定は上のラボと同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
+      </p>
+    </div>
+
+    <div class="card" id="quiz">
+      <div class="quiz-pane" id="quiz-start">
+        <div class="quiz-hero">
+          <p class="eyebrow">検問モードを選ぶ</p>
+          <h3>10 問・ライフ 3</h3>
+          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
+            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
+          </p>
+        </div>
+        <div class="mode-grid" id="mode-grid"></div>
+        <p class="quiz-best" id="quiz-best"></p>
+      </div>
+
+      <div class="quiz-pane" id="quiz-play" hidden>
+        <div class="quiz-bar">
+          <span class="qprog" id="qprog">1 / 10</span>
+          <span class="qcat" id="qcat">—</span>
+          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
+        </div>
+        <div class="qmain">
+          <p class="qtext" id="qtext"></p>
+          <div class="qbody" id="qbody"></div>
+          <div class="choices" id="choices"></div>
+          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+        </div>
+        <div class="quiz-foot">
+          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
+          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
+        </div>
+      </div>
+
+      <div class="quiz-pane" id="quiz-result" hidden>
+        <div class="rank-box">
+          <span class="rank" id="rank">—</span>
+          <div class="rank-meta">
+            <p class="rank-title" id="rank-title">—</p>
+            <p class="rank-sub" id="rank-sub">—</p>
+          </div>
+        </div>
+        <div class="cat-stats" id="cat-stats"></div>
+        <div class="quiz-foot">
+          <button class="btn-main" id="btn-again" type="button">もう一度</button>
+          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ 16 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">持ち帰り</p>
+      <h2>持っておくと効く問い</h2>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み終わったら答えられるはずのこと</p>
+        <p>・NP が「最も標準的な証明システム」だと言えるのはなぜか。証明者と検証者はそれぞれ何をするか。</p>
+        <p>・SumCheck で検証者が「和を足さない」のに納得できる理由を、Schwartz–Zippel の一言で言うと。</p>
+        <p>・「H の全点で 0」を「Z_H で割り切れる」に変えると、何が検証しやすくなるのか。</p>
+        <p>・PLONK でゲート制約とコピー制約の両方が要る理由を、壊れる witness の例つきで。</p>
+        <p>・ブラインド多項式 f + Z_H·R が、H の上で元の値を保つ理由と、外でランダムになる理由。</p>
+        <p>・KZG の信頼設定で「τ を捨てる」が必要な理由。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">次に向けて</p>
+        <p>
+          今週の 3 部品は、これ以降の週の地図です。新しいスキーム名が出てきたら、
+          <b>算術化は何か・コミットメントは何か・証明システムは何か</b>の 3 つを埋めてみてください。
+          埋まらない箱があれば、そこがそのスキームの新しさです。
+        </p>
+        <p>
+          そして Week 3 の Schnorr に戻ると、あれは<b>算術化なし・コミットメント R = rG・証明システムはシグマプロトコル</b>の
+          最小構成でした。今週の GKR / STARK / PLONK は、その「主張」を「x を知っている」から
+          「計算全体が正しい」に広げるために、3 つの箱を大きくしたものです。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ APPX -->
+<section class="band" id="appendix">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">付録</p>
+      <h2>深掘り本文 — 各節を開いて読む（旧版の本文）</h2>
+      <p>上のドリルとカードで骨組みが入ったあとで、細部を足したいときに開いてください。5 パート・複雑性・3 部品表の長文、各スキームの長文版、ゼロ知識化、計算量の比較表、ワークショップの考え方はここにあります。</p>
+    </div>
+    <div>
+<details class="appx"><summary>Week 3 の Schnorr は、何を渡していたのか（旧・出発点）</summary>
 <!-- ============================================ 1 -->
 <section class="band">
   <div class="wrap stack">
@@ -486,11 +1182,13 @@ s = r + e·x        ── s を送る ──▶          s·G == R + e·P ?　�
 
     <div>
       <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
-      <ol class="toc" id="toc"></ol>
+      <ol class="toc" id="toc-old"></ol>
     </div>
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>証明とは何か — 5 つのパートに分ける</summary>
 <!-- ============================================ 2 -->
 <section class="band">
   <div class="wrap stack">
@@ -550,6 +1248,8 @@ s = r + e·x        ── s を送る ──▶          s·G == R + e·P ?　�
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>計算複雑性 — 「解くのは大変、確かめるのは楽」を物差しにする</summary>
 <!-- ============================================ 3 -->
 <section class="band">
   <div class="wrap stack">
@@ -640,6 +1340,8 @@ s = r + e·x        ── s を送る ──▶          s·G == R + e·P ?　�
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>証明システムに求める性質 — 信頼性の軸と、スケーラビリティの軸</summary>
 <!-- ============================================ 4 -->
 <section class="band">
   <div class="wrap stack">
@@ -680,6 +1382,8 @@ s = r + e·x        ── s を送る ──▶          s·G == R + e·P ?　�
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>ゼロ知識証明 = 算術化 + コミットメント + 証明システム（部品表）</summary>
 <!-- ============================================ 5 -->
 <section class="band">
   <div class="wrap stack">
@@ -725,6 +1429,8 @@ s = r + e·x        ── s を送る ──▶          s·G == R + e·P ?　�
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>GKR — 回路をレイヤーに切って、SumCheck で上から降りる（長文版）</summary>
 <!-- ============================================ 6 : GKR -->
 <section class="band">
   <div class="wrap stack">
@@ -869,65 +1575,8 @@ W̃₀ = Σ_{a,b∈{0,1}} g₀(a,b) = g₀(0,1) = 1·(4 + 8) = 12 ≡ 1  ✓</pr
   </div>
 </section>
 
-<!-- ============================================ 7 : LAB 1 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ 1</p>
-      <h2>SumCheck を回す — 検証者の乱数と、嘘の証明者</h2>
-      <p>
-        レイヤー 0 の SumCheck を F₁₁ で回します。<strong>あなたが検証者</strong>で、r₁ と r₂ を選びます。
-        証明者を「嘘」にすると、主張した値だけを変えて辻褄合わせの多項式を送ってきます。
-        右の地図は、いまの主張に対して 121 通りの (r₁, r₂) のどれが受理してしまうかです。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card">
-        <div class="card-head"><h3>設定</h3><span class="eyebrow">F₁₁ / g₀ のレイヤー 0</span></div>
-        <div class="card-body">
-          <div class="field">
-            <div class="field-label"><span>入力 (x₁,x₂,x₃,x₄)</span><span class="hint">回路は同じ、値だけ変える</span></div>
-            <div class="segments" id="sc-in" role="group" aria-label="入力"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>証明者</span><span class="hint">嘘なら主張値を選ぶ</span></div>
-            <div class="segments" id="sc-mode" role="group" aria-label="証明者"></div>
-          </div>
-          <div class="field" id="sc-claim-field">
-            <div class="field-label"><span>主張する値</span><span class="hint">本当の値と違うものを</span></div>
-            <div class="segments" id="sc-claim" role="group" aria-label="主張値"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>r₁（ラウンド 0 の乱数）</span><span class="hint">検証者が選ぶ</span></div>
-            <div class="segments" id="sc-r1" role="group" aria-label="r1"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>r₂（ラウンド 1 の乱数）</span><span class="hint">検証者が選ぶ</span></div>
-            <div class="segments" id="sc-r2" role="group" aria-label="r2"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>受理地図</span><span class="hint">横 r₁ / 縦 r₂。赤 = 受理してしまう</span></div>
-            <div class="heat" id="sc-heat" aria-label="受理地図"></div>
-            <p class="caption" id="sc-heat-note">—</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="verdict">
-          <div class="banner" id="sc-banner">—</div>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="sc-note">—</p>
-        </div>
-        <div class="work">
-          <p class="eyebrow">やりとり</p>
-          <div class="flow" id="sc-flow"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>STARK — 実行の記録を多項式にして、「割り切れるか」だけを見る（長文版）</summary>
 <!-- ============================================ 8 : STARK -->
 <section class="band">
   <div class="wrap stack">
@@ -1077,73 +1726,8 @@ a を全部 5、y₃ を 13 にした「自己整合」な改ざん（4+8=12 の
   </div>
 </section>
 
-<!-- ============================================ 9 : LAB 2 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ 2</p>
-      <h2>トレースを改ざんして、商多項式が消えるのを見る</h2>
-      <p>
-        F₁₇ のトレース（公開入力 3, 1, 2, 4）のマスを直接書き換えられます。
-        書き換えるたびに、遷移多項式 → 制約多項式 → Z_H で割った商と余り → コセット上の低次数テスト、
-        そして商が存在するときは FRI の折り畳みまで計算し直します。
-      </p>
-      <p>
-        1 つ注意があります。講義のトイ AIR が縛っているのは <code>a₁ = x₁+x₂</code>、<code>m₂ = x₃·x₄</code>、
-        <code>y₃ = a₂+m₂</code> の 3 本だけです。<strong>制約の無いマス（y₁ など）は書き換えても通ります</strong>——
-        Week 1 で見たアンダー制約そのもの。実物の AIR は境界制約（初期状態が 0）と「値を保持する」制約
-        （<code>A(ωX) − A(X) = 0</code> など）を足して全マスを縛ります。「y₁ を 5 に」を押して確かめてください。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card">
-        <div class="card-head"><h3>実行トレース</h3><span class="eyebrow">F₁₇ / ω = 4 / H = {1,4,16,13}</span></div>
-        <div class="card-body">
-          <div class="table-scroll" style="border:none;">
-            <table class="trace" id="st-table">
-              <thead><tr><th>t</th><th>X = ω^t</th><th>a</th><th>m</th><th>y</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-          <div class="btn-row">
-            <button class="btn-sm" type="button" data-preset="honest">正しいトレースに戻す</button>
-            <button class="btn-sm" type="button" data-preset="y13">y₃ を 13 に</button>
-            <button class="btn-sm" type="button" data-preset="m9">m を 9 に</button>
-            <button class="btn-sm" type="button" data-preset="a5">a を 5・y₃ を 13 に（自己整合）</button>
-            <button class="btn-sm" type="button" data-preset="y1">y₁ を 5 に（制約の無いマス）</button>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>FRI の β₁</span><span class="hint">検証者の乱数</span></div>
-            <div class="segments" id="st-b1" role="group" aria-label="beta1"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>FRI の β₂</span><span class="hint">検証者の乱数</span></div>
-            <div class="segments" id="st-b2" role="group" aria-label="beta2"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>クエリ点 x</span><span class="hint">評価ドメイン g = 2 の冪</span></div>
-            <div class="segments" id="st-x" role="group" aria-label="query"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="verdict">
-          <div class="banner" id="st-banner">—</div>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="st-note">—</p>
-        </div>
-        <div class="work">
-          <p class="eyebrow">遷移多項式 → 制約多項式 → 商</p>
-          <pre id="st-poly">—</pre>
-          <p class="eyebrow">FRI</p>
-          <pre id="st-fri">—</pre>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>PLONK — ゲートを表にして、「型」と「配線」を別々の多項式で縛る（長文版）</summary>
 <!-- ============================================ 10 : PLONK -->
 <section class="band">
   <div class="wrap stack">
@@ -1254,64 +1838,8 @@ Verify:            f(τ) = (τ − α)·q(τ) + f(α) を、ペアリングで�
   </div>
 </section>
 
-<!-- ============================================ 11 : LAB 3 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">ラボ 3</p>
-      <h2>PLONK の表を書き換える — ゲート制約と配線制約は別の目で見る</h2>
-      <p>
-        witness の 9 マス（F₁₇）を書き換えられます。行ごとのゲート方程式、2 本のコピー制約、
-        そして β, γ を変えながらの大積（F₁₀₁）を同時に計算します。
-        <strong>ゲート制約が全部緑でも大積が赤になる表</strong>を作ってみてください。
-      </p>
-    </div>
-
-    <div class="lab">
-      <div class="card">
-        <div class="card-head"><h3>ゲート表</h3><span class="eyebrow">値は F₁₇ / 大積は F₁₀₁</span></div>
-        <div class="card-body">
-          <div class="table-scroll" style="border:none;">
-            <table class="trace" id="pk-table">
-              <thead><tr><th></th><th>型</th><th>L</th><th>R</th><th>O</th><th>セレクター</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-          <div class="btn-row">
-            <button class="btn-sm" type="button" data-preset="honest">正しい表に戻す</button>
-            <button class="btn-sm" type="button" data-preset="bad">gate 2 を (5, 8, 13) に</button>
-            <button class="btn-sm" type="button" data-preset="swap">gate 2 の L と R を入れ替える</button>
-            <button class="btn-sm" type="button" data-preset="wrongo">gate 1 の O を 9 に</button>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>β</span><span class="hint">検証者の乱数（F₁₀₁）</span></div>
-            <div class="segments" id="pk-beta" role="group" aria-label="beta"></div>
-          </div>
-          <div class="field">
-            <div class="field-label"><span>γ</span><span class="hint">検証者の乱数（F₁₀₁）</span></div>
-            <div class="segments" id="pk-gamma" role="group" aria-label="gamma"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="verdict">
-          <div class="banner" id="pk-banner">—</div>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); margin:0;" id="pk-note">—</p>
-        </div>
-        <div class="work">
-          <p class="eyebrow">ゲート制約（行の中）</p>
-          <div class="flow" id="pk-gates"></div>
-          <p class="eyebrow">コピー制約（行をまたぐ）</p>
-          <div class="flow" id="pk-copies"></div>
-          <p class="eyebrow">大積 — 累算器の 1 周</p>
-          <pre id="pk-grand">—</pre>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+</details>
+<details class="appx"><summary>証明スキームのゼロ知識化 — 多項式にランダムを足して、H の上だけ元のまま残す</summary>
 <!-- ============================================ 12 : ZK -->
 <section class="band">
   <div class="wrap stack">
@@ -1381,6 +1909,8 @@ Verify:            f(τ) = (τ − α)·q(τ) + f(α) を、ペアリングで�
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>3 スキームの計算量・証明サイズ・前提 — 講義で伏せられていた答え合わせ</summary>
 <!-- ============================================ 13 : 比較 -->
 <section class="band">
   <div class="wrap stack">
@@ -1438,6 +1968,8 @@ Verify:            f(τ) = (τ − α)·q(τ) + f(α) を、ペアリングで�
   </div>
 </section>
 
+</details>
+<details class="appx"><summary>ZK, or not ZK — AI エージェント保険のケーススタディを、3 部品で考える</summary>
 <!-- ============================================ 14 : ワークショップ -->
 <section class="band">
   <div class="wrap stack">
@@ -1495,98 +2027,7 @@ Verify:            f(τ) = (τ − α)·q(τ) + f(α) を、ペアリングで�
   </div>
 </section>
 
-<!-- ============================================ 15 : QUIZ -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">検問クイズ</p>
-      <h2>検証者検問 — 少ない手数で嘘を見つける</h2>
-      <p>
-        読んだだけでは定着しない。ここでは<strong>あなたが検証者の席に座り</strong>、
-        SumCheck のラウンド、トレースの制約、ゲート表、FRI の折り畳みを審査する。問題は毎回その場で生成され、
-        判定は上のラボと同じ計算器が行う。<strong>3 回誤判定したら、その回は終了。</strong>
-      </p>
-    </div>
-
-    <div class="card" id="quiz">
-      <div class="quiz-pane" id="quiz-start">
-        <div class="quiz-hero">
-          <p class="eyebrow">検問モードを選ぶ</p>
-          <h3>10 問・ライフ 3</h3>
-          <p style="font-size:var(--fs-sm); color:var(--ink-2); max-width:60ch;">
-            誤答するとその場で解説が出る。分野を絞って弱点だけ潰すこともできる。
-          </p>
-        </div>
-        <div class="mode-grid" id="mode-grid"></div>
-        <p class="quiz-best" id="quiz-best"></p>
-      </div>
-
-      <div class="quiz-pane" id="quiz-play" hidden>
-        <div class="quiz-bar">
-          <span class="qprog" id="qprog">1 / 10</span>
-          <span class="qcat" id="qcat">—</span>
-          <span class="lives" id="lives" role="img" aria-label="残りライフ 3 / 3"></span>
-        </div>
-        <div class="qmain">
-          <p class="qtext" id="qtext"></p>
-          <div class="qbody" id="qbody"></div>
-          <div class="choices" id="choices"></div>
-          <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
-        </div>
-        <div class="quiz-foot">
-          <button class="btn-ghost" id="btn-quit" type="button">やめる</button>
-          <button class="btn-main" id="btn-next" type="button" hidden>次の検問へ</button>
-        </div>
-      </div>
-
-      <div class="quiz-pane" id="quiz-result" hidden>
-        <div class="rank-box">
-          <span class="rank" id="rank">—</span>
-          <div class="rank-meta">
-            <p class="rank-title" id="rank-title">—</p>
-            <p class="rank-sub" id="rank-sub">—</p>
-          </div>
-        </div>
-        <div class="cat-stats" id="cat-stats"></div>
-        <div class="quiz-foot">
-          <button class="btn-main" id="btn-again" type="button">もう一度</button>
-          <button class="btn-ghost" id="btn-modes" type="button">モードを選び直す</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================ 16 -->
-<section class="band">
-  <div class="wrap stack">
-    <div class="band-head">
-      <p class="eyebrow">持ち帰り</p>
-      <h2>持っておくと効く問い</h2>
-    </div>
-    <div class="split">
-      <div class="callout">
-        <p class="eyebrow">読み終わったら答えられるはずのこと</p>
-        <p>・NP が「最も標準的な証明システム」だと言えるのはなぜか。証明者と検証者はそれぞれ何をするか。</p>
-        <p>・SumCheck で検証者が「和を足さない」のに納得できる理由を、Schwartz–Zippel の一言で言うと。</p>
-        <p>・「H の全点で 0」を「Z_H で割り切れる」に変えると、何が検証しやすくなるのか。</p>
-        <p>・PLONK でゲート制約とコピー制約の両方が要る理由を、壊れる witness の例つきで。</p>
-        <p>・ブラインド多項式 f + Z_H·R が、H の上で元の値を保つ理由と、外でランダムになる理由。</p>
-        <p>・KZG の信頼設定で「τ を捨てる」が必要な理由。</p>
-      </div>
-      <div class="callout amber">
-        <p class="eyebrow">次に向けて</p>
-        <p>
-          今週の 3 部品は、これ以降の週の地図です。新しいスキーム名が出てきたら、
-          <b>算術化は何か・コミットメントは何か・証明システムは何か</b>の 3 つを埋めてみてください。
-          埋まらない箱があれば、そこがそのスキームの新しさです。
-        </p>
-        <p>
-          そして Week 3 の Schnorr に戻ると、あれは<b>算術化なし・コミットメント R = rG・証明システムはシグマプロトコル</b>の
-          最小構成でした。今週の GKR / STARK / PLONK は、その「主張」を「x を知っている」から
-          「計算全体が正しい」に広げるために、3 つの箱を大きくしたものです。
-        </p>
-      </div>
+</details>
     </div>
   </div>
 </section>
@@ -2175,7 +2616,7 @@ Verify:            f(τ) = (τ − α)·q(τ) + f(α) を、ペアリングで�
   var heads = document.querySelectorAll(".band-head h2");
   Array.prototype.forEach.call(heads, function (h, i) {
     var section = h.closest(".band");
-    if (!section || i === 0) return;
+    if (!section || i === 0 || h.closest(".appx")) return;
     if (!section.id) section.id = "sec-" + i;
     var li = document.createElement("li"), a = document.createElement("a");
     a.href = "#" + section.id; a.textContent = h.textContent.trim();
@@ -2457,6 +2898,217 @@ Verify:            f(τ) = (τ − α)·q(τ) + f(α) を、ペアリングで�
   });
   showBest();
 })();
+
+
+// ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む）— Week 4 ----
+(function () {
+  "use strict";
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; say.textContent = st.say; step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": " + st.mean)); step.appendChild(mean);
+        if (done) {
+          if (st.out !== "") { var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp); }
+          if (st.then) { var then = document.createElement("p"); then.className = "drill-then"; then.textContent = st.then; step.appendChild(then); }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          if (st.out === "") {
+            var note = document.createElement("p"); note.className = "drill-mean"; note.textContent = "この行は何も表示しません（代入だけ）。打ったら「次へ」。";
+            var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-main"; nx.textContent = "次へ";
+            nx.addEventListener("click", function () { cur++; save(); render(); });
+            step.appendChild(note); form.appendChild(nx); step.appendChild(form); body.appendChild(step); continue;
+          }
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
+
+  // ===== ドリル A: SumCheck（F11） =====
+  var A = [
+    { q: "回路の値 — レイヤー 1 の 2 つの値と、出力", say: "入力 (3, 1, 2, 4)。レイヤー 1 は y₀ = x₁ + x₂、y₁ = x₃·x₄。出力はその和。全部 mod 11。",
+      cmd: "x = (3, 1, 2, 4); y0 = (x[0] + x[1]) % 11; y1 = (x[2] * x[3]) % 11; (y0, y1, (y0 + y1) % 11)", mean: "y₀ = 4、y₁ = 8、出力 = 12 ≡ 1。", out: "(4, 8, 1)",
+      then: "(4, 8, 1)。証明者が検証者に納得させたい主張は「出力は 1 だ」。普通なら検証者が 4 + 8 を自分で足せば済みますが、本物の回路は足す項が 2ᵏ 個（何百万）あるので、「全部足さずに」納得する方法が要ります。それが SumCheck です。" },
+    { q: "多項式に伸ばす — 表 {0→4, 1→8} を、0 でも 1 でもない点でも値が決まる式に", say: "W̃₁(z) = y₀(1−z) + y₁z。z = 0 で y₀、z = 1 で y₁ になる 1 次式（2 点で直線、中 2）。z = 2 でも値が決まるのがミソ。",
+      cmd: "W1 = lambda z: (y0 * (1 - z) + y1 * z) % 11; [W1(0), W1(1), W1(2)]", mean: "表の 2 つの値を通る直線を、0, 1, 2 で評価。", out: "[4, 8, 1]",
+      then: "[4, 8, 1]。z = 0 と 1 では表の値そのもの。z = 2 では 4 + 8 = 12 ≡ 1 という「表に無い値」が決まりました。あとで検証者が「2 のところの値は？」と聞くために、表を式に伸ばしておく（多重線形拡張 = MLE）。" },
+    { q: "配線も式にする — g₀(a, b)", say: "レイヤー 0 のゲートは「レイヤー 1 の番地 0 と番地 1 を足す」。それを g₀(a,b) = (1−a)·b·(W̃₁(a) + W̃₁(b)) と書きます。(1−a)·b は (a,b) = (0,1) のときだけ 1、他の格子点では 0。",
+      cmd: "g0 = lambda a, b: ((1 - a) * b * (W1(a) + W1(b))) % 11; [g0(0,0), g0(0,1), g0(1,0), g0(1,1)]", mean: "4 つの格子点で g₀ を評価。", out: "[0, 1, 0, 0]",
+      then: "[0, 1, 0, 0]。(0,1) のところだけ 4 + 8 = 12 ≡ 1、他は 0。つまり「出力 = Σ_{a,b} g₀(a,b)」という形に書き直せた。これで主張は『ある多項式を 0/1 の全組み合わせで足すと 1』という形になり、レイヤーが深くなっても主張は必ずこの形（格子点全部の和）になります。" },
+    { q: "主張", say: "実際に 4 項の和を足してみる（検証者はこれをやりたくない。項が 2ᵏ 個あるから）。",
+      cmd: "sum(g0(a, b) for a in (0, 1) for b in (0, 1)) % 11", mean: "格子点 4 つの和。", out: "1",
+      then: "1。主張どおり「出力は 1」。ただしいま私たちは 4 項を全部足して確かめました — 検証者はこれをやりたくない側です。本物の回路では項が 2ᵏ 個（何百万）あるので、全部足すのは「計算をやり直す」のと同じ手間になります。ここからが SumCheck: この和を、検証者が 4 項足さずに確かめる手順です。" },
+    { q: "ラウンド 0 — 証明者が一変数多項式 p₁ を送る", say: "証明者は p₁(x) = Σ_b g₀(x, b)（b だけ足して、a を変数 x として残した式）を送ります。講義の答えは p₁(x) = 1 + 3x + 7x²。検証者は「p₁(0) + p₁(1) が主張の 1 に等しいか」だけ見る。",
+      cmd: "p1 = lambda t: (1 + 3 * t + 7 * t**2) % 11; (p1(0) + p1(1)) % 11", mean: "送られてきた p₁ の 2 点の和。", out: "1",
+      then: "1。主張と一致。検証者は 2 点の足し算をしただけ。もし p₁ が本当に Σ_b g₀(x,b) なら、p₁(0) + p₁(1) は 4 項の和そのもの（a = 0 の 2 項 + a = 1 の 2 項）なので、一致して当然。問題は「p₁ が本当にその式か」— 次の行で確かめます。" },
+    { q: "ラウンド 0", say: "p₁ が本当に Σ_b g₀(x, b) と同じ式か、0〜10 全部で比べてみる（これは検算。検証者はやらない）。",
+      cmd: "[(g0(t, 0) + g0(t, 1)) % 11 == p1(t) for t in range(11)]", mean: "全部の t で一致するか。", out: "[True, True, True, True, True, True, True, True, True, True, True]",
+      then: "全部 True。講義の p₁ = 1 + 3x + 7x² は確かに「b だけ足して a を残した式」でした。ただしこの 11 点の検算は、検証者の手には重すぎます（本物では点の数が 2²⁵⁴）。だから検証者は全部見ない — 次の 1 行で「ランダムな 1 点」だけ見ます。1 点で十分な理由もそこで出てきます。" },
+    { q: "ラウンド 0", say: "検証者がランダムに r₁ = 2 を選び、p₁(2) を計算。これが次のラウンドの「主張」になります。",
+      cmd: "p1(2)", mean: "r₁ = 2 での p₁ の値。", out: "2",
+      then: "2。次の主張は「Σ_b g₀(2, b) = 2」— a を 2 に固定した和。変数が 1 つ減りました。なぜ 1 点でよいか: 嘘の p₁′ は本物と違う多項式なので、2 次どうしなら一致する点は 2 個以下。11 点からランダムに選べば 9/11 以上で露見する。" },
+    { q: "ラウンド 1 — 証明者が p₂ を送る", say: "証明者は p₂(y) = g₀(2, y) を送る。講義の答えは 6y + 7y²。検証者は p₂(0) + p₂(1) が前ラウンドの主張 2 に等しいか見る。",
+      cmd: "p2 = lambda t: (6 * t + 7 * t**2) % 11; (p2(0) + p2(1)) % 11", mean: "p₂ の 2 点の和。", out: "2",
+      then: "2 = p₁(2)。前のラウンドで決まった主張「Σ_b g₀(2, b) = 2」と、今届いた p₂ の 2 点の和が一致しました。検証者がやったのは、また 2 点の足し算だけ。変数が 2 個しかないので、これで「2 変数の和」は全部「1 変数の多項式の 2 点の和」に分解されました。残るは p₂ が本物かどうか — それは最後に検証者が自分で 1 点計算して確かめます。" },
+    { q: "ラウンド 1", say: "検算: p₂ は本当に g₀(2, y) か。",
+      cmd: "[g0(2, t) == p2(t) for t in range(11)]", mean: "全部の t で一致するか（検証者はやらない）。", out: "[True, True, True, True, True, True, True, True, True, True, True]",
+      then: "全部 True。p₂ = 6y + 7y² は本当に g₀(2, y) でした。これも検証者はやりません（11 点は多すぎる）。「証明者が正直ならこうなる」を私たちが検算しただけです。次の行が本番で、検証者が自分の手で 1 点だけ計算します。" },
+    { q: "最後 — 検証者が自分で 1 点だけ計算する", say: "検証者が r₂ = 3 を選び、p₂(3) と、自分で計算した g₀(2, 3) を比べる。g₀ の中の W̃₁(2), W̃₁(3) は本来「証明者が主張する値」で次のレイヤーで確かめるが、ここでは手元の W1 で計算。",
+      cmd: "p2(3), g0(2, 3)", mean: "左: 証明者の多項式の値。右: 検証者が自分で計算した値。", out: "(4, 4)",
+      then: "(4, 4)、一致。検証者がやったこと: 2 点の足し算 2 回、1 点の評価 2 回、最後に g₀ を 1 回。4 項の和は一度も足していない。項が 2ᵏ 個でも、ラウンド数は k（変数の数）だけ。これが SumCheck。" },
+    { q: "嘘の証明者 — 主張を 5 だと偽る", say: "証明者が「出力は 5 だ」と嘘をつく。ラウンド 0 の検査 p₁′(0) + p₁′(1) = 5 を通すには、本物に 4·(1 − x) を足せばよい（x = 0 で +4、x = 1 で +0 なので和が 4 増える）。",
+      cmd: "p1c = lambda t: (p1(t) + 4 * (1 - t)) % 11; (p1c(0) + p1c(1)) % 11", mean: "偽物 p₁′ の 2 点の和。", out: "5",
+      then: "5。嘘の主張と辻褄が合ってしまった。「和の検査」は偽物でも通せる。でも偽物は本物と違う多項式になったので、ランダムな点ではずれます。" },
+    { q: "嘘の証明者", say: "検証者が r₁ = 2 を選んだときの偽物の値。",
+      cmd: "p1c(2)", mean: "偽物を r₁ = 2 で評価。", out: "9",
+      then: "9（本物は 2）。偽物 p₁′ = p₁ + 4(1 − x) は x = 2 で 4·(1 − 2) = −4 ≡ 7 だけずれるので、2 + 7 = 9。検証者は本物の 2 を知らないので、この時点では気づけません。次の主張は「Σ_b g₀(2, b) = 9」という嘘になり、証明者はさらに p₂′ で辻褄を合わせに来ます。嘘は嘘を呼ぶ — でも最後に、検証者が自分で計算する 1 点が待っています。" },
+    { q: "嘘の証明者", say: "証明者は p₂′ = p₂ + (9 − 2)·(1 − y) を送って和の検査を通す。最後に検証者が r₂ = 3 で p₂′(3) と自分の g₀(2, 3) を比べる。",
+      cmd: "p2c = lambda t: (p2(t) + (p1c(2) - (p2(0) + p2(1))) * (1 - t)) % 11; (p2c(0) + p2c(1)) % 11, p2c(3), g0(2, 3)", mean: "左から: p₂′ の 2 点の和（= 9 で辻褄）、p₂′(3)、検証者の g₀(2,3)。", out: "(9, 1, 4)",
+      then: "(9, 1, 4)。和の検査は 9 で通ります（辻褄合わせは何段でもできる）。でも最後に検証者が自分の手で g₀(2, 3) = 4 を計算し、証明者の p₂′(3) = 1 と比べると 1 ≠ 4 → 拒否。嘘をつき通すには p₂′ を本物と違う多項式にするしかなく、違う多項式はランダムな点でずれます。「検証者が最後に自分で 1 点計算する」のが効いているのです。" },
+    { q: "嘘の証明者 — 何回に 1 回すり抜けるか", say: "r₁ = 2 に固定して、r₂ を 0〜10 全部試す。偽物の足し分 (1 − y) が 0 になる点でだけ見逃す。",
+      cmd: "sum(1 for r2 in range(11) if p2c(r2) == g0(2, r2))", mean: "見逃す r₂ の個数。", out: "1",
+      then: "1（r₂ = 1 のときだけ）。11 分の 1。体を F₁₁ から 2²⁵⁴ 個の体にすれば、見逃す確率は事実上 0。これが「確率的な健全性」— 絶対に落ちるのではなく、ランダムな点で聞くからほぼ落ちる。" }
+  ];
+
+  // ===== ドリル B: STARK（F17） =====
+  var B = [
+    { q: "実行トレース — 計算を「時間ごとの表」にする", say: "a = 加算結果、m = 乗算結果、y = 最終結果。t = 0 は初期状態、t = 1 で a ← 3 + 1、t = 2 で m ← 2·4、t = 3 で y ← a + m。",
+      cmd: "a = [0, 4, 4, 4]; m = [0, 0, 8, 8]; yv = [0, 0, 0, 12]; (a, m, yv)", mean: "3 列 × 4 行の表（スライド 20）。", out: "([0, 4, 4, 4], [0, 0, 8, 8], [0, 0, 0, 12])",
+      then: "これが実行トレース。回路の代わりに「各ステップで変数がどうなっていたか」を時間順に並べた表です。行が時間（t = 0, 1, 2, 3）、列が変数（a, m, y）。プログラムを 1 回実行すれば、この表は必ず作れます。これから、この表を「多項式が満たす式」に置き換えます — 表のままでは、検証者が全部の行を読むしかないからです。" },
+    { q: "評価ドメイン — 行番号 t を ω^t に置く", say: "F₁₇ で ω = 4 は 4 回で 1 に戻る（位数 4）。行 t を X = ω^t という点に置く。",
+      cmd: "[pow(4, t, 17) for t in range(5)]", mean: "4⁰, 4¹, 4², 4³, 4⁴ を mod 17 で。", out: "[1, 4, 16, 13, 1]",
+      then: "[1, 4, 16, 13, 1]。4 行に 4 つの違う点 {1, 4, 16, 13} が対応し、4 乗で 1 に戻る。なぜこう置くか: 「次の行」が X → 4X という掛け算になる（行 t+1 の点 = 行 t の点 × ω）。" },
+    { q: "遷移多項式 — 列 a を、4 点を通る 3 次式にする", say: "講義の A(X) = 3 − X − X² − X³（mod 17 では 3 + 16X + 16X² + 16X³）。4 点で評価すると列 a に戻るか。",
+      cmd: "A = lambda X: (3 + 16*X + 16*X**2 + 16*X**3) % 17; [A(1), A(4), A(16), A(13)]", mean: "A を H の 4 点で。", out: "[0, 4, 4, 4]",
+      then: "[0, 4, 4, 4] = 列 a。4 点 (1,0), (4,4), (16,4), (13,4) を通る 3 次式が A です。「4 点を通る 3 次式は 1 本に決まる」のは、2 点で直線が 1 本に決まるのと同じ仕組み（ラグランジュ補間）。表の列 1 本が、式 1 本になりました。表を読む代わりに、式の値を聞けばよくなります。" },
+    { q: "遷移多項式", say: "列 m と y も。",
+      cmd: "M = lambda X: (4 + 6*X + 7*X**3) % 17; Y = lambda X: (3 + 12*X + 14*X**2 + 5*X**3) % 17; [M(h) for h in (1,4,16,13)], [Y(h) for h in (1,4,16,13)]", mean: "M, Y を 4 点で。", out: "([0, 0, 8, 8], [0, 0, 0, 12])",
+      then: "([0, 0, 8, 8], [0, 0, 0, 12])。列 m と y も戻りました。3 列が 3 本の式 A, M, Y に置き換わった。ここまでは「表 → 式」の翻訳で、まだ何も検証していません。次に「行と行の間の規則」を式で書きます。" },
+    { q: "遷移制約 — 「次の行」の規則を式で", say: "規則は 3 本: 行 0→1 で a が 4 になる（A(ω·1) − 4 = 0）、行 1→2 で m が 8 になる（M(ω·4) − 8 = 0）、行 2→3 で y = a + m（Y(ω·16) − A(16) − M(16) = 0）。",
+      cmd: "A(4 * 1 % 17) - 4, M(4 * 4 % 17) - 8, (Y(4 * 16 % 17) - A(16) - M(16)) % 17", mean: "3 本の規則を、それぞれの行で評価。", out: "(0, 0, 0)",
+      then: "(0, 0, 0)。3 本とも成り立ちました。ポイントは「次の行の値」を A(ω·X) と書けること — 行 t の点が ω^t なので、行 t+1 の点は ω·ω^t。X を ω 倍するだけで「1 行下」を指せます。表の「行番号 t+1」を式の言葉で書くために、行を ω の冪に置く必要があったのです。" },
+    { q: "制約多項式 C — 3 本を 1 本にまとめる", say: "各行で「その行の規則だけ」が効くように選択多項式 S_i（その行で 1、他で 0）を掛けて足す。講義の結果 C(X) = 2 − 5X − 5X² − 2X⁴ + 5X⁵ + 5X⁶（mod 17 で 2 + 12X + 12X² + 15X⁴ + 5X⁵ + 5X⁶）。H の 4 点で見る。",
+      cmd: "Cc = lambda X: (2 + 12*X + 12*X**2 + 15*X**4 + 5*X**5 + 5*X**6) % 17; [Cc(h) for h in (1, 4, 16, 13)]", mean: "C を H の 4 点で。", out: "[0, 0, 0, 0]",
+      then: "全部 0。3 本の規則を選択多項式で 1 本にまとめた C は、H の 4 点 {1, 4, 16, 13} で全部 0 になりました。つまり「トレースが正しい」⇔「C が H の全点で 0」に言い換わった。スライドの「C = 0」はこの意味で、多項式として 0（係数が全部 0）ではありません — それを次の行で確かめます。" },
+    { q: "制約多項式 C", say: "H の外ではどうか。0〜16 全部。",
+      cmd: "[Cc(X) for X in range(17)]", mean: "C(0) 〜 C(16)。", out: "[2, 0, 12, 16, 0, 8, 12, 1, 15, 5, 12, 2, 3, 0, 13, 1, 0]",
+      then: "1, 4, 13, 16 で 0、他はほぼ 0 でない。C は 6 次の立派な多項式。検証者が「H の全点で 0」を確かめるのに、本物（行が 2²⁰）では全点は見られない。次の一手。" },
+    { q: "消滅多項式 Z_H — H の全点で 0 になる最小の式", say: "H = {1, 4, 16, 13} は ω の冪なので Z_H(X) = (X−1)(X−4)(X−16)(X−13) = X⁴ − 1 という短い形。",
+      cmd: "Z = lambda X: (X**4 - 1) % 17; [Z(h) for h in (1, 4, 16, 13)], Z(2)", mean: "Z を H の 4 点と、外の点 2 で。", out: "([0, 0, 0, 0], 15)",
+      then: "([0, 0, 0, 0], 15)。H では 0、外の点 2 では 15。Z_H = X⁴ − 1 は「H の 4 点でちょうど 0 になる、いちばん次数の低い式」です。因数定理（中 3: f(a) = 0 なら f は (X − a) で割り切れる）を 4 回使うと、C が H の全点で 0 なら C は (X−1)(X−4)(X−16)(X−13) = Z_H で割り切れる。「4 点で 0 か」を「1 回割り切れるか」に変える道具です。" },
+    { q: "商多項式 Q — 割り切れるか", say: "講義の Q₀(X) = 5X² + 5X − 2（mod 17 で 15 + 5X + 5X²）。C = Z·Q が全部の X で成り立つか。",
+      cmd: "Q = lambda X: (15 + 5*X + 5*X**2) % 17; [(Cc(X) - Z(X) * Q(X)) % 17 for X in range(17)]", mean: "C − Z·Q を 0〜16 全部で。", out: "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+      then: "全部 0。割り切れた。問いが入れ替わる: 「C は H の全点で 0 か」→「Q = C/Z_H は多項式か（次数 2 以下か）」。証明者は Q を差し出し、検証者は Q の次数が低いことを確かめればよい。" },
+    { q: "商多項式 Q", say: "検証者はランダムな 1 点（2）で C(2) = Z(2)·Q(2) を見る。",
+      cmd: "Cc(2), Z(2) * Q(2) % 17", mean: "左辺と右辺を X = 2 で。", out: "(12, 12)",
+      then: "(12, 12)。一致。検証者は C, Z, Q の値を X = 2 の 1 点で聞いただけで、4 行（本物は 2²⁰ 行）の表を一度も読んでいません。もし C ≠ Z·Q（割り切れていない）なら、2 つの違う多項式は高々（次数）個の点でしか一致しないので、ランダムな 1 点で高確率でずれます（Schwartz–Zippel）。ただし「Q が本当に次数 2 以下か」はまだ確かめていない — それが FRI です。" },
+    { q: "FRI — 偶数次と奇数次に分けて折り畳む", say: "Q₀(X) = Q_even(X²) + X·Q_odd(X²)。Q₀ = 5X² + 5X − 2 なら Q_even(Y) = 5Y − 2（≡ 5Y + 15）、Q_odd(Y) = 5。全部の X で一致するか。",
+      cmd: "Qe = lambda Y_: (15 + 5*Y_) % 17; Qo = lambda Y_: 5; [Q(X) == (Qe(X*X % 17) + X * Qo(X*X % 17)) % 17 for X in range(17)]", mean: "分解が正しいか 0〜16 で。", out: "[True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]",
+      then: "全部 True。2 次の Q₀ が「1 次の Q_even」と「0 次の Q_odd」に分かれました。偶数次の項と奇数次の項を分けて X² でまとめると、次数がちょうど半分になるのがミソです。次の行で、この 2 本を検証者の乱数で 1 本に混ぜ、次数を半分にします。" },
+    { q: "FRI", say: "検証者の β = 3 で Q₁(Y) = Q_even(Y) + 3·Q_odd(Y) を作る。次数が半分になる。",
+      cmd: "Q1 = lambda Y_: (Qe(Y_) + 3 * Qo(Y_)) % 17; [Q1(0), Q1(1), Q1(2)]", mean: "Q₁ = 5Y + 13 を 0, 1, 2 で。", out: "[13, 1, 6]",
+      then: "Q₁ = 5Y + 13（講義スライド 23）。次数 2 → 1。もう 1 回折れば定数になり、それは平文で送れる。折り畳むたびに次数が半分なので、log 回で終わる。" },
+    { q: "FRI — クエリ: x と −x の 2 点で偶奇部分を復元", say: "検証者が x = 8 を選ぶ。証明者が Q₀(8) と Q₀(−8) = Q₀(9) を（Merkle 経路つきで）開示。",
+      cmd: "Q(8), Q(9)", mean: "開示された 2 つの値。", out: "(1, 6)",
+      then: "(1, 6)。8 と 9 は「x と −x」（8 + 9 = 17 ≡ 0）。x² は同じ（64 ≡ 13）。この 2 点があれば、偶数部分と奇数部分が別々に復元できる。" },
+    { q: "FRI", say: "Q_even(x²) = (Q₀(x) + Q₀(−x))/2。2 の逆元は 9。直接計算と比べる。",
+      cmd: "(Q(8) + Q(9)) * 9 % 17, Qe(8 * 8 % 17)", mean: "左: 2 点から復元。右: Q_even(13) を直接。", out: "(12, 12)",
+      then: "(12, 12)。一致。同様に Q_odd(x²) = (Q₀(x) − Q₀(−x))/(2x) も復元でき、Q₁(x²) = Q_even + β·Q_odd のはずの値が Q₁ の開示と一致すれば、この折り畳みは本物。数か所クエリすれば「本当に半分の次数に折り畳まれている」が確かめられる（Schwartz–Zippel）。" },
+    { q: "FRI", say: "Q_odd(x²) = (Q₀(x) − Q₀(−x))/(2x)。(2·8) の逆元は pow(16, 15, 17) = 16。",
+      cmd: "(Q(8) - Q(9)) * pow(2 * 8, 15, 17) % 17, Qo(8 * 8 % 17)", mean: "左: 復元。右: 直接。", out: "(5, 5)",
+      then: "(5, 5)。偶奇両方が 2 点から出た。検証者は Q₀ 全体を読まず、数点の開示だけで低次数性を確かめる。" },
+    { q: "改ざん — y₃ を 12 → 13 にすると", say: "最終結果を 1 だけ変えたトレースの制約多項式 C′（係数は再計算済み: 1 + 14X + 9X² + 4X³ + 12X⁴ + 7X⁵ + 4X⁶）を H の 4 点で。",
+      cmd: "Cb = lambda X: (1 + 14*X + 9*X**2 + 4*X**3 + 12*X**4 + 7*X**5 + 4*X**6) % 17; [Cb(h) for h in (1, 4, 16, 13)]", mean: "改ざん後の C′ を H で。", out: "[0, 0, 1, 0]",
+      then: "[0, 0, 1, 0]。X = ω² = 16 の行（規則 y₃ = a₂ + m₂）が破れて 1 になった。H の全点で 0 でないので、Z_H で割り切れない → 商 Q が存在しない。" },
+    { q: "改ざん", say: "それでも証明者が「商は Q だ」と言い張ったとして、C′(X)/Z(X) = Q(X) が成り立つ X（H の外）はあるか。",
+      cmd: "[X for X in range(17) if Z(X) != 0 and (Cb(X) * pow(Z(X), 15, 17)) % 17 == Q(X)]", mean: "H の外の 13 点で、点ごとの商が Q と一致する X を集める。", out: "[]",
+      then: "空っぽ。どの点でも一致しない。点ごとに割った値を補間すると次数 7（正直なら 2）になり、FRI の低次数テストで落ちる。検証者は「どのマスが変わったか」を知らなくても、「割り切れない」の 1 点で拒否できる。" }
+  ];
+
+  // ===== ドリル C: PLONK（F17 / F101） =====
+  var C = [
+    { q: "ゲート表 — 3 ゲート × (L, R, O) と、型を表すセレクター", say: "gate 0: 3 + 1 = 4（+）、gate 1: 2 × 4 = 8（×）、gate 2: 4 + 8 = 12（+）。セレクター (Q_L, Q_R, Q_M, Q_O, Q_C) は足し算なら (1,1,0,−1,0)、掛け算なら (0,0,1,−1,0)。ゲート方程式 Q_L·L + Q_R·R + Q_M·L·R + Q_O·O + Q_C を各行で。",
+      cmd: "rows = [(3, 1, 4), (2, 4, 8), (4, 8, 12)]; sel = [(1, 1, 0, -1, 0), (0, 0, 1, -1, 0), (1, 1, 0, -1, 0)]; [(s[0]*L + s[1]*R + s[2]*L*R + s[3]*O + s[4]) % 17 for (L, R, O), s in zip(rows, sel)]", mean: "3 行のゲート方程式を mod 17 で。", out: "[0, 0, 0]",
+      then: "[0, 0, 0]。3 行とも型どおり（3 + 1 − 4 = 0、2·4 − 8 = 0、4 + 8 − 12 = 0）。1 本の式で足し算も掛け算も表せるのがセレクターの役目。回路の「型」はセレクター（公開）に、「値」は witness（秘密）に分かれた。" },
+    { q: "配線 — gate 0 の出力は gate 2 の左入力、gate 1 の出力は gate 2 の右入力", say: "ゲート方程式は行の中しか見ない。行をまたぐ「同じ値であるべき場所」を確かめる。",
+      cmd: "rows[0][2] == rows[2][0], rows[1][2] == rows[2][1]", mean: "O of gate 0 と L of gate 2、O of gate 1 と R of gate 2。", out: "(True, True)",
+      then: "(True, True)。配線が合っています。gate 0 の出力 4 が gate 2 の左入力に、gate 1 の出力 8 が gate 2 の右入力に、確かに運ばれている。ゲート方程式は「行の中」しか見ないので、この「行をまたいで同じ値」は別の制約として確かめる必要があります — それがコピー制約。次に、ゲート制約だけ満たして配線を壊した witness を作ってみます。" },
+    { q: "嘘の witness — ゲート制約は全部通る", say: "gate 2 を (5, 8, 13) にする。5 + 8 − 13 = 0 なので gate 2 の式は通る。",
+      cmd: "bad = [(3, 1, 4), (2, 4, 8), (5, 8, 13)]; [(s[0]*L + s[1]*R + s[2]*L*R + s[3]*O + s[4]) % 17 for (L, R, O), s in zip(bad, sel)]", mean: "嘘の表で 3 行のゲート方程式。", out: "[0, 0, 0]",
+      then: "[0, 0, 0]。3 行とも通ってしまいました。gate 2 は (5, 8, 13) で 5 + 8 − 13 = 0 なので、行の中だけ見る式は文句を言えません。でも gate 0 の出力は 4 であって 5 ではない。行の中だけの制約では、行ごとに勝手な値を置く嘘を止められない — だから「配線」の制約が別に要るのです。" },
+    { q: "嘘の witness — 配線で落ちる", say: "同じ嘘の表でコピー制約。",
+      cmd: "bad[0][2] == bad[2][0], bad[1][2] == bad[2][1]", mean: "O of gate 0 (= 4) と L of gate 2 (= 5)。", out: "(False, True)",
+      then: "(False, True)。4 ≠ 5 で落ちた。ゲート制約とコピー制約は別の目。両方そろって初めて「この回路をこの入力で実行した」になる。では、この「配線の一致」を検証者が 1 個の数で確かめるには — 大積。" },
+    { q: "大積の準備 — 各マスに番地を付ける", say: "番地 = ω^行 · k_列。ここでは F₁₀₁、ω = 10、k = 1, 2, 3（列 L, R, O）。9 マスの番地を並べる。",
+      cmd: "pos = lambda col, row: (pow(10, row, 101) * (col + 1)) % 101; [pos(c, r) for r in range(3) for c in range(3)]", mean: "行 0: L, R, O → 1, 2, 3。行 1: 10, 20, 30。行 2: 100, 99, 98。", out: "[1, 2, 3, 10, 20, 30, 100, 99, 98]",
+      then: "[1, 2, 3, 10, 20, 30, 100, 99, 98]。9 マス全部に違う番地がつきました。作り方は ω^行 × k_列（行ごとに ω 倍、列ごとに 1, 2, 3 倍）で、3 列の番地が重ならないように k を別にしています。配線 σ は「同じ値であるべきマスどうしで番地を入れ替える置換」。次にそれを書きます。" },
+    { q: "大積の準備 — 置換 σ", say: "σ は (列, 行) → (列, 行)。O of gate 0 (2,0) ↔ L of gate 2 (0,2)、O of gate 1 (2,1) ↔ R of gate 2 (1,2)。他は自分自身。",
+      cmd: "sig = {(0,0):(0,0),(1,0):(1,0),(2,0):(0,2),(0,1):(0,1),(1,1):(1,1),(2,1):(1,2),(0,2):(2,0),(1,2):(2,1),(2,2):(2,2)}; sig[(2,0)], sig[(0,2)]", mean: "σ の辞書。(2,0) と (0,2) が入れ替わっている。", out: "((0, 2), (2, 0))",
+      then: "((0, 2), (2, 0))。σ は (2,0) と (0,2) を入れ替え、(2,1) と (1,2) を入れ替え、他は動かしません。ここで効く見方: 各マスを「(値, 番地)」の組にして 9 個の集合を作り、番地だけ σ で付け替えたもう 1 つの集合を作る。配線が正しい（入れ替える 2 マスが同じ値）なら、2 つの集合は同じになります。集合が同じことを「1 個の数」で確かめるのが大積です。" },
+    { q: "大積 — 正しい表", say: "検証者の乱数 β = 5, γ = 7。左辺 = Π(値 + β·番地 + γ)、右辺 = Π(値 + β·σ(番地) + γ)。集合が同じなら積も同じ。",
+      cmd: "import math; f = math.prod([(rows[r][c] + 5 * pos(c, r) + 7) % 101 for r in range(3) for c in range(3)]) % 101; g = math.prod([(rows[r][c] + 5 * pos(*sig[(c, r)]) + 7) % 101 for r in range(3) for c in range(3)]) % 101; (f, g)", mean: "9 マスぶんの積を 2 通りで。", out: "(69, 69)",
+      then: "(69, 69)。一致。Π(値 + β·番地 + γ) は「集合の指紋」— 集合が同じなら積は必ず同じ、違えば β, γ をランダムに選ぶ限りほぼ違う（多項式の恒等判定と同じ理屈）。講義の累算器 p(ω^{i+1}) = p(ω^i)·f_i/g_i は、この積を行ごとに積み上げて最後に 1 に戻ることを確かめる形です。" },
+    { q: "大積 — 嘘の表", say: "同じ β, γ で嘘の表。",
+      cmd: "f = math.prod([(bad[r][c] + 5 * pos(c, r) + 7) % 101 for r in range(3) for c in range(3)]) % 101; g = math.prod([(bad[r][c] + 5 * pos(*sig[(c, r)]) + 7) % 101 for r in range(3) for c in range(3)]) % 101; (f, g)", mean: "嘘の表の 2 通りの積。", out: "(88, 75)",
+      then: "(88, 75)。一致しない。gate 0 の O (= 4) と gate 2 の L (= 5) の番地を入れ替えると、(4, 番地 3) が (4, 番地 100) に、(5, 番地 100) が (5, 番地 3) になり、集合が変わるから。F₁₀₁ では偶然一致する (β, γ) が 6.7% ある（前節の実測）。実際の 254 ビット体では無視できる。" },
+    { q: "まとめ", say: "正しい表と嘘の表を並べて。",
+      cmd: "(rows[0][2] == rows[2][0], bad[0][2] == bad[2][0])", mean: "左: 正しい表の配線。右: 嘘の表の配線。", out: "(True, False)",
+      then: "(True, False)。PLONK の検証は「ゲート制約（ゼロテスト = 商多項式）」と「コピー制約（大積 = これも最後はゼロテスト）」の 2 本を、KZG の開示で確かめるだけ。どちらも「H の全点で 0 ⇔ Z_H で割り切れる」という、Week 3 ドリル 4・ドリル B と同じ道具です。STARK は「行 = 時間」、PLONK は「行 = ゲート」で表を作るという入口の違いだけで、出口は同じ。" },
+    { q: "まとめ", say: "最後に、講義の 3 箱を自分の言葉で。A 算術化 / B コミットメント / C 証明システムを、STARK と PLONK で言うと？（打つ行は確認用の 1 行）",
+      cmd: "('AIR', 'Merkle', 'FRI'), ('Plonkish', 'KZG', 'PolyIOP')", mean: "STARK = (AIR, Merkle, FRI)、PLONK = (Plonkish, KZG, 多項式 IOP)。", out: "(('AIR', 'Merkle', 'FRI'), ('Plonkish', 'KZG', 'PolyIOP'))",
+      then: "3 箱の中身が言えれば、初見のスキームも読めます。ドリル A（GKR）は (多重線形多項式, なし, SumCheck)。講義ではこの 3 箱に名前を付けてから各スキームを並べるので、「いまどの箱の話か」を追いながら聞くと迷子になりません。" }
+  ];
+
+  makeDrill("drillA-card", "ac26-w4-drillA-step", A, "SumCheck を自分の手で 2 ラウンド回し、嘘が 11 分の 1 しか通らないことを数えました。");
+  makeDrill("drillB-card", "ac26-w4-drillB-step", B, "トレース → AIR → 商 → FRI を、講義と同じ数値で最後まで通しました。改ざんは「割り切れない」で落ちます。");
+  makeDrill("drillC-card", "ac26-w4-drillC-step", C, "ゲート制約と配線（大積）が別の目であることを、(5, 8, 13) の嘘で確かめました。");
+})();
+
 </script>
 </body>
 </html>

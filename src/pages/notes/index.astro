@@ -6,17 +6,17 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 // scripts/sync-to-site.sh in that repository (that repository is the source).
 const notes = [
   {
-    title: "Week 4 — 証明システムを 3 つの部品に分ける",
+    title: "Week 4 — 証明システムを 3 つの部品に分ける（予習ノート）",
     description:
-      "証明とゼロ知識性。NP・IP・PCP・IOP から、GKR（SumCheck）・STARK（AIR + FRI）・PLONK（KZG + 大積）を算術化・コミットメント・証明システムの 3 部品で並べる。嘘の証明者がすり抜ける確率を数える 3 つのラボつき。",
+      "SumCheck（mod 11）・STARK のトレース → 商多項式 → FRI（mod 17）・PLONK のゲート表と大積（mod 101）を 1 行ずつ打って進む対話ドリル 3 本（41 行）と、講義スライド追従のカード 26 枚。嘘の証明者がすり抜ける確率を数える 3 つのラボつき。",
     href: "/notes/ac2026-week4/",
     week: "Week 4",
-    date: "2026-08-18",
+    date: "2026-08-19",
   },
   {
-    title: "Week 3 — 楕円曲線と Schnorr（講義スライド 65 枚と同じ順番のカード列）",
+    title: "Week 3 — 楕円曲線と Schnorr（1 行打って、出た値を貼って、1 文読む）",
     description:
-      "宿題 schnorr-from-scratch の 10 関数をスライド番号つきで読む。講義が飛ばした「制約 → 多項式 → 短い証明」と「ゼロ知識証明を自分で組み立てる手順」、用語集、simulator と nonce 再利用のラボ、検問クイズ。",
+      "宿題 schnorr-from-scratch を Python で 1 行ずつ打ちながら進む対話ドリル 4 本（宿題の 7 問・題意からコードへ・曲線の足し算と離散対数・制約 → 多項式 → 1 点で確かめる）。講義スライド 65 枚と同じ順番のカード列、用語集、simulator と nonce 再利用のラボ、検問クイズ。",
     href: "/notes/ac2026-week3/",
     week: "Week 3",
     date: "2026-08-19",
