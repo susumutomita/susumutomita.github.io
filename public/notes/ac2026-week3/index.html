@@ -487,11 +487,11 @@ python3 -i solution.py        ← 簡易チェックが 10 行出たあと、>>>
     <div class="callout">
       <p class="eyebrow">ドリル 2 の前に — 題意からコードへ行く手順は 1 つだけ</p>
       <p class="strong-line">題意 → 入出力を 1 行で言う → 手で 1 回やる（REPL） → その行の数字を引数名に置き換えて return → 壊れる入力を試して if を 1 個ずつ足す。</p>
-      <p>場合分けは「先に設計する」ものではなく、「壊れた所に足す 1 行」です。下のドリルは、10 関数のうち 7 つをこの順で組みます。各行の下に <b>「関数の中では、この行がこうなる」</b> が出ます — 打った行と関数の 1 行を並べて見てください。</p>
+      <p>場合分けは「先に設計する」ものではなく、「壊れた所に足す 1 行」です。下のドリルは、10 関数のうち 7 つをこの順で組みます。各行の下に <b>その時点の関数の全文</b>が出ます。if を 1 個足すたびに全文を再掲し、足した行に <b>← 今足した</b> の印。最後の ec_add は solution.py と同じ形になります。O（無限遠点）は ec_add の前に 4 行で別に扱います。</p>
     </div>
 
     <div class="card" id="drill2-card">
-      <div class="card-head"><h3>ドリル 2 — 手で出した行を、そのまま関数にする</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="card-head"><h3>ドリル 2 — 手で出した行を、そのまま関数にする（関数は全文で、1 行ずつ育つ）</h3><span class="eyebrow drill-progress">0 / 0</span></div>
       <div class="drill-body"></div>
       <div class="drill-foot">
         <button class="btn-ghost drill-reset" type="button">はじめからやり直す</button>
@@ -4490,7 +4490,7 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
           var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
           var then = document.createElement("p"); then.className = "drill-then"; then.textContent = st.then; step.appendChild(then);
           if (st.code) {
-            var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "関数の中では、この行がこうなる:"; step.appendChild(cl);
+            var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "この時点の関数（全文）:"; step.appendChild(cl);
             var cp = document.createElement("pre"); cp.className = "drill-code"; cp.textContent = st.code; step.appendChild(cp);
           }
         } else {
@@ -4608,62 +4608,82 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
 
   // ---- ドリル 2: 手で出した行を、そのまま関数にする ----
   var STEPS2 = [
+    // ---- field_add ----
     { q: "field_add — 題意: (a + b) mod p を 0..p−1 で返す", say: "入出力を 1 行で言う: 整数 a, b, p が入って、余りが 1 個出る。手で 1 回。",
       cmd: "(-3 + 1) % 7", mean: "ドリル 1 で打った行そのもの。", out: "5",
-      then: "この行の −3 を a、1 を b、7 を p に置き換えて return すれば関数。数字を引数名にしただけ。",
-      code: "def field_add(a, b, p):\n    return (a + b) % p        # ← (-3 + 1) % 7 の数字を引数名にした" },
+      then: "この行の −3 を a、1 を b、7 を p に置き換えて return すれば関数の全文。数字を引数名にしただけ。",
+      code: "def field_add(a, b, p):\n    return (a + b) % p        # ← (-3 + 1) % 7 の数字を引数名にした。これで全文" },
     { q: "field_add", say: "自分の関数が同じ値を返すか。",
       cmd: "field_add(-3, 1, 7)", mean: "さっきの手計算を関数で。", out: "5",
-      then: "同じ 5。field_mul も同じ手順（(a * b) % p）。『手で 1 回 → 数字を引数名に → return』が最小単位。" },
+      then: "同じ 5。field_mul も同じ手順で全文が 1 行（(a * b) % p）。『手で 1 回 → 数字を引数名に → return』が最小単位。",
+      code: "def field_mul(a, b, p):\n    return (a * b) % p" },
+    // ---- field_inv ----
     { q: "field_inv — 題意: a·x ≡ 1 となる x を 0..p−1 で返す。a ≡ 0 なら ValueError", say: "与えられた extended_gcd を手で 1 回。",
       cmd: "extended_gcd(5, 13)", mean: "(g, x, y) で 5·x + 13·y = g。g が 1 なら x が逆元。", out: "(1, -5, 2)",
-      then: "x = −5。負なので、ドリル 1 の問 1 と同じ『名刺をそろえる』が要る。" },
+      then: "x = −5。負なので『名刺をそろえる』が要る。この時点の関数は 2 行（extended_gcd を呼んで x を返す）。まだ壊れる入力を考えていない版。",
+      code: "def field_inv(a, p):\n    g, x, _ = extended_gcd(a, p)    # ← いま手で打った行\n    return x                        # ← まだ −5 のまま返してしまう版" },
     { q: "field_inv", say: "名刺をそろえる。",
       cmd: "(-5) % 13", mean: "−5 を 0..12 に直す。", out: "8",
-      then: "8。手順は『a を % p で 0..p−1 に → 0 なら ValueError → extended_gcd → x % p』の 4 行。壊れる入力（0）を先に弾くのが 2 行目。",
-      code: "def field_inv(a, p):\n    a %= p                       # 名刺をそろえる\n    if a == 0:                   # 壊れる入力を先に弾く（0 に相手はいない）\n        raise ValueError(...)\n    g, x, _ = extended_gcd(a, p) # 手で打った行\n    return x % p                 # (-5) % 13 → 8 と同じこと" },
+      then: "8。return を x % p に直す。次に『壊れる入力』: a = 0 や a = 13（13 の倍数）。0 に相手はいないので、先に弾く if を足す。",
+      code: "def field_inv(a, p):\n    a %= p                          # ← 今足した: 入力の名刺もそろえる（13 → 0）\n    if a == 0:                      # ← 今足した: 壊れる入力 0 を先に弾く\n        raise ValueError(\"F_p で 0 の逆元は存在しません\")\n    g, x, _ = extended_gcd(a, p)\n    return x % p                    # ← 直した: (-5) % 13 → 8 と同じこと" },
     { q: "field_inv", say: "関数で同じ値か。",
       cmd: "field_inv(5, 13)", mean: "5 の逆元 mod 13。", out: "8",
-      then: "8。『手で 2 行 → 引数名に → 壊れる入力の if』の形が見えたはず。" },
-    { q: "ec_add — 題意: 曲線上の 2 点の和。まず P == Q（2 倍算）だけ", say: "ドリル 1 で手で組んだ 4 行を、そのまま関数の中身にする。関数で呼んで同じ点が出るか。",
-      cmd: "ec_add((1, 298), (1, 298), TOY)", mean: "P = Q = G の 2 倍算。中身は field_inv → λ → x₃ → y₃ の 4 行。", out: "(818, 800)",
-      then: "(818, 800)。4 行の数字（2·298、1009、3、1、818）を y、p、x、… に置き換えただけ。ここまでが『式の 1 本』。残りは場合分けで、それは『壊れる入力を試して if を足す』で作る。",
-      code: "lam = field_mul(3 * x * x + curve.a, field_inv(2 * y, p), p)   # field_inv(2*298,1009) → 601、field_mul(3, 601, 1009) → 794\nx3  = (lam * lam - x - x) % p                               # (794*794 - 1 - 1) % 1009 → 818\ny3  = (lam * (x - x3) - y) % p                              # (794*(1-818) - 298) % 1009 → 800" },
-    { q: "ec_add — 場合分け 1: P が None だったら", say: "壊れる入力を試す。無限遠点 O（= None）に G を足す。",
-      cmd: "print(ec_add(None, TOY.G, TOY))", mean: "None は『足し算の 0』。0 + G = G になってほしい。print は None 対策。", out: "(1, 298)",
-      then: "(1, 298) = G が返った。式 1 本だけの関数なら None[0] で落ちる。だから『if P is None: return Q』を式より前に 1 行足す。場合分けは設計ではなく、壊れた所への 1 行。",
-      code: "if P is None: return Q      # 壊れる入力 None を試して足した 1 行\nif Q is None: return P" },
-    { q: "ec_add — 場合分け 2: x が同じで y が逆", say: "G と、G の y を反転した (1, 711) を足す（711 = 1009 − 298）。",
-      cmd: "print(ec_add(TOY.G, (1, 711), TOY))", mean: "直線が垂直になる入力。3 つ目の交点が無い。", out: "None",
-      then: "None。この if が無いと、弦の λ の分母 x_Q − x_P = 0 で field_inv(0) が ValueError を投げる。『割れない場所には別の答え（O）がある』を 1 行で。",
-      code: "if x1 == x2 and (y1 + y2) % p == 0: return None   # 垂直 → O。これを λ の計算より前に" },
-    { q: "ec_add — 場合分け 3: P ≠ Q なら弦", say: "最後に普通の 2 点。G + 2G。",
+      then: "8。これが全文。『手で 2 行 → 引数名に → 壊れる入力の if』。" },
+    // ---- 無限遠点 O ----
+    { q: "無限遠点 O — ec_add の前に、O とは何か", say: "O は「点の足し算の 0 の役」。数の 0 が a + 0 = a であるように、P + O = P にしたい。この課題では O を None で表す（点は (x, y) のタプル、O は座標を持たないので別の値）。",
+      cmd: "print(ec_add(None, TOY.G, TOY))", mean: "O + G。print を付けるのは、None は >>> で何も表示されないから。", out: "(1, 298)",
+      then: "(1, 298) = G。O + G = G。『O が入ってきたら、相手をそのまま返す』— これが O の扱いの 1 つ目。" },
+    { q: "無限遠点 O", say: "O はどこから出てくるか。G と、G の y を反転した点 (1, 711) を足す。711 = 1009 − 298。",
+      cmd: "print(ec_add(TOY.G, (1, 711), TOY))", mean: "x が同じで y が逆の 2 点 = 直線が垂直。3 つ目の交点が無い。", out: "None",
+      then: "None = O。垂直な直線は『無限に遠くで曲線と交わる』と考える（実数の絵）。だから名前が無限遠点。P + (−P) = O。これが O の扱いの 2 つ目（O が出ていくとき）。" },
+    { q: "無限遠点 O", say: "n = 967 回足すと一周して O に戻る（位数）。",
+      cmd: "print(ec_scalar_mul(967, TOY.G, TOY))", mean: "G を 967 回足す。", out: "None",
+      then: "None。時計が 12 で 0 に戻るのと同じで、点の足し算も 967 で O に戻る。採点器の test_order_times_generator_is_identity はこれ。O は『特別な例外』ではなく『0 に戻った』状態。" },
+    { q: "無限遠点 O", say: "O の扱いがなぜ関数の先頭に要るか。O（None）は座標を持たないので、座標を取り出す行 x1, y1 = P で壊れる。",
+      cmd: "print(ec_add(None, None, TOY))", mean: "O + O。どちらも None。", out: "None",
+      then: "None。『None が来たら相手を返す』の if を、座標を取り出す行より前に置く理由はこれ（None[0] は TypeError）。ここまでが O の全部: 入ってきたら相手を返す／垂直なら O を返す／n 回で O に戻る。" },
+    // ---- ec_add ----
+    { q: "ec_add — 題意: 曲線上の 2 点の和。まず P == Q（2 倍算）だけ", say: "ドリル 1 で手で組んだ 4 行（field_inv → λ → x₃ → y₃）を、そのまま関数の中身にする。関数で呼んで同じ点が出るか。",
+      cmd: "ec_add((1, 298), (1, 298), TOY)", mean: "P = Q = G の 2 倍算。", out: "(818, 800)",
+      then: "(818, 800)。4 行の数字（2·298、1009、3、1、818）を y、p、x、… に置き換えただけ。この時点の関数は『P == Q のときだけ正しい版』。全文はこう。",
+      code: "def ec_add(P, Q, curve):                # 2 倍算だけ版（まだ場合分け無し）\n    p = curve.p\n    x1, y1 = P[0] % p, P[1] % p          # 座標を取り出して名刺をそろえる\n    x2, y2 = Q[0] % p, Q[1] % p\n    num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)   # 3x² + a\n    lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)            # ← field_inv(2*298,1009)=601, 3·601=794\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)                 # ← (794*794 - 1 - 1) % 1009 = 818\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)      # ← (794*(1-818) - 298) % 1009 = 800\n    return (x3, y3)" },
+    { q: "ec_add — 場合分け 1: O が入ってきたら", say: "壊れる入力を試す。さっきの O + G。上の版だと P[0] で落ちる。",
+      cmd: "print(ec_add(None, TOY.G, TOY))", mean: "None は『足し算の 0』。0 + G = G になってほしい。", out: "(1, 298)",
+      then: "(1, 298)。『None なら相手を返す』を、座標を取り出す行より前に 2 行足す。場合分けは設計ではなく、壊れた所への 1 行。",
+      code: "def ec_add(P, Q, curve):\n    p = curve.p\n    if P is INFINITY:                    # ← 今足した（INFINITY = None）。座標を取り出す前に\n        return Q\n    if Q is INFINITY:                    # ← 今足した\n        return P\n    x1, y1 = P[0] % p, P[1] % p\n    x2, y2 = Q[0] % p, Q[1] % p\n    num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)\n    lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)\n    return (x3, y3)" },
+    { q: "ec_add — 場合分け 2: x が同じで y が逆（垂直）", say: "G と (1, 711) を足す。上の版だと P ≠ Q なのに接線の式を使ってしまい、別の点が出る（しかも本来は弦の分母 x2 − x1 = 0 で割れない）。",
+      cmd: "print(ec_add(TOY.G, (1, 711), TOY))", mean: "垂直な直線。答えは O。", out: "None",
+      then: "None。『x が同じで y1 + y2 ≡ 0 なら O を返す』を 1 行足す。y = 0 の点を 2 倍するときもここに入る（y1 = y2 = 0 で y1 + y2 = 0）— だから 2y = 0 で割る事故も起きない。",
+      code: "def ec_add(P, Q, curve):\n    p = curve.p\n    if P is INFINITY:\n        return Q\n    if Q is INFINITY:\n        return P\n    x1, y1 = P[0] % p, P[1] % p\n    x2, y2 = Q[0] % p, Q[1] % p\n    if x1 == x2 and (y1 + y2) % p == 0:  # ← 今足した: 垂直 → O。λ を計算する前に\n        return INFINITY\n    num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)\n    lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)\n    return (x3, y3)" },
+    { q: "ec_add — 場合分け 3: P ≠ Q なら弦", say: "最後に普通の 2 点。G + 2G。上の版だと P ≠ Q でも接線の式を使ってしまい、間違った点が出る。",
       cmd: "ec_add(TOY.G, (818, 800), TOY)", mean: "違う 2 点なので λ = (y₂ − y₁)/(x₂ − x₁)。", out: "(851, 516)",
-      then: "(851, 516) = 3G。2 倍算との違いは λ の式 1 行だけ。x₃, y₃ の式は共通。これで ec_add は『式 1 本 + if 3 つ』として読める。",
-      code: "if P == Q: lam = 接線            # (3x² + a) / 2y\nelse:      lam = 弦              # (y2 − y1) / (x2 − x1)   ← 分母は field_inv\nx3 = (lam*lam - x1 - x2) % p ; y3 = (lam*(x1 - x3) - y1) % p" },
+      then: "(851, 516) = 3G。λ だけ if/else で分け、x₃, y₃ の式は共通。これが全文 — あなたの solution.py の ec_add と同じ形。『式 1 本 + if 3 つ』。",
+      code: "def ec_add(P, Q, curve):                 # 完成版（= solution.py）\n    p = curve.p\n    if P is INFINITY:\n        return Q\n    if Q is INFINITY:\n        return P\n    x1, y1 = P[0] % p, P[1] % p\n    x2, y2 = Q[0] % p, Q[1] % p\n    if x1 == x2 and (y1 + y2) % p == 0:\n        return INFINITY\n    if x1 == x2 and y1 == y2:             # ← 今足した: P == Q なら接線\n        num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)\n        lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)\n    else:                                 # ← 今足した: それ以外は弦 (y2−y1)/(x2−x1)\n        lam = field_mul(field_add(y2, -y1, p), field_inv(field_add(x2, -x1, p), p), p)\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)\n    return (x3, y3)" },
+    // ---- ec_scalar_mul ----
     { q: "ec_scalar_mul — 題意: k·P を速く（k ≈ 2²⁵⁶ でも）", say: "2 進で下の桁から読む道具が divmod。手で 1 回。",
       cmd: "divmod(123, 2)", mean: "123 を 2 で割った商と余り。余りが最下位ビット、商が『残りの桁』。", out: "(61, 1)",
-      then: "(61, 1)。余り 1 なら『いまの addend を足す』、商 61 を次の k にして続ける。addend は毎回 2 倍。これをループにする。",
-      code: "result, addend = None, P\nwhile k > 0:\n    k, bit = divmod(k, 2)                 # ← divmod(123, 2) → (61, 1)\n    if bit: result = ec_add(result, addend, curve)\n    addend = ec_add(addend, addend, curve)  # 2 倍\nreturn result" },
+      then: "(61, 1)。余り 1 なら『いまの addend を足す』、商 61 を次の k にして続ける。addend は毎回 2 倍。これをループにした全文。",
+      code: "def ec_scalar_mul(k, P, curve):\n    result = INFINITY                    # 足し算の 0 から始める（O）\n    addend = P                           # P, 2P, 4P, … と倍にしていく\n    while k > 0:\n        k, bit = divmod(k, 2)            # ← divmod(123, 2) → (61, 1)\n        if bit:\n            result = ec_add(result, addend, curve)   # 桁が 1 なら足す\n        if k:\n            addend = ec_add(addend, addend, curve)   # 次の桁のために 2 倍\n    return result                        # k = 0 なら O のまま（test: 0·G = None）" },
     { q: "ec_scalar_mul", say: "関数で 13·G。13 = 1101₂ なので足し算 3 回。",
       cmd: "ec_scalar_mul(13, TOY.G, TOY)", mean: "double-and-add で 13 倍。", out: "(101, 688)",
       then: "(101, 688)。素直に 12 回足しても同じ点に着くが、256 ビットでは終わらない。" },
-    { q: "sigma_response — 題意: s = r + e·x mod n", say: "手で 1 回。",
+    // ---- sigma / schnorr ----
+    { q: "sigma_commit / sigma_response — 題意: R = r·G、s = r + e·x mod n", say: "手で 1 回。",
       cmd: "(456 + 77 * 123) % 967", mean: "r + e·x を n で割った余り。", out: "257",
-      then: "257。数字を引数名にして return。唯一の罠: % は curve.p ではなく curve.n（G を何回足すかの数だから）。",
-      code: "def sigma_response(x, r, e, curve):\n    return (r + e * x) % curve.n     # ← (456 + 77*123) % 967。p ではなく n" },
+      then: "257。数字を引数名にして return。唯一の罠: % は curve.p ではなく curve.n（G を何回足すかの数だから）。sigma_commit は ec_scalar_mul を呼ぶだけ。",
+      code: "def sigma_commit(r, curve):\n    return ec_scalar_mul(r % curve.n, curve.G, curve)   # R = r·G\n\ndef sigma_response(x, r, e, curve):\n    return (r + e * x) % curve.n         # ← (456 + 77*123) % 967。p ではなく n" },
     { q: "sigma_verify — 題意: s·G == R + e·P", say: "左辺と右辺はドリル 1 で手で出した 2 行。関数にするだけ。",
       cmd: "sigma_verify((376, 128), (822, 106), 77, 257, TOY)", mean: "left = s·G、right = R + e·P、left == right。", out: "True",
       then: "True。『手で 2 行 → 変数に入れて == で返す』。検証式はそれ以上でも以下でもない。",
-      code: "left  = ec_scalar_mul(s, curve.G, curve)                 # ← ec_scalar_mul(257, TOY.G, TOY)\nright = ec_add(R, ec_scalar_mul(e, pubkey, curve), curve)  # ← ec_add((822,106), ec_scalar_mul(77,(376,128),TOY), TOY)\nreturn left == right" },
-    { q: "schnorr_sign — 題意: README の手順 1〜5 をそのまま", say: "手順が箇条書きで書いてある関数は、1 項目 = 1 行。",
+      code: "def sigma_verify(pubkey, R, e, s, curve):\n    left = ec_scalar_mul(s % curve.n, curve.G, curve)                  # ← ec_scalar_mul(257, TOY.G, TOY)\n    right = ec_add(R, ec_scalar_mul(e % curve.n, pubkey, curve), curve) # ← ec_add((822,106), ec_scalar_mul(77,(376,128),TOY), TOY)\n    return left == right" },
+    { q: "schnorr_sign / schnorr_verify — 題意: README の手順 1〜5 をそのまま", say: "手順が箇条書きで書いてある関数は、1 項目 = 1 行。",
       cmd: 'schnorr_sign(123, b"week3", 456, TOY)', mean: "R = nonce·G → P = x·G → e = H(R,P,m) → s = sigma_response → (R, s)。", out: "((822, 106), 698)",
-      then: "((822, 106), 698)。5 行が README の 5 手順と 1 対 1。『題意 → 入出力 1 行 → 手で 1 回 → 引数名に → 壊れる入力の if』が、この課題の 10 関数すべての作り方です。",
-      code: "R = sigma_commit(nonce, curve)                 # 手順 1\npubkey = ec_scalar_mul(x % curve.n, curve.G, curve)  # 手順 2\ne = challenge_hash(R, pubkey, message, curve.n)      # 手順 3（引数の順番は R, P, m）\ns = sigma_response(x, nonce, e, curve)               # 手順 4\nreturn (R, s)                                        # 手順 5" }
+      then: "((822, 106), 698)。5 行が README の 5 手順と 1 対 1。verify は e を計算し直して sigma_verify を呼ぶだけ。『題意 → 入出力 1 行 → 手で 1 回 → 引数名に → 壊れる入力の if』が、10 関数すべての作り方です。",
+      code: "def schnorr_sign(x, message, nonce, curve):\n    R = sigma_commit(nonce, curve)                         # 手順 1\n    pubkey = ec_scalar_mul(x % curve.n, curve.G, curve)    # 手順 2\n    e = challenge_hash(R, pubkey, message, curve.n)        # 手順 3（引数の順番は R, P, m）\n    s = sigma_response(x, nonce, e, curve)                 # 手順 4\n    return (R, s)                                          # 手順 5\n\ndef schnorr_verify(pubkey, message, signature, curve):\n    R, s = signature\n    e = challenge_hash(R, pubkey, message, curve.n)        # e は受け取らず、自分で計算し直す\n    return sigma_verify(pubkey, R, e, s, curve)" }
   ];
 
   makeDrill("drill-card", "ac26-w3-drill-step", STEPS1, "7 問すべて、自分の手で出した数で説明できました。提出前の自己チェックは完了です。");
-  makeDrill("drill2-card", "ac26-w3-drill2-step", STEPS2, "10 関数の作り方が『手で 1 回 → 引数名に → 壊れる入力の if』で読めました。");
+  makeDrill("drill2-card", "ac26-w3-drill2-step", STEPS2, "10 関数の作り方が『手で 1 回 → 引数名に → 壊れる入力の if』で読めました。最後の ec_add の全文は、あなたの solution.py と同じ形です。");
 })();
 
 </script>
