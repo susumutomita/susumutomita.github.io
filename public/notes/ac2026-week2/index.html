@@ -328,6 +328,25 @@
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
 
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  .drill-codelabel { font-size: var(--fs-xs); color: var(--muted); margin-top: 0.2rem; }
+  .drill-code { background: var(--panel-2); font-size: var(--fs-xs); border-left: 4px solid var(--accent); }
   /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
   .note-title { font-size: var(--fs-sm); font-weight: 700; }
   .deck { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -432,6 +451,45 @@
     </div>
   </div>
 </section>
+
+<!-- ============================================ DRILL : 対話ドリル -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — MPC を、1 行ずつ自分の手で</p>
+      <h2>1 行打って、出た値を貼って、1 文読む</h2>
+      <p>宿題 <code>toy-mpc</code> の Part A / Part B を、<strong>関数を書く前に手で 1 回</strong>通します。1 行打つ → 出た値を貼る → その値を指す 1〜2 文が開く。「足し算は無料、掛け算だけ通信が要る」が、説明ではなく数で入ります。</p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">準備（1 行だけ）</p>
+      <pre>python3</pre>
+      <p>ターミナルで <code>python3</code> と打つだけです。宿題のファイルは要りません（mod 7 と 1 bit の計算だけ）。行頭に空白を入れると <code>IndentationError</code> になるので、貼るときは行頭から。</p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 1 — 分けて、戻して、そのまま計算する</p>
+      <p>share を作る → 足すと戻る → 同じ 2 個から別の秘密 → share のまま足す・定数倍 → 定数足しだけ壊れる → 1 人だけ足す → 掛け算はできない。10 行。</p>
+    </div>
+    <div class="card" id="drillA-card">
+      <div class="card-head"><h3>ドリル 1 — share と線形演算</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 2 — 掛け算を 1 ラウンドで買う（Beaver）と、GMW の AND</p>
+      <p>三つ組 → d, e を開示 → なぜ見せてよいか → 組み立て → d·e の罠 → XOR share → AND の交差項 → OT で運ぶ → コスト表。10 行。</p>
+    </div>
+    <div class="card" id="drillB-card">
+      <div class="card-head"><h3>ドリル 2 — Beaver と GMW</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+  </div>
+</section>
+
 
 <!-- ============================================ D1 : 導入・問題設定 -->
 <section class="band">
@@ -2559,6 +2617,111 @@ choice=1: AssertionError: b'\xc2\x97\xc1W\xb7' != b'right'</pre>
 
   showBest();
 })();
+
+  // ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む） ----
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function drillText(node, text) {
+    // 「**強調**」だけを <b> にする。innerHTML は使わないので、本文は常にテキストのまま。
+    String(text).split("**").forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2 ? Object.assign(document.createElement("b"), { textContent: part })
+                             : document.createTextNode(part));
+    });
+  }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; drillText(say, st.say); step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": ")); drillText(mean, st.mean); step.appendChild(mean);
+        if (done) {
+          var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
+          var then = document.createElement("p"); then.className = "drill-then"; drillText(then, st.then); step.appendChild(then);
+          if (st.code) {
+            var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "この時点の関数（全文）:"; step.appendChild(cl);
+            var cp = document.createElement("pre"); cp.className = "drill-code"; cp.textContent = st.code; step.appendChild(cp);
+          }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          if (st.out === "") {
+            var note = document.createElement("p"); note.className = "drill-mean"; note.textContent = "この行は何も表示しません（代入だけ）。打ったら「次へ」。";
+            var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-main"; nx.textContent = "次へ";
+            nx.addEventListener("click", function () { cur++; save(); render(); });
+            step.appendChild(note); form.appendChild(nx); step.appendChild(form); body.appendChild(step); continue;
+          }
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
+  var STEPS_A = [
+    {"q": "分ける — 最後の 1 個で辻褄を合わせる", "say": "秘密 4 を 3 人に配ります。法は 7、最初の 2 人には乱数 5 と 6 をそのまま渡す。", "cmd": "s = 4; r = [5, 6]; share = r + [(s - sum(r)) % 7]; share", "mean": "最後の 1 人には「秘密 − それまでの合計」を渡す。`% 7` で 0..6 に収める。", "out": "[5, 6, 0]", "then": "[5, 6, 0]。作り方はこれだけです。**最初の n−1 人はただの乱数**で、最後の 1 人が辻褄合わせ役。秘密の情報は「最後の 1 個」ではなく、**3 個の関係**に入っています（誰か 1 人の中には入っていない）。"},
+    {"q": "戻す", "say": "全員の share を足すだけ。", "cmd": "sum(share) % 7", "mean": "5 + 6 + 0 = 11、7 で割った余り。", "out": "4", "then": "4 — 元の秘密です。作り方から当然で、証明も 1 行（乱数 + (s − 乱数の和) = s）。**足せば戻る**が加法的秘密分散の全部で、Week 0 の mod の世界がそのまま舞台になっています。"},
+    {"q": "2 個では何も分からない", "say": "同じ乱数 [5, 6] から、別の秘密の share を作ります。", "cmd": "[5, 6, (1 - 11) % 7]", "mean": "秘密を 1 にして、最後の 1 個だけ選び直す。", "out": "[5, 6, 4]", "then": "[5, 6, 4]。前の 2 個は**まったく同じ**で、最後だけ違います。つまり [5, 6] を見た人には、秘密が 4 なのか 1 なのか区別がつかない。次の行で足して確かめます。"},
+    {"q": "2 個では何も分からない", "say": "足して秘密を出します。", "cmd": "sum([5, 6, 4]) % 7", "mean": "5 + 6 + 4 = 15、mod 7。", "out": "1", "then": "1 — 確かに別の秘密になりました。**同じ 2 個から、7 通りのどの秘密にも辻褄を合わせられます**（最後の 1 個を選び直すだけ）。だから n−1 個は秘密について何の証拠でもない。「漏れない」を主張ではなく**実行できる形**にすると、これになります。"},
+    {"q": "share のまま足す — 通信なし", "say": "もう 1 つの秘密 y = 3 を配ります。", "cmd": "sy = [1, 2, 0]; sum(sy) % 7", "mean": "y の share を用意して、合計を確かめる。", "out": "3", "then": "3。これで x = 4 と y = 3 が、それぞれ 3 人に配られた状態になりました。**誰も x も y も知りません**。この状態のまま x + y を計算します。"},
+    {"q": "share のまま足す", "say": "各自が自分の行どうしを足すだけ。", "cmd": "add = [(a + b) % 7 for a, b in zip(share, sy)]; (add, sum(add) % 7)", "mean": "1 人目は 5 + 1、2 人目は 6 + 2、3 人目は 0 + 0。最後にその合計。", "out": "([6, 1, 0], 0)", "then": "合計は 0 で、x + y = 4 + 3 = 7 ≡ 0 と一致。**誰とも通信していません** — 各自が手元の数を足しただけ。MPC が実用になる理由がこれで、足し算は「無料」です。理由も 1 行: 合計の合計は、合計どうしの合計だから。"},
+    {"q": "公開の定数を掛ける — これも通信なし", "say": "公開された c = 2 を掛けます。", "cmd": "mul = [a * 2 % 7 for a in share]; (mul, sum(mul) % 7)", "mean": "全員が自分の share を 2 倍。最後にその合計。", "out": "([3, 5, 0], 1)", "then": "合計は 1 で、x·c = 4×2 = 8 ≡ 1 と一致。**全員が同じ操作をして正しくなります**（分配法則 c(a+b+c′) = ca+cb+cc′ そのもの）。ここまで 2 つの演算が通信ゼロ。次の行が、この「全員が同じ操作」が**壊れる**唯一の場所です。"},
+    {"q": "定数を足す — ここだけ壊れる", "say": "同じ調子で、全員が c = 2 を足してみます。", "cmd": "bad = [(a + 2) % 7 for a in share]; (bad, sum(bad) % 7)", "mean": "全員が自分の share に 2 を足す。最後にその合計。", "out": "([0, 1, 2], 3)", "then": "合計は 3。でも欲しかったのは x + c = 4 + 2 = 6 です。**3 人が 2 ずつ足したので、合計は 2 ではなく 6 増えた** — ずれは (n − 1)·c = 2×2 = 4（3 ≡ 6 + 4 mod 7）。掛け算では平気だったのに足し算で壊れるのは、定数倍が「合計にも c 倍」なのに対し、定数足しは「合計には n·c」だからです。"},
+    {"q": "定数を足す", "say": "正しいやり方は、1 人だけが足すこと。", "cmd": "ok = [(share[0] + 2) % 7] + share[1:]; (ok, sum(ok) % 7)", "mean": "1 人目だけが 2 を足し、ほかはそのまま。", "out": "([0, 6, 0], 6)", "then": "合計は 6 = x + c。**1 人だけが畳み込む**のが正解です。この落とし穴は Week 2 の宿題（add-constant）でも、Beaver 乗算の最後の d·e でも、同じ形で再登場します — 「公開値を share に足すときは 1 人だけ」と覚えておくと、次のドリルで効きます。"},
+    {"q": "掛け算だけができない", "say": "share どうしを掛けたらどうなるか。", "cmd": "prod = [(a * b) % 7 for a, b in zip(share, sy)]; (prod, sum(prod) % 7, (4 * 3) % 7)", "mean": "各自が自分の行どうしを掛けて、合計。右端は本当の x·y。", "out": "([5, 5, 0], 3, 5)", "then": "合計は x·y と一致しません。**積の和は、和の積ではない**からです（展開すると自分の行だけでは作れない交差項が出る）。線形演算（足し算・定数倍）は無料、**掛け算だけが通信を要る** — この境界が Week 2 の中心で、それを 1 ラウンドで買う方法が次のドリルの Beaver 三つ組です。"}
+  ];
+  var STEPS_B = [
+    {"q": "答え合わせ用の値", "say": "掛けたい 2 つの秘密。本当は誰も知りませんが、検算のために手元に置きます。", "cmd": "x, y = 3, 4; (x * y) % 7", "mean": "x·y を mod 7 で。", "out": "5", "then": "5。この 5 を、**誰も x も y も知らないまま**作るのがこの 10 行の目標です。前のドリルで見たとおり、掛け算だけは各自の手元では閉じません — そこで「前もって配っておいた三つ組」を使います。"},
+    {"q": "三つ組 — 入力と無関係に前もって作る", "say": "a, b と、その積 c = a·b。これも本当は share の形で配られています。", "cmd": "a, b, c = 1, 2, 2; (a * b) % 7 == c", "mean": "三つ組の条件 c = a·b が成り立つか。", "out": "True", "then": "True。**入力 x, y とは何の関係もない乱数**で、暇なときに大量に作って配っておけます（前処理）。本番でやることは、この三つ組を使い捨てて掛け算 1 回を「買う」こと。使い回すと漏れるので、1 回の掛け算につき 1 組です。"},
+    {"q": "覆って開示する", "say": "x を a で、y を b で覆います。", "cmd": "d = (x - a) % 7; e = (y - b) % 7; (d, e)", "mean": "d = x − a、e = y − b を mod 7 で。", "out": "(2, 2)", "then": "(2, 2)。この 2 つを**公開します** — ここが唯一の通信（1 ラウンド）。公開して大丈夫な理由は次の行で確かめますが、直感は「ランダムな a で覆った値だから、x について何も語らない」です。"},
+    {"q": "覆って開示する", "say": "なぜ d を見せてよいか、分布を見ます。", "cmd": "[(x - k) % 7 for k in range(7)]", "mean": "a が 0..6 のどれだったかで、d がどうなるか全部並べる。", "out": "[3, 2, 1, 0, 6, 5, 4]", "then": "0..6 が 1 回ずつ、全部出ています。**a がランダムなら、d はどの値にもなり得て、どれも同じ確からしさ**。だから d を見ても x は絞れません（ワンタイムパッドと同じ理屈）。e も同じ。逆に、同じ三つ組を 2 回使うと d の差から x の差が漏れる — 使い捨てが要る理由です。"},
+    {"q": "組み立てる — ここから先は通信なし", "say": "公開された d, e と、手元の三つ組で x·y を作ります。", "cmd": "(c + d*b + e*a + d*e) % 7", "mean": "展開の公式 x·y = (a+d)(b+e) = ab + ae + db + de を、c = ab に置き換えた形。", "out": "5", "then": "5 — 1 行目の答えと一致しました。**中 3 の展開だけで掛け算が買えています**。しかも d·b と e·a は「公開定数 × share」なので前のドリルで見たとおり通信ゼロ、c もそのまま。つまり通信は d, e の開示 1 回だけ。これが Beaver の三つ組です。"},
+    {"q": "最後の項の罠", "say": "d·e は公開された数どうしの積です。全員が足すとどうなるか。", "cmd": "(c + d*b + e*a + 3 * d*e) % 7", "mean": "3 人全員が d·e を足してしまった場合（n = 3）。", "out": "6", "then": "6 — 正解の 5 とずれました。**前のドリルの「定数足しは 1 人だけ」がここで再登場**しています。d·e は share ではなく公開値なので、全員が足すと (n−1)·d·e ぶん余計に入る。宿題でこの誤りが見つけにくいのは、d か e が 0 の設定では正解と区別がつかないからです（だから fixture が 0 を避けています）。"},
+    {"q": "ビットの世界へ — XOR で分ける", "say": "ここからは 1 bit の話。x を 2 人で XOR share します。", "cmd": "x0, x1 = 1, 0; (x0 ^ x1, x0 ^ x1 == 1)", "mean": "party 0 が x0、party 1 が x1 を持ち、x = x0 ⊕ x1。", "out": "(1, True)", "then": "1。**足し算の代わりに XOR で分けただけ**で、構造は加法的秘密分散とまったく同じ（mod 2 の足し算が XOR）。1 個では何も分からない、片方を選び直せばどちらの秘密にもできる、も同じです。ブール回路（比較・分岐）を扱うときはこちらを使います。"},
+    {"q": "XOR は無料、AND は違う", "say": "もう 1 つのビット y も分けて、AND を展開します。", "cmd": "y0, y1 = 1, 1; ((x0 ^ x1) & (y0 ^ y1), (x0 & y0) ^ (x1 & y1) ^ (x0 & y1) ^ (x1 & y0))", "mean": "左: 本当の x AND y。右: 展開した 4 項（自分の項 2 つ + 交差項 2 つ）を XOR したもの。", "out": "(0, 0)", "then": "どちらも同じ値。**AND は 4 項に展開でき、そのうち x₀y₀ と x₁y₁ は各自が 1 人で計算できます**。残る x₀y₁ と x₁y₀ は、片方ずつを別の人が持っているので 1 人では作れない — この交差項だけが通信を必要とします（前のドリルの「積の和は和の積ではない」の 1 bit 版）。"},
+    {"q": "交差項を OT で運ぶ", "say": "交差項 x₀·y₁ を、2 人が分け持つ形で作ります。送り手（party 0）は乱数 r で覆った 2 通を用意。", "cmd": "r = 1; table = [r ^ (x0 & 0), r ^ (x0 & 1)]; got = table[y1]; (table, got, (got ^ r) == (x0 & y1))", "mean": "送り手は「y₁ = 0 のときの答え」と「y₁ = 1 のときの答え」を r で覆って並べる。受け手は自分の y₁ 番目だけを受け取り、送り手は r を持ち続ける。", "out": "([1, 0], 0, True)", "then": "最後が True — **2 人の持ち分を XOR すると交差項 x₀·y₁ になっています**（送り手が r、受け手が got）。受け手は選んだ側しか受け取れず（もう一方は r で覆われたまま）、送り手はどちらを選ばれたか知らない — この「1 個だけ渡す」を実現する道具が紛失通信（OT）です。交差項 1 個につき OT が 1 回なので、**XOR は無料、AND は OT 2 回**というのが GMW のコスト表になります。"},
+    {"q": "まとめ", "say": "この 2 本のドリルで扱った演算のコストを 1 行に。", "cmd": "dict(add=0, scale=0, add_const=0, mul=1, xor=0, AND=2)", "mean": "各演算に必要な通信ラウンド（AND は OT の回数）。", "out": "{'add': 0, 'scale': 0, 'add_const': 0, 'mul': 1, 'xor': 0, 'AND': 2}", "then": "**足し算・定数倍・定数足しは 0、掛け算は 1、AND は OT 2 回**。MPC の設計とは、この表を見ながら「非線形な演算をどれだけ減らせるか」を考える作業です。宿題の `communication_rounds` が 8 つの演算を分類させるのも、`private-aggregate` が k 回の掛け算を 1 ラウンドにまとめさせるのも、この表の読み方を身につけるためです。"}
+  ];
+  makeDrill("drillA-card", "ac26-w2-drillA-step", STEPS_A, "秘密を分けて戻す・n−1 個では何も分からない・足し算と定数倍は通信なし・定数の足し算だけ 1 人が畳み込む、を自分の手で出した数で通しました。宿題 Part A の share / reconstruct / add_shares / scale_shares はこの 4 つです。");
+  makeDrill("drillB-card", "ac26-w2-drillB-step", STEPS_B, "Beaver 三つ組で掛け算を 1 ラウンドで買い、d·e を全員が足す罠を数で見て、GMW の AND で交差項だけが OT を必要とすることを確かめました。宿題 Part A の beaver_multiply と Part B の gmw_and はこの 2 本です。");
 </script>
 </body>
 </html>

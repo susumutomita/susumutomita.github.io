@@ -328,6 +328,25 @@
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
 
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  .drill-codelabel { font-size: var(--fs-xs); color: var(--muted); margin-top: 0.2rem; }
+  .drill-code { background: var(--panel-2); font-size: var(--fs-xs); border-left: 4px solid var(--accent); }
   /* ---------- スライド追従カード ---------- */
   .deck { display: flex; flex-direction: column; gap: 0.75rem; }
   .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
@@ -414,7 +433,7 @@
     <div class="split">
       <div class="callout">
         <p class="eyebrow">読み方</p>
-        <p>上から順に、1 カードずつ。カード末尾の <b>Q.</b> に自分の言葉で答えられたら次へ。答えは次のカードか、宿題タグの中にあります。章の終わりの<b>「やってみる」</b>は紙と鉛筆で解いてから答えを開いてください。数はすべて 1 桁〜2 桁です。</p>
+        <p><b>まず下の「対話ドリル」から。</b>自分の Python で 1 行打って、出た値を貼って、1 文読む — を 25 行。宿題の 7 問が、自分の手で出した数で説明できる状態になります。ec_add から先が分からなければドリル 3（曲線の足し算と離散対数、19 行）、宿題に無い「多項式への変換」はドリル 4（16 行）。そのあとカード列（スライド順）を上から 1 枚ずつ。カード末尾の <b>Q.</b> に答えられたら次へ。章の終わりの<b>「やってみる」</b>は紙と鉛筆で。</p>
         <p class="strong-line">スライドを横に開いて、同じ番号を見比べながら読むのがいちばん速いです。</p>
       </div>
       <div class="callout amber">
@@ -428,6 +447,77 @@
     <div>
       <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
       <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ DRILL : 対話ドリル -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — 宿題の 7 問を、1 行ずつ</p>
+      <h2>1 行打って、出た値を貼って、1 文読む — そして、その行を関数にする</h2>
+      <p>
+        自己チェック 7 問を、<strong>自分の Python で 1 行ずつ打ちながら</strong>進みます。各行に「この行の意味」が付き、
+        出た値を貼ると、その値を指して 1〜2 文の解説が開きます。<strong>結果と解説が隣にある</strong>のがこのドリルの作りです。
+        Python を開けないときは「ここで実行」を押せば同じ値が出ます（判定は同じ）。
+      </p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">準備（提出フォルダの中で、1 行ずつ）</p>
+      <pre>cd ~/product/advanced-cryptography-2026/week3/submissions/&lt;github-username&gt;/schnorr-from-scratch/python
+export PYTHONPATH="../../../../problems/schnorr-from-scratch/python/tests:."
+python3 -i solution.py        ← 簡易チェックが 10 行出たあと、>>> が出れば準備完了</pre>
+      <p>
+        <b>この 3 行の意味</b>: 1 行目で提出フォルダへ移動。2 行目で「<code>given.py</code> のある tests と、自分のフォルダ」を Python の探し場所に登録
+        （これをしないと <code>No module named 'given'</code> になる）。3 行目の <code>-i</code> は「ファイルを実行したあと、対話モードに入る」。
+        行頭に空白を入れると <code>IndentationError</code> になるので、貼るときは行頭から。
+      </p>
+    </div>
+
+    <div class="card" id="drill-card">
+      <div class="card-head"><h3>ドリル 1 — 7 問を値で確かめる</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot">
+        <button class="btn-ghost drill-reset" type="button">はじめからやり直す</button>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 2 の前に — 題意からコードへ行く手順は 1 つだけ</p>
+      <p class="strong-line">題意 → 入出力を 1 行で言う → 手で 1 回やる（REPL） → その行の数字を引数名に置き換えて return → 壊れる入力を試して if を 1 個ずつ足す。</p>
+      <p>場合分けは「先に設計する」ものではなく、「壊れた所に足す 1 行」です。下のドリルは、10 関数のうち 7 つをこの順で組みます。各行の下に <b>その時点の関数の全文</b>が出ます。if を 1 個足すたびに全文を再掲し、足した行に <b>← 今足した</b> の印。最後の ec_add は solution.py と同じ形になります。O（無限遠点）は ec_add の前に 4 行で別に扱います。</p>
+    </div>
+
+    <div class="card" id="drill2-card">
+      <div class="card-head"><h3>ドリル 2 — 手で出した行を、そのまま関数にする（関数は全文で、1 行ずつ育つ）</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot">
+        <button class="btn-ghost drill-reset" type="button">はじめからやり直す</button>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 3 — ec_add から先が分からない人のために</p>
+      <p class="strong-line">楕円曲線の「足し算」のやり方と、なぜそれが離散対数問題になるのか。</p>
+      <p>講義スライド 27 と同じ小さい曲線 y² = x³ + x + 6 (mod 11) で、点を全部数える → 2 点を通る直線で 3 つ目の点 → 折り返す → 接線 → 引き算の相手と O → 一周（位数）→ 順方向は一瞬・逆方向は総当たり → 本物は 78 桁、の順。19 行。解説は各行 3〜5 文で、「なぜそうなるか」を毎回書いています。</p>
+    </div>
+    <div class="card" id="drill3-card">
+      <div class="card-head"><h3>ドリル 3 — 楕円曲線の足し算と、離散対数</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 4 — 宿題に無い 1 歩: 制約 → 多項式 → 1 点で確かめる</p>
+      <p class="strong-line">「ゼロ知識証明の多項式変換」を、純粋な整数の 16 行で。solution.py は使いません（mod 17 の計算だけ）。</p>
+      <p>計算 w³ + w + 5 = 15 → 3 本の制約 → 3 行 × 3 列の表 → 列を式にする（補間）→ 3 本が 1 本の P に → 1, 2, 3 で 0 ⇔ Z で割り切れる → 検証者はランダムな 1 点だけ見る → 嘘は割り切れないのでどの点でも落ちる → 乱数で覆ってゼロ知識に。Week 4 の STARK / PLONK はこれの大規模版です。</p>
+    </div>
+    <div class="card" id="drill4-card">
+      <div class="card-head"><h3>ドリル 4 — 制約 → 多項式 → 1 点で確かめる</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
     </div>
   </div>
 </section>
@@ -4385,6 +4475,368 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
 
   showBest();
 })();
+
+// ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む） ----
+(function () {
+  "use strict";
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function drillText(node, text) {
+    // 「**強調**」だけを <b> にする。innerHTML は使わないので、本文は常にテキストのまま。
+    String(text).split("**").forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2 ? Object.assign(document.createElement("b"), { textContent: part })
+                             : document.createTextNode(part));
+    });
+  }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; drillText(say, st.say); step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": ")); drillText(mean, st.mean); step.appendChild(mean);
+        if (done) {
+          var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
+          var then = document.createElement("p"); then.className = "drill-then"; drillText(then, st.then); step.appendChild(then);
+          if (st.code) {
+            var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "この時点の関数（全文）:"; step.appendChild(cl);
+            var cp = document.createElement("pre"); cp.className = "drill-code"; cp.textContent = st.code; step.appendChild(cp);
+          }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          if (st.out === "") {
+            var note = document.createElement("p"); note.className = "drill-mean"; note.textContent = "この行は何も表示しません（代入だけ）。打ったら「次へ」。";
+            var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-main"; nx.textContent = "次へ";
+            nx.addEventListener("click", function () { cur++; save(); render(); });
+            step.appendChild(note); form.appendChild(nx); step.appendChild(form); body.appendChild(step); continue;
+          }
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
+
+  var STEPS1 = [
+    // ---- 問 1 ----
+    { q: "問 1 — なぜ足したあとに % p を取るのか", say: "まず、余りを取らない普通の足し算。",
+      cmd: "(-3 + 1)", mean: "ただの整数の足し算。", out: "-2",
+      then: "−2。これは普通の整数の答え。次は同じ式に % 7 を付けます。" },
+    { q: "問 1", say: "同じ式を、7 で割った余りで。",
+      cmd: "(-3 + 1) % 7", mean: "% 7 は「7 で割った余り」。負の数でも 0〜6 のどれかになる。", out: "5",
+      then: "−2 と 5 は mod 7 の世界では同じ数（時計で「2 時間前」と「5 時間後」が同じ針）。% p の仕事は、同じ数の 7 通りの書き方を 0〜6 の 1 つにそろえること — 名刺をそろえている。" },
+    { q: "問 1", say: "大きい数でも同じ。",
+      cmd: "100 % 7", mean: "100 = 14·7 + 2。", out: "2",
+      then: "2。採点器は「期待値 5 と == か」を見るので、あなたの関数が −2 を返すと同じ数なのに落ちる。test_add_normalizes の「正規化」はこの「名刺をそろえる」のこと。— 問 1 の答え: 「% p は、同じ数の別の書き方を 0..p−1 の 1 つに決めるため」。" },
+    // ---- 問 2 ----
+    { q: "問 2 — なぜ 0 だけ逆元が無く、p は素数でなければならないか", say: "逆元 = 「掛けて 1 になる相手」。mod 7 で 3 の相手を総当たりで探します。",
+      cmd: "[3 * k % 7 for k in range(7)]", mean: "k = 0〜6 について 3·k を 7 で割った余りを並べる（Python の内包表記）。", out: "[0, 3, 6, 2, 5, 1, 4]",
+      then: "1 がちょうど 1 回、k = 5 の所にいる（3·5 = 15 = 14 + 1）。だから 3 の逆元は 5。しかも 0〜6 が全部 1 回ずつ出た —「3 を掛ける」は 7 個の数を並べ替えているだけ。" },
+    { q: "問 2", say: "同じことを 0 で。",
+      cmd: "[0 * k % 7 for k in range(7)]", mean: "0·k を 7 で割った余りを並べる。", out: "[0, 0, 0, 0, 0, 0, 0]",
+      then: "全部 0。1 が一度も出ない — 「0 × 何 = 0」なので、0 に「掛けて 1 になる相手」は存在しない。課題の field_inv(0, p) が ValueError を投げる理由はこれだけ。" },
+    { q: "問 2", say: "今度は法を素数でない 6 にして、2 を掛けてみます。",
+      cmd: "[2 * k % 6 for k in range(6)]", mean: "mod 6 で「2 を掛ける」の結果を並べる。", out: "[0, 2, 4, 0, 2, 4]",
+      then: "1 が出ない。0 でない 2 なのに逆元が無い（2·3 = 6 ≡ 0 で「0 でないのに掛けて 0」になる組がいる = 零因子）。法が素数なら 0 以外の全員に相手がいる。— 問 2 の答え: 「0 は何を掛けても 0 で 1 にならない。法が合成数だと 0 以外にも相手のいない数が出るので、素数にする」。" },
+    // ---- 問 3 ----
+    { q: "問 3 — ec_add で y₃ の符号を反転する理由と、垂直な直線のときの答え", say: "ec_add は急に難しく見えますが、中身は Part 1 の関数 4 回です。G = (1, 298) を 2 倍する計算を、1 行ずつ手で組みます。まず接線の傾き λ の分母 2y = 2·298 の逆元。",
+      cmd: "field_inv(2 * 298, 1009)", mean: "「÷ (2y)」は「(2y) の逆元を掛ける」。Part 1 の field_inv をそのまま使う。", out: "601",
+      then: "601。596 × 601 = 358196 = 355·1009 + 1 なので確かに逆元。これで割り算の準備ができた。" },
+    { q: "問 3", say: "接線の傾き λ = (3x² + a) / (2y)。a = 0、x = 1 なので分子は 3。",
+      cmd: "field_mul(3 * 1 * 1, 601, 1009)", mean: "分子 3x² に、さっきの逆元を掛ける = 3 ÷ 596 を mod 1009 でやっている。接線の傾きは数 II の微分（y² = x³ + … を微分して 2y·y′ = 3x²）。", out: "794",
+      then: "λ = 794。傾きが出た。次は x 座標。直線 y = λx + c を曲線に代入すると 3 次方程式になり、3 つの解の和が λ²（解と係数の関係）。2 つは x₁ = x₂ = 1 なので 3 つ目は λ² − 1 − 1。" },
+    { q: "問 3", say: "x₃ = λ² − x₁ − x₂。",
+      cmd: "(794 * 794 - 1 - 1) % 1009", mean: "解と係数の関係で 3 つ目の交点の x を出し、% 1009 で名刺をそろえる。", out: "818",
+      then: "818。3 つ目の交点の x 座標。次は y。直線上の点なら y = y₁ + λ(x₃ − x₁) だが、和はそれを x 軸で反転した点なので符号を返す。" },
+    { q: "問 3", say: "y₃ = λ(x₁ − x₃) − y₁（反転込み）。",
+      cmd: "(794 * (1 - 818) - 298) % 1009", mean: "直線上の y を出して符号を反転 = λ(x₁ − x₃) − y₁。", out: "800",
+      then: "800。つまり 2G = (818, 800)。**field_inv 1 回、field_mul 1 回、整数の式 2 本**で ec_add の 2 倍算ができた。ec_add の関数は、この 4 行に「場合分け 4 つ」を付けただけ。次の行で関数本体が同じ答えを出すことを見ます。" },
+    { q: "問 3", say: "自分の ec_add で G を 2 倍します。",
+      cmd: "ec_add(TOY.G, TOY.G, TOY)", mean: "同じ点どうしなので接線の公式 λ = 3x²/(2y) が使われる。", out: "(818, 800)",
+      then: "(818, 800) = 2G。採点器の期待値と一致。次に、この点が本当に曲線の上にあるかを given の is_on_curve で見ます。" },
+    { q: "問 3", say: "曲線 y² = x³ + 11 (mod 1009) の上にあるか。",
+      cmd: "is_on_curve((818, 800), TOY)", mean: "800² と 818³ + 11 を mod 1009 で比べる。", out: "True",
+      then: "True。では y の符号を反転し忘れた版 — 公式を y₃ = λ(x₃ − x₁) − y₁ と書いてしまうと y が 622 になります — を試します。" },
+    { q: "問 3", say: "反転し忘れた y で同じ検査。",
+      cmd: "is_on_curve((818, 622), TOY)", mean: "(818, 622) が曲線上かどうか。", out: "False",
+      then: "False。反転を忘れると、出てくる点は曲線の上にすら乗らない。採点器の「点が曲線上にありません」はこれ。反転する理由は「直線と曲線の 3 つ目の交点をそのまま和にすると結合法則が成り立たず、足し算にならない」から。" },
+    { q: "問 3", say: "最後に垂直な直線。G と、G の y を反転した点 (1, 1009 − 298) を足します。",
+      cmd: "print(ec_add(TOY.G, (1, 1009 - 298), TOY))", mean: "x が同じで y が符号違いの 2 点。print を付けるのは、None は >>> で何も表示されないから。", out: "None",
+      then: "None = 無限遠点 O。x が同じなので直線は垂直、3 つ目の交点が無い。だから「足し算の 0」を返す。— 問 3 の答え: 「反転しないと群にならず点が曲線から落ちる。垂直なら O（None）」。ec_add の場合分け (2) を (3)(4) より先に書く理由も、ここで分母 x_Q − x_P = 0 で割ろうとしないため。" },
+    // ---- 問 4 ----
+    { q: "問 4 — 123 を 2 進で書いて、ec_add が何回で済むか", say: "Python に 2 進表記を出してもらいます。",
+      cmd: "bin(123)", mean: "123 を 2 進法の文字列にする。", out: "'0b1111011'",
+      then: "1111011₂ — 7 桁で、1 が 6 個。double-and-add は「桁ごとに 2 倍（7 桁なら 6 回）、1 の桁だけ足す（6 回）」なので ec_add は 12 回。素直に G を 123 回足すと 122 回。secp256k1 の 2²⁵⁶ では「素直」は終わらない。" },
+    { q: "問 4", say: "それで本当に同じ点に着くか。",
+      cmd: "ec_scalar_mul(123, TOY.G, TOY)", mean: "自分の double-and-add で 123·G。", out: "(376, 128)",
+      then: "(376, 128)。これが秘密鍵 x = 123 の公開鍵 P。— 問 4 の答え: 「123 = 1111011₂。倍 6 回 + 足し算 6 回 = 12 回」。" },
+    // ---- 問 5 ----
+    { q: "問 5 — s = r + e·x が x を隠す理由と、同じ r を 2 回使うと漏れる理由", say: "秘密 x = 123、乱数 r = 456、チャレンジ e = 77 で応答 s を作ります。",
+      cmd: "sigma_response(123, 456, 77, TOY)", mean: "s = (r + e·x) mod n = (456 + 77·123) mod 967。", out: "257",
+      then: "257。この 1 個の数から x = 123 は出ません — 未知数が 2 個（r と x）で式が 1 本（中 2 の連立方程式: 解けない）。r がランダムで x を覆っている。" },
+    { q: "問 5", say: "同じ r = 456 のまま、別のチャレンジ e = 90 に答えてしまう。",
+      cmd: "sigma_response(123, 456, 90, TOY)", mean: "2 本目の式 s₂ = r + 90·x。", out: "889",
+      then: "889。これで式が 2 本。引き算すると r が消えます: s₁ − s₂ = (77 − 90)·x。次の 1 行で x を解きます。" },
+    { q: "問 5", say: "2 本の式から x を解く（割り算は逆元を掛ける）。",
+      cmd: "(257 - 889) * field_inv(77 - 90, 967) % 967", mean: "x = (s₁ − s₂) · (e₁ − e₂)⁻¹ mod n。", out: "123",
+      then: "123 — 秘密鍵が公開情報だけから出た。採点器の test_nonce_reuse_leaks_secret はまさにこの計算。— 問 5 の答え: 「式 1 本では未知数 2 個を解けないから隠れる。同じ r で 2 本目ができると引き算で r が消えて x が解ける」。nonce = number used once。" },
+    // ---- 問 6 ----
+    { q: "問 6 — 検証者が x なしで s·G = R + e·P を確かめられる理由", say: "検証式の左辺。s = 257 を使う。",
+      cmd: "ec_scalar_mul(257, TOY.G, TOY)", mean: "s·G。使っているのは s と G だけ。", out: "(595, 110)",
+      then: "(595, 110)。次に右辺。R = (822, 106)（= 456·G）、e = 77、P = (376, 128) だけを使います。" },
+    { q: "問 6", say: "検証式の右辺。",
+      cmd: "ec_add((822, 106), ec_scalar_mul(77, (376, 128), TOY), TOY)", mean: "R + e·P。x = 123 はどこにも出てこない。", out: "(595, 110)",
+      then: "左辺と同じ (595, 110)。一致する理由は分配法則: s·G = (r + e·x)·G = r·G + e·(x·G) = R + e·P。— 問 6 の答え: 「右辺は R・e・P（全部公開）だけで計算でき、分配法則で左辺と一致する。x は式を展開したときに消えている」。" },
+    // ---- 問 7 ----
+    { q: "問 7 — e をハッシュにすると何が要らなくなるか", say: "検証者が選んでいた e を、ハッシュに選ばせる。",
+      cmd: 'challenge_hash((822, 106), (376, 128), b"week3", 967)', mean: "e = H(R, P, メッセージ) mod n。検証者のサイコロをハッシュに振らせる。", out: "57",
+      then: "57。誰が計算しても同じ 57 になる（ハッシュは決定的）。だから検証者がその場にいなくてもよい。" },
+    { q: "問 7", say: "その e で署名を作る。",
+      cmd: 'schnorr_sign(123, b"week3", 456, TOY)', mean: "R = 456·G、e = 57、s = 456 + 57·123 mod 967 = 698。返り値は (R, s)。", out: "((822, 106), 698)",
+      then: "((822, 106), 698)。これが署名。3 手の会話が「データ 1 個」になった。" },
+    { q: "問 7", say: "検証。e は受け取らず、自分で計算し直す。",
+      cmd: 'schnorr_verify((376, 128), b"week3", ((822, 106), 698), TOY)', mean: "e = H(R, P, message) を計算し直し、s·G == R + e·P を確かめる。", out: "True",
+      then: "True。最後に、メッセージを 1 文字だけ変えてみます。" },
+    { q: "問 7", say: "メッセージを改ざん。",
+      cmd: 'schnorr_verify((376, 128), b"week3!", ((822, 106), 698), TOY)', mean: "同じ署名を、違うメッセージで検証。", out: "False",
+      then: "False。e にメッセージが入っているので、1 文字でも変わると e が変わり、検証式が崩れる。— 問 7 の答え: 「検証者（その場でサイコロを振る人）が要らなくなり、会話が 1 通の署名になる。メッセージを e に入れるから改ざんも検知できる」。これで 7 問すべて、自分の手で出した数で説明できました。" }
+  ];;
+
+  // ---- ドリル 2: 手で出した行を、そのまま関数にする ----
+  var STEPS2 = [
+    // ---- field_add ----
+    { q: "field_add — 題意: (a + b) mod p を 0..p−1 で返す", say: "入出力を 1 行で言う: 整数 a, b, p が入って、余りが 1 個出る。手で 1 回。",
+      cmd: "(-3 + 1) % 7", mean: "ドリル 1 で打った行そのもの。", out: "5",
+      then: "この行の −3 を a、1 を b、7 を p に置き換えて return すれば関数の全文。数字を引数名にしただけ。",
+      code: "def field_add(a, b, p):\n    return (a + b) % p        # ← (-3 + 1) % 7 の数字を引数名にした。これで全文" },
+    { q: "field_add", say: "自分の関数が同じ値を返すか。",
+      cmd: "field_add(-3, 1, 7)", mean: "さっきの手計算を関数で。", out: "5",
+      then: "同じ 5。field_mul も同じ手順で全文が 1 行（(a * b) % p）。『手で 1 回 → 数字を引数名に → return』が最小単位。",
+      code: "def field_mul(a, b, p):\n    return (a * b) % p" },
+    // ---- field_inv ----
+    { q: "field_inv — 題意: a·x ≡ 1 となる x を 0..p−1 で返す。a ≡ 0 なら ValueError", say: "与えられた extended_gcd を手で 1 回。",
+      cmd: "extended_gcd(5, 13)", mean: "(g, x, y) で 5·x + 13·y = g。g が 1 なら x が逆元。", out: "(1, -5, 2)",
+      then: "x = −5。負なので『名刺をそろえる』が要る。この時点の関数は 2 行（extended_gcd を呼んで x を返す）。まだ壊れる入力を考えていない版。",
+      code: "def field_inv(a, p):\n    g, x, _ = extended_gcd(a, p)    # ← いま手で打った行\n    return x                        # ← まだ −5 のまま返してしまう版" },
+    { q: "field_inv", say: "名刺をそろえる。",
+      cmd: "(-5) % 13", mean: "−5 を 0..12 に直す。", out: "8",
+      then: "8。return を x % p に直す。次に『壊れる入力』: a = 0 や a = 13（13 の倍数）。0 に相手はいないので、先に弾く if を足す。",
+      code: "def field_inv(a, p):\n    a %= p                          # ← 今足した: 入力の名刺もそろえる（13 → 0）\n    if a == 0:                      # ← 今足した: 壊れる入力 0 を先に弾く\n        raise ValueError(\"F_p で 0 の逆元は存在しません\")\n    g, x, _ = extended_gcd(a, p)\n    return x % p                    # ← 直した: (-5) % 13 → 8 と同じこと" },
+    { q: "field_inv", say: "関数で同じ値か。",
+      cmd: "field_inv(5, 13)", mean: "5 の逆元 mod 13。", out: "8",
+      then: "8。これが全文。『手で 2 行 → 引数名に → 壊れる入力の if』。" },
+    // ---- 無限遠点 O ----
+    { q: "無限遠点 O — ec_add の前に、O とは何か", say: "O は「点の足し算の 0 の役」。数の 0 が a + 0 = a であるように、P + O = P にしたい。この課題では O を None で表す（点は (x, y) のタプル、O は座標を持たないので別の値）。",
+      cmd: "print(ec_add(None, TOY.G, TOY))", mean: "O + G。print を付けるのは、None は >>> で何も表示されないから。", out: "(1, 298)",
+      then: "(1, 298) = G。O + G = G。『O が入ってきたら、相手をそのまま返す』— これが O の扱いの 1 つ目。" },
+    { q: "無限遠点 O", say: "O はどこから出てくるか。G と、G の y を反転した点 (1, 711) を足す。711 = 1009 − 298。",
+      cmd: "print(ec_add(TOY.G, (1, 711), TOY))", mean: "x が同じで y が逆の 2 点 = 直線が垂直。3 つ目の交点が無い。", out: "None",
+      then: "None = O。垂直な直線は『無限に遠くで曲線と交わる』と考える（実数の絵）。だから名前が無限遠点。P + (−P) = O。これが O の扱いの 2 つ目（O が出ていくとき）。" },
+    { q: "無限遠点 O", say: "n = 967 回足すと一周して O に戻る（位数）。",
+      cmd: "print(ec_scalar_mul(967, TOY.G, TOY))", mean: "G を 967 回足す。", out: "None",
+      then: "None。時計が 12 で 0 に戻るのと同じで、点の足し算も 967 で O に戻る。採点器の test_order_times_generator_is_identity はこれ。O は『特別な例外』ではなく『0 に戻った』状態。" },
+    { q: "無限遠点 O", say: "O の扱いがなぜ関数の先頭に要るか。O（None）は座標を持たないので、座標を取り出す行 x1, y1 = P で壊れる。",
+      cmd: "print(ec_add(None, None, TOY))", mean: "O + O。どちらも None。", out: "None",
+      then: "None。『None が来たら相手を返す』の if を、座標を取り出す行より前に置く理由はこれ（None[0] は TypeError）。ここまでが O の全部: 入ってきたら相手を返す／垂直なら O を返す／n 回で O に戻る。" },
+    // ---- ec_add ----
+    { q: "ec_add — 題意: 曲線上の 2 点の和。まず P == Q（2 倍算）だけ", say: "ドリル 1 で手で組んだ 4 行（field_inv → λ → x₃ → y₃）を、そのまま関数の中身にする。関数で呼んで同じ点が出るか。",
+      cmd: "ec_add((1, 298), (1, 298), TOY)", mean: "P = Q = G の 2 倍算。", out: "(818, 800)",
+      then: "(818, 800)。4 行の数字（2·298、1009、3、1、818）を y、p、x、… に置き換えただけ。この時点の関数は『P == Q のときだけ正しい版』。全文はこう。",
+      code: "def ec_add(P, Q, curve):                # 2 倍算だけ版（まだ場合分け無し）\n    p = curve.p\n    x1, y1 = P[0] % p, P[1] % p          # 座標を取り出して名刺をそろえる\n    x2, y2 = Q[0] % p, Q[1] % p\n    num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)   # 3x² + a\n    lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)            # ← field_inv(2*298,1009)=601, 3·601=794\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)                 # ← (794*794 - 1 - 1) % 1009 = 818\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)      # ← (794*(1-818) - 298) % 1009 = 800\n    return (x3, y3)" },
+    { q: "ec_add — 場合分け 1: O が入ってきたら", say: "壊れる入力を試す。さっきの O + G。上の版だと P[0] で落ちる。",
+      cmd: "print(ec_add(None, TOY.G, TOY))", mean: "None は『足し算の 0』。0 + G = G になってほしい。", out: "(1, 298)",
+      then: "(1, 298)。『None なら相手を返す』を、座標を取り出す行より前に 2 行足す。場合分けは設計ではなく、壊れた所への 1 行。",
+      code: "def ec_add(P, Q, curve):\n    p = curve.p\n    if P is INFINITY:                    # ← 今足した（INFINITY = None）。座標を取り出す前に\n        return Q\n    if Q is INFINITY:                    # ← 今足した\n        return P\n    x1, y1 = P[0] % p, P[1] % p\n    x2, y2 = Q[0] % p, Q[1] % p\n    num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)\n    lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)\n    return (x3, y3)" },
+    { q: "ec_add — 場合分け 2: x が同じで y が逆（垂直）", say: "G と (1, 711) を足す。上の版だと P ≠ Q なのに接線の式を使ってしまい、別の点が出る（しかも本来は弦の分母 x2 − x1 = 0 で割れない）。",
+      cmd: "print(ec_add(TOY.G, (1, 711), TOY))", mean: "垂直な直線。答えは O。", out: "None",
+      then: "None。『x が同じで y1 + y2 ≡ 0 なら O を返す』を 1 行足す。y = 0 の点を 2 倍するときもここに入る（y1 = y2 = 0 で y1 + y2 = 0）— だから 2y = 0 で割る事故も起きない。",
+      code: "def ec_add(P, Q, curve):\n    p = curve.p\n    if P is INFINITY:\n        return Q\n    if Q is INFINITY:\n        return P\n    x1, y1 = P[0] % p, P[1] % p\n    x2, y2 = Q[0] % p, Q[1] % p\n    if x1 == x2 and (y1 + y2) % p == 0:  # ← 今足した: 垂直 → O。λ を計算する前に\n        return INFINITY\n    num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)\n    lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)\n    return (x3, y3)" },
+    { q: "ec_add — 場合分け 3: P ≠ Q なら弦", say: "最後に普通の 2 点。G + 2G。上の版だと P ≠ Q でも接線の式を使ってしまい、間違った点が出る。",
+      cmd: "ec_add(TOY.G, (818, 800), TOY)", mean: "違う 2 点なので λ = (y₂ − y₁)/(x₂ − x₁)。", out: "(851, 516)",
+      then: "(851, 516) = 3G。λ だけ if/else で分け、x₃, y₃ の式は共通。これが全文 — あなたの solution.py の ec_add と同じ形。『式 1 本 + if 3 つ』。",
+      code: "def ec_add(P, Q, curve):                 # 完成版（= solution.py）\n    p = curve.p\n    if P is INFINITY:\n        return Q\n    if Q is INFINITY:\n        return P\n    x1, y1 = P[0] % p, P[1] % p\n    x2, y2 = Q[0] % p, Q[1] % p\n    if x1 == x2 and (y1 + y2) % p == 0:\n        return INFINITY\n    if x1 == x2 and y1 == y2:             # ← 今足した: P == Q なら接線\n        num = field_add(field_mul(3, field_mul(x1, x1, p), p), curve.a, p)\n        lam = field_mul(num, field_inv(field_mul(2, y1, p), p), p)\n    else:                                 # ← 今足した: それ以外は弦 (y2−y1)/(x2−x1)\n        lam = field_mul(field_add(y2, -y1, p), field_inv(field_add(x2, -x1, p), p), p)\n    x3 = field_add(field_mul(lam, lam, p), -(x1 + x2), p)\n    y3 = field_add(field_mul(lam, field_add(x1, -x3, p), p), -y1, p)\n    return (x3, y3)" },
+    // ---- ec_scalar_mul ----
+    { q: "ec_scalar_mul — 題意: k·P を速く（k ≈ 2²⁵⁶ でも）", say: "2 進で下の桁から読む道具が divmod。手で 1 回。",
+      cmd: "divmod(123, 2)", mean: "123 を 2 で割った商と余り。余りが最下位ビット、商が『残りの桁』。", out: "(61, 1)",
+      then: "(61, 1)。余り 1 なら『いまの addend を足す』、商 61 を次の k にして続ける。addend は毎回 2 倍。これをループにした全文。",
+      code: "def ec_scalar_mul(k, P, curve):\n    result = INFINITY                    # 足し算の 0 から始める（O）\n    addend = P                           # P, 2P, 4P, … と倍にしていく\n    while k > 0:\n        k, bit = divmod(k, 2)            # ← divmod(123, 2) → (61, 1)\n        if bit:\n            result = ec_add(result, addend, curve)   # 桁が 1 なら足す\n        if k:\n            addend = ec_add(addend, addend, curve)   # 次の桁のために 2 倍\n    return result                        # k = 0 なら O のまま（test: 0·G = None）" },
+    { q: "ec_scalar_mul", say: "関数で 13·G。13 = 1101₂ なので足し算 3 回。",
+      cmd: "ec_scalar_mul(13, TOY.G, TOY)", mean: "double-and-add で 13 倍。", out: "(101, 688)",
+      then: "(101, 688)。素直に 12 回足しても同じ点に着くが、256 ビットでは終わらない。" },
+    // ---- sigma / schnorr ----
+    { q: "sigma_commit / sigma_response — 題意: R = r·G、s = r + e·x mod n", say: "手で 1 回。",
+      cmd: "(456 + 77 * 123) % 967", mean: "r + e·x を n で割った余り。", out: "257",
+      then: "257。数字を引数名にして return。唯一の罠: % は curve.p ではなく curve.n（G を何回足すかの数だから）。sigma_commit は ec_scalar_mul を呼ぶだけ。",
+      code: "def sigma_commit(r, curve):\n    return ec_scalar_mul(r % curve.n, curve.G, curve)   # R = r·G\n\ndef sigma_response(x, r, e, curve):\n    return (r + e * x) % curve.n         # ← (456 + 77*123) % 967。p ではなく n" },
+    { q: "sigma_verify — 題意: s·G == R + e·P", say: "左辺と右辺はドリル 1 で手で出した 2 行。関数にするだけ。",
+      cmd: "sigma_verify((376, 128), (822, 106), 77, 257, TOY)", mean: "left = s·G、right = R + e·P、left == right。", out: "True",
+      then: "True。『手で 2 行 → 変数に入れて == で返す』。検証式はそれ以上でも以下でもない。",
+      code: "def sigma_verify(pubkey, R, e, s, curve):\n    left = ec_scalar_mul(s % curve.n, curve.G, curve)                  # ← ec_scalar_mul(257, TOY.G, TOY)\n    right = ec_add(R, ec_scalar_mul(e % curve.n, pubkey, curve), curve) # ← ec_add((822,106), ec_scalar_mul(77,(376,128),TOY), TOY)\n    return left == right" },
+    { q: "schnorr_sign / schnorr_verify — 題意: README の手順 1〜5 をそのまま", say: "手順が箇条書きで書いてある関数は、1 項目 = 1 行。",
+      cmd: 'schnorr_sign(123, b"week3", 456, TOY)', mean: "R = nonce·G → P = x·G → e = H(R,P,m) → s = sigma_response → (R, s)。", out: "((822, 106), 698)",
+      then: "((822, 106), 698)。5 行が README の 5 手順と 1 対 1。verify は e を計算し直して sigma_verify を呼ぶだけ。『題意 → 入出力 1 行 → 手で 1 回 → 引数名に → 壊れる入力の if』が、10 関数すべての作り方です。",
+      code: "def schnorr_sign(x, message, nonce, curve):\n    R = sigma_commit(nonce, curve)                         # 手順 1\n    pubkey = ec_scalar_mul(x % curve.n, curve.G, curve)    # 手順 2\n    e = challenge_hash(R, pubkey, message, curve.n)        # 手順 3（引数の順番は R, P, m）\n    s = sigma_response(x, nonce, e, curve)                 # 手順 4\n    return (R, s)                                          # 手順 5\n\ndef schnorr_verify(pubkey, message, signature, curve):\n    R, s = signature\n    e = challenge_hash(R, pubkey, message, curve.n)        # e は受け取らず、自分で計算し直す\n    return sigma_verify(pubkey, R, e, s, curve)" }
+  ];
+
+  // ---- ドリル 3: 楕円曲線の足し算と、離散対数 ----
+  var STEPS3 = [
+    { q: "曲線とは何か — 講義スライド 27 と同じ小さい曲線 y² = x³ + x + 6 (mod 11)", say: "まず、この曲線を given の Curve という入れ物に入れます。p は「何で割った余りか」、a と b は式の係数、G は基準の点、n は G を何回足すと一周するか。",
+      cmd: "C11 = Curve(p=11, a=1, b=6, G=(2, 7), n=13)", mean: "入れ物を作るだけ。画面には何も出ない。", out: "",
+      then: "" },
+    { q: "曲線とは何か", say: "「曲線」と言っても、余りの世界ではなめらかな線は描けません。代わりに、式 y² = x³ + x + 6 を満たす (x, y) を全部数えます。x と y を 0〜10 で総当たり。",
+      cmd: "[(x, y) for x in range(11) for y in range(11) if (y*y - (x**3 + x + 6)) % 11 == 0]", mean: "x, y を 0〜10 で全部試し、左辺 y² と右辺 x³ + x + 6 の余りが等しいものだけ拾う。", out: "[(2, 4), (2, 7), (3, 5), (3, 6), (5, 2), (5, 9), (7, 2), (7, 9), (8, 3), (8, 8), (10, 2), (10, 9)]",
+      then: "12 個。これに O（無限遠点）を足した 13 個が、この曲線の「点」の全部です。実数のグラフのようななめらかな曲線ではなく、式を満たす点の集まり。13 個しかないので、この先は全部手で追えます。よく見ると (2, 4) と (2, 7) のように x が同じで y が「4 + 7 = 11 ≡ 0」の組が対になっている — これが後で「y を反転した点」= 引き算の相手になります。" },
+    { q: "曲線とは何か", say: "1 点が曲線上かどうかの確かめ方。(2, 7) で、左辺 y² と右辺 x³ + x + 6 を別々に計算して余りを比べます。",
+      cmd: "(7 * 7) % 11, (2**3 + 2 + 6) % 11", mean: "左辺 49 の余りと、右辺 16 の余り。", out: "(5, 5)",
+      then: "5 と 5。同じなので (2, 7) は曲線上。これが「点が曲線に乗っている」の意味の全部で、given の is_on_curve はこの 2 つの数を比べているだけです。" },
+    { q: "足し算の決め方 — 2 点を通る直線", say: "ここからが「点の足し算」。(2, 7) と (5, 2) を足します。座標は足しません。まず 2 点を通る直線の傾き λ（ラムダ）。中学の一次関数と同じで「y の増え方 ÷ x の増え方」。割り算は逆元を掛けます。",
+      cmd: "(2 - 7) * field_inv(5 - 2, 11) % 11", mean: "(y₂ − y₁) ÷ (x₂ − x₁) = (2 − 7) ÷ (5 − 2) を、÷ の代わりに「3 の逆元を掛ける」で。", out: "2",
+      then: "傾き λ = 2。計算の中身: 5 − 2 = 3 の逆元は 4（3 × 4 = 12 ≡ 1）。(−5) × 4 = −20、11 で割った余りは 2。なぜ直線を使うか — 直線は 2 点で 1 本に決まり、3 次の曲線とは必ず「もう 1 点」で交わる（3 次方程式は解が 3 つ）。「2 つを決めると 3 つ目が決まる」という規則なので、足し算の形にちょうどいい。" },
+    { q: "足し算の決め方", say: "3 つ目の交点の x 座標。3 つの交点の x を全部足すと λ² になる、という性質（数 II の「解と係数の関係」）を使います。x = 2 と x = 5 は分かっているので、3 つ目は λ² − 2 − 5。",
+      cmd: "(2 * 2 - 2 - 5) % 11", mean: "λ² − x₁ − x₂ = 4 − 2 − 5 = −3 → 余り 8。", out: "8",
+      then: "x₃ = 8。直線が曲線と 3 回目に交わる場所の x 座標です。「なぜ足すと λ² か」は、直線の式 y = λx + c を曲線に代入すると x³ − λ²x² + … = 0 という 3 次方程式になり、3 つの解の和が x² の係数の符号を変えたもの（λ²）になるから。ここは「そういう性質」と受け取って先へ進んで大丈夫。" },
+    { q: "足し算の決め方", say: "3 つ目の点の y 座標。直線上なので y = 7 + λ·(8 − 2) = 7 + 12 = 19 ≡ 8。でも和はそれを「x 軸で折り返した点」と約束するので符号を反転。式にすると y₃ = λ(x₁ − x₃) − y₁。",
+      cmd: "(2 * (2 - 8) - 7) % 11", mean: "λ(x₁ − x₃) − y₁ = 2·(2 − 8) − 7 = −19 → 余り 3。", out: "3",
+      then: "y₃ = 3。だから (2, 7) + (5, 2) = (8, 3)。「折り返す」のはただの約束ですが、この約束にすると「直線上の 3 点を全部足すと O（0 の役）」になり、足し算の規則（結合法則や P + (−P) = O）がきちんと閉じます。折り返さない規則にすると、足し算として成り立ちません。" },
+    { q: "足し算の決め方", say: "自分の ec_add で同じ計算。",
+      cmd: "ec_add((2, 7), (5, 2), C11)", mean: "弦の場合の ec_add。中身はさっきの 3 行。", out: "(8, 3)",
+      then: "(8, 3)。手計算と同じ。ec_add の「弦」の分岐は、この 3 行（λ → x₃ → y₃）です。" },
+    { q: "足し算の決め方", say: "折り返す前の点 (8, 8) は曲線上でしょうか。",
+      cmd: "is_on_curve((8, 8), C11)", mean: "(8, 8) が式を満たすか。", out: "True",
+      then: "True。折り返す前の点も曲線上にあります。つまり「曲線に乗っているか」では反転の要・不要は判定できない。反転は「足し算の規則が閉じるための約束」であって、曲線に乗せるための操作ではありません（宿題の TOY 曲線で反転し忘れが曲線から落ちたのは、式の書き間違いが別の場所だったから）。" },
+    { q: "同じ点を 2 回 — 接線", say: "(2, 7) + (2, 7)。同じ点どうしだと直線が 1 本に決まらない（2 点を通る直線が無い）。そこで「その点での接線」を使います。接線の傾きは微分で (3x² + a)/(2y)。講義スライド 27 と同じ計算。",
+      cmd: "(3 * 2 * 2 + 1) * field_inv(2 * 7, 11) % 11", mean: "(3·2² + 1) ÷ (2·7) = 13 ÷ 14 を mod 11 で。14 の逆元を掛ける。", out: "8",
+      then: "λ = 8。13 ≡ 2、14 ≡ 3 なので 2 ÷ 3 = 2 × 4 = 8。「微分」は高校の内容ですが、ここでは「同じ点が 2 回来たら λ の式がこれに変わる」とだけ覚えれば十分。残りの x₃, y₃ の式は弦のときと同じです。" },
+    { q: "同じ点を 2 回", say: "x₃ = λ² − x₁ − x₂。x₁ = x₂ = 2。",
+      cmd: "(8 * 8 - 2 - 2) % 11", mean: "64 − 4 = 60 → 余り 5。", out: "5",
+      then: "x₃ = 5。" },
+    { q: "同じ点を 2 回", say: "y₃ = λ(x₁ − x₃) − y₁。",
+      cmd: "(8 * (2 - 5) - 7) % 11", mean: "8·(−3) − 7 = −31 → 余り 2。", out: "2",
+      then: "y₃ = 2。だから 2·(2, 7) = (5, 2)。講義スライド 27 の答えと同じです。" },
+    { q: "同じ点を 2 回", say: "自分の ec_add で。",
+      cmd: "ec_add((2, 7), (2, 7), C11)", mean: "P == Q なので接線の分岐。", out: "(5, 2)",
+      then: "(5, 2)。ec_add の「接線」の分岐はこの 3 行。これで ec_add の 2 つの公式（弦と接線）は両方、自分の手で出せました。" },
+    { q: "引き算の相手と O", say: "(2, 7) と (2, 4) を足してみます。4 = 11 − 7 なので、(2, 4) は (2, 7) の y を反転した点。",
+      cmd: "print(ec_add((2, 7), (2, 4), C11))", mean: "x が同じで y が逆 = 直線が垂直。print は None 対策。", out: "None",
+      then: "None = O。垂直な直線は曲線と 3 回目に交わらないので、答えは「0 の役」。つまり (2, 4) は (2, 7) の引き算の相手（−P）。数の −3 が 3 + (−3) = 0 であるのと同じです。これで「y を反転した点が逆元」の意味が見えました。" },
+    { q: "一周する — 位数", say: "(2, 7) を 1 倍、2 倍、…、13 倍まで並べます。",
+      cmd: "[ec_scalar_mul(k, (2, 7), C11) for k in range(1, 14)]", mean: "k·G を k = 1〜13 で。", out: "[(2, 7), (5, 2), (8, 3), (10, 2), (3, 6), (7, 9), (7, 2), (3, 5), (10, 9), (8, 8), (5, 9), (2, 4), None]",
+      then: "12 個の点を全部 1 回ずつ通って、13 倍で None（O）に戻りました。これが「位数 13」。時計が 12 時間で 0 に戻るのと同じ。そして大事なのは並び方: (2,7) → (5,2) → (8,3) → (10,2) → … と、座標が 2 倍・3 倍になっているわけではなく、バラバラに飛んでいます。「k 倍したから座標が k 倍」という手がかりが無い。これが次の「離散対数が難しい」の原因です。" },
+    { q: "離散対数 — 速い向き", say: "9 倍は一瞬で出ます（double-and-add）。",
+      cmd: "ec_scalar_mul(9, (2, 7), C11)", mean: "順方向: k → k·G。", out: "(10, 9)",
+      then: "(10, 9)。9 = 1001₂ なので、2 倍を 3 回と足し算 1 回。k がどんなに大きくても log₂k 回で着きます。" },
+    { q: "離散対数 — 難しい向き", say: "逆に「(8, 8) は G の何倍か」を求めます。手がかりが無いので、1 倍から順に全部試すしかない。",
+      cmd: "[k for k in range(1, 14) if ec_scalar_mul(k, (2, 7), C11) == (8, 8)]", mean: "k = 1〜13 を全部試して (8, 8) になる k を探す。", out: "[10]",
+      then: "k = 10。13 個しか点が無いので一瞬です。でもこれは「試した」だけで、計算で逆算したわけではありません。点の並びがバラバラなので、上の表を見ても「(8, 8) だから 10 倍だ」とは分からない。" },
+    { q: "離散対数 — 難しい向き", say: "宿題の曲線（点が 967 個）で、公開鍵 (376, 128) の秘密鍵を総当たりで探します。",
+      cmd: "next(k for k in range(1, 968) if ec_scalar_mul(k, TOY.G, TOY) == (376, 128))", mean: "k = 1〜967 を順に試して公開鍵に一致する k。", out: "123",
+      then: "123 — 秘密鍵が 1 秒で出ました。宿題の曲線は「手で追えるように小さく作った練習用」なので、本物の安全性はありません。では本物はどのくらい大きいか。" },
+    { q: "離散対数 — 難しい向き", say: "本物の曲線 secp256k1（Bitcoin）を読み込み、点の個数 n の桁数を見ます。",
+      cmd: "from given import SECP256K1; len(str(SECP256K1.n))", mean: "given から本物の曲線を取り出し、n を 10 進で書いたときの桁数。", out: "78",
+      then: "78 桁。1 秒に 10 億回試しても、宇宙の年齢（約 4 × 10¹⁷ 秒）の何十桁倍もかかります。「離散対数問題は難しい」の中身はこれだけ — 逆算の近道が知られておらず、総当たりは桁が多すぎて終わらない。" },
+    { q: "離散対数 — 速い向きは本物でも速い", say: "同じ本物の曲線で、123·G は一瞬で出ます。x 座標の桁数だけ見ます。",
+      cmd: "len(str(ec_scalar_mul(123, SECP256K1.G, SECP256K1)[0]))", mean: "本物の曲線で 123 倍した点の x 座標の桁数。", out: "77",
+      then: "77 桁の点が一瞬で出た。つまり「x から x·G」は一瞬、「x·G から x」は終わらない。この片方向だけ速い性質のおかげで、公開鍵 P = x·G を世界中に見せても秘密鍵 x は分からない。Week 3 の Schnorr（R = r·G を見せても r が分からない）も、全部この 1 点に乗っています。" }
+  ];
+
+  // ---- ドリル 4: 制約 → 多項式 → 1 点で確かめる（宿題に無い 1 歩、純粋な整数だけ） ----
+  var STEPS4 = [
+    { q: "計算そのもの — w³ + w + 5 = 15 となる w を知っている、と示したい", say: "まず計算を普通にやります。w = 2。掛け算を 1 回ずつに分けて、途中の値 t1, t2 を作ります。",
+      cmd: "w = 2; t1 = w * w; t2 = t1 * w; (t1, t2, t2 + w + 5)", mean: "t1 = w², t2 = w³、最後に w と 5 を足す。", out: "(4, 8, 15)",
+      then: "(4, 8, 15)。2³ + 2 + 5 = 15 が確かめられました。掛け算を 1 回ずつに分けたのは、あとで「1 行 = 掛け算 1 個」の形にそろえるため。これから「この計算を正しくやった」を、w を見せずに示す方法を組み立てます。" },
+    { q: "制約 — 式を「= 0」の形にそろえる", say: "3 つの手順を「= 0 になる式」に書き直します。中学の方程式で右辺を移項して 0 にするのと同じ。",
+      cmd: "(t1 - w * w, t2 - t1 * w, t2 + w + 5 - 15)", mean: "t1 − w·w、t2 − t1·w、t2 + w + 5 − 15。正しい値なら全部 0。", out: "(0, 0, 0)",
+      then: "(0, 0, 0)。3 本とも 0。これが「制約」で、Week 1 の回路と同じものです。「計算を正しくやった」⇔「この 3 本が全部 0」。検証者は w, t1, t2 を知らなくても、もし値をもらえればこの 3 本を確かめるだけでよい。でも値をもらったら秘密が漏れる — そこで次から「値を渡さずに、3 本全部 0 を納得させる」工夫に入ります。" },
+    { q: "制約 — 3 本を同じ形「左 × 右 − 答え = 0」に", say: "3 本を同じ形にそろえます。行 1: (w)·(w) − t1、行 2: (t1)·(w) − t2、行 3: (t2+w+5−15)·(1) − 0。左因子 a、右因子 b、答え c の 3 つの列を作ると、各行は a·b − c = 0。ここからは mod 17 で計算します（暗号では余りの世界で計算するのが普通）。",
+      cmd: "a = (2, 4, 0); b = (2, 2, 1); c = (4, 8, 0); [(a[i] * b[i] - c[i]) % 17 for i in range(3)]", mean: "列 a, b, c を入れて、行ごとに a·b − c を mod 17 で。", out: "[0, 0, 0]",
+      then: "[0, 0, 0]。3 本の制約が「3 行 × 3 列の表」になりました。行 3 だけ「掛け算が無い」ので右因子を 1 にしてあります（何でも × 1 は変わらないから）。この表が Week 3 スライド 48 の R1CS です。" },
+    { q: "多項式にする — 表の列を「点を通る式」にする", say: "ここが講義に無い 1 歩。列 a = (2, 4, 0) を「X = 1 で 2、X = 2 で 4、X = 3 で 0 になる 2 次式」に置き換えます。2 点で直線が 1 本、3 点で放物線が 1 本に決まる（中 2・高 1）ので、そういう式は 1 つだけある。係数 11, 11, 14 はその答え（補間で出したもの、ここでは与えます）。確かめてみます。",
+      cmd: "A = lambda X: (11 + 11 * X + 14 * X**2) % 17; [A(1), A(2), A(3)]", mean: "A(X) = 11 + 11X + 14X² を X = 1, 2, 3 で計算。", out: "[2, 4, 0]",
+      then: "[2, 4, 0] — 列 a そのもの。3 つの数が「1 本の式 A(X)」になりました。式の係数 (11, 11, 14) と、点の値 (2, 4, 0) は同じ情報の 2 つの書き方です（Week 3 スライド 17 の係数表現と評価表現）。" },
+    { q: "多項式にする", say: "列 b と列 c も同じように式にします。",
+      cmd: "B = lambda X: (1 + 10 * X + 8 * X**2) % 17; C = lambda X: (5 + 5 * X + 11 * X**2) % 17; [B(1), B(2), B(3)], [C(1), C(2), C(3)]", mean: "B(X), C(X) を X = 1, 2, 3 で。", out: "([2, 2, 1], [4, 8, 0])",
+      then: "([2, 2, 1], [4, 8, 0]) — 列 b と列 c そのもの。これで 9 個の数が 3 本の式 A, B, C に「圧縮」されました。行が 1 万あっても式は 3 本のまま（次数が上がるだけ）。" },
+    { q: "多項式にする — 3 本の制約が 1 本の式に", say: "P(X) = A(X)·B(X) − C(X) を作り、X = 1, 2, 3 で見ます。",
+      cmd: "P = lambda X: (A(X) * B(X) - C(X)) % 17; [P(1), P(2), P(3)]", mean: "各行の a·b − c を、式のまま 1 本にしたもの。", out: "[0, 0, 0]",
+      then: "[0, 0, 0]。「3 行全部で a·b − c = 0」が「1 本の式 P が X = 1, 2, 3 で 0」に言い換わりました。3 本の制約が 1 本の多項式に。ここまでが「制約 → 多項式」の矢印です。" },
+    { q: "多項式にする", say: "P は 1, 2, 3 以外では 0 になるでしょうか。0〜16 全部で見ます。",
+      cmd: "[P(X) for X in range(17)]", mean: "P(0) から P(16) まで。", out: "[6, 0, 0, 0, 13, 3, 4, 1, 15, 1, 1, 8, 0, 8, 14, 2, 9]",
+      then: "1, 2, 3（と偶然 12）で 0、他は 0 でない。P は「1, 2, 3 でだけ 0 になる式」として効いています。" },
+    { q: "割り切れる — 消滅多項式", say: "1, 2, 3 で 0 になる「いちばん簡単な式」は Z(X) = (X−1)(X−2)(X−3)。これを消滅多項式と呼びます。",
+      cmd: "Z = lambda X: ((X - 1) * (X - 2) * (X - 3)) % 17; [Z(1), Z(2), Z(3), Z(5)]", mean: "Z を 1, 2, 3 と、それ以外の 5 で。", out: "[0, 0, 0, 7]",
+      then: "[0, 0, 0, 7]。1, 2, 3 で 0、5 では 7。中 3 の因数分解の逆で、「X = 1 で 0 になる式は (X − 1) を因数に持つ」（因数定理）。だから「1, 2, 3 で 0」⇔「(X−1)(X−2)(X−3) = Z で割り切れる」。次でそれを確かめます。" },
+    { q: "割り切れる", say: "P を Z で割った商が Q(X) = 16 + 10X です（割り算の答え、ここでは与えます）。P = Z × Q が全部の X で成り立つか。",
+      cmd: "Q = lambda X: (16 + 10 * X) % 17; [(P(X) - Z(X) * Q(X)) % 17 for X in range(17)]", mean: "P − Z·Q を 0〜16 全部で。全部 0 なら多項式として等しい。", out: "[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+      then: "全部 0。つまり P = Z × Q と「割り切れた」。ここで問いが入れ替わります: 「3 行の制約が全部 0 か」→「P を Z で割った商 Q が存在するか（割り切れるか）」。証明者は Q を差し出し、検証者は「本当に P = Z·Q か」を見ればよい。" },
+    { q: "1 点で確かめる — 検証者の仕事", say: "検証者は全部の X を見る必要はありません。ランダムに 1 点（ここでは 5）を選んで、P(5) と Z(5)·Q(5) を比べるだけ。",
+      cmd: "P(5), Z(5) * Q(5) % 17", mean: "左辺 P(5) と、右辺 Z(5)·Q(5)。", out: "(3, 3)",
+      then: "(3, 3)、一致。3 行の制約を 1 本も読まずに「全部成り立っている」と納得できました。なぜ 1 点でよいか — 違う 2 つの式は、せいぜい次数の数だけの点でしか同じ値にならない（2 次式どうしなら最大 2 点）。だから 17 点からランダムに 1 点選べば、嘘は高い確率で見つかる。体を大きくすれば確率はほぼ 1。" },
+    { q: "1 点で確かめる", say: "別の点でも。",
+      cmd: "P(9), Z(9) * Q(9) % 17", mean: "X = 9 で同じ検査。", out: "(1, 1)",
+      then: "(1, 1)。どの点を選んでも一致します。正直な証明者は必ず通る（完全性）。" },
+    { q: "嘘をつくと — w = 3 と偽る", say: "証明者が w = 3 と嘘をつき、t1 = 4, t2 = 8 はそのままにした場合。列 a は (3, 4, 1)、列 b は (3, 3, 1) に変わります。その式 A2, B2（補間済み）を確かめます。",
+      cmd: "A2 = lambda X: (15 + 7 * X + 15 * X**2) % 17; B2 = lambda X: (1 + 3 * X + 16 * X**2) % 17; [A2(1), A2(2), A2(3)]", mean: "嘘の列 a = (3, 4, 1) を式にしたもの。", out: "[3, 4, 1]",
+      then: "[3, 4, 1]。嘘の表も同じように式にできます。式にできること自体は嘘を止めません。止めるのは次の検査。" },
+    { q: "嘘をつくと", say: "嘘の P2 = A2·B2 − C を 1, 2, 3 で。",
+      cmd: "P2 = lambda X: (A2(X) * B2(X) - C(X)) % 17; [P2(1), P2(2), P2(3)]", mean: "嘘の表で a·b − c。", out: "[5, 4, 1]",
+      then: "[5, 4, 1]。0 になりません（行 1 は 3·3 − 4 = 5）。制約が破れている。つまり P2 は 1, 2, 3 で 0 にならないので、Z で割り切れず、商 Q が存在しない。" },
+    { q: "嘘をつくと", say: "それでも証明者が「商は Q だ」と言い張ったとして、検証者の検査 P2(X) = Z(X)·Q(X) が通る X があるか、0〜16 全部で見ます。",
+      cmd: "[X for X in range(17) if (P2(X) - Z(X) * Q(X)) % 17 == 0]", mean: "検査が通ってしまう X を全部集める。", out: "[]",
+      then: "空っぽ。どの点を選んでも嘘は落ちます。（一般には数点で偶然一致しうるので、実物は 2²⁵⁴ 個の点から選ぶ。）「割り切れない → 商が無い → ランダムな点でずれる」の 3 段が健全性です。" },
+    { q: "ゼロ知識にする — 覗く点の値を乱数で覆う", say: "最後に、検証者が覗いた値 A(5) = 8 は秘密 w から作った値なので、集めると漏れます。そこで A に Z × 乱数 を足した Am を使います。1, 2, 3 では Z = 0 なので値は変わらず、5 では変わる。",
+      cmd: "R = 6; Am = lambda X: (A(X) + Z(X) * R) % 17; [A(1), Am(1)], [A(5), Am(5)]", mean: "乱数 R = 6。Am = A + Z·R を、制約の点 1 と、覗かれる点 5 で比べる。", out: "([2, 2], [8, 16])",
+      then: "([2, 2], [8, 16])。X = 1 では A も Am も 2（制約の検査は壊れない）。X = 5 では 8 が 16 に変わった（覗かれる値は乱数で覆われて、元の 8 が分からない）。Week 3 の s = r + e·x で r が x を覆ったのと同じ手で、覆う量が「数 1 個」から「式 1 本」に増えただけ。これがゼロ知識化。" },
+    { q: "まとめ — 正直は通り、嘘は落ちる", say: "同じ点 5 で、正直な P と嘘の P2 を並べて。",
+      cmd: "(P(5) == Z(5) * Q(5) % 17, P2(5) == Z(5) * Q(5) % 17)", mean: "左: 正直、右: 嘘。", out: "(True, False)",
+      then: "(True, False)。ここまでの 16 行が「計算 → 制約 → 多項式 → 割り切れる → 1 点で確かめる → 乱数で覆う」の全部です。Week 4 の STARK / PLONK は、この同じ 6 歩を「行が 1 万あっても」「式を封筒（コミットメント）に入れて」やる大規模版。Schnorr は制約が 1 本なので、最後の「封筒 → 乱数 → 1 点」だけを実装したのが宿題でした。" }
+  ];
+
+  makeDrill("drill-card", "ac26-w3-drill-step", STEPS1, "7 問すべて、自分の手で出した数で説明できました。提出前の自己チェックは完了です。");
+  makeDrill("drill3-card", "ac26-w3-drill3-step", STEPS3, "楕円曲線の足し算（弦・接線・反転・O）と、なぜ離散対数が難しいか（順方向は一瞬、逆方向は 78 桁の総当たり）を、自分の手で出した数で説明できました。");
+  makeDrill("drill4-card", "ac26-w3-drill4-step", STEPS4, "計算 → 制約 → 多項式 → 割り切れる → 1 点で確かめる → 乱数で覆う、の 6 歩を自分の手で通しました。Week 4 はこの大規模版です。");
+  makeDrill("drill2-card", "ac26-w3-drill2-step", STEPS2, "10 関数の作り方が『手で 1 回 → 引数名に → 壊れる入力の if』で読めました。最後の ec_add の全文は、あなたの solution.py と同じ形です。");
+})();
+
 </script>
 </body>
 </html>

@@ -361,6 +361,25 @@
   footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
   footer a { color: var(--muted); }
 
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  .drill-codelabel { font-size: var(--fs-xs); color: var(--muted); margin-top: 0.2rem; }
+  .drill-code { background: var(--panel-2); font-size: var(--fs-xs); border-left: 4px solid var(--accent); }
   /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
   .note-title { font-size: var(--fs-sm); font-weight: 700; }
   .deck { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -463,6 +482,45 @@
     </div>
   </div>
 </section>
+
+<!-- ============================================ DRILL : 対話ドリル -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — 土台編を、1 行ずつ自分の手で</p>
+      <h2>1 行打って、出た値を貼って、1 文読む</h2>
+      <p>土台編のカードは読むためのものですが、<strong>この節だけは手を動かします</strong>。1 行打つ → 出た値を貼る → その値を指す 1〜2 文が開く、を繰り返すだけ。結果と解説が隣にあるので、用語より先に「その数がどういう意味か」が入ります。</p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">準備（1 行だけ）</p>
+      <pre>python3</pre>
+      <p>ターミナルで <code>python3</code> と打つだけです。宿題のファイルも、インストールも要りません。行頭に空白を入れると <code>IndentationError</code> になるので、貼るときは行頭から。<code>def</code> のブロックを貼ったあとは、空行を 1 つ入れてから次の行へ。</p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 1 — 余りの世界（mod 7 / mod 6）</p>
+      <p>負の数 → 余り → 掛け算表 → 零因子 → 逆元 → 位数 → 生成元 → 離散対数。14 行。</p>
+    </div>
+    <div class="card" id="drillA-card">
+      <div class="card-head"><h3>ドリル 1 — 余りの世界</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 2 — 曲線の点を数えて、離散対数を戻す</p>
+      <p>平方の表 → 点を全部数える → O を足す → 点の足し算 → 一周（位数）→ 小さい輪 → 5 倍 → 総当たりで戻す。11 行。</p>
+    </div>
+    <div class="card" id="drillB-card">
+      <div class="card-head"><h3>ドリル 2 — 曲線と離散対数</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+  </div>
+</section>
+
 
 <!-- ============================================ D1 : 余りの世界 -->
 <section class="band">
@@ -3378,6 +3436,116 @@ Lists differ: [70, -2, -71] != [3, 65, 63]</pre>
 
   showBest();
 })();
+
+  // ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む） ----
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function drillText(node, text) {
+    // 「**強調**」だけを <b> にする。innerHTML は使わないので、本文は常にテキストのまま。
+    String(text).split("**").forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2 ? Object.assign(document.createElement("b"), { textContent: part })
+                             : document.createTextNode(part));
+    });
+  }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; drillText(say, st.say); step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": ")); drillText(mean, st.mean); step.appendChild(mean);
+        if (done) {
+          var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
+          var then = document.createElement("p"); then.className = "drill-then"; drillText(then, st.then); step.appendChild(then);
+          if (st.code) {
+            var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "この時点の関数（全文）:"; step.appendChild(cl);
+            var cp = document.createElement("pre"); cp.className = "drill-code"; cp.textContent = st.code; step.appendChild(cp);
+          }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          if (st.out === "") {
+            var note = document.createElement("p"); note.className = "drill-mean"; note.textContent = "この行は何も表示しません（代入だけ）。打ったら「次へ」。";
+            var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-main"; nx.textContent = "次へ";
+            nx.addEventListener("click", function () { cur++; save(); render(); });
+            step.appendChild(note); form.appendChild(nx); step.appendChild(form); body.appendChild(step); continue;
+          }
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
+  var STEPS_A = [
+    {"q": "負の数 — まず 1 行", "say": "Python をそのまま開いて（`python3` と打つだけ）、この 1 行。", "cmd": "(-3 + 1)", "mean": "普通の整数の足し算。まだ「余りの世界」には入っていません。", "out": "-2", "then": "−2。普通の整数では負の数が出ます。ところが暗号で使う世界には、負の数も分数もありません。数は 0, 1, 2, …, p−1 の p 個しかなく、そこからはみ出したら必ず戻ってきます。次の 1 行で、その戻し方を見ます。"},
+    {"q": "負の数", "say": "同じ式に `% 7` を足すだけ。", "cmd": "(-3 + 1) % 7", "mean": "7 で割った余りを取る。Python の `%` は、左が負でも 0..6 の値を返します。", "out": "5", "then": "5。−2 が 5 になりました。**−2 と 5 は mod 7 では同じ数**です（−2 + 7 = 5）。数直線を切って 7 個ずつ丸めた世界だと思ってください。これが「有限体 F₇」で、Week 1〜4 の計算はすべてこの中で起きます。"},
+    {"q": "時計", "say": "大きい数でも同じ。", "cmd": "100 % 7", "mean": "100 を 7 で割った余り。100 = 14×7 + 2。", "out": "2", "then": "2。時計が 13 時を 1 時と呼ぶのと同じで、100 も 2 と同じ扱いです。小 5 で習った「割り算の余り」がそのまま暗号の土台になっている — 新しい概念は 1 つも足していません。"},
+    {"q": "一周する", "say": "0 から 14 まで、余りを並べてみます。", "cmd": "[k % 7 for k in range(15)]", "mean": "0..14 のそれぞれを 7 で割った余り。", "out": "[0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0]", "then": "0,1,2,3,4,5,6 のあと、また 0 に戻って同じ並びが続きます。**世界の住人は 7 個だけ**で、何を足しても掛けてもこの 7 個のどれかになる — これが「閉じている」ということ。だから計算がいくら続いても数が膨らみません。"},
+    {"q": "掛け算は並べ替え — 法が素数のとき", "say": "3 倍の表を作ります。", "cmd": "[3 * k % 7 for k in range(7)]", "mean": "0..6 をそれぞれ 3 倍して、7 で割った余り。", "out": "[0, 3, 6, 2, 5, 1, 4]", "then": "[0, 3, 6, 2, 5, 1, 4]。**0〜6 が 1 回ずつ、順番だけ変えて全部出てきます**。つまり「3 倍する」は世界の住人を並べ替えているだけで、誰も潰していない。1 が表の中にいることに注目してください — 3 に何かを掛けると 1 にできる、という意味です（次の次の行で使います）。"},
+    {"q": "潰れる場合 — 法が素数でないとき", "say": "法を 6 にして、2 倍の表を作ります。", "cmd": "[2 * k % 6 for k in range(6)]", "mean": "0..5 をそれぞれ 2 倍して、6 で割った余り。", "out": "[0, 2, 4, 0, 2, 4]", "then": "[0, 2, 4, 0, 2, 4]。今度は 0, 2, 4 しか出ず、**3 人分が潰れています**。1 が表にいないので、2 に何を掛けても 1 になりません = 2 は逆数を持てない。法を素数にする理由がここにあります。"},
+    {"q": "潰れる場合", "say": "潰れの正体を 1 行で。", "cmd": "3 * 2 % 6", "mean": "mod 6 で 3 と 2 を掛ける。", "out": "0", "then": "0。**どちらも 0 でないのに、積が 0** になりました（零因子）。普通の数ではあり得ないこの現象は、法が合成数（6 = 2×3）だから起きます。法を素数 p にすると零因子は消え、四則が全部できる「体」になる — Week 1 以降で法が必ず素数なのは、この 1 行が理由です。"},
+    {"q": "逆元 — 掛けて 1 になる相手", "say": "mod 7 に戻って、3 の相手を探します。", "cmd": "[3 * k % 7 for k in range(7)].index(1)", "mean": "5 行目で作った 3 倍の表から、値が 1 になる位置（= 掛ける相手）を取り出す。", "out": "5", "then": "5。**3 × 5 = 15 = 2×7 + 1 なので、mod 7 では 3 × 5 = 1**。この 5 が「3 の逆元」で、普通の世界の 1/3 の役です。分数が無い世界でも割り算ができるのは、割り算を「逆元を掛けること」に読み替えているから（小 6 の「÷5 は ×1/5」と同じ）。"},
+    {"q": "逆元", "say": "検算。", "cmd": "3 * 5 % 7", "mean": "3 と、いま見つけた 5 を掛ける。", "out": "1", "then": "1。逆元の定義そのものです。Week 3 の楕円曲線の傾き λ = (y₂−y₁)/(x₂−x₁) に出てくる割り算は、全部この掛け算に置き換わります。分数が出てきたら「逆元を掛ける」と読む — これだけ覚えれば、以降の式は全部読めます。"},
+    {"q": "逆元", "say": "探さずに一発で出す方法。", "cmd": "pow(3, 5, 7)", "mean": "3 の 5 乗を、7 で割った余りで。`pow(a, b, m)` は「掛けるたびに m で余りを取る」高速な冪。", "out": "5", "then": "5 — 表から探した答えと同じです。なぜ 5 乗かというと、p = 7 のとき p − 2 = 5 だから。フェルマーの小定理「a^(p−1) ≡ 1」から a^(p−2) が逆元になります。宿題の `field_inv` は拡張ユークリッド（中 1 の互除法の逆走）で同じ値を出しますが、**答えは 1 つ**なのでどちらでも構いません。"},
+    {"q": "位数 — 何回で戻るか", "say": "3 を掛け続けたら、どう回るか。", "cmd": "[pow(3, k, 7) for k in range(7)]", "mean": "3⁰, 3¹, …, 3⁶ を mod 7 で。", "out": "[1, 3, 2, 6, 4, 5, 1]", "then": "[1, 3, 2, 6, 4, 5, 1]。1 から出て、**6 個すべてを回ってから 1 に戻りました**。この「6 回で戻る」が位数で、0 以外の全員を回れる 3 のような元を「生成元」と呼びます。Week 3 の楕円曲線でも同じ言葉が出ますが、意味は完全にこれ — 何回足すと出発点（O）に戻るか、です。"},
+    {"q": "位数", "say": "全員が生成元とは限りません。", "cmd": "[pow(2, k, 7) for k in range(7)]", "mean": "2⁰, 2¹, …, 2⁶ を mod 7 で。", "out": "[1, 2, 4, 1, 2, 4, 1]", "then": "[1, 2, 4, 1, 2, 4, 1]。3 個で戻ってしまい、6, 3, 5 には**一生たどり着けません**。同じ世界の住人でも、回れる範囲は元ごとに違う。だから暗号では「位数が素数の生成元」を選びます — 位数が素数なら途中で小さな輪に落ちる心配が無いからです（Week 3 の TOY 曲線の n = 967 が素数なのはこの理由）。"},
+    {"q": "高速に回る", "say": "指数が大きくても一瞬です。", "cmd": "pow(3, 100, 7)", "mean": "3 の 100 乗を mod 7 で。", "out": "4", "then": "3¹⁰⁰ は 48 桁の数ですが、答えは 0..6 の 1 個。`pow` は「二乗して余りを取る」を繰り返すので、100 回ではなく 7 回程度の掛け算で終わります。**順方向（指数 → 値）は一瞬**。この非対称が次の行のテーマです。"},
+    {"q": "逆向きは総当たり", "say": "逆に、値から指数を戻してみます。", "cmd": "[k for k in range(7) if pow(3, k, 7) == 6]", "mean": "3 を何乗したら 6 になるか、0..6 を全部試して探す。", "out": "[3]", "then": "[3] — 3³ = 27 = 3×7 + 6 で確かに 6。でも探し方は**総当たりしかありません**。mod 7 なら 7 通りですが、本物の暗号は 2²⁵⁶ 通り（10 の 77 乗）。この「行きは一瞬、帰りは総当たり」が離散対数問題で、Week 3 の秘密鍵 x が公開鍵 P = x·G から戻せない理由そのものです。土台編はここで終わり、Week 1 へ進めます。"}
+  ];
+  var STEPS_B = [
+    {"q": "平方の表 — y² になれる数は少ない", "say": "mod 7 で、二乗するとどうなるか。", "cmd": "[y * y % 7 for y in range(7)]", "mean": "0..6 をそれぞれ二乗して mod 7。", "out": "[0, 1, 4, 2, 2, 4, 1]", "then": "[0, 1, 4, 2, 2, 4, 1]。7 個の数のうち、**二乗で出てくるのは {0, 1, 2, 4} の 4 種類だけ**。5 や 3 は「どの数の二乗でもない」のです。曲線 y² = x³ + 2x + 3 の右辺がこの 4 種類に入らない x では y が存在しない = その x には点が無い、ということになります。曲線の点が数個しか無い理由の半分がこれです。"},
+    {"q": "右辺の値", "say": "曲線の右辺を x = 0..6 で。", "cmd": "[(x, (x**3 + 2*x + 3) % 7) for x in range(7)]", "mean": "各 x について (x, 右辺の値)。", "out": "[(0, 3), (1, 6), (2, 1), (3, 1), (4, 5), (5, 5), (6, 0)]", "then": "x ごとに右辺が決まりました。この値が前の行の平方表に**含まれていれば**、その x には点があります（値ごとに y が 2 個、y = 0 なら 1 個）。含まれなければ点は無い。たとえば右辺が 3 や 5 になる x は落選です。次の行で、条件を満たす (x, y) を全部拾います。"},
+    {"q": "点を全部数える", "say": "条件を満たす (x, y) を総当たりで集めます。", "cmd": "pts = [(x, y) for x in range(7) for y in range(7) if (y*y - (x**3 + 2*x + 3)) % 7 == 0]; pts", "mean": "49 通りの (x, y) を全部試して、曲線の式を満たすものだけ残す。", "out": "[(2, 1), (2, 6), (3, 1), (3, 6), (6, 0)]", "then": "点は 5 個だけ。曲線というと連続した線を思い浮かべますが、**有限体の上では条件を満たす座標が数個あるだけ**です（グラフではなく一覧表）。x = 2 と x = 3 には y が 2 個ずつ（上下対称）、x = 6 には y = 0 が 1 個 — この y = 0 の点は、あとで特別な振る舞いをします。"},
+    {"q": "点を全部数える", "say": "無限遠点 O を足した個数。", "cmd": "len(pts) + 1", "mean": "5 個の点 + 無限遠点 O。", "out": "6", "then": "6。この 6 が群の大きさです。O は「足し算の 0」の役をする特別な点で、座標を持ちません（垂直な直線が曲線と交わる先、と説明されます）。プログラムでは `None` で表すのが定番で、Week 3 の `ec_add` が `if P is None: return Q` から始まるのはこのためです。"},
+    {"q": "点を足す", "say": "足し算の関数を定義します（`def` のブロックを貼ったら、空行を 1 つ入れてから次へ）。", "cmd": "def add(P, Q):\n    if P is None: return Q\n    if Q is None: return P\n    if P[0] == Q[0] and (P[1] + Q[1]) % 7 == 0: return None\n    if P == Q: lam = (3*P[0]*P[0] + 2) * pow(2*P[1], 5, 7) % 7\n    else: lam = (Q[1] - P[1]) * pow(Q[0] - P[0], 5, 7) % 7\n    x3 = (lam*lam - P[0] - Q[0]) % 7\n    return (x3, (lam*(P[0] - x3) - P[1]) % 7)", "mean": "傾き（2 点なら「y の増分 ÷ x の増分」、同じ点なら接線）から 3 つ目の交点を出し、x 軸で折り返す。`pow(a, 5, 7)` は mod 7 の逆元（前のドリル 10 行目の p−2 乗）。", "out": "", "then": ""},
+    {"q": "点を足す", "say": "1 つ目の点を 2 倍してみます。", "cmd": "P = pts[0]; (P, add(P, P))", "mean": "P と、P + P（同じ点どうしなので接線を使う枝）。", "out": "((2, 1), (3, 6))", "then": "P = (2, 1) と 2P = (3, 6)。**座標を足したのではありません** — 接線を引いて曲線と交わる 3 つ目の点を求め、x 軸で折り返した点を「P + P」と**呼ぶことにした**だけです。「足し算」という名前は、この操作が普通の足し算と同じ規則（結合法則・単位元 O・逆元は上下反転）を満たすから付いています。"},
+    {"q": "一周する", "say": "P を足し続けて、O（None）に戻るまで数えます。", "cmd": "R, k = P, 1\nwhile R is not None: R = add(R, P); k += 1\n\nk", "mean": "P, 2P, 3P, … と進め、None になった時点の回数。", "out": "6", "then": "6 回で O に戻りました。群の大きさ（4 行目の 6）と同じなので、**P は全員を回れる生成元**です。前のドリルの [1, 3, 2, 6, 4, 5, 1] とまったく同じ構造 — 掛け算の世界の「一周」が、点の足し算でもそのまま起きています。"},
+    {"q": "一周する", "say": "では、y = 0 の点はどうか。", "cmd": "S, m = pts[-1], 1\nwhile S is not None: S = add(S, pts[-1]); m += 1\n\n(pts[-1], m)", "mean": "最後の点 (6, 0) を足し続けて、O に戻る回数。", "out": "((6, 0), 2)", "then": "((6, 0), 2) — **たった 2 回で戻ってしまいました**。y = 0 なので接線が垂直になり、自分自身と足した瞬間 O に落ちるからです。6 人の世界の中に「2 人だけの小さな輪」がある。群の大きさ 6 が素数でない（6 = 2×3）とこうなります。だから本物の曲線は**位数が素数**になるものを選ぶ（Week 3 の TOY 曲線の n = 967 は素数）— 選んだ点が小さな輪に落ちる事故を、位数を素数にするだけで消せるのです。"},
+    {"q": "順方向は一瞬", "say": "P の 5 倍を出します。", "cmd": "R = None\nfor _ in range(5): R = add(R, P)\n\nR", "mean": "P を 5 回足す（本物は double-and-add で log 回に短縮しますが、答えは同じ）。", "out": "(2, 6)", "then": "5P = (2, 6)。**秘密の数 5 から点を作るのは一瞬**です。これが「公開鍵を作る」操作そのもので、Week 3 の P = x·G はまさにこれ。では逆に、この点だけを見せられて「何倍か」を当てられるでしょうか — 次の行で試します。"},
+    {"q": "逆向きは総当たり", "say": "点から倍率を戻します。", "cmd": "Q5 = R\nfound = []\nfor t in range(1, 7):\n    S = None\n    for _ in range(t): S = add(S, P)\n    if S == Q5: found.append(t)\n\nfound", "mean": "1..6 を全部試して、tP が Q5 と一致する t を集める（総当たり）。", "out": "[5]", "then": "[5] — 確かに 5 倍でした。ただし探し方は**総当たり以外に知られていません**。この曲線なら 6 通りで終わりますが、本物の secp256k1 は 2²⁵⁶ 通り（78 桁）で、世界中の計算機を集めても終わりません。「行きは一瞬、帰りは不可能」— 楕円曲線離散対数問題（ECDLP）で、公開鍵から秘密鍵が出ない理由です。"},
+    {"q": "まとめ", "say": "2 本のドリルで作ったものを 1 行で。", "cmd": "(len(pts) + 1, k, m, pow(3, 5, 7) * 3 % 7)", "mean": "左から: 群の大きさ、P の位数、(6, 0) の位数、逆元 × 元。", "out": "(6, 6, 2, 1)", "then": "(6, 6, 2, 1)。**余りの世界（mod・零因子・逆元・位数）→ その上に作った点の集合（曲線・足し算・一周）→ 片道だけ簡単な仕組み（離散対数）**。この 3 段が土台編の全部です。Week 1 の回路（= 0 の式）も、Week 2 の秘密分散（share を足すと戻る）も、Week 3 の Schnorr（s·G = R + e·P）も、ここで自分の手で出した数の上に建っています。"}
+  ];
+  makeDrill("drillA-card", "ac26-w0-drillA-step", STEPS_A, "余りの世界（mod）・零因子・逆元・位数・生成元を、自分の手で出した数で通しました。Week 1 の「制約 = 0 の式」も、Week 3 の「曲線の点の足し算」も、ここで作った mod 7 の世界の上に建ちます。");
+  makeDrill("drillB-card", "ac26-w0-drillB-step", STEPS_B, "楕円曲線の点を自分で数え、足し算で一周させ、位数が素数でないと小さい輪ができることを見て、離散対数を総当たりで戻しました。Week 3 の Schnorr は、この「一周する点の集合」の上に 3 手を乗せただけです。");
 </script>
 </body>
 </html>
