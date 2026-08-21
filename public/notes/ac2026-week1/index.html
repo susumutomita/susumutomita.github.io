@@ -586,6 +586,25 @@
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
 
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  .drill-codelabel { font-size: var(--fs-xs); color: var(--muted); margin-top: 0.2rem; }
+  .drill-code { background: var(--panel-2); font-size: var(--fs-xs); border-left: 4px solid var(--accent); }
   /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
   .note-title { font-size: var(--fs-sm); font-weight: 700; }
   .deck { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -687,6 +706,45 @@
     </div>
   </div>
 </section>
+
+<!-- ============================================ DRILL : 対話ドリル -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — 回路を、1 行ずつ自分の手で</p>
+      <h2>1 行打って、出た値を貼って、1 文読む</h2>
+      <p>宿題 <code>proof-of-exploit</code> の Part A（組む）と Part B（壊す）を、<strong>関数を書く前に手で 1 回</strong>通します。1 行打つ → 出た値を貼る → その値を指す 1〜2 文が開く。回路とは何か・アンダー制約とは何かが、説明ではなく数で入ります。</p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">準備（1 行だけ）</p>
+      <pre>python3</pre>
+      <p>ターミナルで <code>python3</code> と打つだけです。宿題のファイルは要りません（mod 11 の計算だけ）。行頭に空白を入れると <code>IndentationError</code> になるので、貼るときは行頭から。</p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 1 — 「= 0 の式」で条件を書く</p>
+      <p>移項して = 0 → ビット制約 → メンバーシップ → f が嘘をつくと落ちる → AND は掛け算 → 7 本の残りが全部 0。10 行。</p>
+    </div>
+    <div class="card" id="drillA-card">
+      <div class="card-head"><h3>ドリル 1 — 制約を作る</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル 2 — 1 本抜くと、嘘が通る</p>
+      <p>正常系 → 嘘は落ちる → リンクを抜く → 通る値が 2 通りから 8 通りへ → 攻撃 witness を選ぶ → 修復 → 正常系は無事。9 行。</p>
+    </div>
+    <div class="card" id="drillB-card">
+      <div class="card-head"><h3>ドリル 2 — 壊して、直す</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+  </div>
+</section>
+
 
 <!-- ============================================================ D1 : 背景 -->
 <section class="band">
@@ -4144,6 +4202,110 @@ bit * (bit - 1) === 0;   <span class="c">// ← 手で書く</span></pre>
 
   showBest();
 })();
+
+  // ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む） ----
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function drillText(node, text) {
+    // 「**強調**」だけを <b> にする。innerHTML は使わないので、本文は常にテキストのまま。
+    String(text).split("**").forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2 ? Object.assign(document.createElement("b"), { textContent: part })
+                             : document.createTextNode(part));
+    });
+  }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; drillText(say, st.say); step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": ")); drillText(mean, st.mean); step.appendChild(mean);
+        if (done) {
+          var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
+          var then = document.createElement("p"); then.className = "drill-then"; drillText(then, st.then); step.appendChild(then);
+          if (st.code) {
+            var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "この時点の関数（全文）:"; step.appendChild(cl);
+            var cp = document.createElement("pre"); cp.className = "drill-code"; cp.textContent = st.code; step.appendChild(cp);
+          }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          if (st.out === "") {
+            var note = document.createElement("p"); note.className = "drill-mean"; note.textContent = "この行は何も表示しません（代入だけ）。打ったら「次へ」。";
+            var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-main"; nx.textContent = "次へ";
+            nx.addEventListener("click", function () { cur++; save(); render(); });
+            step.appendChild(note); form.appendChild(nx); step.appendChild(form); body.appendChild(step); continue;
+          }
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
+  var STEPS_A = [
+    {"q": "方程式を「= 0」の形にそろえる", "say": "中 1 の方程式から始めます。Python を開いて（`python3`）この 1 行。", "cmd": "2 * 3 + 1 == 7", "mean": "x = 3 を 2x + 1 = 7 に入れて、成り立つか確かめる。", "out": "True", "then": "True。ここまでは学校の方程式です。回路が使うのは、この形ではありません — 次の行で「= 0」にそろえます。"},
+    {"q": "方程式を「= 0」の形にそろえる", "say": "右辺を左に移項するだけ。", "cmd": "2 * 3 + 1 - 7", "mean": "2x + 1 − 7 に x = 3 を入れた値。", "out": "0", "then": "0。**正しい x なら 0、違う x なら 0 でない数が残る**。この残った数を residual（残り）と呼びます。回路とは「0 になるべき式」を何本も並べたもので、witness（全変数の値の表）を入れて全部の residual が 0 なら、その witness は回路を満たしている。宿題の `assert_zero(expr)` は「この式を 0 になるべき式の束に足す」という意味です。"},
+    {"q": "ビット制約 — 0 か 1 だけを許す式", "say": "b が 0 か 1 だけ、を式で書きます。", "cmd": "[b * b - b for b in range(6)]", "mean": "b·b − b を b = 0..5 で計算。", "out": "[0, 0, 2, 6, 12, 20]", "then": "[0, 0, 2, 6, 12, 20]。**0 になるのは b = 0 と 1 だけ**。理由は中 3 の因数分解で、b·b − b = b·(b − 1) は「積が 0 なら、どちらかが 0」だから b = 0 または b = 1。回路には if 文が無いので、「b は 0 か 1」という条件もこうやって式 1 本で書きます。"},
+    {"q": "ビット制約", "say": "有限体の中でも同じか確かめます（法は 11）。", "cmd": "[(b * b - b) % 11 for b in range(11)]", "mean": "mod 11 の全住人 0..10 で b·b − b。", "out": "[0, 0, 2, 6, 1, 9, 8, 9, 1, 6, 2]", "then": "0 になるのは b = 0 と 1 だけ、ほかは全部 0 以外。**世界の全員を試して 2 人しか通らない**ことを確かめました。回路の検査はこの「全員試して、通るのは狙った値だけか」を見るもので、Week 0 で作った mod の世界がそのまま舞台になっています。"},
+    {"q": "メンバーシップ — 「リストの中」を式で", "say": "許可リスト {1, 6} に入っているか、を式にします。", "cmd": "[(x - 1) * (x - 6) % 11 for x in range(8)]", "mean": "(x − 1)(x − 6) を x = 0..7 で、mod 11。", "out": "[6, 0, 7, 5, 5, 7, 0, 6]", "then": "x = 1 と x = 6 のところだけ 0、ほかは 0 以外。**許可したい値を根に持つ多項式を作れば、「リストの中」が式 1 本になります**。リストが 3 個なら (x − a)(x − b)(x − c) と 3 つ掛けるだけ。宿題の ROLE_OK = {2, 5, 6} も同じ形で書きます。"},
+    {"q": "メンバーシップ", "say": "判定の答えを持つ信号 f と組にします。まず正直な場合。", "cmd": "f, region = 1, 6; f * (region - 1) * (region - 6) % 11", "mean": "「入っている（f = 1）」と主張し、実際に region = 6。", "out": "0", "then": "0。制約を満たしています。この形 `f·(x − 1)(x − 6) = 0` は「**f = 1 と言うなら、x はリストの中でなければならない**」という意味です（f = 1 のとき積が 0 を強制される）。次の行で、嘘をついたらどうなるか見ます。"},
+    {"q": "メンバーシップ", "say": "リストに無い値で「入っている」と主張してみます。", "cmd": "f, region = 1, 0; f * (region - 1) * (region - 6) % 11", "mean": "f = 1（入っていると主張）だが region = 0（リストに無い）。", "out": "6", "then": "6 — **0 でない残りが出て、制約が破れました**。嘘は通りません。逆に f = 0 なら積に 0 が掛かるので必ず 0 になり、制約は通ります（= 「入っていない」と言う分には自由）。この非対称が回路の設計の要で、「1 と言うなら証拠を出せ」を式で表しています。"},
+    {"q": "AND は掛け算", "say": "3 つの条件を「全部満たす」を式にします。", "cmd": "[(a, b, a * b) for a in (0, 1) for b in (0, 1)]", "mean": "0/1 の 2 つを掛けた結果を、4 通り全部。", "out": "[(0, 0, 0), (0, 1, 0), (1, 0, 0), (1, 1, 1)]", "then": "積が 1 になるのは (1, 1) のときだけ、ほかは 0。**ビットの AND は掛け算そのもの**です。宿題の granted = f_role · f_clearance · f_region は「3 つとも 1 のときだけ 1」を 1 本の式で書いたもの。同じ考えで OR は 1 − (1−a)(1−b)、NOT は 1 − a になります（Week 2 の GMW でも同じ式が出ます）。"},
+    {"q": "正しい witness", "say": "資格 (role, clearance, region) = (5, 4, 6) で、全部の残りを並べます。", "cmd": "w = dict(fr=1, fc=1, fg=1, granted=1)\nrows = [(\"bit fr\", w[\"fr\"]**2 - w[\"fr\"]), (\"bit fc\", w[\"fc\"]**2 - w[\"fc\"]), (\"bit fg\", w[\"fg\"]**2 - w[\"fg\"]), (\"role\", w[\"fr\"]*(5-2)*(5-5)*(5-6)), (\"clear\", w[\"fc\"]*(4-3)*(4-4)*(4-7)), (\"region\", w[\"fg\"]*(6-1)*(6-6)), (\"and\", w[\"granted\"] - w[\"fr\"]*w[\"fc\"]*w[\"fg\"])]\n[(name, v % 11) for name, v in rows]", "mean": "ビット 3 本・リンク 3 本・AND 1 本の計 7 本を、この witness で評価。", "out": "[('bit fr', 0), ('bit fc', 0), ('bit fg', 0), ('role', 0), ('clear', 0), ('region', 0), ('and', 0)]", "then": "7 本とも 0。**これが「回路を満たした」の意味**です。granted = 1 も、resident の値がリストの中であることも、全部この 0 の並びが保証しています。証明者はこの witness を持っていて、検証者に見せずに「全部 0 だ」だけを示す — それが Week 3 以降の仕事です。"},
+    {"q": "まとめ", "say": "この 9 行で作った部品を数えます。", "cmd": "(len(rows), sum(1 for name, v in rows if v % 11 == 0))", "mean": "制約の本数と、そのうち 0 になった本数。", "out": "(7, 7)", "then": "(7, 7)。**回路 = 0 になるべき式の集まり、witness = 各信号に入れる値、residual = 代入した残り**。ビット制約・メンバーシップ・AND の 3 部品だけで、アクセス制御の判定が式に書けました。次のドリルでは、この 7 本から 1 本抜くと何が起きるかを見ます。"}
+  ];
+  var STEPS_B = [
+    {"q": "正常系 — 制約がそろっている", "say": "前のドリルの region の部分だけ取り出します。制約は 2 本（ビットとリンク）。", "cmd": "check = lambda f, x: ((f*f - f) % 11, f*(x-1)*(x-6) % 11); check(1, 6)", "mean": "f = 1（許可されていると主張）、region = 6（リストの中）。2 本の残りを返す。", "out": "(0, 0)", "then": "(0, 0)。両方 0 で、正しく通ります。この 2 本が「f は 0 か 1」「f = 1 と言うなら region はリスト {1, 6} の中」を保証しています。"},
+    {"q": "嘘は落ちる", "say": "リストに無い region で「許可されている」と主張。", "cmd": "check(1, 0)", "mean": "f = 1 だが region = 0。", "out": "(0, 6)", "then": "(0, 6)。1 本目（ビット）は通りますが、**2 本目のリンクが 0 でない = 最初に破れた制約**。壊れた witness を調べるとき、この「最初に 0 でなくなった行」が事故の場所です。宿題の first-broken checkpoint はまさにこの行番号と残りを答えさせます。"},
+    {"q": "1 本抜くとどうなる", "say": "リンク制約を抜いて、ビットだけの回路にします。", "cmd": "broken = lambda f, x: ((f*f - f) % 11,); broken(1, 0)", "mean": "制約はビット 1 本だけ。region は式に一度も出てこない。", "out": "(0,)", "then": "(0,) — **全部 0 で通ってしまいました**。region = 0 という許可されていない値なのに、回路は何も文句を言いません。理由は単純で、**region を縛る式が 1 本も無いから**。回路の中の信号は、制約で縛らない限り何を入れても自由です。"},
+    {"q": "どれだけ通るようになったか", "say": "region を 0..7 で全部試して、通る個数を数えます（リンクあり）。", "cmd": "sum(1 for x in range(8) if check(1, x) == (0, 0))", "mean": "f = 1 のまま region を動かし、2 本とも 0 になる個数。", "out": "2", "then": "2 — リスト {1, 6} の 2 通りだけ。**これが「意図した回路」の姿**です。次の行で、制約を抜いた回路を同じ物差しで測ります。"},
+    {"q": "どれだけ通るようになったか", "say": "同じことをリンク抜きで。", "cmd": "sum(1 for x in range(8) if broken(1, x) == (0,))", "mean": "制約がビットだけの回路で、通る region の個数。", "out": "8", "then": "8 — **8 通り全部が通ります**。2 通りだったものが 8 通りに増えた。増えた 6 通りが「嘘の証明」に使える値で、アンダー制約とはこの状態のことです。証明が受理されても、証明された文が意図した文とは限らない — 制約を 1 本書き忘れただけで、そうなります。"},
+    {"q": "攻撃 witness を 1 つ選ぶ", "say": "増えた 6 通りのうち、実際に嘘になるものを列挙します。", "cmd": "[x for x in range(8) if broken(1, x) == (0,) and check(1, x) != (0, 0)]", "mean": "「壊れた回路は満たすが、意図した回路は満たさない」region の一覧。", "out": "[0, 2, 3, 4, 5, 7]", "then": "[0, 2, 3, 4, 5, 7] の 6 個。**この条件そのものが exploit の定義**です — 宿題の attack は「deploy された回路を満たし、かつ本来の回路を満たさない witness」を返せば合格で、どれを選んでも構いません。0 を選べば「許可リストに無い region 0 でアクセスが通る」証明ができあがります。"},
+    {"q": "修復する", "say": "抜けていた 1 本を足し戻します。", "cmd": "repaired = lambda f, x: ((f*f - f) % 11, f*(x-1)*(x-6) % 11); repaired(1, 0)", "mean": "ビット + リンクの 2 本（= 意図した回路）で、さっきの攻撃 witness を検査。", "out": "(0, 6)", "then": "(0, 6)。**さっき通った攻撃 witness が落ちました**。修復は「足りない 1 本を足す」であって、制約を大量に足すことではありません。宿題の repair checkpoint が制約数の上限も見るのはこのため — 全部盛りは修復ではなく、別の回路です。"},
+    {"q": "正常系を壊していないか", "say": "修復後、正しい資格が通るかを確かめます。", "cmd": "[x for x in range(8) if repaired(1, x) == (0, 0)]", "mean": "修復した回路で通る region の一覧。", "out": "[1, 6]", "then": "[1, 6] — 意図したリストどおり。**修復で正常系が壊れていない**ことが確認できました。「攻撃が落ちる」だけでは足りず、「正しい人は通る」も同時に要る — 前者が健全性（soundness）、後者が完全性（completeness）で、この 2 つは別々に壊れます。"},
+    {"q": "まとめ", "say": "3 つの回路を同じ物差しで並べます。", "cmd": "(sum(1 for x in range(8) if check(1, x) == (0, 0)), sum(1 for x in range(8) if broken(1, x) == (0,)), sum(1 for x in range(8) if repaired(1, x) == (0, 0)))", "mean": "意図した回路・壊れた回路・修復した回路で、通る region の個数。", "out": "(2, 8, 2)", "then": "(2, 8, 2)。**制約を 1 本抜くと通る値が 4 倍に増え、足し戻すと元に戻る**。回路を読むとは、この数を数えることです。Week 3 以降の証明システムは「この 0 の並びを、witness を見せずに確かめる」仕組みで、回路そのものは今日作ったこの形のまま最後まで使われます。"}
+  ];
+  makeDrill("drillA-card", "ac26-w1-drillA-step", STEPS_A, "「= 0 の式」「ビット制約」「メンバーシップ」「AND は掛け算」を、自分の手で出した数で通しました。宿題 Part A の build は、この 4 つを並べるだけです。");
+  makeDrill("drillB-card", "ac26-w1-drillB-step", STEPS_B, "「制約を 1 本抜くと、通る値が 2 通りから 8 通りに増える」を数で見て、修復したら元に戻ることを確かめました。宿題 Part B の attack は、この増えた 6 通りのどれかを選ぶ作業です。");
 </script>
 
 </body>

@@ -4480,6 +4480,14 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
 (function () {
   "use strict";
   function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function drillText(node, text) {
+    // 「**強調**」だけを <b> にする。innerHTML は使わないので、本文は常にテキストのまま。
+    String(text).split("**").forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2 ? Object.assign(document.createElement("b"), { textContent: part })
+                             : document.createTextNode(part));
+    });
+  }
   function makeDrill(rootId, storeKey, STEPS, doneText) {
     var root = document.getElementById(rootId);
     if (!root) return;
@@ -4499,7 +4507,7 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
           var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
         }
         lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
-        var say = document.createElement("p"); say.className = "drill-say"; say.textContent = st.say; step.appendChild(say);
+        var say = document.createElement("p"); say.className = "drill-say"; drillText(say, st.say); step.appendChild(say);
         var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
         var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
         var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
@@ -4507,10 +4515,10 @@ C = [   0   0   0   1   0    ]   ← ①の出力: t₁
           if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
         }); })(st.cmd, copy);
         cmdRow.appendChild(copy); step.appendChild(cmdRow);
-        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": " + st.mean)); step.appendChild(mean);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": ")); drillText(mean, st.mean); step.appendChild(mean);
         if (done) {
           var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp);
-          var then = document.createElement("p"); then.className = "drill-then"; then.textContent = st.then; step.appendChild(then);
+          var then = document.createElement("p"); then.className = "drill-then"; drillText(then, st.then); step.appendChild(then);
           if (st.code) {
             var cl = document.createElement("p"); cl.className = "drill-codelabel"; cl.textContent = "この時点の関数（全文）:"; step.appendChild(cl);
             var cp = document.createElement("pre"); cp.className = "drill-code"; cp.textContent = st.code; step.appendChild(cp);
