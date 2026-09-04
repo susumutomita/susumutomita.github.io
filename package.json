@@ -54,7 +54,7 @@
     "@astrojs/mdx": "7.0.5",
     "@astrojs/netlify": "8.2.4",
     "@astrojs/rss": "4.0.19",
-    "@astrojs/sitemap": "3.7.3",
+    "@astrojs/sitemap": "3.7.4",
     "@astrojs/solid-js": "7.0.2",
     "@astrojs/svelte": "9.0.1",
     "@iconify-json/ri": "^1.2.10",
