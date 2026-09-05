@@ -5,7 +5,7 @@ pubDate: 2026-09-05
 category: "engineering,cryptography"
 ---
 
-zk-tokyo の[Advanced Cryptography Program 2026](https://github.com/zk-tokyo/advanced-cryptography-2026)を受講しています。Week 6 のテーマは「Application──理論を応用設計へ」で、これまで別々に学んだゼロ知識証明（ZK）・秘密計算（MPC）・完全準同型暗号（FHE）を、1 つのシステムに組み合わせる週でした。
+zk-tokyo の[Advanced Cryptography Program 2026](https://github.com/zk-tokyo/advanced-cryptography-2026)を受講しています。Week 6 のテーマは「Application（理論を応用設計へ）」で、これまで別々に学んだゼロ知識証明（ZK）・秘密計算（MPC）・完全準同型暗号（FHE）を、1 つのシステムに組み合わせる週でした。
 
 今回の収穫は、**3 つの道具は「どれを使うか」ではなく「何が足りないか」で選ぶ**という設計法が腹に落ちたことです。
 
