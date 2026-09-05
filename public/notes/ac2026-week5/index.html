@@ -1,0 +1,1627 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>暗号文のまま関数を引く — Week 5 自習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 5 の自習ノート。完全準同型暗号と TFHE。Δ で置いて s で消して丸めるところから始め、Programmable Bootstrapping が「多項式を回して定数項を取り出す」だけであることを、講義スライドの数値そのままで手を動かして確かめる。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="暗号文のまま関数を引く — Week 5 自習ノート">
+<meta property="og:description" content="ノイズが Δ/2 を超えた瞬間に復号が壊れる。Bootstrapping は多項式を回して定数項を読むだけ。同じ符号反転が、片方では事故で、もう片方では NAND の仕掛けになる。">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<style>
+  @font-face {
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { display: block; max-width: 100%; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  table { border-collapse: collapse; }
+  [hidden] { display: none !important; }
+
+  :root {
+    color-scheme: light dark;
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+
+    --sans: "AXIS Std", "Helvetica Neue", Helvetica, Arial,
+            "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+            "Noto Sans JP", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+            "Cascadia Mono", Consolas, monospace;
+
+    --fs-label: 0.6875rem; --fs-xs: 0.8125rem; --fs-sm: 0.875rem;
+    --fs-lg: 1.25rem; --fs-xl: 1.6875rem; --fs-2xl: clamp(2rem, 5.5vw, 2.9rem);
+    --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+      --line: #3A4449; --line-strong: #4E5B61;
+      --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+      --accent: #99DBFF; --accent-soft: #24333C;
+      --pass: #B5BD68; --pass-soft: #2B3122;
+      --fail: #CC6666; --fail-soft: #3A2626;
+      --free: #F0C674; --free-soft: #3A3122;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+    --line: #3A4449; --line-strong: #4E5B61;
+    --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+    --accent: #99DBFF; --accent-soft: #24333C;
+    --pass: #B5BD68; --pass-soft: #2B3122;
+    --fail: #CC6666; --fail-soft: #3A2626;
+    --free: #F0C674; --free-soft: #3A3122;
+  }
+  :root[data-theme="light"] {
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+  }
+
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); line-height: 1.85; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .eyebrow { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.35; margin: 0; font-weight: 700; }
+  h1 { font-size: var(--fs-2xl); letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+  h3 { font-size: var(--fs-lg); }
+  h4 { font-size: 1rem; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: 0.925em; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .sitebar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
+             background: color-mix(in srgb, var(--ground) 80%, transparent); backdrop-filter: blur(12px); }
+  .sitebar-inner { height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .sitebar-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); text-decoration: none; }
+  .sitebar-links { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+  .sitebar-links a { font-size: var(--fs-xs); color: var(--muted); text-decoration: none; padding: 0.35rem 0.6rem; border-radius: var(--r-md); }
+  .sitebar-links a:hover { color: var(--ink); background: color-mix(in srgb, var(--line) 60%, transparent); }
+
+  .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .masthead-inner { display: flex; flex-direction: column; gap: 1rem; padding: clamp(2.5rem, 7vw, 4rem) 0 clamp(2rem, 5vw, 2.5rem); }
+  .masthead h1 span { color: var(--accent); }
+  .lead { color: var(--ink-2); max-width: 62ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; padding: 0.25rem 0.55rem;
+         border: 1px solid var(--line-strong); border-radius: var(--r-sm); color: var(--ink-2); }
+
+  .band { padding: clamp(2.25rem, 6vw, 3.5rem) 0; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; max-width: 64ch; }
+  .band-head p { color: var(--ink-2); }
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .stack-sm { display: flex; flex-direction: column; gap: 0.9rem; }
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose strong { color: var(--ink); font-weight: 700; }
+  .split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 860px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 1px;
+           background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .steps > li { counter-increment: step; background: var(--panel); padding: 1.25rem 1.4rem 1.35rem;
+                display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem; align-items: start; }
+  .steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); font-size: var(--fs-xs);
+                        font-weight: 700; color: var(--accent); letter-spacing: 0.06em; padding-top: 0.35rem; }
+  .steps h4 { grid-column: 2; }
+  .steps .body { grid-column: 2; display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.35rem; }
+  .steps p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .steps .why { font-size: var(--fs-sm); color: var(--ink-2); border-left: 2px solid var(--line-strong); padding-left: 0.85rem; }
+  .steps .why b { color: var(--ink); }
+
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-md);
+             background: var(--panel); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; max-width: 68ch; }
+  .callout .eyebrow { color: var(--accent); }
+  .callout p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .callout p.strong-line { color: var(--ink); font-weight: 700; }
+  .callout.amber { border-left-color: var(--free); }
+  .callout.amber .eyebrow { color: var(--free); }
+  .callout.red { border-left-color: var(--fail); }
+  .callout.red .eyebrow { color: var(--fail); }
+
+  pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md);
+        padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.75; color: var(--ink); }
+  pre .c { color: var(--muted); }
+  pre b { color: var(--fail); }
+  .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); line-height: 2; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 0.5rem 0.85rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data th { color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: var(--fs-label); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+
+  /* ---------- pipeline ---------- */
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md);
+              background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-box.on .s { color: var(--accent); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
+  .pipe-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .pipe-tool { flex: 1 1 8rem; border: 1px dashed var(--line-strong); border-radius: var(--r-md);
+               background: var(--panel-2); padding: 0.5rem 0.6rem; text-align: center; font-size: var(--fs-xs); color: var(--ink-2); }
+  .pipe-tool.on { border-style: solid; border-color: var(--pass); color: var(--pass); background: var(--pass-soft); font-weight: 700; }
+
+  /* ---------- table of contents ---------- */
+  .toc {
+    list-style: none; margin: 0; padding: 0; counter-reset: toc;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .toc li { counter-increment: toc; background: var(--panel); }
+  .toc a {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: baseline;
+    padding: 0.7rem 1rem; text-decoration: none; color: var(--ink-2);
+    font-size: var(--fs-sm); line-height: 1.5;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--ink); }
+
+  /* ---------- lab ---------- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+               padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .card-head h3 { font-size: var(--fs-sm); }
+  .card-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .lab { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 940px) { .lab { grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); } }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+                 font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); }
+  .field-label .hint { color: var(--muted); font-size: var(--fs-label); }
+  .segments { display: flex; flex-wrap: wrap; gap: 3px; }
+  .segments button { flex: 1 0 2.4rem; font-family: var(--mono); font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
+                     padding: 0.35rem 0.2rem; background: var(--panel-2); color: var(--ink-2);
+                     border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer; }
+  .segments button:hover { border-color: var(--line-strong); }
+  .segments button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  :root[data-theme="light"] .segments button[aria-pressed="true"] { color: #fff; }
+  :root[data-theme="dark"] .segments button[aria-pressed="true"] { color: #0B0E15; }
+  @media (prefers-color-scheme: light) { .segments button[aria-pressed="true"] { color: #fff; } }
+  @media (prefers-color-scheme: dark) { .segments button[aria-pressed="true"] { color: #0B0E15; } }
+
+  .verdict { padding: 1.1rem; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.6rem; }
+  .banner { font-weight: 700; font-size: 1rem; padding: 0.7rem 0.9rem; border-radius: var(--r-md); border-left: 4px solid; }
+  .banner.ok { background: var(--pass-soft); color: var(--pass); border-color: var(--pass); }
+  .banner.bad { background: var(--fail-soft); color: var(--fail); border-color: var(--fail); }
+  .banner.warn { background: var(--free-soft); color: var(--free); border-color: var(--free); }
+  .work { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .work pre { background: var(--panel-2); }
+
+  /* ---------- quiz ---------- */
+  .quiz-pane { padding: 1.25rem 1.35rem 1.35rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .quiz-hero { display: flex; flex-direction: column; gap: 0.35rem; }
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem; }
+  .mode {
+    text-align: left; cursor: pointer; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 0.8rem 0.95rem; display: flex; flex-direction: column; gap: 0.2rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .m-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .mode .m-desc { font-size: var(--fs-label); color: var(--muted); line-height: 1.6; }
+  .mode.primary { background: var(--accent); border-color: var(--accent); }
+  .mode.primary .m-name { color: #fff; }
+  .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+  :root[data-theme="dark"] .mode.primary .m-name { color: #0B0E15; }
+  :root[data-theme="dark"] .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  @media (prefers-color-scheme: dark) {
+    .mode.primary .m-name { color: #0B0E15; }
+    .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  }
+  :root[data-theme="light"] .mode.primary .m-name { color: #fff; }
+  :root[data-theme="light"] .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+
+  .quiz-best { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); margin: 0; }
+  .quiz-bar {
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
+  }
+  .quiz-bar .qcat {
+    padding: 0.1rem 0.5rem; border: 1px solid var(--line-strong);
+    border-radius: 999px; color: var(--ink-2); font-size: var(--fs-label); letter-spacing: 0.06em;
+  }
+  .quiz-bar .lives { margin-left: auto; letter-spacing: 0.2em; color: var(--fail); font-size: 0.95rem; }
+  .quiz-bar .lives .gone { color: var(--line-strong); }
+
+  .qmain { display: flex; flex-direction: column; gap: 0.9rem; }
+  .qtext { font-weight: 700; font-size: 1.0625rem; line-height: 1.7; }
+  .qbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .qbody .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); }
+  .qbody .clist { display: flex; flex-direction: column; gap: 2px; }
+  .qbody .cline {
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+    padding: 0.3rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2);
+    border-left: 3px solid var(--line-strong); overflow-x: auto; white-space: nowrap;
+  }
+
+  .choices { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .choices.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    text-align: left; cursor: pointer; font-size: var(--fs-sm); line-height: 1.6;
+    padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:disabled { cursor: default; }
+  .choice.is-correct { border-color: var(--pass); background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  .choice.is-wrong   { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); }
+  .choice.dim { opacity: 0.5; }
+
+  .fb { border-radius: var(--r-md); padding: 0.85rem 1rem; border-left: 4px solid; font-size: var(--fs-sm); line-height: 1.75; }
+  .fb.ok  { background: var(--pass-soft); border-color: var(--pass); }
+  .fb.bad { background: var(--fail-soft); border-color: var(--fail); }
+  .fb .fb-head { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+  .fb.ok  .fb-head { color: var(--pass); }
+  .fb.bad .fb-head { color: var(--fail); }
+  .fb code { color: var(--ink); }
+
+  .quiz-foot { display: flex; gap: 0.6rem; align-items: center; justify-content: flex-end; }
+  .btn-main {
+    cursor: pointer; font-size: var(--fs-sm); font-weight: 700; padding: 0.55rem 1.2rem;
+    border-radius: var(--r-md); border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  :root[data-theme="dark"] .btn-main { color: #0B0E15; }
+  @media (prefers-color-scheme: dark) { .btn-main { color: #0B0E15; } }
+  :root[data-theme="light"] .btn-main { color: #fff; }
+  .btn-ghost {
+    cursor: pointer; font-size: var(--fs-sm); padding: 0.55rem 1rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--ink-2); border-color: var(--ink-2); }
+
+  .rank-box { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .rank {
+    font-family: var(--mono); font-size: 3.5rem; font-weight: 700; line-height: 1;
+    width: 5rem; height: 5rem; display: grid; place-items: center;
+    border-radius: var(--r-lg); border: 2px solid currentColor; flex: none;
+  }
+  .rank.s { color: var(--accent); }
+  .rank.a { color: var(--pass); }
+  .rank.b { color: var(--free); }
+  .rank.f { color: var(--fail); }
+  .rank-meta { display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank-title { font-weight: 700; font-size: var(--fs-lg); }
+  .rank-sub { font-size: var(--fs-sm); color: var(--ink-2); }
+  .cat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+  .cstat {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+    padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .cstat .cn { font-size: var(--fs-label); color: var(--muted); }
+  .cstat .cv { font-family: var(--mono); font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cstat .cv.full { color: var(--pass); }
+  .cstat .cv.weak { color: var(--fail); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
+  footer a { color: var(--muted); }
+
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+  .deck { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
+        display: flex; flex-direction: column; gap: 0.55rem; }
+  .sl-head { display: flex; gap: 0.75rem; align-items: baseline; }
+  .sl-head .sn { font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; }
+  .sl-head .st { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .sl-claim { font-weight: 700; font-size: 1rem; line-height: 1.7; color: var(--ink); }
+  .sl p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .sl p.sl-claim { color: var(--ink); font-size: 1rem; }
+  .sl pre { background: var(--panel-2); font-size: var(--fs-xs); }
+  .sl-hw { border-left: 3px solid var(--pass); padding-left: 0.75rem; }
+  .sl-hw b { color: var(--pass); }
+  .sl-q { color: var(--accent); }
+  .exs { border: 1px dashed var(--line-strong); border-radius: var(--r-md); padding: 1rem 1.1rem 0.6rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.5rem; }
+  .exs .eyebrow { color: var(--free); }
+  .ex { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); }
+  .ex > summary { cursor: pointer; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); color: var(--ink); line-height: 1.6; }
+  .ex > summary:hover { color: var(--accent); }
+  .ex > pre { border: none; border-top: 1px solid var(--line); border-radius: 0; }
+  .appx { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: 0.6rem; }
+  .appx > summary { cursor: pointer; padding: 0.8rem 1rem; font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .appx > summary:hover { color: var(--accent); }
+  .appx .band { padding: 0.5rem 0 1.5rem; }
+  .appx .band + .band { border-top: none; }
+  table.hwmap td, table.hwmap th, table.gloss td, table.gloss th { white-space: normal; }
+  table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
+  table.gloss td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  #glossary .note-title { margin-top: 0.5rem; }
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  /* ---------- Week 4 追加分 ---------- */
+  .parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.6rem; }
+  .part { border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.85rem 0.95rem;
+          display: flex; flex-direction: column; gap: 0.25rem; }
+  .part .pn { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.1em; color: var(--accent); }
+  .part .pt { font-weight: 700; font-size: var(--fs-sm); }
+  .part .pd { font-size: var(--fs-xs); color: var(--ink-2); line-height: 1.6; }
+
+  .cmp { width: 100%; font-size: var(--fs-xs); }
+  .cmp th, .cmp td { vertical-align: top; white-space: normal; min-width: 8rem; }
+  .cmp td:first-child, .cmp th:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .cmp td small { color: var(--muted); }
+
+  .heat { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; width: 100%; max-width: 22rem; font-family: var(--mono); font-size: var(--fs-label); }
+  .heat span { aspect-ratio: 1; min-width: 0; display: grid; place-items: center; border-radius: 3px; background: var(--panel-2); color: var(--muted); overflow: hidden; }
+  .heat span.h { background: transparent; color: var(--muted); }
+  .heat span.pass { background: var(--fail-soft); color: var(--fail); font-weight: 700; }
+  .heat span.catch { background: var(--pass-soft); color: var(--pass); }
+  .heat span.here { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  table.trace { font-family: var(--mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; width: 100%; }
+  table.trace th, table.trace td { padding: 0.35rem 0.5rem; text-align: center; border-bottom: 1px solid var(--line); }
+  table.trace th { color: var(--muted); font-weight: 400; font-size: var(--fs-label); letter-spacing: 0.06em; }
+  table.trace input { width: 3.2rem; text-align: center; padding: 0.25rem 0.2rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+                      background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  table.trace input.bad { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); font-weight: 700; }
+  table.trace input.fixed { background: var(--panel-2); color: var(--muted); }
+  table.trace td.rowlab { color: var(--muted); font-size: var(--fs-label); text-align: left; white-space: nowrap; }
+  .mini { font-size: var(--fs-xs); color: var(--ink-2); }
+  .mini b { color: var(--ink); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .btn-sm { cursor: pointer; font-size: var(--fs-xs); padding: 0.35rem 0.7rem; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+            background: var(--panel-2); color: var(--ink-2); }
+  .btn-sm:hover { border-color: var(--accent); color: var(--ink); }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.9rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+  .kv dd.ok { color: var(--pass); font-weight: 700; }
+  .kv dd.ng { color: var(--fail); font-weight: 700; }
+  .flow { display: flex; flex-direction: column; gap: 0.35rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .flow .r { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.6rem; padding: 0.35rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2); }
+  .flow .r .who { color: var(--muted); }
+  .flow .r.v { border-left: 3px solid var(--accent); }
+  .flow .r.p { border-left: 3px solid var(--line-strong); }
+  .flow .r.ok { border-left-color: var(--pass); }
+  .flow .r.ng { border-left-color: var(--fail); background: var(--fail-soft); }
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+</style>
+<body>
+
+<div class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a class="sitebar-name" href="/">Susumu Tomita</a>
+    <nav class="sitebar-links">
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/">ノート一覧</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week0/index.html">土台編</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week4/index.html">Week 4</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 5 自習ノート</p>
+    <h1>暗号文のまま<span>関数を引く</span> — 予習ノート</h1>
+    <p class="lead">
+      Week 5（完全準同型暗号 / TFHE）の<strong>予習ノート</strong>です。事後課題はまだ手元にないので、
+      <strong>対話ドリル 3 本・31 行</strong>（mod 64 と mod 32 の整数だけ。<code>python3</code> と打てば始められる）で
+      「Δ で置いて s で消して丸める」から「多項式を回して定数項を読む」までを 1 行ずつ自分の手で通し、
+      そのあと<strong>講義スライド 51 枚と同じ順番のカード</strong>で言葉を埋めます。
+    </p>
+    <p class="lead">
+      この週の全体像は 1 文で言えます。<strong>Bootstrapping は、復号せずに、答えを並べた多項式を暗号文が指す量だけ回して、定数項を読む操作</strong>です。
+      ドリル B でそれを講義スライドの数値そのままで通します。
+    </p>
+    <div class="meta-row">
+      <span class="tag">対話ドリル 3 本・31 行</span>
+      <span class="tag">スライド 51 枚追従</span>
+      <span class="tag">検問クイズ</span>
+      <span class="tag">前提は Week 0 の余りと mod</span>
+      <span class="tag">外部通信なし</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================ 0 : 出発点 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点 — Week 5 の予習</p>
+      <h2>「暗号文のまま計算する」の難しさは、たった 1 つの数に集まる</h2>
+      <p>
+        暗号文のまま足し算と掛け算ができると、預けたデータを見せずに計算を任せられます。それが完全準同型暗号（FHE）です。
+        ところが暗号文には<strong>ノイズ</strong>が入っていて、演算をするたびに増えます。増えすぎると復号が別の平文を返す。
+        だから「何回演算できるか」は「ノイズがどこまで許されるか」に等しく、その許容量は <strong>Δ/2</strong> という 1 つの数で決まります。
+        ドリル A でこの数を出し、実際に超えさせて壊します。
+      </p>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み方</p>
+        <p><b>ドリル A（LWE とノイズ）→ B（回転で取り出す = Bootstrapping の核）→ C（negacyclic の表と裏）</b>の順に、1 行打って出た値を貼って 1 文読む。準備は <code>python3</code> と打って <code>&gt;&gt;&gt;</code> が出るだけ（import も不要）。そのあとカードを上から。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">前の週とのつながり</p>
+        <p>必要なのは Week 0 の「余り」と mod だけです。Week 3・4 の楕円曲線や多項式コミットメントは使いません。逆に、ここで出てくる「多項式を <code>x<sup>n</sup>+1</code> で割った余りで考える」は Week 3 の NTT と同じ土俵の話で、<strong>符号が 1 つ違う</strong>だけです。その符号 1 つが、この週の主役になります。</p>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ DRILLS -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — 1 行打って、出た値を貼って、1 文読む</p>
+      <h2>TFHE の中心を、mod 64 と mod 32 の整数だけで手で回す</h2>
+      <p>
+        <code>python3</code> を開いて <code>&gt;&gt;&gt;</code> が出たら始められます（import は最後まで不要）。
+        各行に「この行の意味」、出た値を貼ると、その値を指す解説が開きます。Python を開けないときは「ここで実行」。
+        ドリル B と C は<strong>講義スライドの数値そのまま</strong>なので、スライドと突き合わせながら進められます。
+      </p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル A — LWE 暗号とノイズ（p = 4, q = 64, Δ = 16）</p>
+      <p class="strong-line">Δ で置いて、s で消して、丸めて戻す。そのあと、ノイズを増やして復号を壊す。</p>
+      <p>13 行。復号が「割り算」ではなく「いちばん近い目盛りへの四捨五入」であることを見てから、暗号文を足し続けてノイズを 9 まで押し上げ、余裕 8 を超えた瞬間に答えが割れるのを実際に見ます。</p>
+    </div>
+    <div class="card" id="drillA-card">
+      <div class="card-head"><h3>ドリル A — Δ で置いて、s で消して、丸めて戻す</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル B — Programmable Bootstrapping の核（講義スライド 21〜26 の数値そのまま）</p>
+      <p class="strong-line">ノイズの入った暗号文から、ノイズのない平文を取り出す。やることは「多項式を回して定数項を読む」だけ。</p>
+      <p>10 行。講義が「5 分とるので各自手を動かして確認」と言った具体例です。s = (1,0,0,1,1,1,0,1)、a = (8,34,4,32,0,31,58,7)、b = 24。リスケーリングして â = (4,17,2,16,0,16,29,4)、b̂ = 12 が出れば、スライド 25 と一致しています。</p>
+    </div>
+    <div class="card" id="drillB-card">
+      <div class="card-head"><h3>ドリル B — 回して、定数項を読む</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル C — negacyclic の表と裏（講義スライド 35, 43〜45）</p>
+      <p class="strong-line">同じ符号反転が、片方では「起きたら困る事故」、もう片方では「NAND を作る仕掛け」になる。</p>
+      <p>8 行。スライド 35 は「もし Blind Rotation でこれが起きたらなぜ問題か」を問いのまま残しました。スライド 43〜45 は同じ反転をわざと使って NAND を作ります。両方を同じ 1 つの関数で出して、表と裏であることを 12 通り全部で確かめます。</p>
+    </div>
+
+    <div class="callout amber">
+      <p class="eyebrow">スライド 44 の条件について — 手を動かすと分かること</p>
+      <p>スライド 44 は成立条件を「3 &lt; n &lt; p−1」と書いています。ただし講義自身の例は p = 8, n = 16 で、3 &lt; 16 &lt; 7 は成り立ちません。<strong>実際に効いている条件は Δ と n の関係です。</strong></p>
+      <p>回転量は r = 3 のとき 3Δ、r = p−1 のとき 2n − Δ。前者が n 未満、後者が n 以上に落ちればよいので、条件は <b>3Δ &lt; n</b>（Δ = 2n/p なので p &gt; 6 と同じ）と、ノイズの合計について <b>d ≤ Δ</b> です。n, p, d の 45 通りを総当たりして、成立する 26 通りがこの 2 条件と過不足なく一致することを確かめました。講義の例 (p = 8, n = 16, Δ = 4, d ≤ 2) はこれを満たしています。</p>
+    </div>
+    <div class="card" id="drillC-card">
+      <div class="card-head"><h3>ドリル C — 符号が裏返る、その両側</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D1 : FHE の概要 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 2〜11 / FHE の概要</p>
+      <h2>「暗号文のまま計算できる」に、加算と乗算がそろうと何が起こるか</h2>
+      <p>ここからのカード列は講義スライド 51 枚を同じ順番で追いかけます。1 カード = 主張 1 つ。カード末尾の Q. は講義が問いとして置いたもの — 答えを探しながら聞く場所です。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">2/51</span><span class="st">今回の流れ</span></div>
+        <p class="sl-claim">講義は FHE の概要 → LWE 暗号の基礎 → TFHE の Programmable Bootstrapping の 3 部構成。</p>
+        <p>そのあとホワイトボードセッション（テーマ調査・議論・2 グループ相互の発表とフィードバック）。事後課題は、セッションで出たクエスチョンの調査（提出不要）とコードの穴埋め課題。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">3/51</span><span class="st">暗号方式の定義</span></div>
+        <p class="sl-claim">暗号方式 = 3 つのアルゴリズムの組 (Gen, Enc, Dec) で、Dec(Enc(m, key_enc), key_dec) = m を満たすもの。</p>
+        <p>Enc と Dec で同じ鍵なら共通鍵暗号（AES など）。Gen が鍵ペア (pk, sk) を作り、pk で暗号化・sk で復号するなら公開鍵暗号（RSA など）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">4/51</span><span class="st">Homomorphic Encryption</span></div>
+        <p class="sl-claim">準同型暗号 = 暗号文のまま計算できる暗号。Dec(c₁ ⊗ c₂) = m₁ ⊕ m₂。</p>
+        <p>例: RSA は暗号文同士を掛けて復号すると平文同士の掛け算になる。Paillier は暗号文の乗算が平文の加算になる。サーバーにデータを明かさずに計算を任せられる。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">5/51</span><span class="st">Fully Homomorphic Encryption</span></div>
+        <p class="sl-claim">完全準同型暗号 (FHE) = 暗号文のまま、加算と乗算の両方を任意の回数行える準同型暗号。</p>
+        <p class="sl-q">Q. なぜ暗号文のまま加算と乗算ができたら嬉しいのか？（答えは次のカード）</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">6/51</span><span class="st">NAND が組めれば何でも組める</span></div>
+        <p class="sl-claim">m₁, m₂ ∈ {0,1} に対して 1 − m₁m₂ を暗号文のまま計算できれば NAND が評価でき、理論上任意の Boolean 回路を暗号文のまま評価できる。</p>
+        <p>概念の提唱（1978 年、Rivest ら）から初の実現（2009 年）まで 31 年かかった。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">7/51</span><span class="st">FHE の種類</span></div>
+        <p class="sl-claim">「何回まで演算できるか」で 3 段階 — SHE（有限回）→ LHE（パラメータで定めた回数まで、Bootstrapping なし）→ FHE（Bootstrapping により無制限）。</p>
+        <pre>SHE: BGN など   LHE: BFV/BGV, CKKS など   FHE: GSW, FHEW, TFHE など</pre>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">8/51</span><span class="st">主要方式 1 — Gentry's blueprint / BFV・BGV / CKKS</span></div>
+        <p class="sl-claim">方式は「何の計算に向くか」で分かれる — BFV/BGV は整数（SIMD 的な演算可）、CKKS は浮動小数点などの近似値（機械学習と相性が良い）。どちらも Bootstrapping が重く、主に LHE として運用される。</p>
+        <p>出発点は 2009 年の Gentry's blueprint。演算で「ノイズ」が増えて復号できなくなる問題を Bootstrapping の導入で乗り越えたが、当初は計算量が非常に大きく実用には遠かった。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">9/51</span><span class="st">主要方式 2 — GSW / FHEW / TFHE</span></div>
+        <p class="sl-claim">GSW が近似固有ベクトルの概念で暗号文を行列として扱う道を開き、FHEW が Bootstrapping を 1 秒未満に、TFHE が Torus への拡張で論文報告値約 13 ms まで縮めた。</p>
+        <p>FHEW は論理ゲートの評価とノイズのリフレッシュを同時に行えるようにした。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">10/51</span><span class="st">FHE の課題（問い）</span></div>
+        <p class="sl-claim">講義が置いた問い — 次のカードを見る前に、自分で挙げてみる。</p>
+        <p class="sl-q">Q. FHE の課題にはどのようなものがあると思いますか？</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">11/51</span><span class="st">FHE の課題（3 つ）</span></div>
+        <p class="sl-claim">課題は 3 つ — 実行コスト、検証可能性、安全性モデル。</p>
+        <pre>実行コスト: 暗号化でデータが大きくなる・演算が重い・Bootstrapping は改善されてもなおボトルネック
+検証可能性: FHE だけでは計算結果の正しさは保証できない（Week 6 で説明）
+安全性:     暗号文を意図的に変形できる機能そのものが non-malleability と両立しない。
+            多くの方式は CPA 安全性中心。CCA が必要な応用では認証・検証レイヤーを別途設計</pre>
+        <p class="sl-hw"><b>CPA / CCA を区別する</b>: CPA（選択平文攻撃）では、攻撃者は選んだ平文の暗号化を要求できるが、復号は要求できない。CCA（選択暗号文攻撃）では、攻撃者が作った暗号文の復号も要求できる（CCA2 はチャレンジ暗号文を見た後も要求できるが、チャレンジそのものは除く）。FHE は <code>Enc(m) → Enc(f(m))</code> と暗号文を加工する機能が本体なので、加工を禁止する non-malleability と両立しない。CCA が必要な用途では、認証・改ざん検知・復号要求の制限などを別途組み合わせる。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D2 : LWE -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 12〜19 / LWE 暗号とノイズ</p>
+      <h2>誤差を 1 つ足すだけで連立方程式は解けなくなる — それが暗号になる</h2>
+    </div>
+    <div class="callout">
+      <p class="eyebrow">先に役を固定する</p>
+      <p><b>s が秘密鍵</b>。a は標本ごとに変わる公開ベクトル、e は小さい誤差、b は公開される 1 個の値で、暗号文は組 (a, b) です。文字列は先に UTF-8 のバイト列へ変換し、TFHE では通常さらに bit へ分けて、各 bit を小さい平文 m として暗号化します。Δ は文字を数へ直す処理ではなく、その小さい m を暗号文空間の離れた位置へ置く間隔です。</p>
+      <pre>文字列 → UTF-8 bytes → bits / 小さい整数 → LWE 暗号文
+LWE 暗号文 → bits / 小さい整数 → UTF-8 bytes → 文字列</pre>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">12/51</span><span class="st">ここからの地図</span></div>
+        <p class="sl-claim">道順 — 近似連立方程式 → LWE 問題 → LWE 暗号とその演算 → 乗算とノイズ → TFHE の PBS（Blind Rotation / Sample Extraction / Key Switching）→ HomNAND。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">13/51</span><span class="st">近似連立方程式</span></div>
+        <p class="sl-claim">通常の連立方程式は Gauss の消去法で高速に解ける。しかし各式の左辺に小さな誤差 e を足しただけで、誤差を知らずに解くのは困難になる。</p>
+        <p class="sl-hw"><b>橋</b>: 中学の連立方程式は「片方の式からもう片方を引く」で必ず解けた。誤差入りだと引き算のたびに誤差も混ざり合い、消去が効かなくなる。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">14/51</span><span class="st">内積で 1 行に書く</span></div>
+        <p class="sl-claim">誤差入りの式 1 本は、係数ベクトル a と秘密ベクトル s の内積（同じ位置を掛けて全部足す）を使って ⟨a,s⟩ + e = b と 1 行に書ける。</p>
+        <pre>a = (a₀, …, aₖ₋₁),  s = (s₀, …, sₖ₋₁)
+⟨a,s⟩ = a₀s₀ + ··· + aₖ₋₁sₖ₋₁</pre>
+        <p><b>何が嬉しいか</b>: s を固定したまま a を変えると、秘密の異なる線形な組み合わせを 1 個の値として何本でも作れる。ノイズがなければ、それらを A s = b と並べて消去法で s を解ける。標本 i ごとに aᵢ・eᵢ・bᵢ は変わるが、s だけは共通です。</p>
+        <p>射影との関係では、⟨a,s⟩ は射影ベクトルを作る前に現れる 1 個の数です。ただし LWE で使う性質は図形より、⟨a+a′,s⟩ = ⟨a,s⟩ + ⟨a′,s⟩ という線形性です。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">15/51</span><span class="st">（判定）LWE 問題と LWE 仮定</span></div>
+        <p class="sl-claim">判定 LWE = 同じ秘密 s を共有する多数の標本が、bᵢ = ⟨aᵢ,s⟩ + eᵢ (mod q) から来たのか、(aᵢ,bᵢ) が一様ランダムなのかを識別する問題。</p>
+        <p><b>単一の組が式を満たすか、ではありません。</b> e を自由に選べば、ほぼどの (a,b) も式の形にはできます。区別するのは、aᵢ は一様、eᵢ は小さい、s は全標本で共通という<strong>分布</strong>です。</p>
+        <pre>q = 11, s = (1,0) の観察用の例
+a=(2,7), e=+1 → b=3    b−⟨a,s⟩ = +1
+a=(8,4), e=−1 → b=7    b−⟨a,s⟩ = −1
+a=(5,9), e= 0 → b=5    b−⟨a,s⟩ =  0</pre>
+        <p>この例では s を見せたので残差が小さいと確認できますが、本物の判定ゲームでは s は見えません。大きい次元・mod q・多数の未知誤差の下で LWE 分布と一様分布を効率よく区別できない、という仮定が LWE 仮定です。(aᵢ,bᵢ) 群から共通の s を求める側は探索 LWE。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">16/51</span><span class="st">LWE 暗号</span></div>
+        <p class="sl-claim">LWE 暗号 = 秘密鍵 s との内積で平文を隠し、e を足して式を少しずらす共通鍵暗号。b = ⟨a,s⟩ + Δm + e。</p>
+        <pre>Gen: 秘密鍵 s ∈ {0,1}^k を一様ランダムに取る
+Enc: c = (a, b = ⟨a,s⟩ + Δm + e)   a は一様ランダム、e は分布 χ から。Δ := q/p
+Dec: m = ⌊(b − ⟨a,s⟩ mod q) / Δ⌉ mod p   （⌊·⌉ は四捨五入）</pre>
+        <p>s を知る人は b から同じ内積を引き、Δm + e を得ます。e 自体を求めるのではありません。⌊(Δm+e)/Δ⌉ = ⌊m + e/Δ⌉ なので、−Δ/2 ≤ e &lt; Δ/2 なら小さいずれが丸め落ちて m が戻ります。以降この暗号文を LWEₛ(Δm) と書く。</p>
+        <pre>例: Δ=16, m=2, e=3
+Δm+e = 35,  35/16 = 2.1875,  四捨五入 → 2</pre>
+        <div class="callout">
+          <p class="eyebrow">中学生の数だけで、暗号化から復号まで</p>
+          <p><b>設定</b>: p=4、q=20 なので Δ=q/p=5。秘密鍵 s=(1,1)、公開ベクトル a=(2,3)、平文 m=2、ノイズ e=1 とします。</p>
+          <pre>1. 内積:       ⟨a,s⟩ = 2×1 + 3×1 = 5
+2. 平文を置く: Δm = 5×2 = 10
+3. 暗号化:     b = 5 + 10 + 1 = 16
+               暗号文 c = ((2,3), 16)
+
+4. 鍵で消す:   16 − (2×1 + 3×1) = 11
+5. Δで割る:    11÷5 = 2.2
+6. 丸める:     2.2 → 2  （平文が戻る）</pre>
+          <p>秘密鍵を誤って (1,0) とすると、16−2=14、14÷5=2.8→3 になり復号に失敗します。正しい鍵でもノイズを e=3 まで増やすと、(5+10+3−5)÷5=2.6→3 となります。<b>s は内積の項を消す鍵、Δ は平文を離して置く間隔、丸めは小さい e だけを結果から落とす操作</b>です。</p>
+        </div>
+        <p class="sl-q">Q. 暗号文が復号できることを各自確認。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">17/51</span><span class="st">LWE 暗号同士の演算とノイズ</span></div>
+        <p class="sl-claim">平文との乗算と暗号文同士の加算では、出力のノイズが元より増える — 演算を続ければ、いずれ −Δ/2 ≤ e &lt; Δ/2 に収まらなくなる。</p>
+        <pre>平文 m′ の加算:     (a, as + Δ(m+m′) + e)            ノイズ e のまま
+平文 m′ の乗算:     (m′a, m′as + Δmm′ + em′)          ノイズ em′ に増加
+暗号文同士の加算:   (a+a′, (a+a′)s + Δ(m+m′) + e+e′)  ノイズ e+e′ に増加</pre>
+        <div class="callout amber">
+          <p class="eyebrow">さっきの数値例でノイズだけ追う</p>
+          <pre>Δ=5, s=(1,1)
+c₁: m=1, e=1  →  ⟨a,s⟩ + 5 + 1
+c₂: m=1, e=−1 →  ⟨a′,s⟩ + 5 − 1
+
+暗号文を加算:  平文 1+1=2、ノイズ 1+(−1)=0  → 復号しやすい
+平文を 2 倍:   平文 1×2=2、ノイズ 1×2=2   → まだ |e|&lt;Δ/2
+さらに加算:    ノイズ 2+2=4                → Δ/2=2.5 を超え失敗</pre>
+          <p>つまり「計算結果」だけでなく、見えない e も一緒に足し算・掛け算されます。暗号文同士の乗算ではノイズだけでなく暗号文の形（次数）も膨らむので、Relinearization / Key Switching で通常形へ戻し、Bootstrapping でノイズをリセットします。</p>
+        </div>
+        <p class="sl-q">Q. これらの演算結果が正常に復号できるか各自確認してみよう。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">18/51</span><span class="st">暗号文同士の乗算 1 — blueprint と BGV/BFV/CKKS</span></div>
+        <p class="sl-claim">暗号文同士の「乗算」の作り方が方式の分かれ目。Gentry's blueprint は暗号文を多項式のベクトルと見て積を取り、ノイズは指数関数的に増える — それを Bootstrapping（暗号文を暗号文の状態で復号する）で削減する。</p>
+        <p>BGV/BFV/CKKS はテンソル積で掛け、形の崩れた暗号文を Relinearization / Key Switching で通常形へ戻す。ノイズ・スケール管理の中心は BGV の Modulus Switching、CKKS の Rescaling。</p>
+        <div class="callout">
+          <p class="eyebrow">「ベクトルを多項式にする」とノイズが出る？</p>
+          <p>多項式として書き直すだけならノイズは増えません。係数ベクトル <code>(a₀,a₁)</code> を <code>a₀+a₁x</code> と読むと、掛け算は係数の畳み込みになります。</p>
+          <pre>(a₀+a₁x)(b₀+b₁x)
+= a₀b₀ + (a₀b₁+a₁b₀)x + a₁b₁x²
+ベクトル: (a₀b₀, a₀b₁+a₁b₀, a₁b₁)  ← 2 係数が 3 係数に膨らむ</pre>
+          <p>暗号文の各多項式に <code>… + e</code> が含まれているため、掛け算後には <code>e·e′</code> や <code>e·(a′s)</code> などの項も現れます。これがノイズの増加です。環の <code>xⁿ=±1</code> で次数を戻しても、すでに増えたノイズは消えません。そこで Relinearization / Key Switching で形を戻し、Bootstrapping でノイズを抑えます。</p>
+          <p><b>テンソル積</b>は、内積のように足して 1 個へ潰さず、組み合わせごとの積を全部残す操作です。<code>(2,3)⊗(5,7)=(10,14,15,21)</code>（内積なら <code>2×5+3×7=31</code> の 1 個）。全ての交差項を残すので暗号文同士の積を正確に表せるのがメリットですが、要素数とノイズが増えるため、後で通常サイズへ圧縮します。</p>
+          <p>交差項とは、<code>(x+y)(u+v)=xu+xv+yu+yv</code> の <code>xv</code> と <code>yu</code> のような「別の項どうしの組み合わせ」です。これを落とすと平文の積 <code>m·m′</code> も正しく残りません。目的は、秘密鍵を知らずに暗号化された値の積を計算することです。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19/51</span><span class="st">暗号文同士の乗算 2 — GSW と FHEW/TFHE</span></div>
+        <p class="sl-claim">GSW は暗号文を行列の形にして、積をビット分解と行列積で実現し、Gadget Decomposition でノイズの増大を抑えた。FHEW/TFHE はこれを使って Bootstrapping を高速化し、ノイズを減らしながら関数評価できるようにした。</p>
+        <p>平文同士の乗算は、平文を bit 表現して暗号文の状態の NAND を組み合わせれば実現できる。</p>
+        <div class="callout amber">
+          <p class="eyebrow">これは「改良の一本道」</p>
+          <pre>基本 LWE       ベクトルで隠す。加算は簡単、暗号文同士の乗算が難しい
+      ↓
+GSW            行列として持ち、行列積で乗算。Gadget 分解で扱いやすくする
+      ↓
+FHEW / TFHE    GSW の仕掛けを使って Bootstrapping を高速化
+      ↓
+NAND           ビットの NAND を暗号文のまま評価。NAND を組み合わせれば任意の回路</pre>
+          <p>つまり GSW は「乗算を表現する工夫」、FHEW/TFHE は「ノイズをリセットする工夫」、NAND は「任意の計算へ組み立てる部品」です。役割が違うだけで、目標は一つ（暗号文のまま計算）です。</p>
+          <p><b>ビット分解 ≠ ビット論理</b>。GSW の内部では、13 を <code>1101₂=1+4+8</code> のように小さな桁へ分け、各桁を Gadget の重み <code>(1,2,4,8)</code> と組み合わせます。これで大きな係数の積を、決まった小さな部品の行列積へ分解でき、結果の形とノイズを見積もりやすくなります。TFHE の NAND は、暗号化された 0/1 に対して実際に行う別の処理です。</p>
+          <p><b>なぜ格子で FHE か</b>：量子耐性に加え、足し算・掛け算を暗号文の中で自然に表せ、ノイズを Key Switching / Bootstrapping で管理でき、多項式・行列の構造でまとめて計算できます。整数向け（BFV/BGV）、近似値向け（CKKS）、ビット向け（TFHE）を選べる代わりに、暗号文が大きく計算も重い、という交換条件です。</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D3 : PBS の基本アイデア -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 20〜27 / TFHE と Programmable Bootstrapping の基本アイデア</p>
+      <h2>答えの一覧表を多項式にして、暗号文の分だけ回し、定数項を読む</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">20/51</span><span class="st">TFHE の基本情報</span></div>
+        <p class="sl-claim">TFHE = FHEW を Torus（トーラス）という代数構造に拡張した方式。論文中では約 13 ms で Bootstrapping を実行するパラメータ例が報告されている。</p>
+        <p>講義ではトーラスを使わない説明を取り、鍵生成・暗号化・復号は LWE 暗号と同じにする。トーラスの利点が気になる人は Chi20+ / Joy22 へ。</p>
+        <div class="callout">
+          <p class="eyebrow">この論文の中心アイデア</p>
+          <p>TFHE は、LWE の仕組みを捨てた別の暗号ではなく、値を <b>トーラス（1 周する数の世界）</b>に置き、Bootstrapping を高速にした方式です。トーラスは <code>𝕋=ℝ/ℤ</code>、つまり 0.9+0.3=0.2 のように 1 周すると 0 に戻る世界です。</p>
+          <pre>従来: 大きな整数 q の上で LWE を計算
+TFHE : トーラス上の位相（小数の位置）で LWE を計算
+       ↓
+       Blind Rotation で表を回す
+       Sample Extraction で1個のLWEに戻す
+       Key Switching で鍵をそろえる
+       ↓
+       ノイズを抑えた暗号文</pre>
+          <p>トーラスにしただけでノイズが消えるわけではありません。固定幅整数の折り返しを使いやすくし、NANDなどのビット演算と高速なProgrammable Bootstrappingを組み合わせやすくした、というのがメリットです。13msは論文の特定パラメータでの報告値で、常にその速度という意味ではありません。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">21/51</span><span class="st">剰余の復習 — 多項式の割り算の余り</span></div>
+        <p class="sl-claim">整数の 5 mod 3 = 2 と同じ要領で、多項式にも割り算の余りが取れる。mod xⁿ+1 の世界では xⁿ ≡ −1、そして x⁻ᵃ ≡ −xⁿ⁻ᵃ (0 ≤ a ≤ n)。</p>
+        <p class="sl-hw"><b>橋</b>: 「x⁵+x+2 を x²+1 で割った余りは 2x+2」— 数 II の整式の割り算そのもの。係数が有限体 F_p のときは係数側にも mod p を取る。</p>
+        <div class="callout">
+          <p class="eyebrow">式を1行ずつ計算する</p>
+          <pre>x²+1 ≡ 0 なので x² ≡ −1
+x⁴ ≡ (+1),  x⁵ = x·x⁴ ≡ x
+x⁵+x+2 ≡ x+x+2 = 2x+2</pre>
+          <p>多項式の mod は「割り算の余り」なので、次数が高い項を <code>x²≡−1</code> で置き換えて次数を下げています。有限体 (𝔽_5) では係数も5で割った余りにします。例えばスライドの式は <code>(3x+2)(x+4)=3x²+14x+8 ≡ 3x²+4x+3</code>、さらに <code>x²≡−1</code> だから <code>4x</code> です。</p>
+          <p><b>x⁻ᵃ は逆向きの回転</b>です。<code>xᵃ·(−xⁿ⁻ᵃ)=−xⁿ≡1</code> なので、<code>x⁻ᵃ≡−xⁿ⁻ᵃ</code>。負の指数を実数の小数として計算するのではなく、環の中の「掛けると1になる元」として扱います。この符号反転（negacyclic）が、TFHEの多項式を回すときに現れます。</p>
+        </div>
+        <p class="sl-q">Q. xⁿ ≡ −1 と x⁻ᵃ ≡ −xⁿ⁻ᵃ が成立することは各自確認。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">22/51</span><span class="st">Bootstrapping でやりたいこと</span></div>
+        <p class="sl-claim">やりたいこと = 平文を保ったまま、暗号文のノイズをリセットする。作戦: すべての平文を並べたリストの「ノイズの少ない暗号文」から、入力平文 mᵢ の部分だけを切り出す。</p>
+        <div class="callout">
+          <p class="eyebrow">図を「暗号化された答え表」として読む</p>
+          <pre>入力:  Enc(Δmᵢ + e)       ノイズ付き。mᵢ の場所が少しずれている
+用意:  Enc(表)             m₀,m₁,…,mₚ₋₁ を幅を持たせて並べた表
+操作:  暗号文が指す量だけ表を回す（秘密鍵で位置を読む必要なし）
+読出:  0 番地の係数          → mᵢ の部分が0番地に来る
+出力:  Enc(Δmᵢ + 新しいノイズ)  → 平文は同じ、古いノイズは引き継がない</pre>
+          <p>これは「暗号文を復号してから表を引く」のではありません。表も入力も暗号化されたまま、Blind Rotation が回転を実行します。表の値を <code>mⱼ</code> ではなく <code>f(mⱼ)</code> に置けば、同じ手順で <code>Enc(f(mᵢ))</code> が出るため <b>Programmable</b> と呼ばれます。</p>
+          <pre>選べる関数の例（p=2 のビット）
+恒等 f(0)=0,f(1)=1  → 表 [0,1]
+NOT  f(0)=1,f(1)=0  → 表 [1,0]
+
+p=4 なら f(m)=m+1 mod 4 → 表 [1,2,3,0]</pre>
+          <p>つまり「どの位置を読むか」は入力暗号文が決め、「その位置に何を置くか」は計算したい関数が決めます。2入力の NAND などは、複数のビットを組み合わせてからこの1入力の表引きを使います。</p>
+          <p>図の横長の箱は平文を直接見せている絵ではなく、概念上のテスト多項式です。実際のTFHEではその係数も暗号文の内部にあり、最後にSample ExtractionとKey Switchingで通常のLWE暗号文へ戻します。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">23/51</span><span class="st">key observation — x⁻ⁱ を掛けると係数が回る</span></div>
+        <p class="sl-claim">多項式 v(x) に x⁻ⁱ を掛けると (mod xⁿ+1)、係数 aᵢ が定数項に来る — 係数の列を「回転」させられる。</p>
+        <p>暗号文 (a, b) は b − as = Δmᵢ + e を満たす。だからこの量だけ回したとき定数項に mᵢ が来るように、v(x) の係数を組んでおけばよい。</p>
+        <div class="callout amber">
+          <p class="eyebrow">一般式の前に、1回ずつ見る</p>
+          <pre>係数の列:       [10, 20, 30, 40]
+普通に1つ左へ:  [20, 30, 40, 10]
+x⁴=−1 の世界:  [20, 30, 40, −10]  ← 端から来た10だけ符号反転
+
+もう1回 x⁻¹:   [30, 40, −10, −20]
+                 ↑ 元の30が先頭（定数項）へ</pre>
+          <p>この2回分を多項式でまとめたのが <code>x⁻²</code> です。<code>v(x)=10+20x+30x²+40x³</code> に掛けると <code>30+40x−10x²−20x³</code> になります。つまり <code>x⁻¹</code> は「1칸左へ回す」、<code>x⁻²</code> はそれを2回、というだけです。</p>
+          <p>暗号文の <code>b−⟨a,s⟩=Δmᵢ+e</code> は「どれだけ回すか」を表します。表の中で同じ <code>mᵢ</code> を近くの場所にも繰り返しておけば、ノイズ <code>e</code> で少し回転量がずれても、定数項には同じ <code>mᵢ</code> が来ます。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">24/51</span><span class="st">v(x) の構成 — ポイントは幅を持たせること</span></div>
+        <p class="sl-claim">同じ mᵢ を、ノイズ候補ぶんの位置 Δmᵢ+e₀, …, Δmᵢ+e_r のすべてに並べておく。するとノイズ込みの回転量 Δmᵢ+e で回しても、定数項には mᵢ が来る。</p>
+        <div class="callout amber">
+          <p class="eyebrow">まずは「1マス」ではなく「正解の帯」</p>
+          <pre>平文 m=1、Δ=5、ノイズ候補 e∈{−1,0,+1}
+正解の位置は Δm+e = 4, 5, 6
+
+幅なし: 位置 5 だけに「1」
+幅あり: 位置 4,5,6 に「1,1,1」
+
+実際のノイズが +1 → 回転量は 6
+幅なしだと別の値を読むかもしれない
+幅ありなら位置6にも「1」があるので、答えは必ず1</pre>
+          <p>暗号文から分かるのは <code>Δm+e</code> ですが、<code>e</code> 自体は分かりません。だから、あり得るノイズの全候補に同じ平文を置きます。回転がどの候補に着地しても、0番地へ来る係数は同じ <code>m</code> です。</p>
+          <p>スライドの長い式 <code>v_q(x)</code> は、この「同じ数字を何マスも続けて置いた表」を多項式で書いたものです。帯を越えるほどノイズが大きくなると、隣の平文の帯に入り、復号に失敗します。</p>
+          <p class="eyebrow">式の導出は「表 → 式」</p>
+          <ol>
+            <li>欲しい処理を決める。この例は入力をそのまま返す <code>f(m)=m</code>。</li>
+            <li>縮小後の間隔は <code>Δ̂=4</code>、ノイズ候補は <code>e=0,1,2,3</code>。</li>
+            <li>したがって平文1は位置 <code>4,5,6,7</code> のどこかに来るので、その全場所に1を置く。</li>
+            <li>「位置 <code>j</code> に値 <code>c</code>」を <code>c·xʲ</code> と書いて全部足す。</li>
+          </ol>
+          <pre>平文0: 位置0〜3 → 0·(1+x+x²+x³)
+平文1: 位置4〜7 → 1·(x⁴+x⁵+x⁶+x⁷)
+平文2: 位置8〜11 → 2·(x⁸+x⁹+x¹⁰+x¹¹)
+平文3: 位置12〜15 → 3·(x¹²+x¹³+x¹⁴+x¹⁵)</pre>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">25/51</span><span class="st">v(x) の構成 — 実用上の注意</span></div>
+        <p class="sl-claim">実用的なパラメータでは q が大きすぎるので、多項式の次数は q より小さい n にし、a と b を ⌊·(2n/q)⌉ で n の世界へ丸め直してから回す（Rescaling / Modulus Switching と呼ぶ）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">26/51</span><span class="st">多項式でうまくいくことの確認（具体例）</span></div>
+        <p class="sl-claim">p = 8, q = 64, Δ = 8, n = 16 の手計算例 — b − as ≡ 10 = 8·1 + 2 の暗号文を、リスケーリング後の回転量 4 で回すと、定数項に平文 1 が現れる。</p>
+        <div class="callout blue">
+          <p class="eyebrow">数字を1行ずつ追う</p>
+          <ol>
+            <li><strong>秘密鍵との内積:</strong> <code>⟨a,s⟩=8·1+32·1+0·1+31·1+7·1=78≡14 (mod 64)</code>。したがって <code>b−⟨a,s⟩=24−14=10=8·1+2</code>。平文は1、ノイズは2。</li>
+            <li><strong>表を作る:</strong> <code>v</code> は位置0〜3に0、4〜7に1、8〜11に2、12〜15に3を置く表。平文1を4マス続けたのは、ノイズ <code>0≤e&lt;4</code> で位置がずれても1を読めるようにするため。</li>
+            <li><strong>小さい番号へ縮める:</strong> <code>â=round(a/2)=(4,17,2,16,0,16,29,4)</code>、<code>b̂=round(b/2)=12</code>。<code>â</code> と秘密鍵の内積は <code>40</code> なので、回転量は <code>i=12−40≡4 (mod 32)</code>。</li>
+            <li><strong>4マス左へ回す:</strong> もともと平文1の帯は位置4〜7。<code>x⁻⁴v</code> ではそこが位置0〜3へ移るので、定数項（位置0）は <code>1</code>。これが復号した平文。</li>
+          </ol>
+          <p>つまり最後の <code>x⁻⁴</code> は難しい魔法ではなく、「表を4マス回して、先頭の数字を見る」という操作です。</p>
+        </div>
+        <pre>m = 1, s = (1,0,0,1,1,1,0,1), e = 2, (a, b) = ((8,34,4,32,0,31,58,7), 24)
+v = 0·(1+x+x²+x³) + 1·(x⁴+…+x⁷) + 2·(x⁸+…+x¹¹) + 3·(x¹²+…+x¹⁵)
+リスケーリング: Δ̂ = 4, â = (4,17,2,16,0,16,29,4), b̂ = 12
+i = b̂ − âs = 12 − (4+16+0+16+4) ≡ 4 (mod 32) → x⁻⁴v の定数項 = 1 = m</pre>
+        <p class="sl-q">Q. 5 分とるので、各自手を動かして具体例を確認（講義中の演習）。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">27/51</span><span class="st">Programmable Bootstrapping の大まかな構成</span></div>
+        <p class="sl-claim">PBS は 3 部品の直列。</p>
+        <div class="pipe">
+          <div class="pipe-box on"><span class="t">Blind Rotation</span><span class="s">暗号化された v(x) を b − as だけ回す</span></div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-box on"><span class="t">Sample Extraction</span><span class="s">定数項を暗号文のまま抜き出す</span></div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-box on"><span class="t">Key Switching</span><span class="s">鍵を元の暗号文の鍵に戻す</span></div>
+        </div>
+        <div class="callout amber">
+          <p class="eyebrow">さっきの「平文1」の例を3箱に通す</p>
+          <ol>
+            <li><strong>Blind Rotation（こっそり回す）:</strong> サーバーは秘密鍵 <code>s</code> や平文を知りません。それでも、秘密鍵の各ビットを「暗号化されたスイッチ」として使い、<code>v</code> を必要な量だけ回します。今回なら、結果は <code>x⁻⁴v</code> と同じになります。</li>
+            <li><strong>Sample Extraction（先頭だけ取り出す）:</strong> 回転後は、位置0の係数が平文 <code>1</code> です。その係数だけを、新しいLWE暗号文として取り出します。数字1を平文のまま取り出すのではなく、「1を暗号化したもの」を作ります。</li>
+            <li><strong>Key Switching（鍵を付け替える）:</strong> 取り出した暗号文は、多項式用の別の鍵で暗号化されています。鍵変換用の公開情報を使って、同じ平文 <code>1</code> のまま、最初のLWE暗号文と同じ形式の鍵に変換します。</li>
+          </ol>
+          <p><strong>入力:</strong> ノイズのあるLWE暗号文 → <strong>出力:</strong> 同じ平文（この例では1）を含み、ノイズがリセットされた新しいLWE暗号文。3箱ともサーバーが秘密鍵を直接見ることはありません。</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D4 : Blind Rotation -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 28〜35 / Blind Rotation</p>
+      <h2>秘密鍵を見せずに回すために、部品を 4 つ作る — RLWE・Gadget・RGSW・CMUX</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">28/51</span><span class="st">回転を MUX の反復に書き直す</span></div>
+        <p class="sl-claim">回転量 b − as の計算には秘密鍵 s が要る。そこで as = Σ aⱼsⱼ をほどき、「sⱼ = 0 なら何もしない、1 なら x^aⱼ を掛ける」という 2 択（マルチプレクサ、MUX）を k 回繰り返す形に書き直す。</p>
+        <pre>Q₀ ← x⁻ᵇ·v
+for j = 0 … k−1:  Qⱼ₊₁ ← MUX(sⱼ, Qⱼ, x^aⱼ·Qⱼ)
+return Q_k (= x^(−b+as)·v)</pre>
+        <p>あとは v, sⱼ, Qⱼ を暗号文にして、この MUX を準同型演算で実行できればよい。</p>
+        <div class="callout amber">
+          <p class="eyebrow">小さな数字で「回す／回さない」を追う</p>
+          <pre>a=(2,5,1), s=(1,0,1), b=3 とする
+最初: Q₀ = x⁻³v
+j=0: s₀=1 なので x²を掛ける → Q₁=x⁻¹v
+j=1: s₁=0 なので何もしない → Q₂=x⁻¹v
+j=2: s₂=1 なので x¹を掛ける → Q₃=v
+
+指数をまとめると −3 + 2×1 + 5×0 + 1×1 = 0
+だから Q₃ = x⁰v = v</pre>
+          <p><code>MUX(b,a₀,a₁)=b(a₁−a₀)+a₀</code> は、<code>b=0</code> なら <code>a₀</code>、<code>b=1</code> なら <code>a₁</code> を選ぶスイッチです。ここでは <code>sⱼ</code> がそのスイッチで、<code>0</code>なら回さず、<code>1</code>なら <code>x^{aⱼ}</code> を掛けます。</p>
+          <p>実際のBlind Rotationでは <code>sⱼ</code> は秘密なので、スイッチ自体も暗号化したまま（CMUX）動かします。サーバーは「どちらを選んだか」を見ずに、最終的に必要な回転だけを実行できます。<strong><code>s</code>が消えるのではなく、暗号化された <code>sⱼ</code> を評価用のスイッチとして使うため、サーバーが秘密鍵を平文で持つ必要がなくなる</strong>、という意味です。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">29/51</span><span class="st">部品 1: RLWE — LWE 暗号の多項式版</span></div>
+        <p class="sl-claim">RLWE 暗号 = 平文・鍵・乱数をすべて多項式にした LWE。計算は mod xⁿ+1（係数は mod q）で行う。</p>
+        <pre>Enc: (a(x), b(x) = a(x)s(x) + Δμ(x) + e(x))
+Dec: b − as = Δμ + e を計算し、係数ごとに Δ で割って丸める</pre>
+        <p>LWE と同様に、平文との加算・乗算、暗号文同士の加算ができる。</p>
+        <div class="callout amber">
+          <p class="eyebrow">LWEとの違いは「数字」から「多項式」へ</p>
+          <pre>LWE:  b = a·s + Δm + e       （数字の足し算・掛け算）
+RLWE: b(x) = a(x)s(x) + Δμ(x) + e(x)  （多項式の足し算・掛け算）</pre>
+          <p>たとえば秘密鍵 <code>s(x)=1+x</code>、乱数 <code>a(x)=2+3x</code> なら、マスク部分は</p>
+          <pre>a(x)s(x)=(2+3x)(1+x)=2+5x+3x²</pre>
+          <p>となります。<code>s(x)</code> の係数 <code>(1,1,0,…)</code> が秘密鍵です。復号では <code>b(x)−a(x)s(x)</code> を計算し、各係数を <code>Δ</code> で割って丸めます。つまり、LWEの「内積を1回」が、RLWEでは「多項式の掛け算」に置き換わっただけです。</p>
+          <p>多項式にすると、1つの暗号文にたくさんの係数を詰めて、回転や掛け算をまとめて扱えます。Blind Rotationで使う <code>x^r</code> の回転も、この多項式の形だから書けます。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">30/51</span><span class="st">部品 2: Gadget Decomposition — mod q 上の B 進数</span></div>
+        <p class="sl-claim">Gadget Decomposition = mod q の値の B 進数展開。19 = 10011₂ と同じ要領で、r = Σ rᵢ·q/Bⁱ⁺¹ (0 ≤ rᵢ &lt; B) と桁に分け、g⁻¹(r) = (r₀, …, r_{l−1}) を出力する。</p>
+        <p>例（B = 4, l = 3）: Z₆₄ の 47 = 2·(64/4) + 3·(64/16) + 3·(64/64) → g⁻¹(47) = (2, 3, 3)。等式が成り立つには Bˡ = q が必要で、そうでない場合は各項を丸めて近似する。</p>
+        <div class="callout amber">
+          <p class="eyebrow">まずは「47を4進数の桁に分ける」</p>
+          <p>普通の4進数なら、47は <code>2×16 + 3×4 + 3×1</code> です。実際に計算すると、<code>32+12+3=47</code>。</p>
+          <pre>大きな数 47
+  ↓ 4進数の桁に分ける
+(2, 3, 3)
+
+64を一周とする世界でも、使う場所の重みを
+64/4=16、64/4²=4、64/4³=1
+と決めれば、47 = 2×16 + 3×4 + 3×1。</pre>
+          <p>つまり <code>g⁻¹(47)=(2,3,3)</code> は「47を小さい数字3個で表した」という意味です。<code>rᵢ</code> は必ず <code>0,1,2,3</code> のどれかになります。</p>
+          <p>暗号では、大きな係数をそのまま扱わず小さな桁に分けると、各桁を別々のスイッチや鍵素材に対応させられます。これがGadget Decompositionを使う理由です。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">31/51</span><span class="st">多項式の Gadget Decomposition</span></div>
+        <p class="sl-claim">多項式も同じ要領で分解できる — 係数ごとに B 進展開し、q/Bⁱ⁺¹ の位ごとに多項式をまとめ直す。</p>
+        <p>例: Z₁₆, mod x³+1, B = 2, l = 4 で f = 15x² + 4x + 7 → g⁻¹(f) = (x², x²+x+1, x²+1, x²+1)。</p>
+        <div class="callout amber">
+          <p class="eyebrow">なぜ多項式でも分解するのか</p>
+          <p>多項式の係数はそれぞれ普通の数字です。まず係数を1個ずつ2進数のように分け、同じ桁の部品を同じ多項式に集めます。</p>
+          <pre>f = 15x² + 4x + 7、q=16、B=2
+15 → (1,1,1,1)   （8+4+2+1）
+ 4 → (0,1,0,0)   （0+4+0+0）
+ 7 → (0,1,1,1)   （0+4+2+1）
+
+重み8の桁:  x²
+重み4の桁:  x²+x+1
+重み2の桁:  x²+1
+重み1の桁:  x²+1</pre>
+          <p>したがって、</p>
+          <pre>f = x²·8 + (x²+x+1)·4 + (x²+1)·2 + (x²+1)·1</pre>
+          <p><code>g⁻¹(f)=(x², x²+x+1, x²+1, x²+1)</code> は、この4つの小さい係数の多項式を並べたものです。大きな係数をそのまま扱わず0/1の部品にすると、RGSWのGadget行と掛け合わせて、暗号文のまま制御しやすくなります。値を変えているのではなく、あとで足し戻せる形に分解しています。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">32/51</span><span class="st">部品 3: RGSW</span></div>
+        <p class="sl-claim">RGSW 暗号文 = 「0 の RLWE 暗号文」を 2l 個並べたリスト Z に、平文 m を掛けた Gadget Matrix Gᵀ を足したもの。</p>
+        <p>各行は RLWEₛ(−s(x)·m·q/Bⁱ) または RLWEₛ(m·q/Bⁱ) の形になっている。Bˡ = q のとき G⁻¹((x₁, x₂))·Gᵀ = (x₁, x₂)。</p>
+        <div class="callout amber">
+          <p class="eyebrow">RGSWの役割だけ先に見る</p>
+          <p>RGSWは、平文 <code>m</code>（特に秘密鍵ビットの0/1）を暗号化した「掛け算用の暗号文」です。RLWE暗号文 <code>c=Enc(m′)</code> と専用の積を取ると、</p>
+          <pre>RGSW(0) ⊡ Enc(m′) ≈ Enc(0)
+RGSW(1) ⊡ Enc(m′) ≈ Enc(m′)</pre>
+          <p>となります。つまり、<code>m=0</code>ならOFF、<code>m=1</code>ならONです。これを使うと、秘密鍵ビットを見せずに「回す／回さない」を選べます。</p>
+          <p>スライドの長いリストやGadget Matrixは、この掛け算を暗号文のまま実現するための部品表です。大きな係数をGadget分解して各行と組み合わせ、最後に足し戻すことで、平文の積 <code>m·m′</code> を得ます。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">33/51</span><span class="st">部品 3': External Product — RGSW ⊡ RLWE</span></div>
+        <p class="sl-claim">External Product ⊡ = RLWE 暗号文を Gadget 分解してから RGSW 暗号文に掛ける積。結果は RLWEₛ(Δmm′) — 平文同士の掛け算が暗号文のまま 1 回でできる。</p>
+        <pre>G⁻¹(RLWE(Δm′))·(Z + mGᵀ) = RLWE(0) + m·RLWE(Δm′) = RLWE(Δmm′)</pre>
+        <div class="callout amber">
+          <p class="eyebrow">まずは「暗号化した係数で掛ける」</p>
+          <p>RGSW <code>(m)</code> は「平文 <code>m</code> を暗号化した掛け算係数」、RLWE <code>(m′)</code> は「掛けられる暗号文」です。専用の積 <code>⊡</code> を取ると、</p>
+          <pre>RGSW(0) ⊡ RLWE(m′) → RLWE(0)
+RGSW(1) ⊡ RLWE(m′) → RLWE(m′)
+RGSW(2) ⊡ RLWE(m′) → RLWE(2m′)</pre>
+          <p>となります。つまり、RGSWが暗号化されたスイッチ／係数として働き、平文を見ずに掛け算できます。</p>
+          <p>なぜGadget分解が必要かというと、RLWEの大きな係数を小さな桁に分けてRGSWの各行と対応させるためです。式の</p>
+          <pre>G⁻¹(c)(Z + mGᵀ)
+= G⁻¹(c)Z + m·G⁻¹(c)Gᵀ</pre>
+          <p>で、<code>c=RLWE(Δm′)</code>。左の項は「0を暗号化したもの」なので平文には影響せず、右の項はGadgetの桁を足し戻して <code>m·c</code> になります。したがって結果の平文は <code>mm′</code> です。<code>⊡</code>は普通の掛け算ではなく、「分解して、対応する行を掛けて、足し戻す」手順の名前です。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">34/51</span><span class="st">部品 4: CMUX</span></div>
+        <p class="sl-claim">CMUX = MUX(b, a₀, a₁) = b(a₁−a₀) + a₀ の暗号版。選択ビット b を RGSW 暗号文、選択肢を RLWE 暗号文に置き換えて CMUX(c_b, c₀, c₁) = c_b ⊡ (c₁ − c₀) + c₀ = RLWE(Δa_b)。</p>
+        <div class="callout amber">
+          <p class="eyebrow">普通のスイッチを暗号化する</p>
+          <pre>普通のMUX:
+b=0 → a₀=5 を選ぶ
+b=1 → a₁=9 を選ぶ
+
+式: b(a₁−a₀)+a₀
+b=0: 0×(9−5)+5 = 5
+b=1: 1×(9−5)+5 = 9</pre>
+          <p>CMUXでは、<code>a₀=5</code>、<code>a₁=9</code>、<code>b</code>をすべて暗号化します。</p>
+          <pre>c₀ = Enc(5),  c₁ = Enc(9),  c_b = RGSW(b)
+CMUX = c_b ⊡ (c₁−c₀) + c₀</pre>
+          <p>External Product <code>⊡</code>が「暗号化された <code>b</code> × 暗号文」を実行するので、復号すると <code>b=0</code>なら5、<code>b=1</code>なら9です。計算中は、サーバーは選択ビットも選択結果も見ません。</p>
+          <p>Blind Rotationでは、<code>a₀=Qⱼ</code>（回さない候補）、<code>a₁=x^{aⱼ}Qⱼ</code>（回す候補）、<code>b=sⱼ</code>（秘密鍵ビット）を入れます。だからCMUX一回で、秘密鍵ビットに応じた回転を実行できます。</p>
+        </div>
+        <p class="sl-q">Q. CMUX の出力が a_b の RLWE 暗号文になることを各自確認してみよう。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">35/51</span><span class="st">Blind Rotation のアルゴリズム</span></div>
+        <p class="sl-claim">Blind Rotation = スライド 28 の MUX 反復を、そのまま CMUX 反復に置き換えたもの。sⱼ を別の鍵 s′ で RGSW 暗号化したリスト (RGSW_{s′}(s₀), …, RGSW_{s′}(s_{k−1})) を Bootstrapping Key と呼ぶ。</p>
+        <pre>â ← ⌊a·(2n/q)⌉, b̂ ← ⌊b·(2n/q)⌉
+Q₀ ← x^(−b̂)·RLWE_{s′}(Δv(x))
+for j = 0 … k−1:  Qⱼ₊₁ ← CMUX(RGSW_{s′}(sⱼ), Qⱼ, x^âⱼ·Qⱼ)
+return Q_k (= RLWE_{s′}(Δ·x^(−b̂+âs)·v(x)))</pre>
+        <p>テスト多項式 v(x) は、a(x) = 0 としたノイズのない自明な暗号文 (0, Δv) とみなして初期値にできる。</p>
+        <div class="callout amber">
+          <p class="eyebrow">左と右は「同じ処理」を別の方法で行う</p>
+          <pre>秘密鍵を知っている左側:
+Q₀=x⁻ᵇ̂v → s₀で回す/回さない → s₁で回す/回さない → …
+
+秘密鍵を知らない右側:
+Q₀=x⁻ᵇ̂RLWE(Δv) → 暗号化s₀のCMUX → 暗号化s₁のCMUX → …</pre>
+          <p>小さな例 <code>a=(2,5,1), s=(1,0,1), b=3</code> なら、左側は <code>x⁻³v → x⁻¹v → x⁻¹v → v</code>。右側も同じ結果になりますが、<code>s=(1,0,1)</code>を直接見る代わりに、各ビットをRGSW暗号文にしたBootstrapping KeyをCMUXへ渡します。</p>
+          <p><strong>つまりBlindの意味:</strong> サーバーは回転の答えを知らないまま、暗号化されたスイッチを順番に使って、知っている場合と同じ最終回転を作ります。最後の <code>Q_k</code> はまだ暗号文で、秘密鍵 <code>s′</code>（評価用の別鍵）で暗号化されています。</p>
+          <p><strong>Bootstrapping Keyと呼ぶ理由:</strong> 入力暗号文の秘密鍵 <code>s</code> の各ビットを、別鍵 <code>s′</code>でRGSW暗号化した補助データ <code>(RGSW_{s′}(s₀),…,RGSW_{s′}(s_{k−1}))</code>。秘密鍵そのものは渡さず、このデータを使うとサーバーが復号処理を暗号文のまま評価できるので、Bootstrappingを「起動する鍵」と呼びます。通常のメッセージ暗号化に使う鍵ではありません。</p>
+          <p><strong>資料の「回転」:</strong> 講義では「回転」という言葉を毎回書かず、<code>x^r v(x)</code> と表します。<code>x^r</code>を掛けると各項の指数が <code>r</code> だけずれ、係数の位置が移動するためです。例えば <code>x⁻⁴·x⁴=1</code> で、4番地の係数を定数項へ移せます。回転しないと、欲しい平文が <code>x⁴</code> の位置に残り、Sample Extractionが読む定数項には来ません。</p>
+        </div>
+        <p class="sl-q">Q.（講義が残した問い）x^i mod xⁿ+1 には negacyclic の性質があり、i ≥ n では係数の符号が反転する。Blind Rotation でこれが起こるとなぜ問題なのか。どうすれば回避できるだろうか。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D5 : Sample Extraction / Key Switching -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 36〜41 / Sample Extraction と Key Switching</p>
+      <h2>定数項を抜き出し、鍵を乗り換えて、元の形の暗号文に戻す</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">36/51</span><span class="st">Sample Extraction 1 — 定数項に Δm + e₀ がいる</span></div>
+        <p class="sl-claim">Blind Rotation の出力 RLWE 暗号文 (a′(x), b′(x)) の b′ の定数項 b′₀ には Δm + e₀ が含まれている。あとは積 a′(x)s′(x) の定数項がどうなるかを調べればよい。</p>
+        <div class="callout amber">
+          <p class="eyebrow">何を「取り出す」のか</p>
+          <p>Blind Rotation後の多項式暗号文は、平文 <code>m</code> を定数項（<code>x⁰</code>の係数）に置いた状態です。Sample Extractionは多項式全体を復号するのではなく、<strong>その定数項だけを、普通のLWE暗号文として包み直す</strong>処理です。</p>
+          <pre>RLWE( Δ(m + μ₁x + μ₂x²+…) )
+                 ↓ 定数項だけ
+              LWE( Δm )</pre>
+          <p>ただし多項式の掛け算 <code>a′(x)s′(x)</code> にも定数項があるので、次のスライドでそれを「符号つき内積」に書き換えます。暗号文を平文に戻す（復号する）処理ではありません。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">37/51</span><span class="st">Sample Extraction 2 — 定数項は内積の形</span></div>
+        <p class="sl-claim">xⁿ ≡ −1 に注意すると、積の定数項は a′₀s′₀ − a′₁s′_{n−1} − ⋯ − a′_{n−1}s′₁ という「符号つきの掛けて足す」= 内積の形。だから a″ = (a′₀, −a′_{n−1}, …, −a′₁) と置けば、(a″, b′₀) は秘密鍵 s″ = (s′₀, …, s′_{n−1}) による平文 m の LWE 暗号文になる。</p>
+        <div class="callout amber">
+          <p class="eyebrow">まず n=4 で「なぜマイナスか」</p>
+          <pre>a′(x)=a′₀+a′₁x+a′₂x²+a′₃x³
+s′(x)=s′₀+s′₁x+s′₂x²+s′₃x³
+
+定数項に来るもの:
+a′₀s′₀                         （最初からx⁰）
+a′₁s′₃x⁴, a′₂s′₂x⁴, a′₃s′₁x⁴ （指数の和が4）
+
+x⁴ ≡ −1 なので
+b′₀のマスク部分 = a′₀s′₀−a′₁s′₃−a′₂s′₂−a′₃s′₁</pre>
+          <p>この符号つきの掛け算を普通の内積に見せるため、<code>a″=(a′₀,−a′₃,−a′₂,−a′₁)</code> と並べ替えます。すると <code>⟨a″,s″⟩</code> が上の式と同じになり、<code>(a″,b′₀)</code>を「平文mのLWE暗号文」として扱えます。</p>
+          <p>Sample Extractionは、定数項を裸で読む処理ではなく、<strong>多項式の定数項を内積形式に変換して、暗号文の形式をRLWEからLWEへ変える処理</strong>です。</p>
+        </div>
+        <p class="sl-q">Q. s″ で (a″, b′₀) が復号できることを各自確認。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">38/51</span><span class="st">Key Switching の動機</span></div>
+        <p class="sl-claim">抽出後の暗号文の鍵は s″ に変わっている。LWEₛ(a″s″) を引き算すれば鍵 s の暗号文に戻せる — が、毎回 a″ を委託元に送って暗号化して送り返してもらうのは避けたい。</p>
+        <div class="callout amber">
+          <p class="eyebrow">平文は同じ、暗号文の「鍵」だけが違う</p>
+          <pre>Sample Extractionの直後:
+        c = Enc_{s″}(m)   （平文m、鍵s″）
+
+欲しい最終形:
+        Enc_s(m)          （同じ平文m、元の鍵s）</pre>
+          <p>これは箱を開けて平文を取り出す処理ではありません。「鍵 <code>s″</code>でロックされた箱」を、平文を見せずに「鍵 <code>s</code>の箱」へ付け替えたい、という問題です。</p>
+          <p>毎回、秘密鍵の持ち主に復号・再暗号化を頼む方法もあります。しかしそれではサーバーだけで計算が完結せず、通信も必要です。そこで鍵の持ち主が事前に<strong>変換用の暗号文（Key Switching Key）</strong>を渡し、サーバーが暗号文のまま鍵を乗り換えます。</p>
+          <p>Key Switchingは新しい平文計算ではなく、<strong>暗号文の中身を変えずに、暗号化に使われている鍵の形式だけを変える</strong>処理です。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">39/51</span><span class="st">Key switching key</span></div>
+        <p class="sl-claim">事前に ksk[i,j] = LWEₛ(s″ᵢ·q/Bʲ⁺¹) を渡しておけば（Key switching key。Δ を使わないことに注意）、a″ の Gadget 分解の係数で ksk を組み合わせて引くだけで鍵を乗り換えられる。</p>
+        <pre>LWEₛ(Δm) ← (0, …, 0, b′₀) − Σᵢ Σⱼ ā_{i,j}·ksk[i,j]</pre>
+        <div class="callout amber">
+          <p class="eyebrow">まず1個の数字で仕組みを見る</p>
+          <pre>古い鍵: s″=3、古い暗号文の係数: a″=5
+b″ = 5×3 + Δm = 15 + Δm
+
+変換用データ: Enc_s(3)  （新しい鍵sで3を暗号化）
+サーバー: 5×Enc_s(3) = Enc_s(15)
+         b″ − Enc_s(15) → Enc_s(Δm)</pre>
+          <p>古い暗号文に混ざっていた <code>a″s″=15</code> を、新しい鍵 <code>s</code>で暗号化した形として再現し、<code>b″</code>から引いて消しています。平文 <code>m</code>を読む必要はありません。</p>
+          <p>実際は <code>a″</code>がベクトルで値も大きいので、Gadget Decompositionで各係数を小さな桁に分けます。<code>ksk[i,j]</code>は「古い秘密鍵の成分 <code>s″ᵢ</code>×桁の重み」を新しい鍵 <code>s</code>で暗号化した部品です。二重和は、それらを足して <code>a″s″</code>を再現しているだけです。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">40/51</span><span class="st">なぜうまくいくのか</span></div>
+        <p class="sl-claim">二重和は Gadget 分解の再構成そのもので、まとめると LWEₛ(a″s″) になる。b′₀ = a″s″ + Δm + e₀ からそれを引くと (−ã, −ãs + Δm + e₀ − ẽ) — 秘密鍵 s による m の暗号文が残る。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">41/51</span><span class="st">Bootstrapping の流れのまとめ</span></div>
+        <p class="sl-claim">Bootstrapping = 暗号文の形式と秘密鍵を変えながら、同じ平文 m の暗号文を作り直す操作。入出力は同じ形・同じ鍵・同じ平文で、ノイズだけが新しくなっている。</p>
+        <div class="pipe">
+          <div class="pipe-box"><span class="t">LWEₛ(Δm)</span><span class="s">入力・古いノイズ e</span></div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-box on"><span class="t">RLWE_{s′}(Δμ(x))</span><span class="s">1 Blind Rotation</span></div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-box on"><span class="t">LWE_{s″}(Δm)</span><span class="s">2 Sample Extraction</span></div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-box"><span class="t">LWEₛ(Δm)</span><span class="s">3 Key Switching・新しいノイズ</span></div>
+        </div>
+        <p class="sl-hw"><b>何をしているか</b>: 普通の再暗号化ならいったん <code>Dec_s(c)</code> を平文で計算するが、Bootstrapping では秘密鍵 <code>s</code> も暗号化して渡し、復号処理そのものを暗号文のまま評価する。したがって <code>m</code> も <code>s</code> も見えず、古いノイズを引き継がない新しい <code>Enc(m)</code> が得られる（ノイズがゼロになるわけではない）。</p>
+        <div class="callout amber">
+          <p class="eyebrow">「Programmable」は何を変えられるのか</p>
+          <p>通常のBootstrappingは、定数項に元の <code>m</code> を戻します。Programmable Bootstrappingでは、テスト多項式 <code>v(x)</code>を差し替えて、定数項に好きな関数の値 <code>f(m)</code>を置きます。</p>
+          <pre>入力 m=0,1 の例
+恒等関数 f(m)=m:   0→0, 1→1
+NOT関数 f(m)=1−m: 0→1, 1→0
+
+回転と定数項抽出は同じ。
+変えるのは、あらかじめ置く係数（v(x)）だけ。</pre>
+          <p>したがって、動機は2つです。<strong>Bootstrapping</strong>は計算で増えたノイズをリセットすること、<strong>Programmable</strong>は同じ仕組みで <code>m</code> だけでなく <code>f(m)</code>（ビット反転、比較、Lookup Tableなど）を出力できることです。</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D6 : Programmable と HomNAND -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 42〜45 / Programmable と HomNAND</p>
+      <h2>係数を f(m) に書き換えれば、リフレッシュのついでに関数が評価できる</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">42/51</span><span class="st">なぜ "Programmable" なのか</span></div>
+        <p class="sl-claim">テスト多項式の係数を mⱼ から f(mⱼ) に置き換えると、同じ Blind Rotation でノイズのリセットと関数 f の評価が同時にできる — 出力は LWEₛ(Δf(mᵢ))。</p>
+        <p>リスケーリングの丸めで回転先が少しずれても同じ値を取り出せるよう、同じ mⱼ に対応する複数の位置に f(mⱼ) を繰り返し置く。異なる平文が同じ位置に重なる場合、1 回の PBS で区別できるのは、それらの f(mⱼ) が同じときだけ。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">43/51</span><span class="st">negacyclic 性の利用</span></div>
+        <p class="sl-claim">回転量 i が n を超えると定数項の符号が反転する。v(x) = 1 + x + ⋯ + xⁿ⁻¹ なら定数項は 0 ≤ i ≤ n−1 で +1、n ≤ i ≤ 2n−1 で −1 — 1 回の回転で正と負の 2 値を表現できる。</p>
+        <p>この性質を bit 演算に利用する。</p>
+        <div class="callout amber">
+          <p class="eyebrow">このスライドで目的が変わるわけではない</p>
+          <p>ここまでのProgrammable Bootstrappingは、暗号文の入力から <code>f(m)</code> を計算する仕組みでした。ここでは、その <code>f</code> として「値が前半なら0、後半なら1」という<strong>ビット抽出関数</strong>を選びます。negacyclicの符号反転は、その関数を実装するための小技です。</p>
+          <p class="eyebrow">n=4で正負が切り替わる様子</p>
+          <pre>v=1+x+x²+x³
+i=1: x⁻¹v = 1+x+x²−x³      → 定数項 +1
+i=5: x⁻⁵v = −x⁻¹v
+     = −1−x−x²+x³           → 定数項 −1</pre>
+          <p><code>x⁴≡−1</code>なので、4マスを越えて回り込んだときだけ符号が反転します。したがって回転量が <code>0〜3</code> なら定数項は <code>+1</code>、<code>4〜7</code> なら <code>−1</code>です。これは「定数項の符号を見るだけで、回転量が前半か後半か（1ビット）を判定できる」という意味です。</p>
+          <p>普通の回転なら端から戻っても同じ値ですが、<strong>negacyclic回転では戻るときに符号が変わる</strong>ため、これを意図的にビット演算へ利用できます。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">44/51</span><span class="st">HomNAND</span></div>
+        <p class="sl-claim">HomNAND = ① bit を 0 ↦ p−1, 1 ↦ 1 とエンコード ② c = (0, …, 0, Δ·1) − c₁ − c₂ を計算（c の平文は r = 1 − m₁ − m₂ mod p）③ 全係数 1 のテスト多項式で PBS ④ パラメータをうまく設定すると出力が NAND の暗号文になる。</p>
+        <p>3 &lt; n &lt; p−1 であれば、r = 1, 3 のとき定数項は反転せず 1 に、r = p−1 のとき反転して p−1 に — ちょうど NAND の真理値表と一致する。</p>
+        <div class="callout amber">
+          <p class="eyebrow">p=7, n=4で真理値表を計算</p>
+          <p>ビット0を <code>p−1=6</code>、ビット1を <code>1</code> と表します。まず暗号文のまま <code>1−m₁−m₂</code> を作ります。</p>
+          <pre>(m₁,m₂)=(0,0): r=1−6−6≡3 (mod7) → 1
+(m₁,m₂)=(1,0): r=1−1−6≡1 (mod7) → 1
+(m₁,m₂)=(0,1): r=1−6−1≡1 (mod7) → 1
+(m₁,m₂)=(1,1): r=1−1−1≡6 (mod7) → 0</pre>
+          <p>最後の矢印はProgrammable Bootstrappingです。<code>r=1,3</code>は回転量の前半なので定数項が<code>+1</code>、<code>r=6=p−1</code>は後半なのでnegacyclicの符号反転で<code>−1≡6</code>になります。これがNANDの表 <code>(0,0),(1,0),(0,1)→1</code>、<code>(1,1)→0</code>です。</p>
+          <p>「HomNAND」は新しい暗号方式の名前ではなく、<strong>既存のPBSとnegacyclicの性質を使って、NANDという論理関数を暗号文のまま実行したもの</strong>です。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">45/51</span><span class="st">HomNAND の具体例</span></div>
+        <p class="sl-claim">具体例 p = 8, q = 32, n = 16, Δ = 4 — q = 2n なので Blind Rotation 時のリスケーリングは不要。入力暗号文のノイズの和 d ∈ {0, 1, 2} を含めても回転の番号の帯は分かれ、NAND の出力が読める。</p>
+        <pre>(0,0):       r = 3  回転の番号 i = 10, 11, 12  定数項 1        → bit 1
+(1,0),(0,1): r = 1  回転の番号 i = 2, 3, 4     定数項 1        → bit 1
+(1,1):       r = 7  回転の番号 i = 26, 27, 28  定数項 −1 = 7   → bit 0</pre>
+        <div class="callout amber">
+          <p class="eyebrow">表の数字を1行ずつ確認</p>
+          <p>ここでは <code>p=8</code> なので、ビット0は <code>7(=−1)</code>、ビット1は <code>1</code>。<code>Δ=4</code>、入力暗号文2つのノイズの合計を <code>d=0,1,2</code> とします。回転番号は <code>i=Δr−d</code> です。</p>
+          <pre>(0,0): r=3 → i=12−d = 12,11,10（全部0〜15） → 定数項+1 → bit1
+(1,0),(0,1): r=1 → i=4−d = 4,3,2（全部0〜15） → 定数項+1 → bit1
+(1,1): r=7 → i=28−d = 28,27,26（全部16〜31） → 定数項−1=7 → bit0</pre>
+          <p>negacyclicの性質では、回転番号が <code>0〜15</code> なら定数項が<code>+1</code>、<code>16〜31</code>なら<code>−1</code>になります。ノイズで番号が2マスずれても、前半と後半の境界を越えないようにパラメータを選んでいるため、結果が壊れません。</p>
+          <p>このページは新しい理論を導入するのではなく、<strong>前のHomNANDの仕組みが、実際の数値とノイズ込みでも動くことの確認</strong>です。</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D7 : ホワイトボードセッション -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 46〜48 / ホワイトボードセッション</p>
+      <h2>議論のテーマ 2 つ — 高速化の工夫と、FHE の安全性概念</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">46/51</span><span class="st">セッションの進め方</span></div>
+        <p class="sl-claim">グループに分かれてテーマを調査・議論（イントロ 5 分 + 調査・議論 1 時間 30 分）し、2 グループ 1 組で発表 30 分（15 分 × 2）— お互いの発表にフィードバックする。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">47/51</span><span class="st">テーマ 1 — TFHE の高速化（TFHE-rs を読む）</span></div>
+        <p class="sl-claim">議論のテーマ: PBS の流れ（入力 LWE → Blind Rotation → Sample Extraction → Key Switching → 出力 LWE）のどこを、どんな工夫で速くしているかを TFHE-rs のドキュメントとコードから探す。</p>
+        <p>発表では、速くなる仕組みだけでなく「代わりに増えるコスト」と「新たに生まれた疑問」まで示す。工夫の個数に制限はなく、ソースコードを完全に理解する必要もない。参照先: github.com/zama-ai/tfhe-rs / docs.zama.ai/tfhe-rs。</p>
+        <div class="callout">
+          <p class="eyebrow">テーマ1で実際にやること</p>
+          <p><b>目的は、TFHE-rsを自作することではありません。</b> 1回のPBSが「どの部品を通り、何を省略・並列化・まとめているから速いのか」を、実行結果と資料から説明することです。</p>
+          <pre>① まず1つのサンプルを動かす（入力bit → 出力bit）
+② PBSを4箱に分ける: Blind Rotation / Sample Extraction / Key Switching / 出力
+③ 各箱で「速くする工夫」を1つ見つける
+④ 速さの代償（メモリ・前処理・精度・実装の複雑さ）を1つ書く
+⑤ 発表: 処理図に、工夫・根拠（docs/コード）・代償を3色で貼る</pre>
+          <p><b>完成条件:</b> 「この入力を、この処理が受け取り、この出力を返す。ここを○○にしたので速い。ただし△△が増える」と自分の言葉で言えれば十分です。コードを1行ずつ解読したり、速度を自分の環境で再現したりする必要はありません。</p>
+        </div>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">48/51</span><span class="st">テーマ 2 — FHE の安全性概念</span></div>
+        <p class="sl-claim">議論のテーマ: IND-CPA・IND-CCA1・IND-CCA2 を「攻撃者に許される操作」で比較し、FHE がなぜ non-malleability（頑強性）を満たせないのか、それが IND-CCA2 への具体的な攻撃にどうつながるのかを図または表で示す。</p>
+        <p>発展課題: IND-CPA のみを満たす FHE に対する鍵回復攻撃とその対策の概要（論文: eprint.iacr.org/2022/1563）。手がかり: indistinguishability game / encryption・decryption oracle / chosen-plaintext・chosen-ciphertext attack。</p>
+        <div class="callout">
+          <p class="eyebrow">テーマ2で実際にやること</p>
+          <p><b>目的は、暗号方式を破ることではありません。</b> 「攻撃者に何をさせると、どの安全性が破れるか」を、許可証の違いとして整理し、FHEだけはなぜ特別かを示します。</p>
+          <pre>① 3つを表にする
+   IND-CPA  : 平文を選んで暗号化してもらえる
+   IND-CCA1 : さらに暗号文の復号も頼める（攻撃前）
+   IND-CCA2 : チャレンジ後も復号を頼める（ただし挑戦文そのものは除く）
+② FHEの操作 Enc(m) → Enc(f(m)) を書く
+③ これは「暗号文を別の暗号文へ変形」なので non-malleability と衝突すると説明
+④ その変形を使って、CCA2で何を見分けられるかを矢印で示す</pre>
+          <p><b>発表の最低ライン:</b> 「誰が・何を要求できるか」の比較表1枚、FHEが展性を必要とする理由1枚、攻撃の流れ（入力→暗号文の加工→復号結果→判定）1枚。鍵回復攻撃は発展課題なので、まずこの3枚を完成させればよいです。</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ REFS : スライド 49〜51 -->
+<section class="band" id="refs">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 49〜51 / 参考文献</p>
+      <h2>参考文献（一覧のみ）</h2>
+    </div>
+    <div class="stack-sm">
+      <p class="mini"><b>原典（スライド 49）</b> — [Riv78+] 準同型暗号の提唱（1978）／ [RSA78] RSA ／ [ElG85] ElGamal ／ [Pai99] Paillier ／ [Gen09] Gentry, 初の FHE（STOC 2009）／ [Reg05] LWE（Regev, STOC 2005）／ [LPR10] Ring-LWE（EUROCRYPT 2010）</p>
+      <p class="mini"><b>主要 FHE 方式と TFHE（スライド 50）</b> — [Bra12] Brakerski（CRYPTO 2012）／ [Fan12+] BFV ／ [Bra14+] BGV ／ [Che17+] CKKS（ASIACRYPT 2017）／ [Gen13+] GSW（CRYPTO 2013）／ [Duc15+] FHEW（EUROCRYPT 2015）／ [CGGI16] TFHE（ASIACRYPT 2016）／ [Chi20+] TFHE（J. Cryptology 2020）／ [Joy22] SoK: FHE over the Torus（2022）</p>
+      <p class="mini"><b>補助資料・書籍・実装（スライド 51）</b> — [Mic21] FHEW 系の Bootstrapping ／ [Ko25] FHE の入門教科書（arXiv 2025）／ [Kna24] vFHE: 検証可能 FHE（WAHC 2024）／ 岡本『現代暗号の誕生と発展』／ 青野・安田『格子暗号解読のための数学的基礎』／ 縫田『耐量子計算機暗号』／ OpenFHE ／ 松岡「（完全）準同型暗号の最前線 1（入門編）」（Qiita）</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ CHECK -->
+<section class="band" id="precheck">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">予習チェック</p>
+      <h2>講義の前に、自分の言葉で言えるか 7 問</h2>
+    </div>
+    <div class="callout">
+      <p>(1) 「暗号文のまま計算できる」を、Enc・Dec と 2 つの演算の式で言えるか。RSA の掛け算はなぜその例になるのか。 (2) 加算と乗算の 2 つだけで「任意の計算」ができると言えるのはなぜか（{0,1} 上の 1 − m₁m₂ が鍵）。 (3) 連立方程式は中学の消去法で解けたのに、各式に小さな誤差を足すとなぜ急に解けなくなるのか。 (4) (a, b = as + Δm + e) から、鍵を知る人はどうやって m を取り出すか。Δ = q/p は何のための「桁上げ」か。 (5) 暗号文に演算を重ねると、なぜいつか復号が壊れるのか。壊れる境目はどこか。 (6) 「復号せずにノイズをリセットする」— Bootstrapping がやりたいことを 1 文で言えるか。 (7) xⁿ ≡ −1 (mod xⁿ+1) の世界で x⁻ⁱ を掛けると係数の列に何が起こるか。整数の「余り」とどこが似ていて、どこ（符号）が違うか。</p>
+      <p class="strong-line">言えなかった番号だけカードに戻る: 1 → 4/51、2 → 6/51、3 → 13/51、4 → 16/51、5 → 17/51、6 → 22/51、7 → 21〜23/51。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ GLOSSARY -->
+<section class="band" id="glossary">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語カード</p>
+      <h2>用語の意味と、なぜその言葉なのか — 中学・高校の数学から橋を架ける</h2>
+      <p>用語からではなく、知っている数学から入る。「余り」から mod へ、「掛けて足す」から内積へ、「2 進数の筆算」から Gadget Decomposition へ。</p>
+    </div>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>どこで</th></tr></thead><tbody>
+      <tr><td>ノイズ</td><td>理科の測定に必ず混ざる小さな誤差と同じもの。LWE ではわざと足して方程式を解けなくする。ただし演算のたびに育ち、Δ/2 の枠を超えると四捨五入が隣の値に丸めて復号が壊れる</td><td>error（誤差）。LWE の E はこれ</td><td>スライド 13, 16〜17</td></tr>
+      <tr><td>Δ（スケーリングファクター）</td><td>「割り算の前に 10 倍しておくと小数の誤差に強い」の考え方。平文 m を Δ = q/p 倍して数の「上の桁」に置き、ノイズを「下の桁」に隔離する仕切り。復号は Δ で割って四捨五入</td><td>scale（目盛り）を q に合わせて拡大する係数だから</td><td>スライド 16</td></tr>
+      <tr><td>LWE</td><td>中学の連立方程式は消去法で必ず解ける。ところが各式に小さな誤差を足すと、誤差を知らない人には解けなくなる — この難しさを土台にした問題（と、それが困難だという仮定）</td><td>Learning With Errors = 誤差（error）込みの式から秘密を学び取る問題</td><td>スライド 13〜15</td></tr>
+      <tr><td>RLWE</td><td>LWE の「数のベクトル」を丸ごと「多項式」に置き換えた版。整数の割り算に余りがあるように多項式にも余りがあり（mod xⁿ+1）、その余りの世界で同じ暗号を作る</td><td>R は Ring（環）= 足し算と掛け算が自由にできる集合。多項式の余りの世界がその例</td><td>スライド 29</td></tr>
+      <tr><td>negacyclic</td><td>時計の針は 12 を超えると 0 に戻る（巡回）。mod xⁿ+1 の世界では 1 周すると xⁿ ≡ −1、つまり符号がマイナスになって戻ってくる</td><td>nega（負）+ cyclic（巡回）。「負になって巡回する」</td><td>スライド 21, 35, 43</td></tr>
+      <tr><td>テスト多項式</td><td>「関数の値を一覧表にして引く」を多項式でやる。答えの一覧を係数として並べておき、回転させて定数項を読むと表引きになる。v(x) と書く</td><td>入力に応じた値を返す一覧表（テーブル）の役をする多項式だから</td><td>スライド 24〜26, 42</td></tr>
+      <tr><td>Blind Rotation</td><td>回転量 b − as は秘密鍵がないと計算できない。CMUX を鍵のビット数だけ重ねることで、回転量を誰にも見せないままテスト多項式を回す</td><td>blind = 目隠し。回す本人も回転量を知らない回転</td><td>スライド 28, 35</td></tr>
+      <tr><td>CMUX</td><td>2 つの入力から 1 つを選ぶスイッチ（マルチプレクサ、MUX）の暗号版。選択ビットを RGSW 暗号文にして、どちらを選んだか見せずに選ぶ</td><td>MUX を暗号文（Ciphertext）の状態で行うから頭に C</td><td>スライド 28, 34</td></tr>
+      <tr><td>External Product</td><td>「ベクトル × 行列」のように種類の違うもの同士の掛け算。RGSW ⊡ RLWE → RLWE と、掛けても結果が元の種類（RLWE）に戻るのがミソ</td><td>同種同士の積ではなく「外部の」相手との積だから。記号は ⊡</td><td>スライド 33</td></tr>
+      <tr><td>Gadget Decomposition</td><td>19 = 10011₂ のような B 進数の桁分け。大きな係数を掛けるとノイズも大きく増えるので、小さな桁に分けてから掛けて増加を抑える</td><td>gadget（小道具）と呼ばれる行列 G（Gadget Matrix）を使った分解だから</td><td>スライド 30〜32</td></tr>
+      <tr><td>RGSW</td><td>「0 の RLWE 暗号文」を 2l 個並べたリストに、平文 × Gadget Matrix を足した形の暗号文。External Product の左側に置く部品</td><td>GSW は提案者 Gentry・Sahai・Waters の頭文字。R は Ring 版の意味</td><td>スライド 32</td></tr>
+      <tr><td>Sample Extraction</td><td>多項式の積の定数項を書き下すと「符号つきの掛けて足す」= 内積の形をしている。だから RLWE 暗号文から定数項だけを LWE 暗号文として抜き出せる</td><td>extract = 抽出。多項式の係数列から標本（sample）を 1 つ抜くから</td><td>スライド 36〜37</td></tr>
+      <tr><td>Key Switching</td><td>平文を変えずに、暗号文の鍵を s″ から元の s へ乗り換える。鍵 s で s″ を暗号化した表（ksk）を事前に渡しておけば、引き算だけで乗り換えられる</td><td>switch = 切り替え。鍵の乗り換え</td><td>スライド 38〜40</td></tr>
+      <tr><td>Bootstrapping Key</td><td>秘密鍵の各ビット sⱼ を、別の鍵 s′ で RGSW 暗号化したリスト。Blind Rotation の CMUX の選択ビットとして働く</td><td>bootstrap =「靴ひもで自分を持ち上げる」。暗号化された秘密鍵で暗号文自身を復号し直すのに使う鍵</td><td>スライド 35</td></tr>
+      <tr><td>Programmable Bootstrapping</td><td>ノイズのリセット（Bootstrapping）のついでに、テスト多項式の係数を f(m) に書き換えて関数 f も評価する</td><td>テスト多項式の係数で挙動を「プログラム」できる Bootstrapping だから</td><td>スライド 27, 42</td></tr>
+      <tr><td>HomNAND</td><td>NAND を暗号文のまま評価する操作。1 − m₁ − m₂ の暗号文を作り、PBS の符号反転（negacyclic）で真理値表を再現する</td><td>Hom = Homomorphic（準同型）+ NAND</td><td>スライド 44〜45</td></tr>
+      <tr><td>IND-CPA</td><td>「2 つの平文のうちどちらを暗号化したか」を攻撃者が見分けられないという安全性。攻撃者に許されるのは、平文を選んで暗号化させることまで</td><td>INDistinguishability（識別不能）+ Chosen-Plaintext Attack（選択平文攻撃）</td><td>スライド 11, 48</td></tr>
+      <tr><td>non-malleability（頑強性）</td><td>malleable は金属が「叩けば形を変えられる」こと。non-malleability = 暗号文を叩いて別の平文の暗号文に作り変えられないこと。FHE はその変形こそが機能なので、原理的に満たせない</td><td>「展性（malleability）がない」= 叩いても変形しない = 頑強</td><td>スライド 11, 48</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Advanced Cryptography Program 2026 / Week 5 自習ノート — 完全準同型暗号と TFHE。ドリルの数値は講義スライド 21〜26 および 43〜45 のものです。</p>
+  </div>
+</footer>
+
+<script>
+// ---- 目次を h2 から自動生成 ----
+(function () {
+  "use strict";
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var heads = document.querySelectorAll(".band-head h2");
+  Array.prototype.forEach.call(heads, function (h, i) {
+    var section = h.closest(".band");
+    if (!section || i === 0 || h.closest(".appx")) return;
+    if (!section.id) section.id = "sec-" + i;
+    var li = document.createElement("li"), a = document.createElement("a");
+    a.href = "#" + section.id; a.textContent = h.textContent.trim();
+    li.appendChild(a); toc.appendChild(li);
+  });
+})();
+
+
+
+// ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む）— Week 5 ----
+(function () {
+  "use strict";
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function drillText(node, text) {
+    // 「**強調**」だけを <b> にする。innerHTML は使わないので、本文は常にテキストのまま。
+    String(text).split("**").forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2 ? Object.assign(document.createElement("b"), { textContent: part })
+                             : document.createTextNode(part));
+    });
+  }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; drillText(say, st.say); step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": ")); drillText(mean, st.mean); step.appendChild(mean);
+        if (done) {
+          if (st.out !== "") { var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp); }
+          if (st.then) { var then = document.createElement("p"); then.className = "drill-then"; drillText(then, st.then); step.appendChild(then); }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          if (st.out === "") {
+            var note = document.createElement("p"); note.className = "drill-mean"; note.textContent = "この行は何も表示しません（代入だけ）。打ったら「次へ」。";
+            var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-main"; nx.textContent = "次へ";
+            nx.addEventListener("click", function () { cur++; save(); render(); });
+            step.appendChild(note); form.appendChild(nx); step.appendChild(form); body.appendChild(step); continue;
+          }
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
+  var A = [
+    { q: "設定 — 平文の入れ物と、暗号文の入れ物",
+      say: "平文は 0〜3 の 4 通り（p = 4）。暗号文の数は 0〜63（q = 64）。Δ = q/p はそのあいだの「1 目盛りの幅」。秘密鍵 s は 0/1 の並びです。",
+      cmd: "p, q = 4, 64; D = q // p; s = (1, 0, 1, 1); (p, q, D, s)",
+      mean: "Δ = 64/4 = 16。平文 1 つぶんが暗号文空間の 16 目盛りに対応します。",
+      out: "(4, 64, 16, (1, 0, 1, 1))",
+      then: "Δ = 16。平文 1 つぶんが、暗号文空間の 16 目盛りに対応します。以降ずっとこの 16 が効きます。" },
+    { q: "",
+      say: "マスク a を置いて、a と s の内積を取ります。「掛けて足す」だけです。",
+      cmd: "a = (9, 20, 3, 14); dot = sum(x * y for x, y in zip(a, s)) % q; dot",
+      mean: "s = (1,0,1,1) なので、9 + 3 + 14 = 26。s が 0 の場所は落ちます。",
+      out: "26",
+      then: "26。s が 0 の場所（20）は落ちました。この 26 がマスクで、s を知らない人には外せません。" },
+    { q: "",
+      say: "平文 m = 2 を Δ 倍して置き、小さなノイズ e = 3 を足して b を作ります。これが暗号化。",
+      cmd: "m, e = 2, 3; b = (dot + D * m + e) % q; b",
+      mean: "b = 26 + 16·2 + 3 = 61。暗号文は (a, b) の組で、m も s も入っていません。",
+      out: "61",
+      then: "61。暗号文は (a, b) = ((9, 20, 3, 14), 61)。この中に m = 2 も s も、そのままの形では入っていません。" },
+    { q: "復号 — s で消して、丸めて戻す",
+      say: "b から内積を引きます。s を知っている人だけができる操作です。",
+      cmd: "(b - dot) % q",
+      mean: "マスクがきれいに消え、Δm + e だけが残ります。",
+      out: "35",
+      then: "35。マスクが消えて Δm + e = 16·2 + 3 = 35 だけが残りました。ここまで来られるのは s を知っている人だけです。" },
+    { q: "",
+      say: "残った 35 を Δ で割ってみます。商と余りに分けます。",
+      cmd: "divmod((b - dot) % q, D)",
+      mean: "商が平文 2、余りがノイズ 3。「Δ で置いた」ものが「Δ で割る」と戻ります。",
+      out: "(2, 3)",
+      then: "(2, 3)。商 2 が平文、余り 3 がノイズ。**Δ で置いたものが、Δ で割ると戻る** — 復号の正体はこれだけです。" },
+    { q: "",
+      say: "実際の復号は割り算ではなく、いちばん近い目盛りへの四捨五入です。",
+      cmd: "round(((b - dot) % q) / D) % p",
+      mean: "35/16 = 2.1875 を丸めて 2。ノイズ 3 は目盛りをまたぐほど大きくなかった。",
+      out: "2",
+      then: "2。平文が戻りました。ノイズ 3 は 32 を 35 に押しましたが、いちばん近い目盛りはまだ 32 でした。" },
+    { q: "どこまで押せるか",
+      say: "では、ノイズはどこまで許されるか。目盛りの幅 Δ の半分を超えると、隣の目盛りのほうが近くなります。",
+      cmd: "D // 2",
+      mean: "8。ノイズがこれ以上になると、丸めた先が隣の平文に変わります。",
+      out: "8",
+      then: "8。これが「余裕」です。ノイズがこれ以上になると、いちばん近い目盛りが隣に変わり、復号が別の平文を返します。**FHE の難しさは、ほぼ全部この 1 つの数に集まります。**" },
+    { q: "演算 — 足すたびにノイズも足される",
+      say: "平文 1 を足してみます。Δ を掛けて b に足すだけ。",
+      cmd: "b_add = (b + D * 1) % q; round(((b_add - dot) % q) / D) % p",
+      mean: "2 + 1 = 3。平文の足し算が、暗号文のまま行えました。",
+      out: "3",
+      then: "3。平文の足し算が、暗号文を開けずにできました。Δ·1 はノイズを持たないので、ノイズは増えていません。" },
+    { q: "",
+      say: "今度は暗号文どうし。2 本目の暗号文（平文 1、ノイズ 2）を作ります。",
+      cmd: "a2 = (2, 7, 11, 5); dot2 = sum(x * y for x, y in zip(a2, s)) % q; b2 = (dot2 + D * 1 + 2) % q; (dot2, b2)",
+      mean: "内積 18、b₂ = 18 + 16 + 2 = 36。",
+      out: "(18, 36)",
+      then: "(18, 36)。2 本目の暗号文ができました。平文 1、ノイズ 2 です。" },
+    { q: "",
+      say: "a どうし、b どうしを足して、位相を見ます。",
+      cmd: "a3 = tuple((x + y) % q for x, y in zip(a, a2)); b3 = (b + b2) % q; dot3 = sum(x * y for x, y in zip(a3, s)) % q; divmod((b3 - dot3) % q, D)",
+      mean: "平文は 2 + 1 = 3。**ノイズは 3 + 2 = 5 に増えています。**",
+      out: "(3, 5)",
+      then: "(3, 5)。平文は 2 + 1 = 3 で正しい。ただし **ノイズが 3 から 5 に増えました**。暗号文どうしの足し算は、ノイズどうしの足し算でもあります。" },
+    { q: "",
+      say: "それでも 5 < 8 なので、まだ正しく復号できます。",
+      cmd: "round(((b3 - dot3) % q) / D) % p",
+      mean: "3。足し算 1 回ぶんのノイズ増加は、まだ余裕の中。",
+      out: "3",
+      then: "3。5 < 8 なのでまだ復号できます。ただし余裕は 8 − 5 = 3 しか残っていません。" },
+    { q: "壊れる瞬間を見る",
+      say: "復号を関数にしておきます。この行は何も表示しません。",
+      cmd: "dec = lambda A, B: round(((B - sum(x * y for x, y in zip(A, s))) % q) / D) % p",
+      mean: "暗号文 (A, B) を s で復号するだけの関数。",
+      out: "" },
+    { q: "",
+      say: "同じ暗号文を k 倍します。平文は 2k、ノイズは 3k。k を 1 から 4 まで動かして、復号がいつ壊れるか見ます。",
+      cmd: "[(k, 3 * k, dec(tuple(k * x % q for x in a), k * b % q), 2 * k % p) for k in range(1, 5)]",
+      mean: "各組は (k, ノイズ, 復号した値, 本来の値)。",
+      out: "[(1, 3, 2, 2), (2, 6, 0, 0), (3, 9, 3, 2), (4, 12, 1, 0)]",
+      then: "k = 1 と 2 は、復号した値と本来の値が一致しています（2 と 2、0 と 0）。**k = 3 で 3 と 2 に割れました。** ノイズ 9 が余裕 8 を超えたからです。これが「暗号文のまま演算できる回数には限りがある」の正体で、Bootstrapping はこのノイズを捨てて余裕を作り直す操作です。ドリル B でその中身を見ます。" },
+  ];
+
+  var B = [
+    { q: "準備 — mod xⁿ+1 では、はみ出すと符号が反転する",
+      say: "多項式を xⁿ+1 で割った余りで考えます。xⁿ ≡ −1 なので、次数が n 以上になると符号が裏返ります。i 次と j 次を掛けたとき、行き先の次数と符号を見ます。",
+      cmd: "n4 = 4; [((i + j) % n4, -1 if i + j >= n4 else 1) for i, j in ((3, 1), (1, 2), (2, 3))]",
+      mean: "各組は (行き先の次数, 符号)。n = 4 で、x³·x、x·x²、x²·x³ の 3 通り。",
+      out: "[(0, -1), (3, 1), (1, -1)]",
+      then: "[(0, −1), (3, 1), (1, −1)]。x³·x は次数が 4 で n に届いたので、定数項に −1 として戻ってきました。x·x² は次数 3 のままなので符号はそのまま。**はみ出すと符号が反転する** — これが negacyclic で、このドリルの最後まで効きます。" },
+    { q: "設定 — 講義スライドの数値そのまま",
+      say: "ここからは講義（スライド 21〜26）の数値をそのまま使います。講義が「5 分とるので各自手を動かして」と言った箇所です。",
+      cmd: "p, q, n = 8, 64, 16; D = q // p; (D, 2 * n, q)",
+      mean: "Δ = 8。テスト多項式の係数は n = 16 個で、回転の番号は 2n = 32 で回ります。",
+      out: "(8, 32, 64)",
+      then: "(8, 32, 64)。Δ = 8、回転の目盛りは 32、暗号文の目盛りは 64。**この 2 つが違う**ことが、あとでリスケーリングを呼びます。" },
+    { q: "",
+      say: "秘密鍵・暗号文を置いて、位相 b − a·s を出します。",
+      cmd: "s = (1, 0, 0, 1, 1, 1, 0, 1); a = (8, 34, 4, 32, 0, 31, 58, 7); b = 24; (b - sum(x * y for x, y in zip(a, s))) % q",
+      mean: "10。ドリル A と同じ計算です。",
+      out: "10",
+      then: "10。ドリル A とまったく同じ計算です。" },
+    { q: "",
+      say: "Δ で割って、平文とノイズに分けます。",
+      cmd: "divmod((b - sum(x * y for x, y in zip(a, s))) % q, D)",
+      mean: "平文 1、ノイズ 2。10 = 8·1 + 2。",
+      out: "(1, 2)",
+      then: "(1, 2)。平文 1、ノイズ 2。10 = 8·1 + 2。" },
+    { q: "テスト多項式 — 答えを並べた表",
+      say: "係数 j 番目に「そこへ回ってきたときに読ませたい値」を書いた多項式を作ります。ノイズで多少ずれても同じ値が読めるよう、同じ値を 4 つずつ並べます。",
+      cmd: "v = [j // 4 for j in range(n)]; v",
+      mean: "0 が 4 つ、1 が 4 つ、2 が 4 つ、3 が 4 つ。この「幅」がノイズへの耐性です。",
+      out: "[0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3]",
+      then: "係数が階段になっています。同じ値を 4 つずつ並べたのは、ノイズで回転先が多少ずれても同じ値が読めるようにするため。**この「幅」が、そのままノイズへの耐性です。**" },
+    { q: "リスケーリング — 暗号文の目盛りを、多項式の目盛りに合わせる",
+      say: "暗号文は 0〜63 の 64 目盛り、多項式の回転は 32 目盛り。2n/q = 1/2 を掛けて丸め、両方を同じ土俵に乗せます。",
+      cmd: "rs = lambda x: round(x * 2 * n / q); (rs(D), tuple(rs(x) for x in a), rs(b))",
+      mean: "Δ̂ = 4、â、b̂ が出ます。講義スライドの値と同じか確かめてください。",
+      out: "(4, (4, 17, 2, 16, 0, 16, 29, 4), 12)",
+      then: "(4, (4, 17, 2, 16, 0, 16, 29, 4), 12)。講義スライド 25 の値と一致します。暗号文の 64 目盛りを、多項式の 32 目盛りに詰め直しました。" },
+    { q: "",
+      say: "リスケール後の値で、回す量 i を出します。**2n で割った余り**であることに注意。",
+      cmd: "ah = tuple(rs(x) for x in a); bh = rs(b); i = (bh - sum(x * y for x, y in zip(ah, s))) % (2 * n); i",
+      mean: "i = 12 − 40 = −28 ≡ 4 (mod 32)。",
+      out: "4",
+      then: "4。回す量が決まりました。**2n = 32 で割った余り**であることに注意してください — n = 16 ではありません。ここを n にすると、次のドリル C の符号の話が丸ごと消えます。" },
+    { q: "取り出す",
+      say: "回した多項式の定数項を読む関数を置きます。この行は何も表示しません。",
+      cmd: "rot = lambda v, i: v[i % (2*len(v))] if i % (2*len(v)) < len(v) else -v[i % (2*len(v)) - len(v)]",
+      mean: "i が n 未満なら v[i]、n 以上なら符号を裏返して v[i−n]。さっき見た xⁿ ≡ −1 がここに効きます。",
+      out: "" },
+    { q: "",
+      say: "i = 4 だけ回して、定数項を読みます。",
+      cmd: "rot(v, i)",
+      mean: "ノイズ入りの暗号文から、ノイズなしで平文が出ます。",
+      out: "1",
+      then: "1。**ノイズ 2 が入った暗号文から、ノイズのない平文 1 が出ました。** これが Bootstrapping の核心で、やったことは「多項式を i だけ回して、定数項を読んだ」だけです。復号は 1 回も起きていません。" },
+    { q: "",
+      say: "ノイズが少しずれても同じ値が読めるか、i を前後に振って確かめます。",
+      cmd: "[(j, rot(v, j)) for j in (3, 4, 7, 8)]",
+      mean: "i = 4, 7 はどちらも 1。3 と 8 は隣の値。",
+      out: "[(3, 0), (4, 1), (7, 1), (8, 2)]",
+      then: "[(3, 0), (4, 1), (7, 1), (8, 2)]。i が 4 でも 7 でも 1 が読めます。ノイズが 3 ずれても答えは変わらない。逆に 3 や 8 まで行くと隣の値になる — テスト多項式の「幅 4」が、そのまま許容できるノイズの幅です。" },
+  ];
+
+  var C = [
+    { q: "設定 — HomNAND のパラメータ（講義スライド 44〜45）",
+      say: "平文空間 8、暗号文空間 32、テスト多項式の係数 16 個。ここでは q = 2n なのでリスケーリングは要りません。",
+      cmd: "p, q, n = 8, 32, 16; D = q // p; v = [1] * n; (p, q, n, D)",
+      mean: "Δ = 4。**テスト多項式は全係数が 1** — ドリル B のような階段ではありません。",
+      out: "(8, 32, 16, 4)",
+      then: "(8, 32, 16, 4)。Δ = 4。q = 2n なので、ドリル B のリスケーリングは今回は要りません。" },
+    { q: "",
+      say: "定数項を読む関数を置きます。ドリル B と同じもの。この行は何も表示しません。",
+      cmd: "const = lambda i: (lambda j: v[j] if j < n else -v[j - n])(i % (2 * n))",
+      mean: "全係数が 1 なので、返る値は +1 か −1 だけになります。",
+      out: "" },
+    { q: "同じ多項式が、回す量だけで 2 つの値を返す",
+      say: "回す量 i を変えて、定数項を見ます。",
+      cmd: "[const(i) for i in (0, 5, 15, 16, 20, 31)]",
+      mean: "i が 0〜15 なら +1、16〜31 なら −1。**係数は全部 1 なのに、符号だけが変わります。**",
+      out: "[1, 1, 1, -1, -1, -1]",
+      then: "[1, 1, 1, −1, −1, −1]。**同じ多項式を、同じ読み方で読んでいるのに、回す量が 16 をまたいだ瞬間に符号が変わりました。** 係数は全部 1 なのにです。" },
+    { q: "表と裏 — 同じ性質が、事故にも仕掛けにもなる",
+      say: "講義スライド 35 は、Blind Rotation でこの符号反転が起きたらなぜ困るかを問いのまま残しました。答えを先に言うと、読みたい係数の符号が勝手に裏返るからです。ここからは、その同じ反転を**わざと使う**側を見ます。",
+      cmd: "enc = {0: p - 1, 1: 1}; enc",
+      mean: "bit 0 を p−1 = 7 に、bit 1 を 1 に対応させます。7 は −1 のことです（mod 8）。",
+      out: "{0: 7, 1: 1}",
+      then: "{0: 7, 1: 1}。7 は mod 8 での −1 のことです。つまり bit を **+1 と −1** で表しています。なぜ ± なのかは、次の 3 行で分かります。" },
+    { q: "",
+      say: "2 つの入力ビットから r = 1 − m₁ − m₂ を計算します。暗号文のまま引き算するだけ。",
+      cmd: "[((m1, m2), (1 - enc[m1] - enc[m2]) % p) for m1 in (0, 1) for m2 in (0, 1)]",
+      mean: "(0,0) で 3、(0,1) と (1,0) で 1、(1,1) だけ 7。",
+      out: "[((0, 0), 3), ((0, 1), 1), ((1, 0), 1), ((1, 1), 7)]",
+      then: "(1, 1) だけ r = 7 で、ほかは 1 か 3。**(1, 1) だけが大きい** — ここが分かれ目になります。" },
+    { q: "",
+      say: "r に Δ を掛けたものが回す量。ノイズの合計 d は 0〜2 のどれかなので、3 通り出します。",
+      cmd: "[((m1, m2), [(D * ((1 - enc[m1] - enc[m2]) % p) - d) % q for d in (0, 1, 2)]) for m1 in (0, 1) for m2 in (0, 1)]",
+      mean: "(1,1) だけが 26〜28、つまり **16 以上**の側に落ちます。ほかは全部 16 未満。",
+      out: "[((0, 0), [12, 11, 10]), ((0, 1), [4, 3, 2]), ((1, 0), [4, 3, 2]), ((1, 1), [28, 27, 26])]",
+      then: "Δ = 4 を掛けると、(1, 1) だけ 26〜28 で **16 以上**、ほかは 2〜12 で **16 未満**。ちょうど符号が変わる境界で 2 つに分かれました。" },
+    { q: "NAND が出る",
+      say: "定数項を読んで、NAND の真理値表と並べます。",
+      cmd: "[((m1, m2), const(D * ((1 - enc[m1] - enc[m2]) % p)), 1 - (m1 & m2)) for m1 in (0, 1) for m2 in (0, 1)]",
+      mean: "各組は (入力, 定数項, NAND の答え)。+1 が bit 1、−1 が bit 0。",
+      out: "[((0, 0), 1, 1), ((0, 1), 1, 1), ((1, 0), 1, 1), ((1, 1), -1, 0)]",
+      then: "定数項が NAND の答えと完全に一致しています。(1, 1) だけが −1、つまり bit 0。" },
+    { q: "",
+      say: "ノイズが 0/1/2 のどれであっても答えが変わらないか、4 通り × 3 通りを全部確かめます。",
+      cmd: "all(const(D * ((1 - enc[m1] - enc[m2]) % p) - d) == (1 if 1 - (m1 & m2) else -1) for m1 in (0, 1) for m2 in (0, 1) for d in (0, 1, 2))",
+      mean: "12 通りすべてで一致するか。",
+      out: "True",
+      then: "True。ノイズが 0, 1, 2 のどれであっても、12 通り全部で一致しました。**講義スライド 35 が「もし Blind Rotation でこれが起きたらなぜ困るか」と問いのまま残した符号反転が、ここでは NAND を作る当の仕掛けになっています。** 同じ計算の表と裏です。" },
+  ];
+
+  makeDrill("drillA-card", "ac26-w5-drillA-step", A, "Δ で置いて s で消して丸めるところから、ノイズが余裕 8 を超えて復号が壊れる瞬間まで、自分の手で通しました。");
+  makeDrill("drillB-card", "ac26-w5-drillB-step", B, "講義スライドの数値そのままで、ノイズ入りの暗号文から平文を取り出しました。やったのは多項式を 4 だけ回して定数項を読むことだけです。");
+  makeDrill("drillC-card", "ac26-w5-drillC-step", C, "同じ符号反転が、Blind Rotation では事故で、HomNAND では仕掛けであることを、12 通り全部で確かめました。");
+})();
+</script>
+</body>
+</html>

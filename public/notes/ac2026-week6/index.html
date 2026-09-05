@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>隠す・分ける・示すを組み合わせる — Week 6 自習ノート</title>
+<meta name="description" content="Advanced Cryptography Program 2026 Week 6 の自習ノート。ZK は示す、MPC は分ける、FHE は隠す — 3 つを要件から逆算して組む。co-SNARK・zkVM・Tornado Cash を、宿題と同じ数値の対話ドリル 38 行で手を動かして確かめる。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="隠す・分ける・示すを組み合わせる — Week 6 自習ノート">
+<meta property="og:description" content="share 同士を掛けても積の share にならない。実行の表を 1 か所いじると制約が 0 でなくなる。制約が 1 行抜けると二重引き出しが通る。3 つの合成を 1 行ずつ。">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<style>
+  @font-face {
+    font-family: "AXIS Std";
+    src: url("/fonts/axis-std.otf") format("opentype");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { display: block; max-width: 100%; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  table { border-collapse: collapse; }
+  [hidden] { display: none !important; }
+
+  :root {
+    color-scheme: light dark;
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+
+    --sans: "AXIS Std", "Helvetica Neue", Helvetica, Arial,
+            "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+            "Noto Sans JP", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+            "Cascadia Mono", Consolas, monospace;
+
+    --fs-label: 0.6875rem; --fs-xs: 0.8125rem; --fs-sm: 0.875rem;
+    --fs-lg: 1.25rem; --fs-xl: 1.6875rem; --fs-2xl: clamp(2rem, 5.5vw, 2.9rem);
+    --r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+      --line: #3A4449; --line-strong: #4E5B61;
+      --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+      --accent: #99DBFF; --accent-soft: #24333C;
+      --pass: #B5BD68; --pass-soft: #2B3122;
+      --fail: #CC6666; --fail-soft: #3A2626;
+      --free: #F0C674; --free-soft: #3A3122;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1D2528; --panel: #242E33; --panel-2: #1D2528;
+    --line: #3A4449; --line-strong: #4E5B61;
+    --ink: #C5C8C6; --ink-2: #A9B0AE; --muted: #8A979D;
+    --accent: #99DBFF; --accent-soft: #24333C;
+    --pass: #B5BD68; --pass-soft: #2B3122;
+    --fail: #CC6666; --fail-soft: #3A2626;
+    --free: #F0C674; --free-soft: #3A3122;
+  }
+  :root[data-theme="light"] {
+    --ground: #F5F7F8; --panel: #FFFFFF; --panel-2: #F5F7F8;
+    --line: #D4DADE; --line-strong: #B4BEC4;
+    --ink: #242E33; --ink-2: #46535A; --muted: #6C7A80;
+    --accent: #3E5A7C; --accent-soft: #E4EDF4;
+    --pass: #55632B; --pass-soft: #EDF0DF;
+    --fail: #A54242; --fail-soft: #F7E7E7;
+    --free: #8A5A28; --free-soft: #FAEEDF;
+  }
+
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); line-height: 1.85; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+  .eyebrow { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.35; margin: 0; font-weight: 700; }
+  h1 { font-size: var(--fs-2xl); letter-spacing: -0.02em; line-height: 1.2; }
+  h2 { font-size: var(--fs-xl); letter-spacing: -0.01em; }
+  h3 { font-size: var(--fs-lg); }
+  h4 { font-size: 1rem; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: 0.925em; font-variant-numeric: tabular-nums; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .sitebar { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--line);
+             background: color-mix(in srgb, var(--ground) 80%, transparent); backdrop-filter: blur(12px); }
+  .sitebar-inner { height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .sitebar-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); text-decoration: none; }
+  .sitebar-links { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+  .sitebar-links a { font-size: var(--fs-xs); color: var(--muted); text-decoration: none; padding: 0.35rem 0.6rem; border-radius: var(--r-md); }
+  .sitebar-links a:hover { color: var(--ink); background: color-mix(in srgb, var(--line) 60%, transparent); }
+
+  .masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .masthead-inner { display: flex; flex-direction: column; gap: 1rem; padding: clamp(2.5rem, 7vw, 4rem) 0 clamp(2rem, 5vw, 2.5rem); }
+  .masthead h1 span { color: var(--accent); }
+  .lead { color: var(--ink-2); max-width: 62ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; padding: 0.25rem 0.55rem;
+         border: 1px solid var(--line-strong); border-radius: var(--r-sm); color: var(--ink-2); }
+
+  .band { padding: clamp(2.25rem, 6vw, 3.5rem) 0; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; max-width: 64ch; }
+  .band-head p { color: var(--ink-2); }
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .stack-sm { display: flex; flex-direction: column; gap: 0.9rem; }
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose strong { color: var(--ink); font-weight: 700; }
+  .split { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 860px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: flex; flex-direction: column; gap: 1px;
+           background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .steps > li { counter-increment: step; background: var(--panel); padding: 1.25rem 1.4rem 1.35rem;
+                display: grid; grid-template-columns: 2.4rem 1fr; gap: 0 1rem; align-items: start; }
+  .steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); font-size: var(--fs-xs);
+                        font-weight: 700; color: var(--accent); letter-spacing: 0.06em; padding-top: 0.35rem; }
+  .steps h4 { grid-column: 2; }
+  .steps .body { grid-column: 2; display: flex; flex-direction: column; gap: 0.7rem; margin-top: 0.35rem; }
+  .steps p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .steps .why { font-size: var(--fs-sm); color: var(--ink-2); border-left: 2px solid var(--line-strong); padding-left: 0.85rem; }
+  .steps .why b { color: var(--ink); }
+
+  .callout { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-md);
+             background: var(--panel); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.65rem; max-width: 68ch; }
+  .callout .eyebrow { color: var(--accent); }
+  .callout p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .callout p.strong-line { color: var(--ink); font-weight: 700; }
+  .callout.amber { border-left-color: var(--free); }
+  .callout.amber .eyebrow { color: var(--free); }
+  .callout.red { border-left-color: var(--fail); }
+  .callout.red .eyebrow { color: var(--fail); }
+
+  pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md);
+        padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.75; color: var(--ink); }
+  pre .c { color: var(--muted); }
+  pre b { color: var(--fail); }
+  .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); line-height: 2; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: 0.5rem 0.85rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data th { color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; font-size: var(--fs-label); }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data tr.here td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .caption { font-size: var(--fs-xs); color: var(--muted); max-width: 68ch; }
+
+  /* ---------- pipeline ---------- */
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md);
+              background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-box.on .s { color: var(--accent); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
+  .pipe-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .pipe-tool { flex: 1 1 8rem; border: 1px dashed var(--line-strong); border-radius: var(--r-md);
+               background: var(--panel-2); padding: 0.5rem 0.6rem; text-align: center; font-size: var(--fs-xs); color: var(--ink-2); }
+  .pipe-tool.on { border-style: solid; border-color: var(--pass); color: var(--pass); background: var(--pass-soft); font-weight: 700; }
+
+  /* ---------- table of contents ---------- */
+  .toc {
+    list-style: none; margin: 0; padding: 0; counter-reset: toc;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+    border-radius: var(--r-lg); overflow: hidden;
+  }
+  .toc li { counter-increment: toc; background: var(--panel); }
+  .toc a {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: baseline;
+    padding: 0.7rem 1rem; text-decoration: none; color: var(--ink-2);
+    font-size: var(--fs-sm); line-height: 1.5;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--ink); }
+
+  /* ---------- lab ---------- */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+               padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+  .card-head h3 { font-size: var(--fs-sm); }
+  .card-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .lab { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 940px) { .lab { grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); } }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;
+                 font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); }
+  .field-label .hint { color: var(--muted); font-size: var(--fs-label); }
+  .segments { display: flex; flex-wrap: wrap; gap: 3px; }
+  .segments button { flex: 1 0 2.4rem; font-family: var(--mono); font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
+                     padding: 0.35rem 0.2rem; background: var(--panel-2); color: var(--ink-2);
+                     border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer; }
+  .segments button:hover { border-color: var(--line-strong); }
+  .segments button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); font-weight: 700; }
+  :root[data-theme="light"] .segments button[aria-pressed="true"] { color: #fff; }
+  :root[data-theme="dark"] .segments button[aria-pressed="true"] { color: #0B0E15; }
+  @media (prefers-color-scheme: light) { .segments button[aria-pressed="true"] { color: #fff; } }
+  @media (prefers-color-scheme: dark) { .segments button[aria-pressed="true"] { color: #0B0E15; } }
+
+  .verdict { padding: 1.1rem; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.6rem; }
+  .banner { font-weight: 700; font-size: 1rem; padding: 0.7rem 0.9rem; border-radius: var(--r-md); border-left: 4px solid; }
+  .banner.ok { background: var(--pass-soft); color: var(--pass); border-color: var(--pass); }
+  .banner.bad { background: var(--fail-soft); color: var(--fail); border-color: var(--fail); }
+  .banner.warn { background: var(--free-soft); color: var(--free); border-color: var(--free); }
+  .work { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .work pre { background: var(--panel-2); }
+
+  /* ---------- quiz ---------- */
+  .quiz-pane { padding: 1.25rem 1.35rem 1.35rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .quiz-hero { display: flex; flex-direction: column; gap: 0.35rem; }
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.6rem; }
+  .mode {
+    text-align: left; cursor: pointer; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 0.8rem 0.95rem; display: flex; flex-direction: column; gap: 0.2rem;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .mode .m-name { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .mode .m-desc { font-size: var(--fs-label); color: var(--muted); line-height: 1.6; }
+  .mode.primary { background: var(--accent); border-color: var(--accent); }
+  .mode.primary .m-name { color: #fff; }
+  .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+  :root[data-theme="dark"] .mode.primary .m-name { color: #0B0E15; }
+  :root[data-theme="dark"] .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  @media (prefers-color-scheme: dark) {
+    .mode.primary .m-name { color: #0B0E15; }
+    .mode.primary .m-desc { color: rgba(11,14,21,0.75); }
+  }
+  :root[data-theme="light"] .mode.primary .m-name { color: #fff; }
+  :root[data-theme="light"] .mode.primary .m-desc { color: rgba(255,255,255,0.82); }
+
+  .quiz-best { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); margin: 0; }
+  .quiz-bar {
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
+  }
+  .quiz-bar .qcat {
+    padding: 0.1rem 0.5rem; border: 1px solid var(--line-strong);
+    border-radius: 999px; color: var(--ink-2); font-size: var(--fs-label); letter-spacing: 0.06em;
+  }
+  .quiz-bar .lives { margin-left: auto; letter-spacing: 0.2em; color: var(--fail); font-size: 0.95rem; }
+  .quiz-bar .lives .gone { color: var(--line-strong); }
+
+  .qmain { display: flex; flex-direction: column; gap: 0.9rem; }
+  .qtext { font-weight: 700; font-size: 1.0625rem; line-height: 1.7; }
+  .qbody { display: flex; flex-direction: column; gap: 0.6rem; }
+  .qbody .subst { font-family: var(--mono); font-size: var(--fs-sm); color: var(--ink); }
+  .qbody .clist { display: flex; flex-direction: column; gap: 2px; }
+  .qbody .cline {
+    font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2);
+    padding: 0.3rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2);
+    border-left: 3px solid var(--line-strong); overflow-x: auto; white-space: nowrap;
+  }
+
+  .choices { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .choices.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    text-align: left; cursor: pointer; font-size: var(--fs-sm); line-height: 1.6;
+    padding: 0.7rem 0.9rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:disabled { cursor: default; }
+  .choice.is-correct { border-color: var(--pass); background: var(--pass-soft); color: var(--pass); font-weight: 700; }
+  .choice.is-wrong   { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); }
+  .choice.dim { opacity: 0.5; }
+
+  .fb { border-radius: var(--r-md); padding: 0.85rem 1rem; border-left: 4px solid; font-size: var(--fs-sm); line-height: 1.75; }
+  .fb.ok  { background: var(--pass-soft); border-color: var(--pass); }
+  .fb.bad { background: var(--fail-soft); border-color: var(--fail); }
+  .fb .fb-head { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+  .fb.ok  .fb-head { color: var(--pass); }
+  .fb.bad .fb-head { color: var(--fail); }
+  .fb code { color: var(--ink); }
+
+  .quiz-foot { display: flex; gap: 0.6rem; align-items: center; justify-content: flex-end; }
+  .btn-main {
+    cursor: pointer; font-size: var(--fs-sm); font-weight: 700; padding: 0.55rem 1.2rem;
+    border-radius: var(--r-md); border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  }
+  :root[data-theme="dark"] .btn-main { color: #0B0E15; }
+  @media (prefers-color-scheme: dark) { .btn-main { color: #0B0E15; } }
+  :root[data-theme="light"] .btn-main { color: #fff; }
+  .btn-ghost {
+    cursor: pointer; font-size: var(--fs-sm); padding: 0.55rem 1rem; border-radius: var(--r-md);
+    border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--ink-2); border-color: var(--ink-2); }
+
+  .rank-box { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .rank {
+    font-family: var(--mono); font-size: 3.5rem; font-weight: 700; line-height: 1;
+    width: 5rem; height: 5rem; display: grid; place-items: center;
+    border-radius: var(--r-lg); border: 2px solid currentColor; flex: none;
+  }
+  .rank.s { color: var(--accent); }
+  .rank.a { color: var(--pass); }
+  .rank.b { color: var(--free); }
+  .rank.f { color: var(--fail); }
+  .rank-meta { display: flex; flex-direction: column; gap: 0.15rem; }
+  .rank-title { font-weight: 700; font-size: var(--fs-lg); }
+  .rank-sub { font-size: var(--fs-sm); color: var(--ink-2); }
+  .cat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.6rem; }
+  .cstat {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel-2);
+    padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .cstat .cn { font-size: var(--fs-label); color: var(--muted); }
+  .cstat .cv { font-family: var(--mono); font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cstat .cv.full { color: var(--pass); }
+  .cstat .cv.weak { color: var(--fail); }
+
+  footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: var(--fs-xs); }
+  footer a { color: var(--muted); }
+
+  /* ---------- 対話ドリル ---------- */
+  .drill-body { padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+  .drill-foot { padding: 0.8rem 1.1rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+  .drill-step { border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.55rem; background: var(--panel); }
+  .drill-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drill-step.done { opacity: 0.92; }
+  .drill-q { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.06em; color: var(--accent); font-weight: 700; }
+  .drill-say { font-size: var(--fs-sm); color: var(--ink); }
+  .drill-cmd { display: flex; gap: 0.5rem; align-items: stretch; }
+  .drill-cmd pre { flex: 1 1 auto; background: var(--panel-2); font-size: var(--fs-sm); padding: 0.6rem 0.8rem; }
+  .drill-mean { font-size: var(--fs-xs); color: var(--ink-2); border-left: 3px solid var(--line-strong); padding-left: 0.7rem; }
+  .drill-mean b { color: var(--ink); }
+  .drill-out { background: var(--panel-2); font-size: var(--fs-sm); padding: 0.5rem 0.8rem; border-left: 4px solid var(--pass); }
+  .drill-then { font-size: var(--fs-sm); color: var(--ink); background: var(--pass-soft); border-radius: var(--r-sm); padding: 0.6rem 0.8rem; line-height: 1.75; }
+  .drill-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .drill-form input { flex: 1 1 16rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  .drill-fb { font-size: var(--fs-xs); color: var(--fail); }
+  /* ---------- スライド追従カード・演習・用語集・付録 ---------- */
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+  .deck { display: flex; flex-direction: column; gap: 0.75rem; }
+  .sl { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 0.9rem 1.1rem 1rem;
+        display: flex; flex-direction: column; gap: 0.55rem; }
+  .sl-head { display: flex; gap: 0.75rem; align-items: baseline; }
+  .sl-head .sn { font-family: var(--mono); font-size: var(--fs-label); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; }
+  .sl-head .st { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .sl-claim { font-weight: 700; font-size: 1rem; line-height: 1.7; color: var(--ink); }
+  .sl p { font-size: var(--fs-sm); color: var(--ink-2); }
+  .sl p.sl-claim { color: var(--ink); font-size: 1rem; }
+  .sl pre { background: var(--panel-2); font-size: var(--fs-xs); }
+  .sl-hw { border-left: 3px solid var(--pass); padding-left: 0.75rem; }
+  .sl-hw b { color: var(--pass); }
+  .sl-q { color: var(--accent); }
+  .exs { border: 1px dashed var(--line-strong); border-radius: var(--r-md); padding: 1rem 1.1rem 0.6rem; background: var(--panel-2); display: flex; flex-direction: column; gap: 0.5rem; }
+  .exs .eyebrow { color: var(--free); }
+  .ex { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); }
+  .ex > summary { cursor: pointer; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); color: var(--ink); line-height: 1.6; }
+  .ex > summary:hover { color: var(--accent); }
+  .ex > pre { border: none; border-top: 1px solid var(--line); border-radius: 0; }
+  .appx { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: 0.6rem; }
+  .appx > summary { cursor: pointer; padding: 0.8rem 1rem; font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+  .appx > summary:hover { color: var(--accent); }
+  .appx .band { padding: 0.5rem 0 1.5rem; }
+  .appx .band + .band { border-top: none; }
+  table.hwmap td, table.hwmap th, table.gloss td, table.gloss th { white-space: normal; }
+  table.hwmap td:first-child { white-space: nowrap; font-family: var(--mono); }
+  table.gloss td:first-child { white-space: nowrap; font-weight: 700; color: var(--ink); }
+  #glossary .note-title { margin-top: 0.5rem; }
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+  .pipe-box { flex: 1 1 8rem; min-width: 7rem; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.7rem 0.6rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+  .pipe-box .t { font-weight: 700; font-size: var(--fs-sm); }
+  .pipe-box .s { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+  .pipe-box.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pipe-arrow { align-self: center; color: var(--muted); font-size: var(--fs-sm); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  /* ---------- Week 4 追加分 ---------- */
+  .parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.6rem; }
+  .part { border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); padding: 0.85rem 0.95rem;
+          display: flex; flex-direction: column; gap: 0.25rem; }
+  .part .pn { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.1em; color: var(--accent); }
+  .part .pt { font-weight: 700; font-size: var(--fs-sm); }
+  .part .pd { font-size: var(--fs-xs); color: var(--ink-2); line-height: 1.6; }
+
+  .cmp { width: 100%; font-size: var(--fs-xs); }
+  .cmp th, .cmp td { vertical-align: top; white-space: normal; min-width: 8rem; }
+  .cmp td:first-child, .cmp th:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .cmp td small { color: var(--muted); }
+
+  .heat { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; width: 100%; max-width: 22rem; font-family: var(--mono); font-size: var(--fs-label); }
+  .heat span { aspect-ratio: 1; min-width: 0; display: grid; place-items: center; border-radius: 3px; background: var(--panel-2); color: var(--muted); overflow: hidden; }
+  .heat span.h { background: transparent; color: var(--muted); }
+  .heat span.pass { background: var(--fail-soft); color: var(--fail); font-weight: 700; }
+  .heat span.catch { background: var(--pass-soft); color: var(--pass); }
+  .heat span.here { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  table.trace { font-family: var(--mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; width: 100%; }
+  table.trace th, table.trace td { padding: 0.35rem 0.5rem; text-align: center; border-bottom: 1px solid var(--line); }
+  table.trace th { color: var(--muted); font-weight: 400; font-size: var(--fs-label); letter-spacing: 0.06em; }
+  table.trace input { width: 3.2rem; text-align: center; padding: 0.25rem 0.2rem; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+                      background: var(--panel); color: var(--ink); font-family: var(--mono); font-size: var(--fs-sm); }
+  table.trace input.bad { border-color: var(--fail); background: var(--fail-soft); color: var(--fail); font-weight: 700; }
+  table.trace input.fixed { background: var(--panel-2); color: var(--muted); }
+  table.trace td.rowlab { color: var(--muted); font-size: var(--fs-label); text-align: left; white-space: nowrap; }
+  .mini { font-size: var(--fs-xs); color: var(--ink-2); }
+  .mini b { color: var(--ink); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .btn-sm { cursor: pointer; font-size: var(--fs-xs); padding: 0.35rem 0.7rem; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+            background: var(--panel-2); color: var(--ink-2); }
+  .btn-sm:hover { border-color: var(--accent); color: var(--ink); }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.9rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+  .kv dd.ok { color: var(--pass); font-weight: 700; }
+  .kv dd.ng { color: var(--fail); font-weight: 700; }
+  .flow { display: flex; flex-direction: column; gap: 0.35rem; font-family: var(--mono); font-size: var(--fs-xs); }
+  .flow .r { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.6rem; padding: 0.35rem 0.6rem; border-radius: var(--r-sm); background: var(--panel-2); }
+  .flow .r .who { color: var(--muted); }
+  .flow .r.v { border-left: 3px solid var(--accent); }
+  .flow .r.p { border-left: 3px solid var(--line-strong); }
+  .flow .r.ok { border-left-color: var(--pass); }
+  .flow .r.ng { border-left-color: var(--fail); background: var(--fail-soft); }
+  .note-title { font-size: var(--fs-sm); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a class="sitebar-name" href="/">Susumu Tomita</a>
+    <nav class="sitebar-links">
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/">ノート一覧</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week0/index.html">土台編</a>
+      <a href="https://susumutomita.github.io/advanced-cryptography-note/week5/index.html">Week 5</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <p class="eyebrow">Advanced Cryptography Program 2026 / Week 6 自習ノート</p>
+    <h1>隠す・分ける・示すを<span>組み合わせる</span> — 予習ノート</h1>
+    <p class="lead">
+      Week 6（Application — 理論を応用設計へ）の<strong>予習ノート</strong>です。
+      <strong>対話ドリル 3 本・38 行</strong>（mod 97 の整数・16 ビットの足し算・sha256 の先頭 6 桁だけ。<code>python3</code> と打てば始められる）で
+      「秘密を分けたまま証明を組む」「実行を表にして 1 行ずつ確かめる」「預けたことは示すが、どれかは言わない」を自分の手で通し、
+      そのあと<strong>講義スライド 41 枚と同じ順番のカード</strong>で言葉を埋めます。
+    </p>
+    <p class="lead">
+      この週の全体像は 1 文で言えます。<strong>ZK は「示す」、MPC は「分ける」、FHE は「隠す」— 3 つは競合ではなく、足りない保証を補い合う部品で、要件から逆算して組む</strong>。
+      グループワーク①（暗号文のまま AI 診断）の模範解 Verifiable FHE = 隠す + 示す は、その典型です。
+    </p>
+    <div class="meta-row">
+      <span class="tag">対話ドリル 3 本・38 行</span>
+      <span class="tag">スライド 41 枚追従</span>
+      <span class="tag">宿題 2 問への地図</span>
+      <span class="tag">前提は Week 2 の秘密分散と Week 4 の制約</span>
+      <span class="tag">外部通信なし</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================ 0 : 出発点 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">出発点 — Week 6 の予習</p>
+      <h2>5 週かけて手に入れた 3 つの道具は、「どれを使うか」ではなく「何が足りないか」で選ぶ</h2>
+      <p>
+        Week 1〜4 で証明（ZK）と秘密分散（MPC）を、Week 5 で暗号文のままの計算（FHE）を、それぞれ別々に学びました。
+        今週はそれらが<strong>合流</strong>します。講義の言い方では「信頼する第三者を、検証できる数学に置き換える」。
+        ただし 3 つは万能薬ではありません。ZK は<strong>正しさを示す</strong>が秘密を持ち寄れない。MPC は<strong>秘密を分けて</strong>計算できるが、計算が正しかったかは参加者の信頼に乗る。
+        FHE は<strong>データを隠して</strong>計算を任せられるが、サーバが正しく計算したかは分からない。
+        だから「FHE で隠したい、かつ正しさも確かめたい」なら FHE + ZK、「秘密を持ち寄ったまま 1 つの証明にしたい」なら MPC + ZK。<strong>足りない保証を、別の道具で埋める</strong> — それがこの週の設計法です。
+      </p>
+    </div>
+    <div class="split">
+      <div class="callout">
+        <p class="eyebrow">読み方</p>
+        <p><b>ドリル A（分ける + 示す = co-SNARK）→ B（実行そのものを示す = zkVM）→ C（示す、そして壊す = Tornado Cash と抜けた制約 1 行）</b>の順に、1 行打って出た値を貼って 1 文読む。準備は <code>python3</code> と打って <code>&gt;&gt;&gt;</code> が出るだけ（ドリル C だけ <code>import hashlib</code> を最初の行で打つ）。そのあとカードを上から。宿題 2 問（<code>co-snark-prove</code> / <code>zkvm-exploit</code>）は、ドリル A と B の数そのままです。</p>
+      </div>
+      <div class="callout amber">
+        <p class="eyebrow">前の週とのつながり</p>
+        <p>ドリル A の「share」「Beaver triple」は Week 2 の秘密分散です（p = 97 の余りだけ）。ドリル B の「制約が全部 0 なら正しい実行」は Week 4 の PLONK・AIR の制約と同じ考え方で、ここでは 16 ビットの足し算 1 種類しか制約がありません。ドリル C の「commitment」「Merkle 木」は Week 3・4 のコミットメントの最小版で、ハッシュは sha256 の先頭 6 桁で済ませます。Week 5 の FHE は数式では出ませんが、Verifiable FHE のカード（25〜27）で「Week 5 に足りなかったもの」として戻ってきます。</p>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow" style="margin-bottom:0.6rem;">この頁の構成</p>
+      <ol class="toc" id="toc"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ DRILLS -->
+<section class="band" id="drill">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">対話ドリル — 1 行打って、出た値を貼って、1 文読む</p>
+      <h2>3 つの合成を、mod 97 の整数・16 ビットの足し算・sha256 の先頭 6 桁だけで手で回す</h2>
+      <p>
+        <code>python3</code> を開いて <code>&gt;&gt;&gt;</code> が出たら始められます。
+        各行に「この行の意味」、出た値を貼ると、その値を指す解説が開きます。Python を開けないときは「ここで実行」。
+        ドリル A と B は<strong>宿題の README とテストの数値そのまま</strong>なので、宿題を書くときにそのまま突き合わせられます。
+      </p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル A — 分けたまま、証明を組む（co-SNARK。宿題 co-snark-prove の p = 97, w = [3, 5]）</p>
+      <p class="strong-line">秘密を 2 つに分ける。足し算と定数倍は分けたまま手元でできる。掛け算だけは、前もって配った「乱数の積」で 1 往復。</p>
+      <p>14 行。まず share 1 つを見ても秘密が分からないことを 3 通りで確かめ、線形結合が「share ごとに同じ計算」で済むことを見てから、share 同士を掛けても積の share に<strong>ならない</strong>ことを実際に失敗させ、Beaver triple で直します。最後に、公開した差 d からも秘密が絞れないことを見ます。</p>
+    </div>
+    <div class="card" id="drillA-card">
+      <div class="card-head"><h3>ドリル A — 分けたまま、証明を組む</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル B — 実行そのものを表にして、1 行ずつ確かめる（zkVM。宿題 zkvm-exploit の CAP = 1000, 16 ビット）</p>
+      <p class="strong-line">クーポン検証プログラムは 16 ビットで足し算する。65535 + 1001 は 1000 に化ける。この「あふれ」が攻撃で、実行の表と制約が、それを 1 行の 0 でない数として捕まえる。</p>
+      <p>14 行。正しいクーポンで検証器が通ることを見てから、真の合計は 66536 なのに 16 ビットでは 1000 になって通ってしまう入力を作ります。実行を表（trace）にして隣接する 2 行の制約が全部 0 になることを見て、表を 1 か所書き換えると 0 でなくなることを見ます。最後にプログラムの識別子（program_id）を出し、「どの攻撃かは言わずに、攻撃が存在する」だけを公開する claim を組みます。</p>
+    </div>
+    <div class="card" id="drillB-card">
+      <div class="card-head"><h3>ドリル B — 実行を表にして、1 行ずつ確かめる</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">ドリル C — 預けたことは示す、どれかは言わない（Tornado Cash。スライド 12〜13 と 33）</p>
+      <p class="strong-line">預かり証 C = h(k, r) を木に入れる。引き出すときは「木のどれかの葉の k, r を知っている」と nullifier h(r) だけを見せる。そして、制約が 1 行抜けると何が起きるかを見る。</p>
+      <p>10 行。ハッシュは sha256 の先頭 6 桁で、4 枚の葉の Merkle 木を手で作ります。根の検証・使用済み札・二重引き出しの拒否まで通したあと、偽造者が別の r2 を持ってきたときに<strong>どの検査が止めるのか</strong>、そして回路がその検査を「要求していなかったら」どうなるかを見ます。スライド 33（Zcash Orchard）が 1 行で再現できます。</p>
+    </div>
+    <div class="card" id="drillC-card">
+      <div class="card-head"><h3>ドリル C — 預けたことは示す、どれかは言わない</h3><span class="eyebrow drill-progress">0 / 0</span></div>
+      <div class="drill-body"></div>
+      <div class="drill-foot"><button class="btn-ghost drill-reset" type="button">はじめからやり直す</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D1 : 合成パターン -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 2〜9 / 暗号プリミティブを組み合わせる</p>
+      <h2>「信頼する誰か」を「検証できる数学」に置き換える — 3 つの道具は競合ではなく部品</h2>
+      <p>ここからのカード列は講義スライド 41 枚を同じ順番で追いかけます（目次だけのスライド 3・10・28・35 は飛ばします）。1 カード = 主張 1 つ。カード末尾の Q. は講義が問いとして置いたもの、緑の帯は宿題・ドリルとの対応です。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">2/41</span><span class="st">本日の流れ</span></div>
+        <p class="sl-claim">講義は 4 部構成。① ZK / MPC / FHE を整理して目的指向で合成する → ② アプリケーション紹介（zkVM / zkTLS / zkML / zkEmail / PIR / World ID）→ ③ 要件定義（設計フロー・ライブラリ・性能・プライバシー・法律）→ ④ ホワイトボードセッション。</p>
+        <p>これまでの週は「1 つの道具の中身」でした。今週は「道具を選んで組む」側に立ちます。実装時の注意点（性能・セキュリティ・プライバシー・法律）は第 3 部（カード 31〜34）でまとめて扱います。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">4/41</span><span class="st">信頼できる第三者を、数学で置き換える</span></div>
+        <p class="sl-claim">Trusted Third Party（各人が秘密を「信頼する誰か」に預ける）→ Mathematically Trustworthy Protocol（信頼を暗号プロトコルに置き換える）。Programmable Cryptography が目指すのはこの置換。</p>
+        <p>Nick Szabo の「The God Protocols」（1997）が出発点です。全員が秘密を預けられる神様がいれば、秘密入札も匿名投票も一瞬で済む。その神様の役を、誰も信頼せずに数学で果たすのが ZK・MPC・FHE です。</p>
+        <p class="sl-hw"><b>ドリルで見る形</b>: ドリル A の 2 人は、どちらも w の全体を持たないまま証明を組みます（誰も神様にならない）。ドリル C は「預かり所」に何を見せずに済むかを追います。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">5/41</span><span class="st">任意のデータ形式を相互変換する汎用アダプタ</span></div>
+        <p class="sl-claim">HTTPS / DKIM などで<strong>既に署名済み</strong>のデータを、zkSNARK で検証しながら任意の宛先形式へ変換できる。既存サービスの移行を待たずに相互運用が成り立つ。</p>
+        <p>ここが「応用」の入口です。世の中のデータは、すでに誰かが署名しています（Web サーバの TLS、メールの DKIM、パスポートの IC チップ）。その署名を回路の中で検証すれば、「Google がこのメールを送ったと保証している内容のうち、この 1 項目だけを示す」ができる。zkEmail・zkTLS・POD2（補遺）は全部この形です。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">6/41</span><span class="st">special-purpose から programmable cryptography へ</span></div>
+        <p class="sl-claim">special-purpose = 1 つの操作だけを暗号的に保証（署名 / range proof / group signature）。programmable = 暗号の中で汎用計算ができる（ZK / MPC / FHE / Witness Encryption / iO）。</p>
+        <p>Week 1 の署名や Week 2 の秘密分散は「1 つの操作」でした。汎用計算ができるようになると、「何を保証するか」を回路（プログラム）で自由に書ける。だから今週は数式ではなく<strong>設計</strong>が主題になります。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">7/41</span><span class="st">ZK / MPC / FHE のおさらいと比較</span></div>
+        <p class="sl-claim">3 つは<strong>位相</strong>（誰が誰と何をやり取りするか）で覚える。各セルの保証は「無料ではない」対価で、組み合わせれば全部解決、は誤り。</p>
+        <div class="table-scroll"><table class="data"><thead><tr><th></th><th>ZK — 事実を証明する</th><th>MPC — 秘密を持ち寄って計算</th><th>FHE — データを見せずに計算させる</th></tr></thead><tbody>
+          <tr><td>式</td><td>π : ∃w. C(x, w) = 1</td><td>f(x₁, x₂, x₃)、各 xᵢ は各自の手元</td><td>E(x) → blind eval → E(f(x))</td></tr>
+          <tr><td>隠す対象</td><td>証明者の witness w</td><td>各参加者の入力</td><td>計算データと中間状態</td></tr>
+          <tr><td>信頼前提</td><td>証明者を信頼しなくてよい（数学が保証）</td><td>k-of-n の party を信頼（t 未満が corrupt）</td><td>Server を信頼（正しく計算するか）</td></tr>
+          <tr><td>敵対モデル</td><td>証明者（偽証）／ 検証者（witness 窃取）</td><td>Party（最大 t 名が逸脱: semi-honest / malicious）</td><td>盗聴者（復号・改ざん）／ Server（復号試行）</td></tr>
+          <tr><td>主な用途</td><td>年齢証明 — 生年月日を出さず「18 以上」</td><td>秘密入札 — 入札額を漏らさず最高値</td><td>暗号文 AI 診断 — 医療データを暗号化のまま分析</td></tr>
+        </tbody></table></div>
+        <p><b>信頼前提の行が設計の要</b>です。FHE は「Server を信頼」と書いてある — 中身は見えないが、正しく計算したかは分からない。MPC は「t 未満の共謀」までしか守れない。この 2 つの穴が、カード 8 の合成パターン②（Verifiable FHE）と⑥（co-SNARK）を生みます。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">8/41</span><span class="st">プリミティブは組み合わせられる — 6 つの代表的合成パターン</span></div>
+        <p class="sl-claim">各アプリは、暗号プリミティブどうし、または既存システムとの合成として現れる。</p>
+        <div class="table-scroll"><table class="data"><thead><tr><th>#</th><th>名前</th><th>合成</th><th>何をしたか</th></tr></thead><tbody>
+          <tr><td>①</td><td>Longfellow</td><td>ZK ∘ ECDSA (mDOC)</td><td>既存 ID 標準（mDOC / JWT）を ZK 化</td></tr>
+          <tr><td>②</td><td>Verifiable FHE</td><td>ZK + FHE</td><td>FHE の計算の正しさを ZK で保証（カード 25〜27）</td></tr>
+          <tr><td>③</td><td>threshold FHE</td><td>MPC + FHE</td><td>FHE の鍵を MPC で分散管理</td></tr>
+          <tr><td>④</td><td>POD2</td><td>ZK + 署名データ</td><td>署名済みデータを証明して組み合わせる（補遺 39〜40）</td></tr>
+          <tr><td>⑤</td><td>leanVM</td><td>ZK + XMSS</td><td>耐量子署名を再帰集約して 1 proof に（カード 18〜20）</td></tr>
+          <tr><td>⑥</td><td>co-SNARK</td><td>ZK + MPC</td><td>入力を秘匿したまま協調証明（World ID、カード 22〜24）</td></tr>
+        </tbody></table></div>
+        <p class="sl-hw"><b>この週のドリルと宿題は ⑥ と ②、それに zkVM</b>: ドリル A / 宿題 co-snark-prove が ⑥（分ける + 示す）、ドリル B / 宿題 zkvm-exploit が zkVM（実行を示す）、GW① の模範解が ②（隠す + 示す）。3 つの合成の「+」の部分を、それぞれ 1 行の Python で通します。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">9/41</span><span class="st">暗号プリミティブは 1 つの計算機に統合される</span></div>
+        <p class="sl-claim">ZK = 検証可能な配線（wire）、FHE-MPC = 秘匿計算 CPU、ORAM = 高速な暗号 state、Ethereum = 社会規模のハードディスク。「zkSNARK 単体で何ができるか」ではなく、統合スタックとして何が作れるかを問う。</p>
+        <p>コンピュータの部品に見立てた図です。配線（結果を運ぶ = 正しさの証明）、CPU（秘密のまま計算）、記憶（アクセスパターンも隠す）、ディスク（誰でも読める公開台帳）。この見立てが、カード 29 の「欲しい成果物から選ぶ」決定木の土台になります。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D2 : Tornado Cash -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 11〜14 / Tornado Cash と Solidity verifier</p>
+      <h2>預けたことは示す、どれかは言わない — commitment・nullifier・Merkle 所属の 3 点セット</h2>
+      <p>ドリル C がこの節の数値版です。C = h(k, r)、4 枚の葉の木、根 <code>b712a6</code>、nullifier <code>790269</code>。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">11/41</span><span class="st">ゼロ知識証明を用いたアプリケーション</span></div>
+        <p class="sl-claim">Tornado Cash（匿名ミキサー）／ zkVM（任意プログラムの実行を、回路を手書きせず証明）／ zkEVM（EVM 実行を証明して L1 を圧縮）／ leanVM（耐量子署名 leanXMSS を zkVM で再帰集約）／ zkEmail（DKIM 署名を ZK 検証）／ zkML（モデル推論の正しさを ZK 証明）。</p>
+        <p>6 つのうち、この節で Tornado Cash を、次の節で zkVM と leanVM を深掘りします。zkEVM・zkEmail・zkML は「zkVM の上に作られた用途特化」として、カード 15 で位置づけられます。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">12/41</span><span class="st">Tornado Cash のユーザーフロー：預入 → 匿名集合 → 別アドレスで引出</span></div>
+        <p class="sl-claim">User A が 1 ETH と commitment C を預入アドレス（公開）から送る。同じ固定額の預入が 1 本の Merkle 木に集まり、どれが誰の C か埋もれる。無関係な新アドレス A′ が証明 π を出して 1 ETH を受け取る。</p>
+        <pre>預入:  A ──(1 ETH + C)──▶ プール（Merkle 木: root ← C₁, C, C₃, C₄）
+       note (k, r) は手元だけ・秘密
+引出:  A′ ──(π)──▶ プール ──(1 ETH)──▶ A′
+       A ↔ A′ のリンクを暗号的に断ち切る</pre>
+        <p><b>匿名集合（anonymity set）</b>は「自分と見分けがつかない人の集まり」です。木に葉が n 枚あれば、引き出した人は n 人のうちの誰か。預入者が増えるほど大きく育ちます。</p>
+        <p class="sl-hw"><b>ドリル C の 2〜4 行目</b>: <code>C = h(k, r)</code> → <code>leaves.index(C)</code> → <code>root</code>。「木に入っている」を根 1 つで表せることが、この 3 行で見えます。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">13/41</span><span class="st">Tornado Cash：リンクを断つ仕組みと、使い方で漏れる匿名性</span></div>
+        <p class="sl-claim">commitment + nullifier + Merkle membership で預入と引出のリンクを暗号的に断つ。ただし匿名性は暗号の外 = 使い方で決まる。</p>
+        <pre>① 預入   乱数を 2 つ: secret k（秘密）、nullifier r（後で二重引出を防ぐ）
+         commitment C = H(k, r) を提出、1 ETH を送金。k, r はチェーンに出さない
+② 匿名集合  commitments の Merkle 木。預入者が増えるほど大きい
+③ 引出   新アドレス A′ から zk-SNARK で証明:
+           ▸ k, r を知る葉 C が木に存在（membership）
+           ▸ nullifierHash = H(r) を公開
+         nullifierHash 既出なら拒否 = 二重引出を防止。リレイヤーがガス代を肩代わり</pre>
+        <p><b>暗号が保証すること</b>: 預入 C と引出は数学的に連結不可（zero-knowledge）。漏れるのは「木のどれかの葉」まで。nullifierHash で二重引出を阻止（soundness）。</p>
+        <p><b>運用次第で漏れる情報</b>: タイミング相関、関連アドレスの再利用、金額・ガス・リレイヤーの痕跡、過疎なプールで匿名集合が実質縮む。使用パターンのクラスタ分析で、Tornado Cash 取引のうち $2.3B 相当が身元特定可能と報告されています（arXiv 2510.09433）。<strong>暗号保証 ≠ 実用プライバシー</strong>。</p>
+        <p class="sl-hw"><b>ドリル C の 6〜8 行目</b>: <code>nh = h(r)</code> を公開し、<code>spent</code> に入れ、2 回目は <code>nh in spent</code> が True で拒否。k は最後まで一度も出てきません — それが「どれかは言わない」の中身です。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">14/41</span><span class="st">ZK 証明をブロックチェーンで公開検証する：Solidity Verifier</span></div>
+        <p class="sl-claim">Solidity verifier = ZK 証明システムの検証アルゴリズムを Solidity コントラクトとして実装したもの。π と public inputs を渡すと on-chain で検証し、結果に応じて状態遷移をトリガーする。Tornado Cash のコントラクトがまさにこれ。</p>
+        <pre>① Prover   witness を使って計算を実行し π を生成。witness は誰にも見せない
+② Verifier コントラクトが π と public inputs を受け取り verify ✓/✗
+           $ snarkjs zkey export solidityverifier circuit.zkey Verifier.sol
+           人は回路（circom）だけ書き、verifier は機械生成
+③ Chain    verify ✓ なら状態遷移（払出・認証・集約）。全ノードが同じ検証を独立に再実行</pre>
+        <p><b>Public Verifiability</b>: ブロックチェーンは誰でも検証できる公開台帳なので、中央の信頼者が要りません。ZK の「正しさ」が、数学的事実から合意形成の基盤へ変わる。</p>
+        <p><b>設計の含意</b>: 「proof を誰が・どこで検証するか」は primitive 選択と同じくらい重要。オンチェーン検証 = gas cost という実コストが伴います（カード 32 の「0.93 KB の Groth16 が今も優位」に直結）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D3 : zkVM / LeanVM -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 15〜20 / zkVM と LeanVM</p>
+      <h2>回路を手書きせず、実行の表そのものを証明する — trace・AIR・境界制約</h2>
+      <p>ドリル B がこの節の数値版です。trace <code>[0, 65535, 1000]</code>、遷移の残差 <code>[0, 0]</code>、1 か所書き換えると <code>[0, 65535]</code>。宿題 zkvm-exploit の guest プログラムは、この表の「中で走る側」を書く問題です。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">15〜16/41</span><span class="st">zkVM：任意プログラムの実行を証明する</span></div>
+        <p class="sl-claim">Rust / C の普通のプログラム → RISC-V などの VM ISA にコンパイル → 実行トレース（1 命令ずつ記録）→ 算術化して STARK/SNARK で prove → 小さな proof を<strong>再実行せず</strong>検証。on-chain でも安価。</p>
+        <p>Week 4 までの ZK は「回路を手で書く」でした。zkVM は「CPU の 1 ステップが正しい」という制約を 1 回だけ書いておき、どんなプログラムもその CPU の上で走らせれば証明できる、という発想です。zkEVM・zkEmail・zkML はいずれもこの上に作られた用途特化（スライド 15）。</p>
+        <p class="sl-hw"><b>宿題 zkvm-exploit の立ち位置</b>: zkVM 本体は動かしません。書くのは「zkVM の<strong>中で</strong>走る guest プログラム」（<code>guest_main</code>）と、「何を公開し、何を witness に残すか」（<code>public_claim</code>）。Proof of Exploit = 「このプログラムには攻撃が存在する」を、攻撃入力そのものは見せずに示す。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">17/41</span><span class="st">zkVM の仕組み：実行トレースを算術化して証明する</span></div>
+        <p class="sl-claim">trace T ∈ Fⁿˣʷ（n ステップ × w 列: pc・レジスタ・メモリ操作・フラグ）。∀i: C(T[i], T[i+1]) = 0（隣接行が ISA 規則に従う）と、T[0] = init・out(T[n−1]) = y（境界）。<strong>正しい実行 ⟷ 全行で制約多項式が 0</strong>。</p>
+        <pre>① 実行 → トレース表   エミュレータが 1 命令ずつ実行し、各ステップの VM 状態を 1 行に記録
+② 算術化（AIR）        各列を有限体上の多項式とみなし、「正しい実行」を多項式の恒等式に帰着
+                        隣接行制約 + 境界制約が、評価領域の全点で 0 になるか
+③ 証明（STARK/SNARK）  多項式コミット + 検査で恒等式を簡潔に証明。verify は数点の評価のみ
+   単変数系: 商多項式 + FRI（Week 4）   多変数系: hypercube 上の sumcheck（Jolt / WHIR → LeanVM）</pre>
+        <p><b>要点</b>: 証明者はネイティブ実行の 10³〜10⁶ 倍重い。continuations / precompiles / recursion / GPU proving で実用化が進む。検証側は一貫して軽い。</p>
+        <p class="sl-hw"><b>ドリル B の 6〜9 行目</b>がこのスライドの最小版です。trace は「16 ビットの合計」1 列だけ、隣接行制約は <code>(trace[i] + c[i]) % M − trace[i+1]</code> の 1 種類、境界制約は「先頭は 0」「末尾 ≤ CAP」。表を 1 か所書き換えると残差が <code>65535</code> になって捕まる。<strong>制約が全部 0 であることが、証明の中身</strong>です。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">18/41</span><span class="st">LeanVM：Ethereum の PQC 移行のための zkVM</span></div>
+        <p class="sl-claim">各 validator は毎スロット、ブロックに署名する。量子計算機が BLS 署名（楕円曲線）を破るため、ハッシュベースの耐量子署名 leanXMSS への置換が必須。leanXMSS は 1 個 ~3,000 B（BLS は 96 B）で単純加算で集約できない → zkVM が全署名の検証を 1 つの小さな proof に再帰集約（約 250 倍圧縮）。</p>
+        <p><b>なぜ zkEVM ではないのか</b>: ① 対象が違う — zkEVM は実行層、要るのは合意層の署名集約。② zkEVM は楕円曲線依存で量子脆弱。PQC 移行の VM がそれでは本末転倒。③ 速度と形式検証のため ISA は最小。</p>
+        <p class="sl-hw"><b>橋</b>: 「verify ∘ verify ∘ …」の再帰集約は、Week 4 の「証明の証明」（recursion）そのものです。1 つの proof が「4 つの署名検証がすべて通った」を表す。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">19/41</span><span class="st">LeanVM の構成</span></div>
+        <p class="sl-claim">レジスタは FP / PC のみ（AP なし）、メモリは read-only、ISA は ADD / MUL / DEREF / JUMP の 4 命令だけ。無駄をそぎ落とした設計。</p>
+        <p>命令が 4 つしかない理由は、カード 17 の「隣接行制約」の数がそのまま証明コストになるからです。命令が少ないほど制約も少なく、形式検証もしやすい。ドリル B の VM は命令 1 つ（16 ビット加算）で、その極端な例です。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">20/41</span><span class="st">LeanVM の証明システム</span></div>
+        <p class="sl-claim">実行を複数のテーブルに分け、lookup で Memory に束ね、GKR で結合して証明する。1 サイクルわずか 5 要素のみコミット。多項式コミットは WHIR。</p>
+        <p>Week 4 の PLONK では 1 つの大きな表に全部を入れました。LeanVM は表を役割ごとに分けて（4 テーブル）、表どうしの整合を lookup（Logup*）で取ります。コミットする量が減るので証明者が軽くなる。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D4 : zkTLS / PIR / World ID / co-SNARK -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 21〜24 / zkTLS・PIR・World ID・co-SNARK</p>
+      <h2>秘密を持ち寄ったまま、1 つの証明にまとめる — 線形は手元、掛け算だけ通信</h2>
+      <p>ドリル A がこの節の数値版です。p = 97、w = [3, 5] を 2 人に分け、A = 13・B = 17 の積 27 の share を Beaver triple で組みます。宿題 co-snark-prove の <code>linear_combination_shares</code> と <code>mpc_prove</code> がそのまま対応します。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">21/41</span><span class="st">その他のアプリケーション</span></div>
+        <p class="sl-claim">zkTLS（ZK + MPC）= Web2 の API レスポンスを第三者検証可能に（TLSNotary / vlayer / Reclaim）。PIR（FHE）= どのインデックスを引いたか隠して取得。World ID（co-SNARK）= 虹彩コードの一意性を秘匿したまま検証。Verifiable FHE（FHE + ZK）= 暗号文のまま計算を委託し、結果の正当性も検証。</p>
+        <p><b>PIR（Private Information Retrieval）</b>は「図書館で何を借りたか司書にも知られずに本を借りる」です。RPC やライトクライアントが「どのアカウントの残高を見たか」を隠すのに使います。<b>zkTLS</b> は、TLS 通信の中身を MPC で秘密分散したまま処理して「このサーバがこう返した」を証明する — カード 5 の「署名済みデータのアダプタ」の TLS 版です。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">22/41</span><span class="st">World ID：AI 時代の Proof of Personhood</span></div>
+        <p class="sl-claim">Orb スキャン → iris code 化 → 一意性を判定し、検証済み人間の集合（Merkle 木）へ登録。</p>
+        <p>問題は「一意性判定」です。新しい虹彩コードを、既登録の数百万件と照合しなければならない。しかし虹彩コードは究極の個人情報で、平文で持ちたくない。ここで MPC と co-SNARK が要ります。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">23/41</span><span class="st">World ID の構成：秘匿照合・検証可能性・匿名性の合成</span></div>
+        <p class="sl-claim">World ID は単一プリミティブではなく、秘匿照合（MPC）・検証可能性（co-SNARK）・匿名性（Semaphore）の合成。</p>
+        <pre>① Orb スキャン（専用 HW）  虹彩から人間性と一意性を読み取る
+② iris code 化              生画像は破棄。一意性判定用のコードのみ残す
+③ 一意性チェック（MPC）      iris code を秘密分散し、平文を誰も見ずに既登録と照合
+④ 計算の検証可能性（co-SNARK） 照合が正しく行われたことを公開検証可能に（TACEO:Proof, 2025）
+⑤ 匿名クレデンシャル（Semaphore） 身元を隠して「検証済み人間」を証明し、二重使用を防止</pre>
+        <p><b>発行後のプライバシー（⑤）</b>: Semaphore は検証済み人間の Merkle 木に「匿名で」所属を証明する — Tornado Cash と同じ commitment + nullifier + membership です。nullifier は (user × app × action) ごとに決定的だが紐付け不可なので、本人を特定せずに「1 人 1 アクション」を強制し、アプリ横断トラッキングを防ぐ。World ID 4.0 は分散 OPRF で nullifier を計算し one-time-use 等で強化（生体情報の規制議論は継続）。</p>
+        <p class="sl-hw"><b>ドリル C とのつながり</b>: ⑤ はドリル C の 10 行がそのまま当てはまります。葉が「預かり証」から「検証済み人間の commitment」に変わるだけ。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">24/41</span><span class="st">co-SNARK：複数者の秘密入力を 1 つの証明にまとめる</span></div>
+        <p class="sl-claim">witness を秘密分散して配る（各 party は自分の share だけ、誰も w 全体を知らない）→ MPC で協調 prove（線形な MSM・FFT はローカル = 無料、乗算だけ通信ラウンド）→ open で π を得る。<strong>single-prover と byte-identical な 1 proof</strong>。検証者・vk・proof サイズは無変更。</p>
+        <pre>分散  [w] ← Share(w)          誰も w 全体を持たない（N 者へ秘密分散）
+MPC   Prove(pk, x; [w])        線形（MSM・FFT）= ローカル / 乗算のみ通信
+open  π ← Open(A, B, C)        single-prover と byte-identical
+verify Verify(vk, x, π)        検証側は何も変えなくてよい</pre>
+        <p><b>「線形はローカル、乗算だけ通信」の理由</b>: share の足し算・定数倍は、各自が自分の share に同じ計算をするだけで、結果の share になります。掛け算はそうならない（share 同士の積は積の share ではない）。だから掛け算のときだけ Beaver triple で 1 往復する。証明生成の大半（MSM・FFT）は線形なので、通信は少なくて済みます。</p>
+        <p class="sl-hw"><b>ドリル A の 5〜12 行目</b>がこの 3 段です。<code>A_sh = [5, 8]</code>（線形 = 手元）→ share 同士の積は <code>(21, 27)</code> で不一致（掛け算は手元では無理）→ Beaver で <code>(d, e) = (8, 8)</code> を公開 → <code>z = [27, 0]</code> → open <code>27</code>。宿題では <code>linear_combination_shares</code>（5〜7 行目）と <code>mpc_prove</code>（9〜12 行目）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D5 : Verifiable FHE -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 25〜27 / Verifiable FHE</p>
+      <h2>FHE が守るのは機密だけ — 「正しく計算したか」は証明で足す</h2>
+      <p>Week 5 の FHE に足りなかったものが、ここで名前を得ます。サーバが暗号文のまま f を計算して E(f(x)) を返しても、それが本当に f だったかは分からない。garbage を返されてもユーザは気づけない。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">25〜26/41</span><span class="st">Verifiable FHE：FHE に「計算の正しさ」を足す（ZK + FHE）</span></div>
+        <p class="sl-claim">FHE が守るのはデータ機密だけ。「正しく計算したか」は別問題。そこに ZK で計算の正しさを足すのが Verifiable FHE。</p>
+        <p>ユーザが秘密データ x を E(x) にしてサーバへ。サーバは中身を見ずに f を評価して E(f(x)) を返す。ここまでが Week 5。問題は、サーバが f ではなく g を計算していても、ユーザは復号するまで分からず、復号しても「これが f(x) か」を確かめる手段がないことです。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">27/41</span><span class="st">Verifiable FHE の構成：暗号文評価に「正しさの証明」を添える</span></div>
+        <p class="sl-claim">enc → eval → prove₁（ユーザ: 暗号文が正しく作られている）→ prove₂（サーバ: c′ = Eval(f, c)）→ verify。<strong>証明者が違う</strong>点が要。</p>
+        <pre>enc:    c ← Enc(pk, x)                             ユーザが暗号化（中身は秘匿）
+eval:   c′ ← Eval(f, c)                            サーバが暗号文のまま f を評価（FHE）
+prove₁: π_wf ← ZKProve{ ∃x, r : c = Enc(pk, x; r) ∧ noise 範囲内 }   ユーザ。x を隠す → ZK 必須
+prove₂: π_eval ← Prove{ c′ = Eval(f, c) }         サーバ。秘密なし → succinct で十分
+verify: Dec(sk, c′) = f(x) かつ Verify(π_wf, π_eval) = ⊤   機密性 + 正しさ を同時に</pre>
+        <p><b>注（講義が強調した点）</b>: π_eval に zero-knowledge 性は必須ではありません。c, c′, f は公開で、隠す witness が無い。本質は <strong>succinctness</strong> — 再実行より安く検証できること。SNARK / STARK で十分。ZK が要るのは π_wf（平文 x を隠す）と、サーバがモデル重み等を秘匿する場合。</p>
+        <p><b>コスト</b>: FHE の bootstrapping と ZK 証明生成が支配的で重い。回路バグは soundness を壊すので検証が要る（カード 33）。</p>
+        <p class="sl-hw"><b>Week 5 との橋</b>: π_wf の「noise 範囲内」は、Week 5 ドリル A の「ノイズが Δ/2 を超えると復号が壊れる」そのものです。ユーザが正しい範囲のノイズで暗号化したことを、ノイズの値を見せずに証明する。GW①（カード 36・41）の模範解がこれ。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D6 : 決め方と実装 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 29〜30 / 決め方と実装</p>
+      <h2>欲しい成果物から逆算する — 5 つの問いで primitive が決まる</h2>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">29/41</span><span class="st">欲しい成果物からプリミティブを選ぶ</span></div>
+        <p class="sl-claim">問いは 5 つ。欲しい成果物は「証明」か「計算結果」か？ witness（秘密）は誰が持つ（単独 / 複数者）？ 証明対象は回路か任意プログラムか？ 誰が計算する（複数者で共同 / 第三者に委託）？ その計算の正しさも証明したいか？</p>
+        <pre>欲しいのは証明
+  witness は単独 ── 回路      → 回路 DSL（Circom / Noir / halo2）
+                 └ 任意プログラム → zkVM（RISC0 / SP1 / Jolt）
+  witness は複数者（分散）      → co-SNARK
+欲しいのは計算結果
+  複数者で共同計算              → MPC
+  第三者に委託 ── 正しさは不要  → FHE
+             └ 正しさも証明したい → Verifiable FHE</pre>
+        <p><b>使い方</b>: 上から順に答えるだけで 1 つに決まります。GW①「医療データを見せずに AI 診断、正しさも確認したい」→ 計算結果 → 第三者に委託 → 正しさも → Verifiable FHE。宿題 co-snark-prove → 証明 → 複数者 → co-SNARK。宿題 zkvm-exploit → 証明 → 単独 → 任意プログラム → zkVM。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">30/41</span><span class="st">実装の紹介</span></div>
+        <p class="sl-claim">ZK: Circom + snarkjs（回路 DSL + Groth16 / Plonk、最も普及）。zkVM: RISC0（RISC-V トレースを STARK で証明、Groth16 に変換してオンチェーン検証）。co-SNARK: co-snarks（TACEO、Circom 回路を coSNARK 化、World ID の基盤）。Threshold FHE: threshold-fhe（Zama、TFHE の復号鍵を MPC で分散管理、FHEVM の KMS 基盤）。Verifiable FHE: EagleEye（FHE 演算トレースを Plonk 系制約に変換して証明）。</p>
+        <p><b>選定基準</b>: trusted setup の要否 / 言語エコシステム / 想定用途で選ぶ。Groth16 は回路ごとに trusted setup が要るが proof が最小（0.93 KB）。Plonk・STARK 系は setup 不要か汎用だが proof が大きい。カード 32 の実測に続きます。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D7 : 動くだけでは不十分 -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 31〜34 / 動くだけでは不十分</p>
+      <h2>性能・安全性・プライバシー・法律 — 4 つの落とし穴を設計段階で織り込む</h2>
+      <p>ドリル C の 9 行目（抜けた制約 1 行）がスライド 33 の再現です。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">31/41</span><span class="st">動くだけでは不十分</span></div>
+        <p class="sl-claim">4 つの観点。パフォーマンス（ZK: prover 重い・verify 軽い／ MPC: 通信ラウンドが支配的／ FHE: bootstrapping が支配的）、セキュリティ（ZK: soundness と zero-knowledge は別物／ MPC: 閾値超の共謀で漏れる／ FHE: 機密性のみ）、プライバシー（メタデータ・タイミング・利用パターン、MPC の出力そのもの、FHE のアクセスパターン）、法律・規制（OFAC 制裁・マネロン規制・GDPR・年齢確認義務）。</p>
+        <p><b>soundness と zero-knowledge は別物</b>、がこの節の鍵です。soundness = 偽の主張が通らない。zero-knowledge = 秘密が漏れない。片方だけ壊れることがあり、Zcash（カード 33）で壊れたのは soundness でした。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">32/41</span><span class="st">パフォーマンス：ZK はモバイルで実用段階に入った</span></div>
+        <p class="sl-claim">同じ 3 つの主張（パスポート検証・WebAuthn・OPRF）を、同じ端末で Circom + Groth16 / Noir + Barretenberg / ProveKit v1 の 3 方式に証明させた実測。手元の端末で証明を作ることが現実的なコストに収まりつつある。</p>
+        <div class="table-scroll"><table class="data"><thead><tr><th>指標（Moto E15, 2 GB RAM）</th><th>Groth16</th><th>ProveKit v1</th><th>読み方</th></tr></thead><tbody>
+          <tr><td>証明生成時間 Passport P1</td><td>241.6 s</td><td>22.0 s</td><td>約 11 倍速い。WebAuthn は Groth16 が OOM で完走せず</td></tr>
+          <tr><td>必要ダウンロード量 WebAuthn</td><td>1,753 MB</td><td>2.4 MB</td><td>回路ごとの巨大な鍵配布が消える</td></tr>
+          <tr><td>proof サイズ Passport P1</td><td>0.93 KB</td><td>716 KB</td><td><strong>ここだけ逆転</strong>。約 770 倍に膨らむ</td></tr>
+        </tbody></table></div>
+        <p><b>教訓</b>: 速くなった代わりに proof が重くなった。手元での証明生成は実用域に入ったが、その proof をオンチェーンで検証するなら 0.93 KB の Groth16 が今も優位。<strong>「一番速い方式」は存在せず、証明を誰がどこで検証するかで方式が決まる</strong>（カード 14 の設計の含意）。出典は ProveKit チーム自身の計測で、第三者の追試ではない点は講義も注記しています。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">33/41</span><span class="st">セキュリティ：Zcash Orchard の偽造脆弱性</span></div>
+        <p class="sl-claim">halo2 回路の制約漏れ 1 行が soundness を破り、無制限・検出不能な偽造を可能にした（2026 年発覚）。壊れたのは soundness で、zero-knowledge ではない。</p>
+        <pre>- let base = assign_advice(cs, || g_d)?;              // witness するだけ、g_d との一致を制約しない
++ let base = copy_advice(cs, || g_d, g_d_upstream)?;  // g_d と一致することを制約（copy constraint）</pre>
+        <p><b>何が起きたか</b>: base point が制約なし → 任意の値を witness 可能 → nk を偽造者が自由選択 → ivk = Commit(ak, nk, rivk) を偽造 → 同一 note に複数 nullifier → 無制限偽造 / 二重支払いが検知不能（秘匿取引）。05-29 に Taylor Hornby が AI 支援監査（Claude Opus 4.8）で発見。人手監査は 4 年間見逃していた。06-02 緊急ソフトフォーク、06-03 NU6.2 で回路を修正。</p>
+        <p><b>教訓</b>: 回路の制約漏れは 1 行でも致命的。秘匿性ゆえ過去の悪用有無は暗号学的に検証不能。</p>
+        <p class="sl-hw"><b>ドリル C の 9 行目</b>: 偽造者が r2 を持ってきたとき <code>(h(r2) in spent, h(k, r2) == C)</code> は <code>(False, False)</code>。左が False なので使用済み検査は素通り。右が False なのは当然で、偽造者は r2 と C を結ぶつもりがない。回路が「C = h(k, r) を満たす r で nullifier を作った」を<strong>要求していれば</strong>ここで止まり、要求していなければ左の False だけで 2 回目が通る。Orchard の <code>assign_advice</code> は「witness を置くだけで結びつきを制約しない」— 同じ形です。</p>
+      </article>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">34/41</span><span class="st">法律・規制：Tornado Cash 事件</span></div>
+        <p class="sl-claim">プライバシー技術は、設計・デプロイ・運用する人が規制の対象になりうる。プロトコルと開発者は別々に裁かれている。</p>
+        <pre>2022-08  米 OFAC が Tornado Cash を制裁指定（コントラクトアドレスを SDN リスト化）。蘭で開発者 Pertsev 逮捕
+2023-08  米 DOJ が Storm / Semenov を訴追（マネロン共謀・制裁違反・無登録送金業）
+2024-05  蘭裁判所が Pertsev をマネロン幇助で有罪、禁錮 5 年 4 か月
+2024-11  米第 5 巡回区 Van Loon v. Treasury: 不変のスマートコントラクトは「財産」でなく OFAC は越権 → 2025-03 制裁解除
+2025-08  Storm に無登録送金業で有罪評決。マネロン・制裁違反は評決不一致で一部 mistrial
+2026-09  Storm は未量刑、不一致の 2 罪状は 2026-10 に再審理予定。Pertsev は条件付き釈放で控訴審係属中</pre>
+        <p><b>設計上の論点</b>: プロトコルへの制裁は解除され、Tornado Cash の利用自体は違法ではなくなった。一方で開発者個人の刑事責任は今も係争中。コードは中立でも運用主体は問われうる。送金業ライセンス・制裁コンプライアンス・不変コントラクトの法的扱いを、設計段階で織り込む必要がある（2026-09 時点、流動的）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ D8 : GW① -->
+<section class="band">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">スライド 36・41（+ 補遺 37〜40）/ グループワーク①</p>
+      <h2>暗号文のまま AI 診断 — 要件から Verifiable FHE に辿り着く</h2>
+      <p>講義中のホワイトボードセッションです。回答例（スライド 41）は先に見ずに、まずスライド 36 の 4 段階を自分でやってから開くのを勧めます。</p>
+    </div>
+    <div class="deck">
+      <article class="sl">
+        <div class="sl-head"><span class="sn">36/41</span><span class="st">グループワーク①：暗号文のまま AI 診断を設計する</span></div>
+        <p class="sl-claim">お題: ユーザが自分の医療データをクラウドの AI に診断させたい。クラウドにも第三者にも生データを見せたくない。さらに「診断が正しく計算された」ことを本人が確認したい。この要件を満たすスタックを設計せよ。</p>
+        <pre>1. 要件を言語化（アクター / 秘匿入力 / 公開出力 / 信頼境界）
+2. 各 primitive が何を保証するかを思い出し、要件を満たす組み合わせを自分で選ぶ
+3. ユーザーフローを書き出す（誰が → 何を → どの primitive を通り → 境界を越えるのは何か、時系列で）
+4. 落とし穴を 1 つ（性能 / soundness / メタデータ / 規制）</pre>
+        <p class="sl-q">Q. 発表（各 1 分）: ユーザーフローを見比べ、「なぜ Verifiable FHE / なぜ MPC / なぜ TEE」を 1 文で説明できるか。</p>
+        <p class="sl-hw"><b>予習でやっておくこと</b>: カード 29 の決定木を上から答える。「欲しいのは計算結果 → 第三者に委託 → 正しさも証明したい」で 1 つに決まります。次に「MPC だとなぜ不利か」「TEE だとなぜ不利か」を、カード 7 の信頼前提の行から 1 文ずつ。</p>
+      </article>
+      <details class="appx">
+        <summary>補遺（スライド 37〜40）— Cryptomata と POD2</summary>
+        <div class="deck" style="padding:0.8rem 1rem 1rem;">
+          <article class="sl">
+            <div class="sl-head"><span class="sn">38/41</span><span class="st">Cryptomata：数学が正しさと秘匿を保証する自律システム</span></div>
+            <p class="sl-claim">止められず・覗けず・改竄できない自己実行プログラム。obfuscation + ZK + MPC（+ 量子暗号）で、ID registry や医療・遺伝データなど社会基盤を暗号ネイティブに動かす将来像。</p>
+          </article>
+          <article class="sl">
+            <div class="sl-head"><span class="sn">39〜40/41</span><span class="st">POD2：署名データを証明し、組み合わせる汎用アダプタ</span></div>
+            <p class="sl-claim">SignedPOD（発行者が EdDSA 署名した key-value ストア、エントリを Merkle 木化して個別の値だけ選択開示）を入力に、演繹規則（Statement × Operation）で新しい主張を導き、再帰的に証明（MainPOD）を積み上げる。MainPOD 自体も POD なので次の証明へ合成できる。</p>
+            <p>実装スタックはコンパイラ構造: Frontend（人間可読な型）→ Middleware（型付き中間表現）→ Backend（証明系 Plonky2、trusted setup 不要・再帰向き。on-chain 検証時は Groth16 で wrap）。カード 5 の「署名済みデータのアダプタ」の一般形です。</p>
+          </article>
+        </div>
+      </details>
+      <article class="sl">
+        <div class="sl-head"><span class="sn">41/41</span><span class="st">グループワーク① 回答例：暗号文のまま AI 診断</span></div>
+        <p class="sl-claim">生データを渡さず、診断の正しさまで確認する。Verifiable FHE = FHE + ZK が両方の要件を同時に満たす。</p>
+        <pre>① ユーザ（患者）  医療データ D を FHE 公開鍵で暗号化し Enc(D) だけをクラウドへ。D はローカル
+② クラウド AI     暗号文のまま推論 f を評価し Enc(f(D)) を返す。同時に「c に正しく f を評価した」証明 π を生成
+③ ユーザ（検証）  Enc(f(D)) を復号して診断結果 + π を検証。データ機密（FHE）と計算の正しさ（ZK）を同時に確認
+信頼境界          クラウドは信頼しない。境界を越えるのは Enc(D) と Enc(f(D)) + π だけ</pre>
+        <p><b>なぜこの組み合わせ</b>: FHE 単体はデータ機密のみで「正しく計算したか」は保証しない → ZK を重ねた Verifiable FHE で埋める。MPC / TEE は信頼前提とコストで不利。</p>
+        <p><b>落とし穴</b>: 性能（FHE の bootstrapping が支配的）／ soundness（Verifiable FHE の回路バグ、カード 33）／ メタデータ（誰がいつ診断したかは隠れない、カード 13）／ 規制（医療データ = GDPR・HIPAA、カード 34）。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ HW MAP -->
+<section class="band" id="hwmap">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">宿題の地図</p>
+      <h2>宿題 2 問の関数は、ドリルのどの行か</h2>
+      <p>宿題はどちらも「primitive の中で／上で走る計算」を書きます。zkVM 本体や SNARK 本体は動かしません。数はドリルと同じなので、書いた関数にドリルの入力を渡せば、ドリルの出力がそのまま期待値です。</p>
+    </div>
+    <div class="table-scroll"><table class="data hwmap"><thead><tr><th>宿題 / 関数</th><th>ドリルの行</th><th>何を確かめるか</th></tr></thead><tbody>
+      <tr><td>co-snark-prove<br>linear_combination_shares</td><td>A の 5〜7 行目</td><td>係数 × share を share ごとに足すだけで、線形結合の share になる。open すると平文で計算した A = 13、B = 17 と一致。<code>add_shares</code> と <code>scale_shares</code> は支給済み</td></tr>
+      <tr><td>co-snark-prove<br>mpc_prove</td><td>A の 8〜12 行目</td><td>share 同士の積は積の share にならない（8 行目で失敗させる）。Beaver triple (a, b, c) を使い、d = A − a と e = B − b を open して z = c + d·[b] + e·[a] + d·e（d·e は片方だけ）。open すると 27 = 13 × 17 mod 97。<code>beaver_multiply</code> は支給済みで、それを呼ぶ形</td></tr>
+      <tr><td>zkvm-exploit<br>is_exploit</td><td>B の 2〜5 行目</td><td>「プログラムは受理する（16 ビットの合計 ≤ CAP）」かつ「真の合計は CAP を超える」の両方が成り立つとき True。legit / honest は False、[65535, 1001] と [65535, 65535, 1002] は True</td></tr>
+      <tr><td>zkvm-exploit<br>public_claim / program_hash</td><td>B の 10〜11 行目</td><td>公開するのはプログラムの識別子と「攻撃が存在する」だけ。攻撃入力は witness に残す。v2 のプログラムは別の識別子になる</td></tr>
+      <tr><td>zkvm-exploit<br>guest_main</td><td>B の 12〜14 行目</td><td>攻撃でない入力には Err（"rejected"）、攻撃なら PublicClaim。2 つの違う攻撃入力が<strong>同じ</strong>公開出力を返す（13 行目 True）— これが「どの攻撃かは言わない」の中身</td></tr>
+    </tbody></table></div>
+    <div class="callout amber">
+      <p class="eyebrow">Python のドリルと Rust の宿題の対応</p>
+      <p><code>% 65536</code> ↔ <code>wrapping_add</code>（u16 のあふれ）。真の合計はドリルでは普通の int、Rust では <code>u64</code> で取る（u16 で足すとまた化ける）。<code>hashlib.sha256(...)[:8]</code> ↔ <code>DefaultHasher</code> — ただし <strong>DefaultHasher は暗号学的ハッシュではなく、Rust のバージョンが変わると値も変わる</strong>。テストが「同じビルドの中で決定的」しか要らないから済んでいるだけで、本物の zkVM は SHA-256 のような衝突耐性のあるハッシュでプログラムに束縛します。Beaver triple はドリルでも宿題でも<strong>引数で渡される</strong>（実運用では試合前の offline phase で配っておく）。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ CHECK -->
+<section class="band" id="precheck">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">予習チェック</p>
+      <h2>講義の前に、自分の言葉で言えるか 7 問</h2>
+    </div>
+    <div class="callout">
+      <p>(1) ZK・MPC・FHE を「誰が誰と何をやり取りするか」で 1 行ずつ言えるか。それぞれの<strong>信頼前提</strong>はどこに残るか。 (2) Tornado Cash の引き出しで、証明者が示す 2 つのことは何か。k と r のどちらを、どの形で見せるか。 (3) zkVM の「正しい実行」は、表（trace）のどんな性質に置き換わるか。表を 1 か所書き換えると何が起きるか。 (4) co-SNARK で「線形はローカル、掛け算だけ通信」なのはなぜか。share 同士を掛けると何がまずいか。 (5) FHE だけでは何が保証されないか。Verifiable FHE の 2 つの証明は、誰が何を証明するか。π_eval に zero-knowledge は要るか。 (6) soundness と zero-knowledge はどう違うか。Zcash Orchard で壊れたのはどちらか、原因は何行か。 (7) 「医療データを見せずに AI 診断、正しさも確認したい」を、カード 29 の決定木で上から答えると何に着くか。MPC・TEE はなぜ不利か。</p>
+      <p class="strong-line">言えなかった番号だけカードに戻る: 1 → 7/41、2 → 13/41 とドリル C、3 → 17/41 とドリル B、4 → 24/41 とドリル A、5 → 27/41、6 → 31・33/41、7 → 29・41/41。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ GLOSSARY -->
+<section class="band" id="glossary">
+  <div class="wrap stack">
+    <div class="band-head">
+      <p class="eyebrow">用語カード</p>
+      <h2>用語の意味と、なぜその言葉なのか — 中学・高校の数学から橋を架ける</h2>
+      <p>用語からではなく、知っている数学から入る。「余り」から mod へ、「2 人で持つ半券」から share へ、「答え合わせが全部 0」から制約へ。</p>
+    </div>
+    <div class="table-scroll"><table class="data gloss"><thead><tr><th>用語</th><th>意味</th><th>なぜその言葉か</th><th>どこで</th></tr></thead><tbody>
+      <tr><td>share（シェア）</td><td>秘密 w を 2 つの数に分けて、足すと w に戻るようにしたもの（w = s₁ + s₂ mod p）。片方だけ見ても w は分からない — ドリル A の 4 行目で、同じ share 1 から 3 通りの秘密が出る</td><td>share = 分け前。秘密の「分け前」を 1 人 1 つ持つ</td><td>ドリル A、スライド 24</td></tr>
+      <tr><td>Beaver triple</td><td>秘密と無関係な乱数 a, b とその積 c = ab の 3 つ組。share 同士は掛けられないので、前もって配った (a, b, c) の share を使い、d = A − a と e = B − b だけ公開して積の share を作る</td><td>Donald Beaver（1991）の手法。3 つ組なので triple</td><td>ドリル A 9〜12 行目、スライド 24</td></tr>
+      <tr><td>co-SNARK</td><td>witness を秘密分散したまま、複数の証明者が協力して 1 つの SNARK を作る。出来上がる proof は 1 人で作ったものと byte 単位で同じ</td><td>collaborative（協調）SNARK</td><td>スライド 24、宿題 co-snark-prove</td></tr>
+      <tr><td>witness / public input</td><td>witness = 証明者だけが知る秘密の入力。public input = 検証者にも見せる入力。「∃w. C(x, w) = 1」の w と x</td><td>witness = 証人。「私はこれを知っている」の「これ」</td><td>スライド 7、ドリル B 10〜13 行目</td></tr>
+      <tr><td>zkVM</td><td>回路を手で書く代わりに、「CPU の 1 ステップが正しい」制約を 1 回だけ書いた仮想計算機。上で走らせたどんなプログラムの実行も証明できる</td><td>zero-knowledge Virtual Machine</td><td>スライド 16〜17、宿題 zkvm-exploit</td></tr>
+      <tr><td>guest プログラム</td><td>zkVM の<strong>中で</strong>走るプログラム。宿題の <code>guest_main</code>。外側（host）が証明を作る</td><td>host（主人）の家に泊まる guest（客）。実行環境の内と外</td><td>宿題 zkvm-exploit</td></tr>
+      <tr><td>trace（実行トレース）</td><td>プログラムの実行を、1 ステップ = 1 行で並べた表。列は pc・レジスタ・メモリ操作など。ドリル B では「16 ビットの合計」1 列だけ</td><td>trace = 足跡。実行が残した足跡の一覧</td><td>スライド 17、ドリル B 6 行目</td></tr>
+      <tr><td>AIR / 隣接行制約</td><td>「i 行目と i+1 行目の関係はこうでなければならない」を式にしたもの。全行で 0 なら正しい実行。表を 1 か所いじると 0 でなくなる</td><td>Algebraic Intermediate Representation。代数（式）で書いた中間表現</td><td>スライド 17、ドリル B 7〜8 行目</td></tr>
+      <tr><td>境界制約</td><td>表の最初と最後の行に課す条件。「最初は 0 から始まる」「最後の値が出力 y に等しい」</td><td>boundary（境界）= 表の端</td><td>スライド 17、ドリル B 9 行目</td></tr>
+      <tr><td>soundness / zero-knowledge</td><td>soundness = 偽の主張が通らないこと。zero-knowledge = 証明から秘密が漏れないこと。別々の性質で、片方だけ壊れることがある（Zcash で壊れたのは soundness）</td><td>sound = 健全。「健全性」と「零知識性」</td><td>スライド 31・33、ドリル C 9 行目</td></tr>
+      <tr><td>commitment（預かり証）</td><td>秘密を決めた、という証拠を先に出しておく値。C = H(k, r)。後で k, r を明かせば「あのとき決めていた」が示せるが、C から k, r は逆算できない</td><td>commit = 約束する。値を約束しておく</td><td>スライド 13、ドリル C 2 行目</td></tr>
+      <tr><td>nullifier（使用済み札）</td><td>引き出すときに公開する H(r)。同じ r からは同じ値が出るので、2 回目は「既出」で拒否される。しかし C = H(k, r) とは結びつけられないので、どの預入かは漏れない</td><td>nullify = 無効にする。使った札を無効化する</td><td>スライド 13・23、ドリル C 6〜8 行目</td></tr>
+      <tr><td>Merkle membership</td><td>ハッシュを 2 つずつ束ねて木にし、根 1 つで全部の葉を代表させる。「私の葉は木にある」を、根と兄弟ハッシュの列（path）だけで示せる</td><td>Ralph Merkle の木。membership = 所属</td><td>スライド 12〜13、ドリル C 3〜5 行目</td></tr>
+      <tr><td>Verifiable FHE</td><td>FHE（暗号文のまま計算）に、「本当にその関数を計算した」証明を添えたもの。ユーザは暗号文の well-formedness を ZK で、サーバは評価の正しさを succinct な証明で示す</td><td>verifiable = 検証できる FHE</td><td>スライド 25〜27・41</td></tr>
+      <tr><td>threshold FHE</td><td>FHE の復号鍵を 1 人が持たず、MPC で分散して持つ。t 人以上が集まらないと復号できない</td><td>threshold = しきい値。t 人というしきい値</td><td>スライド 8・30</td></tr>
+      <tr><td>PIR</td><td>データベースから「何番目を読んだか」をサーバに知られずに読む。FHE で「何番目か」を暗号化したまま取り出す</td><td>Private Information Retrieval（秘匿情報検索）</td><td>スライド 21</td></tr>
+      <tr><td>zkTLS</td><td>Web サーバとの TLS 通信の中身を、MPC で分散したまま処理して「このサーバがこう返した」を第三者に証明する</td><td>zero-knowledge + TLS（HTTPS の暗号層）</td><td>スライド 21</td></tr>
+      <tr><td>Semaphore</td><td>「検証済みの集合に所属している」を匿名で証明し、nullifier で二重使用を防ぐ zk-SNARK の仕組み。Tornado Cash と同じ 3 点セット</td><td>semaphore = 手旗信号。身元を言わずに合図だけ送る</td><td>スライド 12・23</td></tr>
+      <tr><td>program binding（プログラム束縛）</td><td>証明を「どのプログラムの実行か」に結びつけること。プログラムのハッシュを公開入力に入れる。ドリル B の program_id</td><td>bind = 結びつける</td><td>ドリル B 10〜11 行目</td></tr>
+      <tr><td>succinct（簡潔）</td><td>証明の検証が、計算をやり直すよりずっと安いこと。π_eval に要るのはこれで、zero-knowledge は要らない</td><td>succinct = 簡潔な。短くて速い</td><td>スライド 27</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Advanced Cryptography Program 2026 / Week 6 自習ノート — 理論を応用設計へ。ドリル A・B の数値は宿題 co-snark-prove / zkvm-exploit の README とテストのもの、ドリル C は sha256 の先頭 6 桁で作った最小の Tornado Cash です。</p>
+  </div>
+</footer>
+
+<script>
+// ---- 目次を h2 から自動生成 ----
+(function () {
+  "use strict";
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var heads = document.querySelectorAll(".band-head h2");
+  Array.prototype.forEach.call(heads, function (h, i) {
+    var section = h.closest(".band");
+    if (!section || i === 0 || h.closest(".appx")) return;
+    if (!section.id) section.id = "sec-" + i;
+    var li = document.createElement("li"), a = document.createElement("a");
+    a.href = "#" + section.id; a.textContent = h.textContent.trim();
+    li.appendChild(a); toc.appendChild(li);
+  });
+})();
+
+
+
+// ---- 対話ドリル（1 行打って、出た値を貼って、1 文読む）— Week 6 ----
+(function () {
+  "use strict";
+  function norm(s) { return String(s).replace(/\s+/g, "").replace(/^>>>/, "").replace(/['"]/g, "").toLowerCase(); }
+  function drillText(node, text) {
+    // 「**強調**」だけを <b> にする。innerHTML は使わないので、本文は常にテキストのまま。
+    String(text).split("**").forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2 ? Object.assign(document.createElement("b"), { textContent: part })
+                             : document.createTextNode(part));
+    });
+  }
+  function makeDrill(rootId, storeKey, STEPS, doneText) {
+    var root = document.getElementById(rootId);
+    if (!root) return;
+    var body = root.querySelector(".drill-body"), progress = root.querySelector(".drill-progress"), reset = root.querySelector(".drill-reset");
+    var cur = 0;
+    try { cur = Math.min(parseInt(localStorage.getItem(storeKey) || "0", 10) || 0, STEPS.length); } catch (e) {}
+    function save() { try { localStorage.setItem(storeKey, String(cur)); } catch (e) {} }
+    function render() {
+      body.textContent = "";
+      progress.textContent = cur + " / " + STEPS.length + " 行";
+      var lastQ = null;
+      for (var i = 0; i <= cur && i < STEPS.length; i++) {
+        var st = STEPS[i], done = i < cur;
+        var step = document.createElement("div");
+        step.className = "drill-step" + (done ? " done" : " now");
+        if (st.q.indexOf("—") >= 0 && st.q !== lastQ) {
+          var h = document.createElement("p"); h.className = "drill-q"; h.textContent = st.q; step.appendChild(h);
+        }
+        lastQ = st.q.indexOf("—") >= 0 ? st.q : lastQ;
+        var say = document.createElement("p"); say.className = "drill-say"; drillText(say, st.say); step.appendChild(say);
+        var cmdRow = document.createElement("div"); cmdRow.className = "drill-cmd";
+        var pre = document.createElement("pre"); pre.textContent = ">>> " + st.cmd; cmdRow.appendChild(pre);
+        var copy = document.createElement("button"); copy.type = "button"; copy.className = "btn-sm"; copy.textContent = "コピー";
+        (function (c, b) { b.addEventListener("click", function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(function () { b.textContent = "コピーした"; setTimeout(function () { b.textContent = "コピー"; }, 1200); });
+        }); })(st.cmd, copy);
+        cmdRow.appendChild(copy); step.appendChild(cmdRow);
+        var mean = document.createElement("p"); mean.className = "drill-mean"; var mb = document.createElement("b"); mb.textContent = "この行の意味"; mean.appendChild(mb); mean.appendChild(document.createTextNode(": ")); drillText(mean, st.mean); step.appendChild(mean);
+        if (done) {
+          if (st.out !== "") { var outp = document.createElement("pre"); outp.className = "drill-out"; outp.textContent = st.out; step.appendChild(outp); }
+          if (st.then) { var then = document.createElement("p"); then.className = "drill-then"; drillText(then, st.then); step.appendChild(then); }
+        } else {
+          var form = document.createElement("div"); form.className = "drill-form";
+          if (st.out === "") {
+            var note = document.createElement("p"); note.className = "drill-mean"; note.textContent = "この行は何も表示しません（代入だけ）。打ったら「次へ」。";
+            var nx = document.createElement("button"); nx.type = "button"; nx.className = "btn-main"; nx.textContent = "次へ";
+            nx.addEventListener("click", function () { cur++; save(); render(); });
+            step.appendChild(note); form.appendChild(nx); step.appendChild(form); body.appendChild(step); continue;
+          }
+          var inp = document.createElement("input"); inp.type = "text"; inp.placeholder = "出た値をそのまま貼る（例: " + st.out + "）"; inp.setAttribute("aria-label", "出た値");
+          var ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "確認";
+          var run = document.createElement("button"); run.type = "button"; run.className = "btn-ghost"; run.textContent = "ここで実行";
+          var fb = document.createElement("p"); fb.className = "drill-fb"; fb.hidden = true;
+          (function (st, inp, fb) {
+            function check(v) {
+              if (norm(v) === norm(st.out)) { cur++; save(); render(); window.setTimeout(function () {
+                var el = body.querySelector(".drill-step.now") || body.lastElementChild; if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 0); }
+              else { fb.hidden = false; fb.textContent = "違う値です（" + v + "）。行頭の空白や、打ち間違いがないか見てください。Python が出した値をそのまま貼れば大丈夫。"; }
+            }
+            ok.addEventListener("click", function () { check(inp.value); });
+            inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(inp.value); });
+            run.addEventListener("click", function () { inp.value = st.out; check(st.out); });
+          })(st, inp, fb);
+          form.appendChild(inp); form.appendChild(ok); form.appendChild(run); step.appendChild(form); step.appendChild(fb);
+        }
+        body.appendChild(step);
+      }
+      if (cur >= STEPS.length) {
+        var fin = document.createElement("div"); fin.className = "banner ok"; fin.textContent = doneText; body.appendChild(fin);
+      }
+    }
+    reset.addEventListener("click", function () { cur = 0; save(); render(); });
+    render();
+  }
+  var A = [
+    { q: "分ける — witness を 2 人に分ける",
+      say: "証明したい秘密（witness）は 2 つの数。誰にも全部は見せたくない。まず数を置きます。",
+      cmd: "p = 97; w = [3, 5]; (p, w)",
+      mean: "p は「割った余り」で数を回す法。w が秘密。",
+      out: "(97, [3, 5])",
+      then: "ここから先、w を丸ごと持つ人は 1 人も出てきません。" },
+    { q: "",
+      say: "w[0] = 3 を 2 人に分けます。1 人目に乱数 1 を渡し、2 人目には「足すと 3 に戻る残り」を渡す。w[1] = 5 も同じ。",
+      cmd: "w0 = [1, (w[0] - 1) % p]; w1 = [2, (w[1] - 2) % p]; (w0, w1)",
+      mean: "w0 = [1, 2] が 3 の share、w1 = [2, 3] が 5 の share。",
+      out: "([1, 2], [2, 3])",
+      then: "1 人目は (1, 2)、2 人目は (2, 3) だけを持ちます。これが**秘密分散**（share）。宿題では `share()` が支給されていて、この計算をします。" },
+    { q: "",
+      say: "足すと元に戻るか。",
+      cmd: "(sum(w0) % p, sum(w1) % p)",
+      mean: "share を全部足して p で割った余り。",
+      out: "(3, 5)",
+      then: "戻りました。これが `reconstruct()`。**戻すには全員の share が要る** — 1 人では戻せない、が次の行。" },
+    { q: "",
+      say: "1 人目の share は 1 でした。秘密が 3 でなく 50 や 96 だったら、1 人目の手元は変わったでしょうか。",
+      cmd: "[(1, (s - 1) % p) for s in (3, 50, 96)]",
+      mean: "秘密 s を 3 通り変えて、1 人目の乱数 1 を固定したときの share の組。",
+      out: "[(1, 2), (1, 49), (1, 95)]",
+      then: "1 人目の手元は**どの秘密でも 1 のまま**。つまり share 1 枚は秘密について何も語らない。分けるだけで「見せずに預ける」ができています。" },
+    { q: "線形 — 通信なしで share のまま",
+      say: "証明の部品 A = 1·w[0] + 2·w[1] を作ります。ただし w を戻さず、各人が**自分の share だけ**で。",
+      cmd: "A_sh = [(1 * x + 2 * y) % p for x, y in zip(w0, w1)]; A_sh",
+      mean: "1 人目は自分の (1, 2) から 1·1 + 2·2 = 5、2 人目は (2, 3) から 1·2 + 2·3 = 8。",
+      out: "[5, 8]",
+      then: "誰も相手に何も送っていません。掛けて足すだけなら、share のまま各自で終わる。**宿題の `linear_combination_shares` はこの 1 行です**（`scale_shares` と `add_shares` で書く）。" },
+    { q: "",
+      say: "戻すと、平文で計算した A と一致するか。",
+      cmd: "(sum(A_sh) % p, (1 * 3 + 2 * 5) % p)",
+      mean: "左は share を戻した値、右は秘密を知る人が直接計算した値。",
+      out: "(13, 13)",
+      then: "一致。**線形なら share の上と平文の上で同じ結果**になる — これが co-SNARK の「MSM・FFT はローカルで無料」（スライド 24）の正体です。" },
+    { q: "",
+      say: "もう 1 つの部品 B = 4·w[0] + 1·w[1] も同じ手で。",
+      cmd: "B_sh = [(4 * x + 1 * y) % p for x, y in zip(w0, w1)]; (B_sh, sum(B_sh) % p)",
+      mean: "各自 4·x + 1·y。戻すと 17。",
+      out: "([6, 11], 17)",
+      then: "A = 13、B = 17 の share が手元にできました。まだ誰も 13 も 17 も見ていません。" },
+    { q: "掛け算 — share のままでは通らない",
+      say: "C = A·B が欲しい。share 同士を掛けてみます。",
+      cmd: "(sum(x * y for x, y in zip(A_sh, B_sh)) % p, 13 * 17 % p)",
+      mean: "左は share ごとに掛けて足したもの、右は正しい答え 221 mod 97。",
+      out: "(21, 27)",
+      then: "**合いません**。(5+8)(6+11) を展開すると 5·11 と 8·6 の交差項が出ますが、share ごとの掛け算はそれを落とす。足し算と違って、掛け算は各自だけでは終わらない。ここだけ通信が要ります。" },
+    { q: "",
+      say: "そこで前もって配っておく三つ組（Beaver triple）。a = 5, b = 9, c = a·b = 45 を、それぞれ分けた形で持っています。",
+      cmd: "a_sh, b_sh, c_sh = [1, 4], [4, 5], [20, 25]; (sum(a_sh) % p, sum(b_sh) % p, sum(c_sh) % p, 5 * 9)",
+      mean: "戻すと a = 5, b = 9, c = 45 で、c = a·b。",
+      out: "(5, 9, 45, 45)",
+      then: "a, b は秘密と無関係な乱数です。「乱数同士の積」を事前に用意しておく、がこの手の核。実運用では試合前の **offline phase** で（別の MPC か信頼できる配布者が）大量に作って配っておきます。ここでは天下りに与えています — 宿題も同じで、`beaver_triple` は引数で渡されます。" },
+    { q: "",
+      say: "開く（open）のは 2 つだけ: d = A − a と e = B − b。",
+      cmd: "d = (sum(A_sh) - sum(a_sh)) % p; e = (sum(B_sh) - sum(b_sh)) % p; (d, e)",
+      mean: "全員が share を持ち寄って d と e だけを復元する。これが唯一の通信（1 往復）。",
+      out: "(8, 8)",
+      then: "d = 13 − 5 = 8、e = 17 − 9 = 8。A も B も開いていません。開いたのは a と b という乱数でずらした値だけ。" },
+    { q: "",
+      say: "d と e が公開されたので、各自が自分の share だけで C の share を作れます（支給の `beaver_multiply` の中身）。",
+      cmd: "z = [(c_sh[i] + d * b_sh[i] + e * a_sh[i]) % p for i in range(2)]; z[0] = (z[0] + d * e) % p; z",
+      mean: "各自: c の share + d·(b の share) + e·(a の share)。d·e は公開値なので 1 人だけが足す。",
+      out: "[27, 0]",
+      then: "C の share は [27, 0]。1 人目が 20 + 32 + 8 + 64 = 124 → 27、2 人目が 25 + 40 + 32 = 97 → 0。" },
+    { q: "",
+      say: "戻して、正解 13·17 と比べます。",
+      cmd: "(sum(z) % p, 13 * 17 % p)",
+      mean: "左は share を戻した C、右は平文で計算した 221 mod 97。",
+      out: "(27, 27)",
+      then: "一致。**証明 (A, B, C) = (13, 17, 27) の share が、witness を一度も戻さずに揃いました**。宿題の `mpc_prove` は行 5・7・11 を並べたものです。" },
+    { q: "仕上げ — なぜ合うのか、なぜ漏れないのか",
+      say: "種明かし。x·y = (x−a)(y−b) + d·b + e·a + a·b を、公開値 d, e と三つ組で計算しているだけ。",
+      cmd: "(d * e + d * 9 + e * 5 + 45) % p",
+      mean: "d·e + d·b + e·a + c。全部足して mod 97。",
+      out: "27",
+      then: "中学の展開公式 1 本です。(x−a)(y−b) = xy − xb − ya + ab を xy について解いた形。" },
+    { q: "",
+      say: "最後に、開いた d = 8 から A が分かってしまわないか。A が 13 でも 50 でも 90 でも d = 8 になる a はあるか。",
+      cmd: "[(A, (A - d) % p) for A in (13, 50, 90)]",
+      mean: "A を 3 通り変えて、d = 8 を作る a を逆算。",
+      out: "[(13, 5), (50, 42), (90, 82)]",
+      then: "どの A でも a を合わせれば d = 8。a は乱数なので、**d を見た人は A を絞れない**。行 4 と同じ理屈です。開いたのは「乱数でずらした値」だけ — 通信 1 回で、秘密は 1 つも出ていない。" },
+  ];
+  var B = [
+    { q: "設定 — 壊れているプログラム P",
+      say: "クーポンの割引合計が 1000 以下なら Accept、が仕様。まず正当なクーポン。",
+      cmd: "CAP = 1000; ds = [10, 20, 30]; (sum(ds), sum(ds) <= CAP)",
+      mean: "合計 60、上限以下。",
+      out: "(60, True)",
+      then: "ここは何も問題ない。" },
+    { q: "",
+      say: "P は合計を 16 bit（0〜65535）の箱で足します。あふれると 0 に戻る。65535 + 1001 を、本当の合計と P の見る合計で。",
+      cmd: "M = 2 ** 16; ds = [65535, 1001]; (sum(ds), sum(ds) % M)",
+      mean: "本当は 66536、16 bit の箱では 66536 − 65536 = 1000。",
+      out: "(66536, 1000)",
+      then: "Rust の `wrapping_add` はこの `% M` そのものです。箱からあふれた分が静かに消えて、**ちょうど 1000** に着地した。" },
+    { q: "",
+      say: "P の判定と、正しい判定を並べます。",
+      cmd: "(sum(ds) % M <= CAP, sum(ds) <= CAP)",
+      mean: "左が P（あふれた合計で判定）、右が正しい実装（本当の合計で判定）。",
+      out: "(True, False)",
+      then: "P は Accept、本当は Reject。**この食い違いが「攻撃（exploit）」の定義**です — P が受理し、かつ本当の合計が上限を超える。" },
+    { q: "",
+      say: "上限を超えているだけでは攻撃ではない。[2000] は？",
+      cmd: "ds2 = [2000]; (sum(ds2) % M <= CAP, sum(ds2) <= CAP)",
+      mean: "あふれないので P も正しく Reject する。",
+      out: "(False, False)",
+      then: "両方 False。P がちゃんと断っているので、これは攻撃ではありません（tests の `honestly_rejected_coupon`）。" },
+    { q: "",
+      say: "攻撃の条件を 1 つの式にして、tests の 4 つのクーポンに当てます。",
+      cmd: "[(sum(x) % M <= CAP) and (sum(x) > CAP) for x in ([10, 20, 30], [2000], [65535, 1001], [65535, 65535, 1002])]",
+      mean: "「P が Accept」かつ「本当の合計が上限超え」。",
+      out: "[False, False, True, True]",
+      then: "**宿題の `is_exploit` はこの式です**。Rust では本当の合計を `u64` で足す（あふれない箱）のがコツ。" },
+    { q: "trace — zkVM が記録する「実行の表」",
+      say: "zkVM は P を 1 命令ずつ走らせ、各ステップの状態を 1 行として表にします（スライド 17 の trace）。ここでは「合計の箱」の値だけを列に。",
+      cmd: "t = [0, ds[0] % M, (ds[0] + ds[1]) % M]; t",
+      mean: "開始 0 → 1 個目を足して 65535 → 2 個目を足してあふれて 1000。",
+      out: "[0, 65535, 1000]",
+      then: "これが実行トレース。3 行 × 1 列の小さな表です。" },
+    { q: "",
+      say: "「正しく実行された」を、隣り合う 2 行の関係で言います。次の行 − 今の行 − 足した数 が 0 か。",
+      cmd: "[(t[i + 1] - t[i] - ds[i]) % M for i in range(2)]",
+      mean: "各遷移で t[i+1] = t[i] + ds[i] (mod M) が成り立つか。0 なら成立。",
+      out: "[0, 0]",
+      then: "全行 0。**正しい実行 ⟺ すべての行で制約が 0**（スライド 17: ∀i, C(T[i], T[i+1]) = 0）。zkVM が証明するのは、この「全行 0」です。" },
+    { q: "",
+      say: "表を 1 か所だけ書き換えてみます。最後の 1000 を 999 に。",
+      cmd: "t2 = [0, 65535, 999]; [(t2[i + 1] - t2[i] - ds[i]) % M for i in range(2)]",
+      mean: "改竄した表に同じ検査を当てる。",
+      out: "[0, 65535]",
+      then: "2 行目が 0 でなくなった。**1 行でも嘘があれば、どこかの制約が 0 にならない** — だから表を見せずに「全行 0」だけ証明すれば、実行の正しさが伝わる。" },
+    { q: "",
+      say: "遷移の他に、入口と出口も固定します（境界制約）。開始は 0、最後は上限以下、そして本当の合計は上限超え。",
+      cmd: "(t[0] == 0, t[-1] <= CAP, sum(ds) > CAP)",
+      mean: "表の 1 行目、最終行、そして主張したい事実。",
+      out: "(True, True, True)",
+      then: "遷移制約 + 境界制約で「P がこの入力を Accept した」が表として固定され、`sum(ds) > CAP` が「でも本当は超えている」。3 つ揃って Proof of Exploit の中身です。" },
+    { q: "公開するもの — プログラムの名札だけ",
+      say: "検証者に見せるのは「どのプログラムを破ったか」。プログラムのバイト列のハッシュを名札にします。",
+      cmd: "import hashlib; pid = hashlib.sha256(b\"coupon-validator-v1\").hexdigest()[:8]; pid",
+      mean: "P のバイト列 → ハッシュ（先頭 8 桁だけ表示）。",
+      out: "'6bf920d0'",
+      then: "これが `program_id`。宿題の `program_hash` はこの役です。ただし宿題の Rust 版は `DefaultHasher` — **暗号学的ハッシュではなく、Rust のバージョンが変わると値も変わる**もので、テストが同じビルド内での決定性しか要らないからそれで済んでいます。本物の zkVM は、衝突を見つけられないハッシュ（SHA-256 など）でプログラムに束縛します。" },
+    { q: "",
+      say: "1 文字違うプログラム v2 は、同じ名札になるか。",
+      cmd: "hashlib.sha256(b\"coupon-validator-v2\").hexdigest()[:8] == pid",
+      mean: "v1 と v2 の名札を比較。",
+      out: "False",
+      then: "別物になる。**改竄したプログラムを「これを破った」と言い張れない** — これが binding（束縛）。tests の `public_claim_binds_program_identity`。" },
+    { q: "",
+      say: "guest（zkVM の中で走る本体）を 1 行で。攻撃なら (名札, 主張) を返し、攻撃でなければ拒否。",
+      cmd: "guest = lambda prog, x: (hashlib.sha256(prog).hexdigest()[:8], \"exploit exists\") if (sum(x) % M <= CAP and sum(x) > CAP) else \"rejected\"; guest(b\"coupon-validator-v1\", [10, 20, 30])",
+      mean: "正当なクーポンを渡す。",
+      out: "'rejected'",
+      then: "攻撃でない入力は Err。**宿題の `guest_main` はこの形**（`is_exploit` が False なら Err、True なら `public_claim`）。" },
+    { q: "",
+      say: "違う 2 つの攻撃で、公開される値は同じか。",
+      cmd: "guest(b\"coupon-validator-v1\", [65535, 1001]) == guest(b\"coupon-validator-v1\", [65535, 65535, 1002])",
+      mean: "[65535, 1001] と [65535, 65535, 1002]、どちらも攻撃。",
+      out: "True",
+      then: "**同じ**。公開出力に攻撃コード（witness）は 1 bit も入っていない。tests の `public_output_does_not_depend_on_which_exploit` はこれを見ています。" },
+    { q: "",
+      say: "検証者が受け取るものを表示します。",
+      cmd: "guest(b\"coupon-validator-v1\", [65535, 1001])",
+      mean: "(名札, 主張) だけ。",
+      out: "('6bf920d0', 'exploit exists')",
+      then: "クーポンの中身はどこにもない。「P にこの名札のプログラムを破る入力が存在する」だけが外に出る。zkVM は、この guest が Ok を返す実行が存在することを、表を見せずに証明する層です。" },
+  ];
+  var C = [
+    { q: "道具 — ハッシュ 1 つ",
+      say: "同じ入力なら同じ値、順番が違えば別の値。それだけ確かめて始めます（表示は先頭 6 桁）。",
+      cmd: "import hashlib; h = lambda *xs: hashlib.sha256(\",\".join(map(str, xs)).encode()).hexdigest()[:6]; (h(1, 2) == h(1, 2), h(1, 2) == h(2, 1))",
+      mean: "h(1,2) は h(1,2) と同じで、h(2,1) とは違う。",
+      out: "(True, False)",
+      then: "ハッシュは「中身を言わずに、同じかどうかだけ言える」道具です。" },
+    { q: "",
+      say: "預けるとき。手元で乱数 k と r を作り、その組のハッシュ C（commitment）だけを出します。",
+      cmd: "k, r = 11, 7; C = h(k, r); C",
+      mean: "k = secret、r = nullifier。C はその「封をした札」。",
+      out: "'6dece5'",
+      then: "チェーンに出るのは C だけ。k と r は手元（スライド 13 ①）。" },
+    { q: "",
+      say: "プールには他の人の札も並んでいます。自分の C は何番目か。",
+      cmd: "leaves = [h(3, 4), C, h(5, 6), h(8, 9)]; leaves.index(C)",
+      mean: "4 枚の葉のうち、C は 1 番目（0 始まり）。",
+      out: "1",
+      then: "この 4 枚が**匿名集合**。預ける人が増えるほど、どれが誰か分からなくなる（スライド 13 ②）。" },
+    { q: "",
+      say: "4 枚を 2 枚ずつハッシュし、さらにその 2 つをハッシュして根（root）を作ります。",
+      cmd: "root = h(h(leaves[0], leaves[1]), h(leaves[2], leaves[3])); root",
+      mean: "Merkle tree の根。全員に公開されるのはこの 1 つの値。",
+      out: "'b712a6'",
+      then: "4 枚の葉が 1 つの値に畳まれました。" },
+    { q: "所属 — 「木の中にある」を、葉を明かさず示す",
+      say: "自分の葉 C から根に戻るには、隣の葉と、反対側の枝のハッシュの 2 つがあれば足りる。",
+      cmd: "path = [leaves[0], h(leaves[2], leaves[3])]; h(h(path[0], C), path[1]) == root",
+      mean: "C と path の 2 つで根を組み直し、公開されている root と一致するか。",
+      out: "True",
+      then: "一致。これが membership（所属）の証明の中身です。ZK 証明はこの計算を「C も path も見せずに、一致した、とだけ」伝えます。" },
+    { q: "",
+      say: "引き出すとき。二重引き出しを防ぐ札 nullifierHash = h(r) を公開します。",
+      cmd: "nh = h(r); nh",
+      mean: "r からだけ作った値。k は使わない。",
+      out: "'790269'",
+      then: "C = h(k, r) と nh = h(r) は、r を知らない人には結びつけられません。" },
+    { q: "",
+      say: "検証者（コントラクト）が見るものを並べます。",
+      cmd: "(root, nh)",
+      mean: "公開されるのはこの 2 つと、ZK 証明 π だけ。",
+      out: "('b712a6', '790269')",
+      then: "どの葉かも、k も r もない。「木の中のどれかの葉の持ち主が、その r で引き出した」だけが伝わる（スライド 12 ③）。" },
+    { q: "",
+      say: "同じ r でもう一度引き出そうとすると。",
+      cmd: "spent = {nh}; h(r) in spent",
+      mean: "使用済み nullifier の集合に入っているか。",
+      out: "True",
+      then: "入っているので拒否。**二重引き出しは nullifier が止める**（soundness の側）。" },
+    { q: "壊す — 抜けた制約 1 行が、何を壊すか",
+      say: "スライド 33 の事故を 4 枚の木で。もし回路が「C = h(k, r)」の確認を忘れていたら。別の r2 を使うと。",
+      cmd: "r2 = 8; (h(r2) in spent, h(k, r2) == C)",
+      mean: "左: 新しい nullifier は未使用か。右: その r2 で C が作れるか（本来の検査）。",
+      out: "(False, False)",
+      then: "左が False なので、使用済み検査は素通り。右が False なのは**当然**です — 偽造者は r2 と C を結ぶつもりがない。回路が「C = h(k, r) を満たす r で nullifier を作った」を**要求していれば**ここで止まる。要求していなければ、左の False だけで 2 回目の引き出しが通る。Zcash Orchard で 4 年間見つからなかったのは、まさにこの「witness を置くだけで、結びつきを制約しない」1 行でした（スライド 33）。" },
+    { q: "",
+      say: "その 1 行が無いと、1 回の預け入れから何回引き出せるか。",
+      cmd: "len({h(x) for x in range(100)})",
+      mean: "r を 100 通り変えて、違う nullifier がいくつできるか。",
+      out: "100",
+      then: "100 通り、つまり好きなだけ。**壊れたのは zero-knowledge ではなく soundness** — 秘密は漏れないまま、無限に偽造できる。ZK の「隠す」と「正しい」は別物で、別々に壊れます（スライド 31, 33）。" },
+  ];
+
+  makeDrill("drillA-card", "ac26-w6-drillA-step", A, "秘密を 2 つに分けたまま、線形結合を手元で、掛け算を Beaver triple の 1 往復で組み、open して 27 = 13 × 17 mod 97 を得ました。share も、公開した d も、秘密を語りませんでした。");
+  makeDrill("drillB-card", "ac26-w6-drillB-step", B, "16 ビットのあふれで 66536 が 1000 に化ける攻撃を見つけ、実行の表と隣接行制約でそれを捕まえ、「どの攻撃かは言わずに、攻撃が存在する」だけを公開する claim を組みました。");
+  makeDrill("drillC-card", "ac26-w6-drillC-step", C, "預かり証を木に入れ、根と使用済み札だけで引き出しを通し、二重引き出しを拒否しました。最後に、回路が結びつきを要求しなければ偽造が通ることを 1 行で見ました。");
+})();
+</script>
+</body>
+</html>
